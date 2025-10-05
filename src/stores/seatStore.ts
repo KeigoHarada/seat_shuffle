@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { Seat, Student, SeatLayout, AppState, Group, Role } from '../types';
+import { Seat, Student, SeatLayout, AppState, Group, Role, Condition, StudentGroupCondition, RoleGroupCondition, StudentDistanceCondition } from '../types';
+import { generateConditionalSeatAssignment } from '../utils/conditionUtils';
 
 interface SeatStore extends AppState {
   // アクション
@@ -28,6 +29,12 @@ interface SeatStore extends AppState {
   assignRoleToStudent: (studentId: string, roleId: string) => void;
   removeRoleFromStudent: (studentId: string, roleId: string) => void;
   
+  // 条件管理
+  addCondition: (condition: StudentGroupCondition | RoleGroupCondition | StudentDistanceCondition) => void;
+  removeCondition: (conditionId: string) => void;
+  updateCondition: (conditionId: string, updates: Partial<Condition>) => void;
+  toggleCondition: (conditionId: string) => void;
+  
   // 新しい機能
   selectedSeatId: string | null;
   setSelectedSeatId: (seatId: string | null) => void;
@@ -44,6 +51,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   students: [],
   groups: [],
   roles: [],
+  conditions: [],
   isShuffling: false,
   showSettings: false,
   selectedSeatId: null,
@@ -205,27 +213,68 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
 
     // シャッフルエフェクトのための遅延
     setTimeout(() => {
-      const { currentLayout, students } = get();
+      const { currentLayout, students, conditions, groups, roles } = get();
       if (!currentLayout) return;
 
-      // 空席でない席のみを取得
-      const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
+      // 有効な条件のみを取得
+      const enabledConditions = conditions.filter(c => c.enabled);
       
-      // 生徒をランダムにシャッフル
-      const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
+      let newSeats;
       
-      // 席に生徒を割り当て
-      const newSeats = currentLayout.seats.map(seat => {
-        if (seat.isEmpty) return seat;
+      if (enabledConditions.length > 0) {
+        // 条件を考慮した席配置を生成
+        const assignments = generateConditionalSeatAssignment(
+          students,
+          currentLayout.seats,
+          enabledConditions,
+          groups,
+          roles
+        );
         
-        const studentIndex = availableSeats.indexOf(seat);
-        const student = shuffledStudents[studentIndex];
+        if (assignments) {
+          // 条件を満たす配置が見つかった場合
+          newSeats = currentLayout.seats.map(seat => {
+            if (seat.isEmpty) return seat;
+            return {
+              ...seat,
+              studentId: assignments[seat.id]
+            };
+          });
+        } else {
+          // 条件を満たす配置が見つからない場合、従来のランダム配置にフォールバック
+          console.warn('条件を満たす席配置が見つかりません。ランダム配置にフォールバックします。');
+          const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
+          const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
+          
+          newSeats = currentLayout.seats.map(seat => {
+            if (seat.isEmpty) return seat;
+            
+            const studentIndex = availableSeats.indexOf(seat);
+            const student = shuffledStudents[studentIndex];
+            
+            return {
+              ...seat,
+              studentId: student?.id
+            };
+          });
+        }
+      } else {
+        // 条件が設定されていない場合、従来のランダム配置
+        const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
+        const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
         
-        return {
-          ...seat,
-          studentId: student?.id
-        };
-      });
+        newSeats = currentLayout.seats.map(seat => {
+          if (seat.isEmpty) return seat;
+          
+          const studentIndex = availableSeats.indexOf(seat);
+          const student = shuffledStudents[studentIndex];
+          
+          return {
+            ...seat,
+            studentId: student?.id
+          };
+        });
+      }
 
       set({
         currentLayout: {
@@ -285,7 +334,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
         roleIds: []
       };
       set((state) => ({
-        students: [...state.students, student]
+        students: [...state.students, student!]
       }));
     }
     
@@ -294,7 +343,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       currentLayout: state.currentLayout ? {
         ...state.currentLayout,
         seats: state.currentLayout.seats.map(seat => 
-          seat.id === seatId ? { ...seat, studentId: student.id, isEmpty: false } : seat
+          seat.id === seatId ? { ...seat, studentId: student!.id, isEmpty: false } : seat
         )
       } : null
     }));
@@ -332,7 +381,9 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       
       // 生徒を追加
       debugStudents.forEach(student => {
-        get().addStudent(student);
+        set((state) => ({
+          students: [...state.students, student]
+        }));
       });
       
       // 席に生徒をランダムに割り当て（一部空席も作成）
@@ -368,7 +419,9 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
               studentNumber: shuffledStudents.length + index + 1,
               roleIds: []
             };
-            get().addStudent(additionalStudent);
+            set((state) => ({
+              students: [...state.students, additionalStudent]
+            }));
             get().assignStudentToSeat(additionalStudent.id, seat.id);
           }
         });
@@ -444,6 +497,27 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       student.id === studentId 
         ? { ...student, roleIds: student.roleIds.filter(id => id !== roleId) }
         : student
+    )
+  })),
+
+  // 条件管理の実装
+  addCondition: (condition) => set((state) => ({
+    conditions: [...state.conditions, condition]
+  })),
+
+  removeCondition: (conditionId) => set((state) => ({
+    conditions: state.conditions.filter(c => c.id !== conditionId)
+  })),
+
+  updateCondition: (conditionId, updates) => set((state) => ({
+    conditions: state.conditions.map(c => 
+      c.id === conditionId ? { ...c, ...updates } : c
+    )
+  })),
+
+  toggleCondition: (conditionId) => set((state) => ({
+    conditions: state.conditions.map(c => 
+      c.id === conditionId ? { ...c, enabled: !c.enabled } : c
     )
   }))
 }));

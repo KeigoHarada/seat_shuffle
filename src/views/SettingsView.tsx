@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useSeatStore } from '../stores/seatStore';
 import { LayoutSettings } from '../components/LayoutSettings';
 import { StudentManager } from '../components/StudentManager';
 import { GroupManager } from '../components/GroupManager';
 import { RoleManager } from '../components/RoleManager';
+import { ConditionManager } from '../components/ConditionManager';
 
 export const SettingsView: React.FC = () => {
   const { toggleSettings, settingsPanelWidth, setSettingsPanelWidth } = useSeatStore();
@@ -107,6 +108,7 @@ export const SettingsView: React.FC = () => {
           <StudentManager />
           <GroupManager />
           <RoleManager />
+          <ConditionManager />
           
           <div className="card">
             <h2 className="text-title3" style={{ marginBottom: 'var(--spacing-lg)' }}>
@@ -133,7 +135,25 @@ export const SettingsView: React.FC = () => {
               
               <div>
                 <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  3. 席替え表で編集
+                  3. グループ・ロール設定
+                </h3>
+                <p className="text-body">
+                  グループを作成して席に割り当て、ロールを作成して生徒に付与できます。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
+                  4. 条件設定
+                </h3>
+                <p className="text-body">
+                  席配置の条件を設定できます。生徒のグループ配置、ロールの配置人数、生徒間の距離などを指定できます。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
+                  5. 席替え表で編集
                 </h3>
                 <p className="text-body">
                   背景の席替え表で直接編集できます。ダブルクリックで名前変更、右クリックで空席設定・席交換が可能です。
@@ -142,7 +162,7 @@ export const SettingsView: React.FC = () => {
               
               <div>
                 <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  4. パネルサイズ調整
+                  6. パネルサイズ調整
                 </h3>
                 <p className="text-body">
                   設定パネルの左端をドラッグして幅を調整できます（400px〜1000px）。
@@ -151,7 +171,7 @@ export const SettingsView: React.FC = () => {
               
               <div>
                 <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  5. 生徒表示モード
+                  7. 生徒表示モード
                 </h3>
                 <p className="text-body">
                   設定画面を閉じることで、生徒に見せる状態になります。シャッフル実行も可能です。
@@ -160,7 +180,7 @@ export const SettingsView: React.FC = () => {
               
               <div>
                 <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  6. リアルタイム反映
+                  8. リアルタイム反映
                 </h3>
                 <p className="text-body">
                   設定を変更すると、背景の席替え表に即座に反映されます。設定画面と席替え表を同時に操作できます。
