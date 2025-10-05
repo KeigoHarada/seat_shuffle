@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Seat, Student, SeatLayout, AppState, Group } from '../types';
+import { Seat, Student, SeatLayout, AppState, Group, Role } from '../types';
 
 interface SeatStore extends AppState {
   // アクション
@@ -21,6 +21,13 @@ interface SeatStore extends AppState {
   updateGroup: (groupId: string, updates: Partial<Group>) => void;
   assignGroupToSeat: (seatId: string, groupId: string | null) => void;
   
+  // ロール管理
+  addRole: (role: Role) => void;
+  removeRole: (roleId: string) => void;
+  updateRole: (roleId: string, updates: Partial<Role>) => void;
+  assignRoleToStudent: (studentId: string, roleId: string) => void;
+  removeRoleFromStudent: (studentId: string, roleId: string) => void;
+  
   // 新しい機能
   selectedSeatId: string | null;
   setSelectedSeatId: (seatId: string | null) => void;
@@ -36,6 +43,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   currentLayout: null,
   students: [],
   groups: [],
+  roles: [],
   isShuffling: false,
   showSettings: false,
   selectedSeatId: null,
@@ -48,7 +56,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     // 生徒番号を自動で割り当て（連番で詰める）
     const studentWithNumber = {
       ...student,
-      studentNumber: state.students.length + 1
+      studentNumber: state.students.length + 1,
+      roleIds: student.roleIds || []
     };
     
     return {
@@ -272,7 +281,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       student = {
         id: `student-${Date.now()}`,
         name: studentName,
-        studentNumber: state.students.length + 1
+        studentNumber: state.students.length + 1,
+        roleIds: []
       };
       set((state) => ({
         students: [...state.students, student]
@@ -298,26 +308,26 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       
       // デバッグ用の生徒データを作成
       const debugStudents = [
-        { id: 'student-1', name: '田中太郎', studentNumber: 1 },
-        { id: 'student-2', name: '佐藤花子', studentNumber: 2 },
-        { id: 'student-3', name: '鈴木次郎', studentNumber: 3 },
-        { id: 'student-4', name: '高橋美咲', studentNumber: 4 },
-        { id: 'student-5', name: '伊藤健太', studentNumber: 5 },
-        { id: 'student-6', name: '渡辺さくら', studentNumber: 6 },
-        { id: 'student-7', name: '山本大輔', studentNumber: 7 },
-        { id: 'student-8', name: '中村優子', studentNumber: 8 },
-        { id: 'student-9', name: '小林翔太', studentNumber: 9 },
-        { id: 'student-10', name: '加藤愛美', studentNumber: 10 },
-        { id: 'student-11', name: '吉田直樹', studentNumber: 11 },
-        { id: 'student-12', name: '松本麻衣', studentNumber: 12 },
-        { id: 'student-13', name: '井上雄介', studentNumber: 13 },
-        { id: 'student-14', name: '木村由美', studentNumber: 14 },
-        { id: 'student-15', name: '林健一', studentNumber: 15 },
-        { id: 'student-16', name: '清水美穂', studentNumber: 16 },
-        { id: 'student-17', name: '山口拓也', studentNumber: 17 },
-        { id: 'student-18', name: '池田理恵', studentNumber: 18 },
-        { id: 'student-19', name: '前田和也', studentNumber: 19 },
-        { id: 'student-20', name: '藤原香織', studentNumber: 20 }
+        { id: 'student-1', name: '田中太郎', studentNumber: 1, roleIds: [] },
+        { id: 'student-2', name: '佐藤花子', studentNumber: 2, roleIds: [] },
+        { id: 'student-3', name: '鈴木次郎', studentNumber: 3, roleIds: [] },
+        { id: 'student-4', name: '高橋美咲', studentNumber: 4, roleIds: [] },
+        { id: 'student-5', name: '伊藤健太', studentNumber: 5, roleIds: [] },
+        { id: 'student-6', name: '渡辺さくら', studentNumber: 6, roleIds: [] },
+        { id: 'student-7', name: '山本大輔', studentNumber: 7, roleIds: [] },
+        { id: 'student-8', name: '中村優子', studentNumber: 8, roleIds: [] },
+        { id: 'student-9', name: '小林翔太', studentNumber: 9, roleIds: [] },
+        { id: 'student-10', name: '加藤愛美', studentNumber: 10, roleIds: [] },
+        { id: 'student-11', name: '吉田直樹', studentNumber: 11, roleIds: [] },
+        { id: 'student-12', name: '松本麻衣', studentNumber: 12, roleIds: [] },
+        { id: 'student-13', name: '井上雄介', studentNumber: 13, roleIds: [] },
+        { id: 'student-14', name: '木村由美', studentNumber: 14, roleIds: [] },
+        { id: 'student-15', name: '林健一', studentNumber: 15, roleIds: [] },
+        { id: 'student-16', name: '清水美穂', studentNumber: 16, roleIds: [] },
+        { id: 'student-17', name: '山口拓也', studentNumber: 17, roleIds: [] },
+        { id: 'student-18', name: '池田理恵', studentNumber: 18, roleIds: [] },
+        { id: 'student-19', name: '前田和也', studentNumber: 19, roleIds: [] },
+        { id: 'student-20', name: '藤原香織', studentNumber: 20, roleIds: [] }
       ];
       
       // 生徒を追加
@@ -355,7 +365,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
             const additionalStudent = {
               id: `student-${Date.now()}-${index}`,
               name: `生徒${index + 1}`,
-              studentNumber: shuffledStudents.length + index + 1
+              studentNumber: shuffledStudents.length + index + 1,
+              roleIds: []
             };
             get().addStudent(additionalStudent);
             get().assignStudentToSeat(additionalStudent.id, seat.id);
@@ -399,5 +410,40 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
         )
       }
     };
-  })
+  }),
+
+  // ロール管理の実装
+  addRole: (role) => set((state) => ({
+    roles: [...state.roles, role]
+  })),
+
+  removeRole: (roleId) => set((state) => ({
+    roles: state.roles.filter(r => r.id !== roleId),
+    students: state.students.map(student => ({
+      ...student,
+      roleIds: student.roleIds.filter(id => id !== roleId)
+    }))
+  })),
+
+  updateRole: (roleId, updates) => set((state) => ({
+    roles: state.roles.map(r => 
+      r.id === roleId ? { ...r, ...updates } : r
+    )
+  })),
+
+  assignRoleToStudent: (studentId, roleId) => set((state) => ({
+    students: state.students.map(student => 
+      student.id === studentId 
+        ? { ...student, roleIds: [...student.roleIds.filter(id => id !== roleId), roleId] }
+        : student
+    )
+  })),
+
+  removeRoleFromStudent: (studentId, roleId) => set((state) => ({
+    students: state.students.map(student => 
+      student.id === studentId 
+        ? { ...student, roleIds: student.roleIds.filter(id => id !== roleId) }
+        : student
+    )
+  }))
 }));

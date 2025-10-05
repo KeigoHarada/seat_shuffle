@@ -1,13 +1,39 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { Student } from '../types';
+import { 
+  Crown, 
+  Shield, 
+  Utensils, 
+  BookOpen, 
+  Users, 
+  Clipboard, 
+  Calendar,
+  MessageSquare,
+  Settings,
+  Award
+} from 'lucide-react';
+
+const ROLE_ICONS = [
+  { id: 'crown', name: '王冠', component: Crown },
+  { id: 'shield', name: '盾', component: Shield },
+  { id: 'utensils', name: '給食', component: Utensils },
+  { id: 'book', name: '学習', component: BookOpen },
+  { id: 'users', name: 'グループ', component: Users },
+  { id: 'clipboard', name: '記録', component: Clipboard },
+  { id: 'calendar', name: '予定', component: Calendar },
+  { id: 'message', name: '連絡', component: MessageSquare },
+  { id: 'settings', name: '設定', component: Settings },
+  { id: 'award', name: '表彰', component: Award }
+];
 
 export const StudentManager: React.FC = () => {
-  const { students, addStudent, removeStudent, updateStudent, currentLayout } = useSeatStore();
+  const { students, addStudent, removeStudent, updateStudent, currentLayout, roles, assignRoleToStudent, removeRoleFromStudent } = useSeatStore();
   const [newStudentName, setNewStudentName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [sortBy, setSortBy] = useState<'studentNo' | 'seat'>('studentNo');
+  const [showRoleMenu, setShowRoleMenu] = useState<string | null>(null);
 
   // 生徒の席番号を取得
   const getStudentSeatNumber = (studentId: string) => {
@@ -50,7 +76,8 @@ export const StudentManager: React.FC = () => {
       const student: Student = {
         id: `student-${Date.now()}`,
         name: newStudentName.trim(),
-        studentNumber: 0 // ストアで自動割り当てされる
+        studentNumber: 0, // ストアで自動割り当てされる
+        roleIds: []
       };
       addStudent(student);
       setNewStudentName('');
@@ -73,6 +100,23 @@ export const StudentManager: React.FC = () => {
   const handleEditCancel = () => {
     setEditingId(null);
     setEditingName('');
+  };
+
+  const handleRoleToggle = (studentId: string, roleId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (student) {
+      if (student.roleIds.includes(roleId)) {
+        removeRoleFromStudent(studentId, roleId);
+      } else {
+        assignRoleToStudent(studentId, roleId);
+      }
+    }
+  };
+
+  const getStudentRoles = (studentId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return [];
+    return roles.filter(role => student.roleIds.includes(role.id));
   };
 
   return (
@@ -132,7 +176,7 @@ export const StudentManager: React.FC = () => {
             {/* ヘッダー */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '40px 40px 1fr 120px',
+              gridTemplateColumns: '40px 40px 1fr 1fr 120px',
               alignItems: 'center',
               gap: 'var(--spacing-sm)',
               padding: 'var(--spacing-sm)',
@@ -145,6 +189,7 @@ export const StudentManager: React.FC = () => {
               <span style={{ textAlign: 'center' }}>生徒No.</span>
               <span style={{ textAlign: 'center' }}>机No.</span>
               <span>名前</span>
+              <span>ロール</span>
               <span style={{ textAlign: 'center' }}>操作</span>
             </div>
             
@@ -153,7 +198,7 @@ export const StudentManager: React.FC = () => {
                 key={student.id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '40px 40px 1fr 120px',
+                  gridTemplateColumns: '40px 40px 1fr 1fr 120px',
                   alignItems: 'center',
                   gap: 'var(--spacing-sm)',
                   padding: 'var(--spacing-sm)',
@@ -201,6 +246,33 @@ export const StudentManager: React.FC = () => {
                       }}
                       autoFocus
                     />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
+                      {roles.map((role) => {
+                        const iconData = ROLE_ICONS.find(icon => icon.id === role.icon);
+                        const IconComponent = iconData?.component;
+                        return (
+                          <button
+                            key={role.id}
+                            onClick={() => handleRoleToggle(student.id, role.id)}
+                            style={{
+                              padding: '2px 6px',
+                              fontSize: '0.7rem',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--color-secondary-300)',
+                              backgroundColor: student.roleIds.includes(role.id) ? 'var(--color-primary-100)' : 'transparent',
+                              color: student.roleIds.includes(role.id) ? 'var(--color-primary-800)' : 'var(--color-secondary-600)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '2px'
+                            }}
+                          >
+                            {IconComponent && <IconComponent size={10} />}
+                            {role.name}
+                          </button>
+                        );
+                      })}
+                    </div>
                     <div style={{ display: 'flex', gap: 'var(--spacing-xs)', justifyContent: 'center' }}>
                       <button
                         className="btn btn-primary"
@@ -243,6 +315,31 @@ export const StudentManager: React.FC = () => {
                     <span className="text-body" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {student.name}
                     </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
+                      {getStudentRoles(student.id).map((role) => {
+                        const iconData = ROLE_ICONS.find(icon => icon.id === role.icon);
+                        const IconComponent = iconData?.component;
+                        return (
+                          <span
+                            key={role.id}
+                            style={{
+                              padding: '2px 6px',
+                              fontSize: '0.7rem',
+                              borderRadius: 'var(--radius-sm)',
+                              backgroundColor: 'var(--color-primary-100)',
+                              color: 'var(--color-primary-800)',
+                              fontWeight: '500',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '2px'
+                            }}
+                          >
+                            {IconComponent && <IconComponent size={10} />}
+                            {role.name}
+                          </span>
+                        );
+                      })}
+                    </div>
                     <div style={{ display: 'flex', gap: 'var(--spacing-xs)', justifyContent: 'center' }}>
                       <button
                         className="btn btn-secondary"

@@ -1,11 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useSeatStore } from '../stores/seatStore';
+import { 
+  Crown, 
+  Shield, 
+  Utensils, 
+  BookOpen, 
+  Users, 
+  Clipboard, 
+  Calendar,
+  MessageSquare,
+  Settings,
+  Award
+} from 'lucide-react';
+
+const ROLE_ICONS = [
+  { id: 'crown', name: '王冠', component: Crown },
+  { id: 'shield', name: '盾', component: Shield },
+  { id: 'utensils', name: '給食', component: Utensils },
+  { id: 'book', name: '学習', component: BookOpen },
+  { id: 'users', name: 'グループ', component: Users },
+  { id: 'clipboard', name: '記録', component: Clipboard },
+  { id: 'calendar', name: '予定', component: Calendar },
+  { id: 'message', name: '連絡', component: MessageSquare },
+  { id: 'settings', name: '設定', component: Settings },
+  { id: 'award', name: '表彰', component: Award }
+];
 
 export const SeatGrid: React.FC = () => {
   const { 
     currentLayout, 
     students, 
     groups,
+    roles,
     isShuffling, 
     selectedSeatId,
     setSelectedSeatId,
@@ -95,6 +121,13 @@ export const SeatGrid: React.FC = () => {
   const getGroup = (groupId?: string) => {
     if (!groupId) return null;
     return groups.find(g => g.id === groupId) || null;
+  };
+
+  const getStudentRoles = (studentId?: string) => {
+    if (!studentId) return [];
+    const student = students.find(s => s.id === studentId);
+    if (!student) return [];
+    return roles.filter(role => student.roleIds.includes(role.id));
   };
 
   const handleClick = (seatId: string, e: React.MouseEvent) => {
@@ -308,6 +341,65 @@ export const SeatGrid: React.FC = () => {
             }}
             title={group.name}
             />
+          )}
+
+          {/* ロール表示 */}
+          {seat.studentId && (
+            <div style={{
+              position: 'absolute',
+              bottom: '2px',
+              right: '2px',
+              display: 'flex',
+              gap: '1px',
+              flexWrap: 'wrap',
+              maxWidth: '60px',
+              justifyContent: 'flex-end'
+            }}>
+              {getStudentRoles(seat.studentId).slice(0, 2).map((role) => {
+                const iconData = ROLE_ICONS.find(icon => icon.id === role.icon);
+                const IconComponent = iconData?.component;
+                return (
+                  <div
+                    key={role.id}
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'var(--color-secondary-100)',
+                      border: '1px solid var(--color-secondary-300)',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title={role.name}
+                  >
+                    {IconComponent && <IconComponent size={8} color="var(--color-secondary-600)" />}
+                  </div>
+                );
+              })}
+              {getStudentRoles(seat.studentId).length > 2 && (
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: 'var(--radius-sm)',
+                    backgroundColor: 'var(--color-secondary-400)',
+                    border: '1px solid var(--color-secondary-300)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                    fontSize: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold'
+                  }}
+                  title={`他${getStudentRoles(seat.studentId).length - 2}個のロール`}
+                >
+                  +
+                </div>
+              )}
+            </div>
           )}
           
           {/* 編集モード */}

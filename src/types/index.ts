@@ -6,6 +6,14 @@ export interface Group {
   description?: string;
 }
 
+// ロールの型定義
+export interface Role {
+  id: string;
+  name: string;
+  icon: string;
+  description?: string;
+}
+
 // 席の型定義
 export interface Seat {
   id: string;
@@ -21,6 +29,7 @@ export interface Student {
   id: string;
   name: string;
   studentNumber: number;
+  roleIds: string[];
 }
 
 // 席配置の型定義
@@ -37,6 +46,7 @@ export interface AppState {
   currentLayout: SeatLayout | null;
   students: Student[];
   groups: Group[];
+  roles: Role[];
   isShuffling: boolean;
   showSettings: boolean;
 }
