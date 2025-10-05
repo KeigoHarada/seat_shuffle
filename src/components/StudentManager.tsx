@@ -30,6 +30,7 @@ const ROLE_ICONS = [
 export const StudentManager: React.FC = () => {
   const { students, addStudent, removeStudent, updateStudent, currentLayout, roles, assignRoleToStudent, removeRoleFromStudent } = useSeatStore();
   const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentRoles, setNewStudentRoles] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [sortBy, setSortBy] = useState<'studentNo' | 'seat'>('studentNo');
@@ -77,11 +78,20 @@ export const StudentManager: React.FC = () => {
         id: `student-${Date.now()}`,
         name: newStudentName.trim(),
         studentNumber: 0, // ストアで自動割り当てされる
-        roleIds: []
+        roleIds: newStudentRoles
       };
       addStudent(student);
       setNewStudentName('');
+      setNewStudentRoles([]);
     }
+  };
+
+  const handleNewStudentRoleToggle = (roleId: string) => {
+    setNewStudentRoles(prev => 
+      prev.includes(roleId) 
+        ? prev.filter(id => id !== roleId)
+        : [...prev, roleId]
+    );
   };
 
   const handleEditStart = (student: Student) => {
@@ -141,29 +151,71 @@ export const StudentManager: React.FC = () => {
         </div>
       </div>
       
-      <div className="flex" style={{ marginBottom: 'var(--spacing-lg)', flexWrap: 'wrap', gap: 'var(--spacing-sm)' }}>
-        <input
-          type="text"
-          placeholder="生徒名を入力"
-          value={newStudentName}
-          onChange={(e) => setNewStudentName(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleAddStudent()}
-          style={{
-            padding: 'var(--spacing-sm)',
-            border: '1px solid var(--color-secondary-300)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: '1rem',
-            flex: '1',
-            minWidth: '200px'
-          }}
-        />
-        <button
-          className="btn btn-primary"
-          onClick={handleAddStudent}
-          disabled={!newStudentName.trim()}
-        >
-          追加
-        </button>
+      <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="flex" style={{ marginBottom: 'var(--spacing-sm)', flexWrap: 'wrap', gap: 'var(--spacing-sm)' }}>
+          <input
+            type="text"
+            placeholder="生徒名を入力"
+            value={newStudentName}
+            onChange={(e) => setNewStudentName(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAddStudent()}
+            style={{
+              padding: 'var(--spacing-sm)',
+              border: '1px solid var(--color-secondary-300)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '1rem',
+              flex: '1',
+              minWidth: '200px'
+            }}
+          />
+          <button
+            className="btn btn-primary"
+            onClick={handleAddStudent}
+            disabled={!newStudentName.trim()}
+          >
+            追加
+          </button>
+        </div>
+        
+        {/* ロール選択 */}
+        <div style={{ marginBottom: 'var(--spacing-sm)' }}>
+          <div style={{ fontSize: '0.875rem', fontWeight: '500', marginBottom: 'var(--spacing-xs)', color: 'var(--color-secondary-700)' }}>
+            ロールを選択（任意）
+          </div>
+          {roles.length > 0 ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-xs)' }}>
+              {roles.map((role) => {
+                const iconData = ROLE_ICONS.find(icon => icon.id === role.icon);
+                const IconComponent = iconData?.component;
+                return (
+                  <button
+                    key={role.id}
+                    onClick={() => handleNewStudentRoleToggle(role.id)}
+                    style={{
+                      padding: 'var(--spacing-xs) var(--spacing-sm)',
+                      fontSize: '0.75rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--color-secondary-300)',
+                      backgroundColor: newStudentRoles.includes(role.id) ? 'var(--color-primary-100)' : 'transparent',
+                      color: newStudentRoles.includes(role.id) ? 'var(--color-primary-800)' : 'var(--color-secondary-600)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    {IconComponent && <IconComponent size={12} />}
+                    {role.name}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-secondary-500)', fontStyle: 'italic' }}>
+              ロール管理でロールを作成してください
+            </p>
+          )}
+        </div>
       </div>
 
       <div style={{ maxHeight: '300px', overflowY: 'auto' }}>

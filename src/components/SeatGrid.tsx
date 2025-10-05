@@ -39,6 +39,7 @@ export const SeatGrid: React.FC = () => {
     assignStudentNameToSeat,
     toggleSeatEmpty,
     assignGroupToSeat,
+    removeStudentFromSeat,
     initializeDefaultLayout
   } = useSeatStore();
   
@@ -184,7 +185,11 @@ export const SeatGrid: React.FC = () => {
 
   const handleNameSubmit = (seatId: string) => {
     if (editingName.trim()) {
+      // 名前が入力されている場合は生徒を割り当て
       assignStudentNameToSeat(seatId, editingName.trim());
+    } else {
+      // 名前が空の場合は席から生徒を削除
+      removeStudentFromSeat(seatId);
     }
     setEditingSeatId(null);
     setEditingName('');
@@ -422,6 +427,9 @@ export const SeatGrid: React.FC = () => {
                     // 名前を登録して次の席に移動
                     if (editingName.trim()) {
                       assignStudentNameToSeat(seat.id, editingName.trim());
+                    } else {
+                      // 名前が空の場合は席から生徒を削除
+                      removeStudentFromSeat(seat.id);
                     }
                     setEditingSeatId(null);
                     setEditingName('');
