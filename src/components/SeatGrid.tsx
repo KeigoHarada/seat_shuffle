@@ -87,7 +87,11 @@ export const SeatGrid: React.FC = () => {
     if (selectedSeatId) {
       // 席交換
       if (selectedSeatId !== seatId) {
-        swapSeats(selectedSeatId, seatId);
+        const targetSeat = currentLayout.seats.find(s => s.id === seatId);
+        // 空席とは交換しない
+        if (targetSeat && !targetSeat.isEmpty) {
+          swapSeats(selectedSeatId, seatId);
+        }
       }
       setSelectedSeatId(null);
     } else {
@@ -116,6 +120,17 @@ export const SeatGrid: React.FC = () => {
     setEditingName('');
   };
 
+  // 空席を飛ばした席番号を計算
+  const getSeatNumber = (seatIndex: number) => {
+    let seatNumber = 0;
+    for (let i = 0; i <= seatIndex; i++) {
+      if (!currentLayout.seats[i].isEmpty) {
+        seatNumber++;
+      }
+    }
+    return seatNumber;
+  };
+
   return (
     <div className="seat-grid" style={{ 
       display: 'grid', 
@@ -138,16 +153,18 @@ export const SeatGrid: React.FC = () => {
           }}
         >
           {/* 席番号 */}
-          <div style={{
-            position: 'absolute',
-            top: '2px',
-            left: '2px',
-            fontSize: '10px',
-            color: 'var(--color-secondary-500)',
-            fontWeight: 'bold'
-          }}>
-            {index + 1}
-          </div>
+          {!seat.isEmpty && (
+            <div style={{
+              position: 'absolute',
+              top: '2px',
+              left: '2px',
+              fontSize: '10px',
+              color: 'var(--color-secondary-500)',
+              fontWeight: 'bold'
+            }}>
+              {getSeatNumber(index)}
+            </div>
+          )}
           
           {/* 編集モード */}
           {editingSeatId === seat.id ? (

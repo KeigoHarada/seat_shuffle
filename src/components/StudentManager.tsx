@@ -3,10 +3,27 @@ import { useSeatStore } from '../stores/seatStore';
 import { Student } from '../types';
 
 export const StudentManager: React.FC = () => {
-  const { students, addStudent, removeStudent, updateStudent } = useSeatStore();
+  const { students, addStudent, removeStudent, updateStudent, currentLayout } = useSeatStore();
   const [newStudentName, setNewStudentName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+
+  // 生徒の席番号を取得
+  const getStudentSeatNumber = (studentId: string) => {
+    if (!currentLayout) return 0;
+    
+    const seatIndex = currentLayout.seats.findIndex(seat => seat.studentId === studentId);
+    if (seatIndex === -1) return 0;
+    
+    // 空席を飛ばした席番号を計算
+    let seatNumber = 0;
+    for (let i = 0; i <= seatIndex; i++) {
+      if (!currentLayout.seats[i].isEmpty) {
+        seatNumber++;
+      }
+    }
+    return seatNumber;
+  };
 
   const handleAddStudent = () => {
     if (newStudentName.trim()) {
@@ -116,7 +133,7 @@ export const StudentManager: React.FC = () => {
                         textAlign: 'center'
                       }}
                     >
-                      {students.indexOf(student) + 1}
+                      {getStudentSeatNumber(student.id) || '-'}
                     </span>
                     <input
                       type="text"
@@ -163,7 +180,7 @@ export const StudentManager: React.FC = () => {
                         textAlign: 'center'
                       }}
                     >
-                      {students.indexOf(student) + 1}
+                      {getStudentSeatNumber(student.id) || '-'}
                     </span>
                     <span className="text-body" style={{ flex: '1' }}>
                       {student.name}
