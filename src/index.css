@@ -148,6 +148,12 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.seat.selected {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-200);
+  background-color: var(--color-primary-50);
+}
+
 .seat.occupied {
   background-color: var(--color-primary-100);
   border-color: var(--color-primary-300);

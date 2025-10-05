@@ -71,7 +71,7 @@ export const PublicView: React.FC = () => {
         {!currentLayout && (
           <div className="flex-center" style={{ marginTop: 'var(--spacing-2xl)' }}>
             <p className="text-body" style={{ opacity: 0.7 }}>
-              設定画面で席配置を作成してください
+              デフォルトレイアウトを読み込み中...
             </p>
           </div>
         )}

@@ -14,6 +14,13 @@ interface SeatStore extends AppState {
   shuffleSeats: () => void;
   toggleSettings: () => void;
   setShuffling: (isShuffling: boolean) => void;
+  
+  // 新しい機能
+  selectedSeatId: string | null;
+  setSelectedSeatId: (seatId: string | null) => void;
+  swapSeats: (seatId1: string, seatId2: string) => void;
+  assignStudentNameToSeat: (seatId: string, studentName: string) => void;
+  initializeDefaultLayout: () => void;
 }
 
 export const useSeatStore = create<SeatStore>((set, get) => ({
@@ -22,6 +29,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   students: [],
   isShuffling: false,
   showSettings: false,
+  selectedSeatId: null,
 
   // アクション
   setCurrentLayout: (layout) => set({ currentLayout: layout }),
@@ -153,5 +161,68 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     showSettings: !state.showSettings
   })),
 
-  setShuffling: (isShuffling) => set({ isShuffling })
+  setShuffling: (isShuffling) => set({ isShuffling }),
+
+  // 新しい機能の実装
+  setSelectedSeatId: (seatId) => set({ selectedSeatId: seatId }),
+
+  swapSeats: (seatId1, seatId2) => set((state) => {
+    if (!state.currentLayout) return state;
+    
+    const seat1 = state.currentLayout.seats.find(s => s.id === seatId1);
+    const seat2 = state.currentLayout.seats.find(s => s.id === seatId2);
+    
+    if (!seat1 || !seat2) return state;
+    
+    return {
+      currentLayout: {
+        ...state.currentLayout,
+        seats: state.currentLayout.seats.map(seat => {
+          if (seat.id === seatId1) {
+            return { ...seat, studentId: seat2.studentId };
+          }
+          if (seat.id === seatId2) {
+            return { ...seat, studentId: seat1.studentId };
+          }
+          return seat;
+        })
+      },
+      selectedSeatId: null
+    };
+  }),
+
+  assignStudentNameToSeat: (seatId, studentName) => {
+    const state = get();
+    if (!state.currentLayout) return;
+    
+    // 既存の生徒を探すか、新しく作成
+    let student = state.students.find(s => s.name === studentName);
+    if (!student) {
+      student = {
+        id: `student-${Date.now()}`,
+        name: studentName
+      };
+      set((state) => ({
+        students: [...state.students, student]
+      }));
+    }
+    
+    // 席に生徒を割り当て
+    set((state) => ({
+      currentLayout: state.currentLayout ? {
+        ...state.currentLayout,
+        seats: state.currentLayout.seats.map(seat => 
+          seat.id === seatId ? { ...seat, studentId: student.id, isEmpty: false } : seat
+        )
+      } : null
+    }));
+  },
+
+  initializeDefaultLayout: () => {
+    const state = get();
+    if (!state.currentLayout) {
+      // デフォルトの5x6レイアウトを作成
+      get().createLayout(5, 6, 'デフォルト教室');
+    }
+  }
 }));
