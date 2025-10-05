@@ -75,6 +75,23 @@ export const StudentManager: React.FC = () => {
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+            {/* ヘッダー */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-sm)',
+              padding: 'var(--spacing-sm)',
+              backgroundColor: 'var(--color-secondary-200)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-secondary-300)',
+              fontWeight: 'bold',
+              fontSize: '0.875rem'
+            }}>
+              <span style={{ minWidth: '30px', textAlign: 'center' }}>No.</span>
+              <span style={{ flex: '1' }}>名前</span>
+              <span style={{ minWidth: '120px', textAlign: 'center' }}>操作</span>
+            </div>
+            
             {students.map((student) => (
               <div
                 key={student.id}
@@ -90,6 +107,17 @@ export const StudentManager: React.FC = () => {
               >
                 {editingId === student.id ? (
                   <>
+                    <span 
+                      style={{ 
+                        minWidth: '30px',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        color: 'var(--color-secondary-600)',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {students.indexOf(student) + 1}
+                    </span>
                     <input
                       type="text"
                       value={editingName}
@@ -107,46 +135,61 @@ export const StudentManager: React.FC = () => {
                       }}
                       autoFocus
                     />
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleEditSave}
-                      style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
-                    >
-                      保存
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={handleEditCancel}
-                      style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
-                    >
-                      取消
-                    </button>
+                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', minWidth: '120px', justifyContent: 'center' }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleEditSave}
+                        style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
+                      >
+                        保存
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={handleEditCancel}
+                        style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
+                      >
+                        取消
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
+                    <span 
+                      style={{ 
+                        minWidth: '30px',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        color: 'var(--color-secondary-600)',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {students.indexOf(student) + 1}
+                    </span>
                     <span className="text-body" style={{ flex: '1' }}>
                       {student.name}
                     </span>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => handleEditStart(student)}
-                      style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
-                    >
-                      編集
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => removeStudent(student.id)}
-                      style={{ 
-                        padding: 'var(--spacing-xs) var(--spacing-sm)', 
-                        fontSize: '0.75rem',
-                        backgroundColor: 'var(--color-error-100)',
-                        color: 'var(--color-error-800)',
-                        borderColor: 'var(--color-error-300)'
-                      }}
-                    >
-                      削除
-                    </button>
+                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', minWidth: '120px', justifyContent: 'center' }}>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => handleEditStart(student)}
+                        style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
+                      >
+                        編集
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => removeStudent(student.id)}
+                        style={{ 
+                          padding: 'var(--spacing-xs) var(--spacing-sm)', 
+                          fontSize: '0.75rem',
+                          backgroundColor: 'var(--color-error-100)',
+                          color: 'var(--color-error-800)',
+                          borderColor: 'var(--color-error-300)'
+                        }}
+                      >
+                        削除
+                      </button>
+                    </div>
                   </>
                 )}
               </div>

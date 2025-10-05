@@ -21,6 +21,8 @@ interface SeatStore extends AppState {
   swapSeats: (seatId1: string, seatId2: string) => void;
   assignStudentNameToSeat: (seatId: string, studentName: string) => void;
   initializeDefaultLayout: () => void;
+  settingsPanelWidth: number;
+  setSettingsPanelWidth: (width: number) => void;
 }
 
 export const useSeatStore = create<SeatStore>((set, get) => ({
@@ -30,6 +32,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   isShuffling: false,
   showSettings: false,
   selectedSeatId: null,
+  settingsPanelWidth: 600,
 
   // アクション
   setCurrentLayout: (layout) => set({ currentLayout: layout }),
@@ -224,5 +227,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       // デフォルトの5x6レイアウトを作成
       get().createLayout(5, 6, 'デフォルト教室');
     }
-  }
+  },
+
+  setSettingsPanelWidth: (width) => set({ settingsPanelWidth: width })
 }));

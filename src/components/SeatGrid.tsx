@@ -16,11 +16,46 @@ export const SeatGrid: React.FC = () => {
   
   const [editingSeatId, setEditingSeatId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [focusedSeatId, setFocusedSeatId] = useState<string | null>(null);
 
   // デフォルトレイアウトを初期化
   useEffect(() => {
     initializeDefaultLayout();
   }, [initializeDefaultLayout]);
+
+  // キーボードイベントハンドラー
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!currentLayout) return;
+
+      // 編集中は入力フィールド内で処理するため、グローバルでは処理しない
+      if (e.key === 'Tab' && focusedSeatId && !editingSeatId) {
+        e.preventDefault();
+        e.stopPropagation();
+        const currentIndex = currentLayout.seats.findIndex(seat => seat.id === focusedSeatId);
+        const nextIndex = (currentIndex + 1) % currentLayout.seats.length;
+        const nextSeat = currentLayout.seats[nextIndex];
+        setFocusedSeatId(nextSeat.id);
+      } else if (e.key === 'Enter' && focusedSeatId && !editingSeatId) {
+        e.preventDefault();
+        const seat = currentLayout.seats.find(s => s.id === focusedSeatId);
+        if (seat) {
+          handleDoubleClick(focusedSeatId, getStudentName(seat.studentId));
+        }
+      } else if (e.key === 'Escape' && !editingSeatId) {
+        setFocusedSeatId(null);
+      }
+    };
+
+    // 編集中でない場合のみイベントリスナーを追加
+    if (!editingSeatId) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentLayout, focusedSeatId, editingSeatId]);
 
   if (!currentLayout) {
     return (
@@ -36,9 +71,14 @@ export const SeatGrid: React.FC = () => {
     return student?.name || '';
   };
 
+  const handleClick = (seatId: string) => {
+    setFocusedSeatId(seatId);
+  };
+
   const handleDoubleClick = (seatId: string, currentName: string) => {
     setEditingSeatId(seatId);
     setEditingName(currentName);
+    setFocusedSeatId(null);
   };
 
   const handleRightClick = (e: React.MouseEvent, seatId: string) => {
@@ -88,7 +128,8 @@ export const SeatGrid: React.FC = () => {
       {currentLayout.seats.map((seat, index) => (
         <div
           key={seat.id}
-          className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''}`}
+          className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''}`}
+          onClick={() => handleClick(seat.id)}
           onDoubleClick={() => handleDoubleClick(seat.id, getStudentName(seat.studentId))}
           onContextMenu={(e) => handleRightClick(e, seat.id)}
           style={{
@@ -116,8 +157,32 @@ export const SeatGrid: React.FC = () => {
                 value={editingName}
                 onChange={(e) => setEditingName(e.target.value)}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') handleNameSubmit(seat.id);
-                  if (e.key === 'Escape') handleNameCancel();
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleNameSubmit(seat.id);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // 名前を登録して次の席に移動
+                    if (editingName.trim()) {
+                      assignStudentNameToSeat(seat.id, editingName.trim());
+                    }
+                    setEditingSeatId(null);
+                    setEditingName('');
+                    
+                    // 次の席にフォーカス
+                    const currentIndex = currentLayout.seats.findIndex(s => s.id === seat.id);
+                    const nextIndex = (currentIndex + 1) % currentLayout.seats.length;
+                    const nextSeat = currentLayout.seats[nextIndex];
+                    setFocusedSeatId(nextSeat.id);
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNameCancel();
+                  }
                 }}
                 onBlur={() => handleNameSubmit(seat.id)}
                 style={{

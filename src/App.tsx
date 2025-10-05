@@ -8,7 +8,8 @@ function App() {
 
   return (
     <div className="App">
-      {showSettings ? <SettingsView /> : <PublicView />}
+      <PublicView />
+      {showSettings && <SettingsView />}
     </div>
   );
 }

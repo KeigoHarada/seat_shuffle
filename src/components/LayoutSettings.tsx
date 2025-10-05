@@ -2,17 +2,12 @@ import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 
 export const LayoutSettings: React.FC = () => {
-  const { createLayout, currentLayout, toggleSeatEmpty } = useSeatStore();
+  const { createLayout, currentLayout } = useSeatStore();
   const [rows, setRows] = useState(5);
   const [cols, setCols] = useState(6);
-  const [layoutName, setLayoutName] = useState('教室レイアウト');
 
   const handleCreateLayout = () => {
-    createLayout(rows, cols, layoutName);
-  };
-
-  const handleSeatClick = (seatId: string) => {
-    toggleSeatEmpty(seatId);
+    createLayout(rows, cols, '教室レイアウト');
   };
 
   return (
@@ -22,23 +17,6 @@ export const LayoutSettings: React.FC = () => {
       </h2>
       
       <div className="flex" style={{ marginBottom: 'var(--spacing-lg)', flexWrap: 'wrap', gap: 'var(--spacing-md)' }}>
-        <div>
-          <label className="text-callout" style={{ display: 'block', marginBottom: 'var(--spacing-xs)' }}>
-            レイアウト名
-          </label>
-          <input
-            type="text"
-            value={layoutName}
-            onChange={(e) => setLayoutName(e.target.value)}
-            style={{
-              padding: 'var(--spacing-sm)',
-              border: '1px solid var(--color-secondary-300)',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '1rem'
-            }}
-          />
-        </div>
-        
         <div>
           <label className="text-callout" style={{ display: 'block', marginBottom: 'var(--spacing-xs)' }}>
             行数
@@ -91,25 +69,27 @@ export const LayoutSettings: React.FC = () => {
 
       {currentLayout && (
         <div>
-          <p className="text-callout" style={{ marginBottom: 'var(--spacing-sm)' }}>
-            席をクリックして空席に設定/解除できます
+          <p className="text-callout" style={{ marginBottom: 'var(--spacing-sm)', color: 'var(--color-primary-600)' }}>
+            ✅ 席配置が作成されました。背景の席替え表で確認・編集できます。
           </p>
           <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: `repeat(${currentLayout.cols}, 1fr)`,
-            gap: 'var(--spacing-xs)',
-            maxWidth: 'fit-content'
+            backgroundColor: 'var(--color-secondary-100)',
+            padding: 'var(--spacing-md)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-secondary-200)'
           }}>
-            {currentLayout.seats.map((seat) => (
-              <div
-                key={seat.id}
-                className={`seat ${seat.isEmpty ? 'empty' : ''}`}
-                onClick={() => handleSeatClick(seat.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                {seat.isEmpty ? '空' : `${seat.row + 1}-${seat.col + 1}`}
-              </div>
-            ))}
+            <p className="text-callout" style={{ marginBottom: 'var(--spacing-sm)' }}>
+              <strong>現在の設定:</strong>
+            </p>
+            <p className="text-callout">
+              サイズ: {currentLayout.rows}行 × {currentLayout.cols}列
+            </p>
+            <p className="text-callout">
+              総席数: {currentLayout.seats.length}席
+            </p>
+            <p className="text-callout">
+              空席数: {currentLayout.seats.filter(seat => seat.isEmpty).length}席
+            </p>
           </div>
         </div>
       )}

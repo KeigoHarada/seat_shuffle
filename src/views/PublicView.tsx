@@ -4,7 +4,7 @@ import { useSeatStore } from '../stores/seatStore';
 import { SeatGrid } from '../components/SeatGrid';
 
 export const PublicView: React.FC = () => {
-  const { shuffleSeats, toggleSettings, isShuffling, currentLayout, students } = useSeatStore();
+  const { shuffleSeats, toggleSettings, isShuffling, currentLayout, students, showSettings, settingsPanelWidth } = useSeatStore();
 
   const handlePrint = () => {
     window.print();
@@ -13,7 +13,16 @@ export const PublicView: React.FC = () => {
   const canShuffle = currentLayout && students.length > 0 && !isShuffling;
 
   return (
-    <div className="container">
+    <div 
+      className="container"
+      style={{
+        opacity: showSettings ? 0.9 : 1,
+        transition: 'opacity 0.3s ease',
+        pointerEvents: 'auto',
+        marginRight: showSettings ? `${settingsPanelWidth}px` : '0',
+        maxWidth: showSettings ? `calc(100vw - ${settingsPanelWidth}px)` : '100%'
+      }}
+    >
       <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -29,7 +38,12 @@ export const PublicView: React.FC = () => {
             top: 'var(--spacing-lg)',
             right: 'var(--spacing-lg)',
             zIndex: 1000,
-            opacity: 0.7
+            opacity: 0.8,
+            padding: 'var(--spacing-sm)',
+            borderRadius: '50%',
+            width: '48px',
+            height: '48px',
+            boxShadow: 'var(--shadow-md)'
           }}
         >
           <Settings size={20} />

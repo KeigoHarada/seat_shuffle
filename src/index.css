@@ -154,6 +154,13 @@ body {
   background-color: var(--color-primary-50);
 }
 
+.seat.focused {
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 3px var(--color-primary-300);
+  background-color: var(--color-primary-100);
+  transform: scale(1.02);
+}
+
 .seat.occupied {
   background-color: var(--color-primary-100);
   border-color: var(--color-primary-300);
@@ -249,6 +256,37 @@ body {
   animation: shuffle 0.2s ease-in-out infinite;
 }
 
+/* 設定画面スライドアニメーション */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.settings-panel {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.settings-panel.closing {
+  animation: slideOutToRight 0.3s ease-in;
+}
+
 /* レスポンシブ */
 @media (max-width: 768px) {
   .container {
@@ -271,5 +309,13 @@ body {
   
   .text-title2 {
     font-size: 1.5rem;
+  }
+  
+  .settings-panel {
+    width: 100vw !important;
+  }
+  
+  .settings-panel .resize-handle {
+    display: none;
   }
 }
