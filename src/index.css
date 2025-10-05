@@ -180,6 +180,19 @@ body {
   transform: scale(1.01);
 }
 
+.seat.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  cursor: grabbing !important;
+}
+
+.seat.drag-over {
+  border-color: var(--color-accent-500);
+  box-shadow: 0 0 0 3px var(--color-accent-200);
+  background-color: var(--color-accent-50);
+  transform: scale(1.05);
+}
+
 .seat.occupied {
   background-color: var(--color-primary-100);
   border-color: var(--color-primary-300);

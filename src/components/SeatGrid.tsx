@@ -22,6 +22,8 @@ export const SeatGrid: React.FC = () => {
   const [showGroupMenu, setShowGroupMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [multiSelectedSeats, setMultiSelectedSeats] = useState<Set<string>>(new Set());
+  const [draggedSeatId, setDraggedSeatId] = useState<string | null>(null);
+  const [dragOverSeatId, setDragOverSeatId] = useState<string | null>(null);
 
   // デフォルトレイアウトを初期化
   useEffect(() => {
@@ -179,6 +181,50 @@ export const SeatGrid: React.FC = () => {
     setMultiSelectedSeats(new Set());
   };
 
+  // ドラッグ&ドロップのイベントハンドラー
+  const handleDragStart = (e: React.DragEvent, seatId: string) => {
+    const seat = currentLayout.seats.find(s => s.id === seatId);
+    if (seat && !seat.isEmpty && seat.studentId) {
+      setDraggedSeatId(seatId);
+      e.dataTransfer.effectAllowed = 'move';
+    } else {
+      e.preventDefault();
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent, seatId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    const targetSeat = currentLayout.seats.find(s => s.id === seatId);
+    if (targetSeat && !targetSeat.isEmpty) {
+      setDragOverSeatId(seatId);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverSeatId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetSeatId: string) => {
+    e.preventDefault();
+    setDragOverSeatId(null);
+    
+    if (draggedSeatId && draggedSeatId !== targetSeatId) {
+      const targetSeat = currentLayout.seats.find(s => s.id === targetSeatId);
+      if (targetSeat && !targetSeat.isEmpty) {
+        // 生徒のみを交換（席の設定は交換しない）
+        swapSeats(draggedSeatId, targetSeatId);
+      }
+    }
+    setDraggedSeatId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedSeatId(null);
+    setDragOverSeatId(null);
+  };
+
   // 生徒が割り当てられた席の番号を計算
   const getSeatNumber = (seatIndex: number) => {
     let seatNumber = 0;
@@ -205,15 +251,22 @@ export const SeatGrid: React.FC = () => {
           return (
           <div
             key={seat.id}
-            className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''}`}
+            className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''} ${draggedSeatId === seat.id ? 'dragging' : ''} ${dragOverSeatId === seat.id ? 'drag-over' : ''}`}
             onClick={(e) => handleClick(seat.id, e)}
             onDoubleClick={() => handleDoubleClick(seat.id, getStudentName(seat.studentId))}
             onContextMenu={(e) => handleRightClick(e, seat.id)}
+            draggable={!seat.isEmpty && !!seat.studentId}
+            onDragStart={(e) => handleDragStart(e, seat.id)}
+            onDragOver={(e) => handleDragOver(e, seat.id)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, seat.id)}
+            onDragEnd={handleDragEnd}
             style={{
               animationDelay: `${Math.random() * 0.5}s`,
               position: 'relative',
               borderColor: group ? group.color : undefined,
-              borderWidth: group ? '3px' : undefined
+              borderWidth: group ? '3px' : undefined,
+              cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default'
             }}
           >
           {/* 席番号 */}
