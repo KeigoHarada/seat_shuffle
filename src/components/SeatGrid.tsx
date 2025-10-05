@@ -179,11 +179,11 @@ export const SeatGrid: React.FC = () => {
     setMultiSelectedSeats(new Set());
   };
 
-  // 空席を飛ばした席番号を計算
+  // 生徒が割り当てられた席の番号を計算
   const getSeatNumber = (seatIndex: number) => {
     let seatNumber = 0;
     for (let i = 0; i <= seatIndex; i++) {
-      if (!currentLayout.seats[i].isEmpty) {
+      if (!currentLayout.seats[i].isEmpty && currentLayout.seats[i].studentId) {
         seatNumber++;
       }
     }
@@ -217,7 +217,7 @@ export const SeatGrid: React.FC = () => {
             }}
           >
           {/* 席番号 */}
-          {!seat.isEmpty && (
+          {!seat.isEmpty && seat.studentId && (
             <div style={{
               position: 'absolute',
               top: '2px',
@@ -307,9 +307,7 @@ export const SeatGrid: React.FC = () => {
                   {getStudentName(seat.studentId)}
                 </span>
               ) : (
-                <span style={{ opacity: 0.3, fontSize: '12px' }}>
-                  {seat.row + 1}-{seat.col + 1}
-                </span>
+                <span style={{ opacity: 0.5, fontSize: '12px' }}>空席</span>
               )}
             </div>
           )}

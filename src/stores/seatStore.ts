@@ -44,9 +44,21 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   // アクション
   setCurrentLayout: (layout) => set({ currentLayout: layout }),
 
-  addStudent: (student) => set((state) => ({
-    students: [...state.students, student]
-  })),
+  addStudent: (student) => set((state) => {
+    // 生徒番号を自動で割り当て（既存の最大番号+1）
+    const maxStudentNumber = state.students.length > 0 
+      ? Math.max(...state.students.map(s => s.studentNumber))
+      : 0;
+    
+    const studentWithNumber = {
+      ...student,
+      studentNumber: student.studentNumber || maxStudentNumber + 1
+    };
+    
+    return {
+      students: [...state.students, studentWithNumber]
+    };
+  }),
 
   removeStudent: (studentId) => set((state) => ({
     students: state.students.filter(s => s.id !== studentId),
@@ -233,6 +245,73 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     if (!state.currentLayout) {
       // デフォルトの5x6レイアウトを作成
       get().createLayout(5, 6, 'デフォルト教室');
+      
+      // デバッグ用の生徒データを作成
+      const debugStudents = [
+        { id: 'student-1', name: '田中太郎', studentNumber: 1 },
+        { id: 'student-2', name: '佐藤花子', studentNumber: 2 },
+        { id: 'student-3', name: '鈴木次郎', studentNumber: 3 },
+        { id: 'student-4', name: '高橋美咲', studentNumber: 4 },
+        { id: 'student-5', name: '伊藤健太', studentNumber: 5 },
+        { id: 'student-6', name: '渡辺さくら', studentNumber: 6 },
+        { id: 'student-7', name: '山本大輔', studentNumber: 7 },
+        { id: 'student-8', name: '中村優子', studentNumber: 8 },
+        { id: 'student-9', name: '小林翔太', studentNumber: 9 },
+        { id: 'student-10', name: '加藤愛美', studentNumber: 10 },
+        { id: 'student-11', name: '吉田直樹', studentNumber: 11 },
+        { id: 'student-12', name: '松本麻衣', studentNumber: 12 },
+        { id: 'student-13', name: '井上雄介', studentNumber: 13 },
+        { id: 'student-14', name: '木村由美', studentNumber: 14 },
+        { id: 'student-15', name: '林健一', studentNumber: 15 },
+        { id: 'student-16', name: '清水美穂', studentNumber: 16 },
+        { id: 'student-17', name: '山口拓也', studentNumber: 17 },
+        { id: 'student-18', name: '池田理恵', studentNumber: 18 },
+        { id: 'student-19', name: '前田和也', studentNumber: 19 },
+        { id: 'student-20', name: '藤原香織', studentNumber: 20 }
+      ];
+      
+      // 生徒を追加
+      debugStudents.forEach(student => {
+        get().addStudent(student);
+      });
+      
+      // 席に生徒をランダムに割り当て（一部空席も作成）
+      const currentLayout = get().currentLayout;
+      if (currentLayout) {
+        const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
+        const shuffledStudents = [...debugStudents].sort(() => Math.random() - 0.5);
+        
+        // 一部の席を空席にする（約20%）
+        const emptySeatCount = Math.floor(availableSeats.length * 0.2);
+        const seatsToEmpty = availableSeats
+          .sort(() => Math.random() - 0.5)
+          .slice(0, emptySeatCount);
+        
+        seatsToEmpty.forEach(seat => {
+          get().toggleSeatEmpty(seat.id);
+        });
+        
+        // 残りの席に生徒を割り当て（全ての席に名前を登録）
+        const remainingSeats = availableSeats.filter(seat => 
+          !seatsToEmpty.some(emptySeat => emptySeat.id === seat.id)
+        );
+        
+        // 全ての席に生徒を割り当て（生徒数が足りない場合は追加の生徒を作成）
+        remainingSeats.forEach((seat, index) => {
+          if (index < shuffledStudents.length) {
+            get().assignStudentToSeat(shuffledStudents[index].id, seat.id);
+          } else {
+            // 追加の生徒を作成
+            const additionalStudent = {
+              id: `student-${Date.now()}-${index}`,
+              name: `生徒${index + 1}`,
+              studentNumber: shuffledStudents.length + index + 1
+            };
+            get().addStudent(additionalStudent);
+            get().assignStudentToSeat(additionalStudent.id, seat.id);
+          }
+        });
+      }
     }
   },
 

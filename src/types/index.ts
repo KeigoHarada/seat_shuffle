@@ -20,6 +20,7 @@ export interface Seat {
 export interface Student {
   id: string;
   name: string;
+  studentNumber: number;
 }
 
 // 席配置の型定義

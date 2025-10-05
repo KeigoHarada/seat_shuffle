@@ -7,6 +7,7 @@ export const StudentManager: React.FC = () => {
   const [newStudentName, setNewStudentName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [sortBy, setSortBy] = useState<'student' | 'seat'>('student');
 
   // 生徒の席番号を取得
   const getStudentSeatNumber = (studentId: string) => {
@@ -15,21 +16,41 @@ export const StudentManager: React.FC = () => {
     const seatIndex = currentLayout.seats.findIndex(seat => seat.studentId === studentId);
     if (seatIndex === -1) return 0;
     
-    // 空席を飛ばした席番号を計算
+    // 生徒が割り当てられた席の番号を計算
     let seatNumber = 0;
     for (let i = 0; i <= seatIndex; i++) {
-      if (!currentLayout.seats[i].isEmpty) {
+      if (!currentLayout.seats[i].isEmpty && currentLayout.seats[i].studentId) {
         seatNumber++;
       }
     }
     return seatNumber;
   };
 
+  // ソートされた生徒リストを取得
+  const getSortedStudents = () => {
+    const studentsWithSeatNumbers = students.map(student => ({
+      ...student,
+      seatNumber: getStudentSeatNumber(student.id)
+    }));
+
+    if (sortBy === 'seat') {
+      return studentsWithSeatNumbers.sort((a, b) => {
+        if (a.seatNumber === 0 && b.seatNumber === 0) return 0;
+        if (a.seatNumber === 0) return 1;
+        if (b.seatNumber === 0) return -1;
+        return a.seatNumber - b.seatNumber;
+      });
+    } else {
+      return studentsWithSeatNumbers.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+    }
+  };
+
   const handleAddStudent = () => {
     if (newStudentName.trim()) {
       const student: Student = {
         id: `student-${Date.now()}`,
-        name: newStudentName.trim()
+        name: newStudentName.trim(),
+        studentNumber: 0 // ストアで自動割り当てされる
       };
       addStudent(student);
       setNewStudentName('');
@@ -56,9 +77,25 @@ export const StudentManager: React.FC = () => {
 
   return (
     <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
-      <h2 className="text-title3" style={{ marginBottom: 'var(--spacing-lg)' }}>
-        生徒管理
-      </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
+        <h2 className="text-title3">生徒管理</h2>
+        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+          <button
+            className={`btn ${sortBy === 'student' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setSortBy('student')}
+            style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
+          >
+            生徒名順
+          </button>
+          <button
+            className={`btn ${sortBy === 'seat' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setSortBy('seat')}
+            style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
+          >
+            机番号順
+          </button>
+        </div>
+      </div>
       
       <div className="flex" style={{ marginBottom: 'var(--spacing-lg)', flexWrap: 'wrap', gap: 'var(--spacing-sm)' }}>
         <input
@@ -94,7 +131,8 @@ export const StudentManager: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
             {/* ヘッダー */}
             <div style={{
-              display: 'flex',
+              display: 'grid',
+              gridTemplateColumns: '40px 40px 1fr 120px',
               alignItems: 'center',
               gap: 'var(--spacing-sm)',
               padding: 'var(--spacing-sm)',
@@ -104,16 +142,18 @@ export const StudentManager: React.FC = () => {
               fontWeight: 'bold',
               fontSize: '0.875rem'
             }}>
-              <span style={{ minWidth: '30px', textAlign: 'center' }}>No.</span>
-              <span style={{ flex: '1' }}>名前</span>
-              <span style={{ minWidth: '120px', textAlign: 'center' }}>操作</span>
+              <span style={{ textAlign: 'center' }}>生徒No.</span>
+              <span style={{ textAlign: 'center' }}>机No.</span>
+              <span>名前</span>
+              <span style={{ textAlign: 'center' }}>操作</span>
             </div>
             
-            {students.map((student) => (
+            {getSortedStudents().map((student, index) => (
               <div
                 key={student.id}
                 style={{
-                  display: 'flex',
+                  display: 'grid',
+                  gridTemplateColumns: '40px 40px 1fr 120px',
                   alignItems: 'center',
                   gap: 'var(--spacing-sm)',
                   padding: 'var(--spacing-sm)',
@@ -126,14 +166,23 @@ export const StudentManager: React.FC = () => {
                   <>
                     <span 
                       style={{ 
-                        minWidth: '30px',
                         fontSize: '0.75rem',
                         fontWeight: 'bold',
                         color: 'var(--color-secondary-600)',
                         textAlign: 'center'
                       }}
                     >
-                      {getStudentSeatNumber(student.id) || '-'}
+                      {student.studentNumber}
+                    </span>
+                    <span 
+                      style={{ 
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        color: 'var(--color-secondary-600)',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {student.seatNumber || '-'}
                     </span>
                     <input
                       type="text"
@@ -148,11 +197,11 @@ export const StudentManager: React.FC = () => {
                         border: '1px solid var(--color-primary-300)',
                         borderRadius: 'var(--radius-sm)',
                         fontSize: '0.875rem',
-                        flex: '1'
+                        width: '100%'
                       }}
                       autoFocus
                     />
-                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', minWidth: '120px', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', justifyContent: 'center' }}>
                       <button
                         className="btn btn-primary"
                         onClick={handleEditSave}
@@ -173,19 +222,28 @@ export const StudentManager: React.FC = () => {
                   <>
                     <span 
                       style={{ 
-                        minWidth: '30px',
                         fontSize: '0.75rem',
                         fontWeight: 'bold',
                         color: 'var(--color-secondary-600)',
                         textAlign: 'center'
                       }}
                     >
-                      {getStudentSeatNumber(student.id) || '-'}
+                      {student.studentNumber}
                     </span>
-                    <span className="text-body" style={{ flex: '1' }}>
+                    <span 
+                      style={{ 
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        color: 'var(--color-secondary-600)',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {student.seatNumber || '-'}
+                    </span>
+                    <span className="text-body" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {student.name}
                     </span>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', minWidth: '120px', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', justifyContent: 'center' }}>
                       <button
                         className="btn btn-secondary"
                         onClick={() => handleEditStart(student)}
