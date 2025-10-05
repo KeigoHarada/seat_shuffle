@@ -45,14 +45,10 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   setCurrentLayout: (layout) => set({ currentLayout: layout }),
 
   addStudent: (student) => set((state) => {
-    // 生徒番号を自動で割り当て（既存の最大番号+1）
-    const maxStudentNumber = state.students.length > 0 
-      ? Math.max(...state.students.map(s => s.studentNumber))
-      : 0;
-    
+    // 生徒番号を自動で割り当て（連番で詰める）
     const studentWithNumber = {
       ...student,
-      studentNumber: student.studentNumber || maxStudentNumber + 1
+      studentNumber: state.students.length + 1
     };
     
     return {
@@ -60,15 +56,26 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     };
   }),
 
-  removeStudent: (studentId) => set((state) => ({
-    students: state.students.filter(s => s.id !== studentId),
-    currentLayout: state.currentLayout ? {
-      ...state.currentLayout,
-      seats: state.currentLayout.seats.map(seat => 
-        seat.studentId === studentId ? { ...seat, studentId: undefined } : seat
-      )
-    } : null
-  })),
+  removeStudent: (studentId) => set((state) => {
+    // 生徒を削除
+    const updatedStudents = state.students.filter(s => s.id !== studentId);
+    
+    // 生徒番号を詰める（1から連番に再割り当て）
+    const renumberedStudents = updatedStudents.map((student, index) => ({
+      ...student,
+      studentNumber: index + 1
+    }));
+    
+    return {
+      students: renumberedStudents,
+      currentLayout: state.currentLayout ? {
+        ...state.currentLayout,
+        seats: state.currentLayout.seats.map(seat => 
+          seat.studentId === studentId ? { ...seat, studentId: undefined } : seat
+        )
+      } : null
+    };
+  }),
 
   updateStudent: (studentId, updates) => set((state) => ({
     students: state.students.map(s => 
@@ -92,13 +99,34 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   removeStudentFromSeat: (seatId) => set((state) => {
     if (!state.currentLayout) return state;
     
+    // 削除される生徒のIDを取得
+    const seatToRemove = state.currentLayout.seats.find(seat => seat.id === seatId);
+    const studentIdToRemove = seatToRemove?.studentId;
+    
+    // 席から生徒を削除
+    const updatedLayout = {
+      ...state.currentLayout,
+      seats: state.currentLayout.seats.map(seat => 
+        seat.id === seatId ? { ...seat, studentId: undefined } : seat
+      )
+    };
+    
+    // 生徒管理からも削除（生徒番号を詰める）
+    if (studentIdToRemove) {
+      const updatedStudents = state.students.filter(s => s.id !== studentIdToRemove);
+      const renumberedStudents = updatedStudents.map((student, index) => ({
+        ...student,
+        studentNumber: index + 1
+      }));
+      
+      return {
+        currentLayout: updatedLayout,
+        students: renumberedStudents
+      };
+    }
+    
     return {
-      currentLayout: {
-        ...state.currentLayout,
-        seats: state.currentLayout.seats.map(seat => 
-          seat.id === seatId ? { ...seat, studentId: undefined } : seat
-        )
-      }
+      currentLayout: updatedLayout
     };
   }),
 
@@ -129,13 +157,34 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   toggleSeatEmpty: (seatId) => set((state) => {
     if (!state.currentLayout) return state;
     
+    // 空席に変更される席の生徒IDを取得
+    const seatToToggle = state.currentLayout.seats.find(seat => seat.id === seatId);
+    const studentIdToRemove = seatToToggle?.studentId;
+    
+    // 席を空席に変更
+    const updatedLayout = {
+      ...state.currentLayout,
+      seats: state.currentLayout.seats.map(seat => 
+        seat.id === seatId ? { ...seat, isEmpty: !seat.isEmpty, studentId: undefined } : seat
+      )
+    };
+    
+    // 空席に変更する場合、生徒管理からも削除（生徒番号を詰める）
+    if (studentIdToRemove && !seatToToggle.isEmpty) {
+      const updatedStudents = state.students.filter(s => s.id !== studentIdToRemove);
+      const renumberedStudents = updatedStudents.map((student, index) => ({
+        ...student,
+        studentNumber: index + 1
+      }));
+      
+      return {
+        currentLayout: updatedLayout,
+        students: renumberedStudents
+      };
+    }
+    
     return {
-      currentLayout: {
-        ...state.currentLayout,
-        seats: state.currentLayout.seats.map(seat => 
-          seat.id === seatId ? { ...seat, isEmpty: !seat.isEmpty, studentId: undefined } : seat
-        )
-      }
+      currentLayout: updatedLayout
     };
   }),
 
@@ -222,7 +271,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     if (!student) {
       student = {
         id: `student-${Date.now()}`,
-        name: studentName
+        name: studentName,
+        studentNumber: state.students.length + 1
       };
       set((state) => ({
         students: [...state.students, student]

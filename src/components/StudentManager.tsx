@@ -7,7 +7,7 @@ export const StudentManager: React.FC = () => {
   const [newStudentName, setNewStudentName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [sortBy, setSortBy] = useState<'student' | 'seat'>('student');
+  const [sortBy, setSortBy] = useState<'studentNo' | 'seat'>('studentNo');
 
   // 生徒の席番号を取得
   const getStudentSeatNumber = (studentId: string) => {
@@ -41,7 +41,7 @@ export const StudentManager: React.FC = () => {
         return a.seatNumber - b.seatNumber;
       });
     } else {
-      return studentsWithSeatNumbers.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      return studentsWithSeatNumbers.sort((a, b) => a.studentNumber - b.studentNumber);
     }
   };
 
@@ -81,11 +81,11 @@ export const StudentManager: React.FC = () => {
         <h2 className="text-title3">生徒管理</h2>
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
           <button
-            className={`btn ${sortBy === 'student' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setSortBy('student')}
+            className={`btn ${sortBy === 'studentNo' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setSortBy('studentNo')}
             style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
           >
-            生徒名順
+            生徒No順
           </button>
           <button
             className={`btn ${sortBy === 'seat' ? 'btn-primary' : 'btn-secondary'}`}
