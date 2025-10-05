@@ -24,6 +24,7 @@ export const SeatGrid: React.FC = () => {
   const [multiSelectedSeats, setMultiSelectedSeats] = useState<Set<string>>(new Set());
   const [draggedSeatId, setDraggedSeatId] = useState<string | null>(null);
   const [dragOverSeatId, setDragOverSeatId] = useState<string | null>(null);
+  const [swappedSeats, setSwappedSeats] = useState<Set<string>>(new Set());
 
   // デフォルトレイアウトを初期化
   useEffect(() => {
@@ -213,8 +214,17 @@ export const SeatGrid: React.FC = () => {
     if (draggedSeatId && draggedSeatId !== targetSeatId) {
       const targetSeat = currentLayout.seats.find(s => s.id === targetSeatId);
       if (targetSeat && !targetSeat.isEmpty) {
-        // 生徒のみを交換（席の設定は交換しない）
-        swapSeats(draggedSeatId, targetSeatId);
+        // 交換アニメーションを開始
+        setSwappedSeats(new Set([draggedSeatId, targetSeatId]));
+        
+        // 少し遅延してから実際の交換を実行
+        setTimeout(() => {
+          swapSeats(draggedSeatId, targetSeatId);
+          // アニメーション完了後にクリア
+          setTimeout(() => {
+            setSwappedSeats(new Set());
+          }, 300);
+        }, 50);
       }
     }
     setDraggedSeatId(null);
@@ -251,7 +261,7 @@ export const SeatGrid: React.FC = () => {
           return (
           <div
             key={seat.id}
-            className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''} ${draggedSeatId === seat.id ? 'dragging' : ''} ${dragOverSeatId === seat.id ? 'drag-over' : ''}`}
+            className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''} ${draggedSeatId === seat.id ? 'dragging' : ''} ${dragOverSeatId === seat.id ? 'drag-over' : ''} ${swappedSeats.has(seat.id) ? 'drag-swap' : ''}`}
             onClick={(e) => handleClick(seat.id, e)}
             onDoubleClick={() => handleDoubleClick(seat.id, getStudentName(seat.studentId))}
             onContextMenu={(e) => handleRightClick(e, seat.id)}

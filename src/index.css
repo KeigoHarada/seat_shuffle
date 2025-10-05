@@ -181,16 +181,46 @@ body {
 }
 
 .seat.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
+  opacity: 0.7;
+  transform: scale(0.9) rotate(5deg);
   cursor: grabbing !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: all 0.2s ease;
 }
 
 .seat.drag-over {
   border-color: var(--color-accent-500);
   box-shadow: 0 0 0 3px var(--color-accent-200);
   background-color: var(--color-accent-50);
-  transform: scale(1.05);
+  transform: scale(1.08);
+  animation: pulse 0.6s ease-in-out infinite alternate;
+  transition: all 0.2s ease;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 3px var(--color-accent-200);
+  }
+  100% {
+    box-shadow: 0 0 0 6px var(--color-accent-300);
+  }
+}
+
+.seat.drag-swap {
+  animation: swapAnimation 0.3s ease-in-out;
+}
+
+@keyframes swapAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1) rotate(2deg);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .seat.occupied {
