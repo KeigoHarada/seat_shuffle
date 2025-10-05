@@ -1,0 +1,31 @@
+// 席の型定義
+export interface Seat {
+  id: string;
+  row: number;
+  col: number;
+  studentId?: string;
+  isEmpty: boolean;
+}
+
+// 生徒の型定義
+export interface Student {
+  id: string;
+  name: string;
+}
+
+// 席配置の型定義
+export interface SeatLayout {
+  id: string;
+  name: string;
+  rows: number;
+  cols: number;
+  seats: Seat[];
+}
+
+// アプリケーションの状態型定義
+export interface AppState {
+  currentLayout: SeatLayout | null;
+  students: Student[];
+  isShuffling: boolean;
+  showSettings: boolean;
+}
