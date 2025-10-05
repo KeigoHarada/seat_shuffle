@@ -1,3 +1,11 @@
+// グループの型定義
+export interface Group {
+  id: string;
+  name: string;
+  color: string;
+  description?: string;
+}
+
 // 席の型定義
 export interface Seat {
   id: string;
@@ -5,6 +13,7 @@ export interface Seat {
   col: number;
   studentId?: string;
   isEmpty: boolean;
+  groupId?: string;
 }
 
 // 生徒の型定義
@@ -26,6 +35,7 @@ export interface SeatLayout {
 export interface AppState {
   currentLayout: SeatLayout | null;
   students: Student[];
+  groups: Group[];
   isShuffling: boolean;
   showSettings: boolean;
 }

@@ -173,6 +173,13 @@ body {
   transform: scale(1.02);
 }
 
+.seat.multi-selected {
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 2px var(--color-primary-200);
+  background-color: var(--color-primary-50);
+  transform: scale(1.01);
+}
+
 .seat.occupied {
   background-color: var(--color-primary-100);
   border-color: var(--color-primary-300);

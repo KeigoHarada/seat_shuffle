@@ -5,23 +5,41 @@ export const SeatGrid: React.FC = () => {
   const { 
     currentLayout, 
     students, 
+    groups,
     isShuffling, 
     selectedSeatId,
     setSelectedSeatId,
     swapSeats,
     assignStudentNameToSeat,
     toggleSeatEmpty,
+    assignGroupToSeat,
     initializeDefaultLayout
   } = useSeatStore();
   
   const [editingSeatId, setEditingSeatId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [focusedSeatId, setFocusedSeatId] = useState<string | null>(null);
+  const [showGroupMenu, setShowGroupMenu] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [multiSelectedSeats, setMultiSelectedSeats] = useState<Set<string>>(new Set());
 
   // デフォルトレイアウトを初期化
   useEffect(() => {
     initializeDefaultLayout();
   }, [initializeDefaultLayout]);
+
+  // グループメニューを閉じる
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowGroupMenu(null);
+      setMenuPosition(null);
+    };
+
+    if (showGroupMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showGroupMenu]);
 
   // キーボードイベントハンドラー
   useEffect(() => {
@@ -71,8 +89,33 @@ export const SeatGrid: React.FC = () => {
     return student?.name || '';
   };
 
-  const handleClick = (seatId: string) => {
-    setFocusedSeatId(seatId);
+  const getGroup = (groupId?: string) => {
+    if (!groupId) return null;
+    return groups.find(g => g.id === groupId) || null;
+  };
+
+  const handleClick = (seatId: string, e: React.MouseEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      // コントロールキーが押されている場合は複数選択
+      setMultiSelectedSeats(prev => {
+        const newSet = new Set(prev);
+        // 現在フォーカスされている席も複数選択に含める
+        if (focusedSeatId && focusedSeatId !== seatId) {
+          newSet.add(focusedSeatId);
+        }
+        if (newSet.has(seatId)) {
+          newSet.delete(seatId);
+        } else {
+          newSet.add(seatId);
+        }
+        return newSet;
+      });
+      setFocusedSeatId(seatId);
+    } else {
+      // 通常のクリック
+      setMultiSelectedSeats(new Set());
+      setFocusedSeatId(seatId);
+    }
   };
 
   const handleDoubleClick = (seatId: string, currentName: string) => {
@@ -95,15 +138,11 @@ export const SeatGrid: React.FC = () => {
       }
       setSelectedSeatId(null);
     } else {
-      // 空席設定または選択
-      const seat = currentLayout.seats.find(s => s.id === seatId);
-      if (seat && !seat.studentId) {
-        // 名前が入っていない場合は空席に変更
-        toggleSeatEmpty(seatId);
-      } else if (seat && seat.studentId) {
-        // 名前が入っている場合は選択
-        setSelectedSeatId(seatId);
-      }
+      // 複数選択がある場合は、その席も含めてメニュー表示
+      const seatsToShow = multiSelectedSeats.size > 0 ? Array.from(multiSelectedSeats) : [seatId];
+      const rect = e.currentTarget.getBoundingClientRect();
+      setMenuPosition({ x: rect.left, y: rect.bottom });
+      setShowGroupMenu(seatsToShow.join(','));
     }
   };
 
@@ -120,6 +159,26 @@ export const SeatGrid: React.FC = () => {
     setEditingName('');
   };
 
+  const handleGroupSelect = (seatIds: string, groupId: string | null) => {
+    const seatIdArray = seatIds.split(',');
+    seatIdArray.forEach(seatId => {
+      assignGroupToSeat(seatId, groupId);
+    });
+    setShowGroupMenu(null);
+    setMenuPosition(null);
+    setMultiSelectedSeats(new Set());
+  };
+
+  const handleEmptyToggle = (seatIds: string) => {
+    const seatIdArray = seatIds.split(',');
+    seatIdArray.forEach(seatId => {
+      toggleSeatEmpty(seatId);
+    });
+    setShowGroupMenu(null);
+    setMenuPosition(null);
+    setMultiSelectedSeats(new Set());
+  };
+
   // 空席を飛ばした席番号を計算
   const getSeatNumber = (seatIndex: number) => {
     let seatNumber = 0;
@@ -132,26 +191,31 @@ export const SeatGrid: React.FC = () => {
   };
 
   return (
-    <div className="seat-grid" style={{ 
-      display: 'grid', 
-      gridTemplateColumns: `repeat(${currentLayout.cols}, 1fr)`,
-      gap: 'var(--spacing-sm)',
-      maxWidth: 'fit-content',
-      margin: '0 auto',
-      padding: 'var(--spacing-lg)'
-    }}>
-      {currentLayout.seats.map((seat, index) => (
-        <div
-          key={seat.id}
-          className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''}`}
-          onClick={() => handleClick(seat.id)}
-          onDoubleClick={() => handleDoubleClick(seat.id, getStudentName(seat.studentId))}
-          onContextMenu={(e) => handleRightClick(e, seat.id)}
-          style={{
-            animationDelay: `${Math.random() * 0.5}s`,
-            position: 'relative'
-          }}
-        >
+    <div style={{ position: 'relative' }}>
+      <div className="seat-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: `repeat(${currentLayout.cols}, 1fr)`,
+        gap: 'var(--spacing-sm)',
+        maxWidth: 'fit-content',
+        margin: '0 auto',
+        padding: 'var(--spacing-lg)'
+      }}>
+        {currentLayout.seats.map((seat, index) => {
+          const group = getGroup(seat.groupId);
+          return (
+          <div
+            key={seat.id}
+            className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''}`}
+            onClick={(e) => handleClick(seat.id, e)}
+            onDoubleClick={() => handleDoubleClick(seat.id, getStudentName(seat.studentId))}
+            onContextMenu={(e) => handleRightClick(e, seat.id)}
+            style={{
+              animationDelay: `${Math.random() * 0.5}s`,
+              position: 'relative',
+              borderColor: group ? group.color : undefined,
+              borderWidth: group ? '3px' : undefined
+            }}
+          >
           {/* 席番号 */}
           {!seat.isEmpty && (
             <div style={{
@@ -164,6 +228,23 @@ export const SeatGrid: React.FC = () => {
             }}>
               {getSeatNumber(index)}
             </div>
+          )}
+
+          {/* グループ表示 */}
+          {group && (
+            <div style={{
+              position: 'absolute',
+              top: '2px',
+              right: '2px',
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: group.color,
+              border: '1px solid white',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+            }}
+            title={group.name}
+            />
           )}
           
           {/* 編集モード */}
@@ -232,8 +313,130 @@ export const SeatGrid: React.FC = () => {
               )}
             </div>
           )}
+
         </div>
-      ))}
+        );
+      })}
+      </div>
+
+      {/* グループメニュー */}
+      {showGroupMenu && menuPosition && (
+        <div style={{
+          position: 'fixed',
+          left: menuPosition.x,
+          top: menuPosition.y,
+          backgroundColor: 'white',
+          border: '1px solid var(--color-secondary-300)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-lg)',
+          zIndex: 9999,
+          padding: 'var(--spacing-sm)',
+          minWidth: '150px'
+        }}>
+          <div style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 'bold', 
+            marginBottom: 'var(--spacing-xs)',
+            color: 'var(--color-secondary-700)'
+          }}>
+            {showGroupMenu.includes(',') ? `${showGroupMenu.split(',').length}席の設定` : '席の設定'}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {/* 空席設定 */}
+            {(() => {
+              const seatIds = showGroupMenu.split(',');
+              const firstSeat = currentLayout.seats.find(s => s.id === seatIds[0]);
+              if (firstSeat) {
+                const allEmpty = seatIds.every(id => {
+                  const seat = currentLayout.seats.find(s => s.id === id);
+                  return seat?.isEmpty;
+                });
+                const allNotEmpty = seatIds.every(id => {
+                  const seat = currentLayout.seats.find(s => s.id === id);
+                  return !seat?.isEmpty;
+                });
+                
+                return (
+                  <button
+                    onClick={() => handleEmptyToggle(showGroupMenu)}
+                    style={{
+                      padding: 'var(--spacing-xs)',
+                      border: 'none',
+                      background: 'transparent',
+                      textAlign: 'left',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      borderRadius: 'var(--radius-sm)',
+                      color: allEmpty ? 'var(--color-primary-600)' : 'var(--color-secondary-600)',
+                      fontWeight: allEmpty ? 'bold' : 'normal'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    {allEmpty ? '✓ 空席を解除' : allNotEmpty ? '空席にする' : '空席状態を統一'}
+                  </button>
+                );
+              }
+              return null;
+            })()}
+            
+            {/* 区切り線 */}
+            <div style={{ 
+              height: '1px', 
+              backgroundColor: 'var(--color-secondary-200)', 
+              margin: '4px 0'
+            }} />
+            
+            <button
+              onClick={() => handleGroupSelect(showGroupMenu, null)}
+              style={{
+                padding: 'var(--spacing-xs)',
+                border: 'none',
+                background: 'transparent',
+                textAlign: 'left',
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-sm)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              グループなし
+            </button>
+            {groups.map((group) => (
+              <button
+                key={group.id}
+                onClick={() => handleGroupSelect(showGroupMenu, group.id)}
+                style={{
+                  padding: 'var(--spacing-xs)',
+                  border: 'none',
+                  background: 'transparent',
+                  textAlign: 'left',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--spacing-xs)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: group.color,
+                    border: '1px solid var(--color-secondary-300)'
+                  }}
+                />
+                {group.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Seat, Student, SeatLayout, AppState } from '../types';
+import { Seat, Student, SeatLayout, AppState, Group } from '../types';
 
 interface SeatStore extends AppState {
   // アクション
@@ -15,6 +15,12 @@ interface SeatStore extends AppState {
   toggleSettings: () => void;
   setShuffling: (isShuffling: boolean) => void;
   
+  // グループ管理
+  addGroup: (group: Group) => void;
+  removeGroup: (groupId: string) => void;
+  updateGroup: (groupId: string, updates: Partial<Group>) => void;
+  assignGroupToSeat: (seatId: string, groupId: string | null) => void;
+  
   // 新しい機能
   selectedSeatId: string | null;
   setSelectedSeatId: (seatId: string | null) => void;
@@ -29,6 +35,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   // 初期状態
   currentLayout: null,
   students: [],
+  groups: [],
   isShuffling: false,
   showSettings: false,
   selectedSeatId: null,
@@ -229,5 +236,39 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     }
   },
 
-  setSettingsPanelWidth: (width) => set({ settingsPanelWidth: width })
+  setSettingsPanelWidth: (width) => set({ settingsPanelWidth: width }),
+
+  // グループ管理の実装
+  addGroup: (group) => set((state) => ({
+    groups: [...state.groups, group]
+  })),
+
+  removeGroup: (groupId) => set((state) => ({
+    groups: state.groups.filter(g => g.id !== groupId),
+    currentLayout: state.currentLayout ? {
+      ...state.currentLayout,
+      seats: state.currentLayout.seats.map(seat => 
+        seat.groupId === groupId ? { ...seat, groupId: undefined } : seat
+      )
+    } : null
+  })),
+
+  updateGroup: (groupId, updates) => set((state) => ({
+    groups: state.groups.map(g => 
+      g.id === groupId ? { ...g, ...updates } : g
+    )
+  })),
+
+  assignGroupToSeat: (seatId, groupId) => set((state) => {
+    if (!state.currentLayout) return state;
+    
+    return {
+      currentLayout: {
+        ...state.currentLayout,
+        seats: state.currentLayout.seats.map(seat => 
+          seat.id === seatId ? { ...seat, groupId: groupId || undefined } : seat
+        )
+      }
+    };
+  })
 }));

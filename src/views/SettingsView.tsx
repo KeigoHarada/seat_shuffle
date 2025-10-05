@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { useSeatStore } from '../stores/seatStore';
 import { LayoutSettings } from '../components/LayoutSettings';
 import { StudentManager } from '../components/StudentManager';
+import { GroupManager } from '../components/GroupManager';
 
 export const SettingsView: React.FC = () => {
   const { toggleSettings, settingsPanelWidth, setSettingsPanelWidth } = useSeatStore();
@@ -103,6 +104,7 @@ export const SettingsView: React.FC = () => {
         <main>
           <LayoutSettings />
           <StudentManager />
+          <GroupManager />
           
           <div className="card">
             <h2 className="text-title3" style={{ marginBottom: 'var(--spacing-lg)' }}>
