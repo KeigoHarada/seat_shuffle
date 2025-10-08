@@ -56,8 +56,17 @@ export const checkRoleGroupCondition = (
   // 条件が無効な場合は常にtrue
   if (!condition.enabled) return true;
   
-  // 対象ロールでない場合は常にtrue
-  if (!student.roleIds.includes(condition.roleId)) return true;
+  // ロールまたは性別でフィルタリング
+  if (condition.roleId) {
+    // ロールでフィルタリング
+    if (!student.roleIds.includes(condition.roleId)) return true;
+  } else if (condition.gender) {
+    // 性別でフィルタリング
+    if (student.gender !== condition.gender) return true;
+  } else {
+    // ロールも性別も指定されていない場合は常にtrue
+    return true;
+  }
   
   // 対象グループでない場合は常にtrue（いずれかのグループが含まれているかチェック）
   const hasTargetGroup = seat.groupIds.some(gid => condition.groupIds.includes(gid));
@@ -72,7 +81,15 @@ export const checkRoleGroupCondition = (
       const assignedSeat = Object.values(currentAssignments);
       
       const assignedStudent = students.find(s => s.id === assignedStudentId);
-      return assignedStudent && assignedStudent.roleIds.includes(condition.roleId);
+      if (!assignedStudent) return false;
+      
+      // ロールまたは性別でチェック
+      if (condition.roleId) {
+        return assignedStudent.roleIds.includes(condition.roleId);
+      } else if (condition.gender) {
+        return assignedStudent.gender === condition.gender;
+      }
+      return false;
     }).length;
     
     // 1つでも制限内のグループがあればOK

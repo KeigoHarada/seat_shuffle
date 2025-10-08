@@ -71,10 +71,33 @@ export const validateRoleGroupCondition = (
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // 対象ロールの存在チェック
-  const role = roles.find(r => r.id === condition.roleId);
-  if (!role) {
-    errors.push(`対象ロール「${condition.roleId}」が見つかりません`);
+  // ロールまたは性別のチェック
+  let targetStudents: Student[] = [];
+  let filterName = '';
+
+  if (condition.roleId) {
+    // ロールでフィルタリング
+    const role = roles.find(r => r.id === condition.roleId);
+    if (!role) {
+      errors.push(`対象ロール「${condition.roleId}」が見つかりません`);
+    }
+    targetStudents = students.filter(s => s.roleIds.includes(condition.roleId));
+    filterName = role?.name || condition.roleId;
+    
+    if (targetStudents.length === 0) {
+      errors.push(`対象ロール「${filterName}」を持つ生徒がいません`);
+    }
+  } else if (condition.gender) {
+    // 性別でフィルタリング
+    const genderLabels = { male: '男性', female: '女性', other: 'その他' };
+    filterName = genderLabels[condition.gender];
+    targetStudents = students.filter(s => s.gender === condition.gender);
+    
+    if (targetStudents.length === 0) {
+      errors.push(`${filterName}の生徒がいません`);
+    }
+  } else {
+    errors.push(`ロールまたは性別のいずれかを指定してください`);
   }
 
   // 対象グループの存在チェック
@@ -83,12 +106,6 @@ export const validateRoleGroupCondition = (
     if (!group) {
       errors.push(`対象グループ「${groupId}」が見つかりません`);
     }
-  }
-
-  // 対象ロールを持つ生徒の存在チェック
-  const studentsWithRole = students.filter(s => s.roleIds.includes(condition.roleId));
-  if (studentsWithRole.length === 0) {
-    errors.push(`対象ロール「${role?.name || condition.roleId}」を持つ生徒がいません`);
   }
 
   // 各グループの席数と配置人数のチェック
@@ -105,8 +122,8 @@ export const validateRoleGroupCondition = (
 
   // 全体の配置人数チェック
   const totalRequiredCount = condition.groupIds.length * condition.count;
-  if (studentsWithRole.length < totalRequiredCount) {
-    warnings.push(`対象ロール「${role?.name || condition.roleId}」を持つ生徒数（${studentsWithRole.length}人）が全体の必要人数（${totalRequiredCount}人）より少ないです`);
+  if (targetStudents.length < totalRequiredCount) {
+    warnings.push(`${filterName}の生徒数（${targetStudents.length}人）が全体の必要人数（${totalRequiredCount}人）より少ないです`);
   }
 
   return {

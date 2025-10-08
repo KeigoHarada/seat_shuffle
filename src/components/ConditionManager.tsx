@@ -45,10 +45,12 @@ export const ConditionManager: React.FC = () => {
     shouldPlace: true
   });
 
-  // ロール-グループ条件のフォーム状態
+  // ロール/性別-グループ条件のフォーム状態
   const [roleGroupForm, setRoleGroupForm] = useState({
     name: '',
+    filterType: 'role' as 'role' | 'gender',
     roleId: '',
+    gender: 'male' as 'male' | 'female' | 'other',
     groupIds: [] as string[],
     count: 1
   });
@@ -63,7 +65,7 @@ export const ConditionManager: React.FC = () => {
 
   const resetForms = () => {
     setStudentGroupForm({ name: '', studentIds: [], groupIds: [], shouldPlace: true });
-    setRoleGroupForm({ name: '', roleId: '', groupIds: [], count: 1 });
+    setRoleGroupForm({ name: '', filterType: 'role', roleId: '', gender: 'male', groupIds: [], count: 1 });
     setStudentDistanceForm({ name: '', studentId1: '', studentId2: '', shouldBeClose: true });
     setShowAddForm(false);
     setEditingId(null);
@@ -87,10 +89,12 @@ export const ConditionManager: React.FC = () => {
       case 'role-group':
         newCondition = {
           id: `condition-${Date.now()}`,
-          name: roleGroupForm.name || 'ロール-グループ条件',
+          name: roleGroupForm.name || (roleGroupForm.filterType === 'gender' ? '性別-グループ条件' : 'ロール/性別-グループ条件'),
           type: 'role-group',
           enabled: true,
-          roleId: roleGroupForm.roleId,
+          ...(roleGroupForm.filterType === 'role' 
+            ? { roleId: roleGroupForm.roleId } 
+            : { gender: roleGroupForm.gender }),
           groupIds: roleGroupForm.groupIds,
           count: roleGroupForm.count
         };
@@ -126,7 +130,9 @@ export const ConditionManager: React.FC = () => {
     } else if (condition.type === 'role-group') {
       setRoleGroupForm({
         name: condition.name,
-        roleId: condition.roleId,
+        filterType: condition.roleId ? 'role' : 'gender',
+        roleId: condition.roleId || '',
+        gender: condition.gender || 'male',
         groupIds: condition.groupIds,
         count: condition.count
       });
@@ -158,7 +164,9 @@ export const ConditionManager: React.FC = () => {
       case 'role-group':
         updates = {
           name: roleGroupForm.name,
-          roleId: roleGroupForm.roleId,
+          ...(roleGroupForm.filterType === 'role' 
+            ? { roleId: roleGroupForm.roleId, gender: undefined } 
+            : { gender: roleGroupForm.gender, roleId: undefined }),
           groupIds: roleGroupForm.groupIds,
           count: roleGroupForm.count
         };
@@ -341,9 +349,9 @@ export const ConditionManager: React.FC = () => {
               },
               { 
                 type: 'role-group', 
-                label: 'ロール-グループ', 
+                label: 'ロール/性別-グループ', 
                 icon: Target,
-                example: '例: 班長を各グループに1人配置する'
+                example: '例: 班長を各グループに1人配置する / 各班に男子を2人配置する'
               },
               { 
                 type: 'student-distance', 
@@ -512,29 +520,64 @@ export const ConditionManager: React.FC = () => {
           </div>
         )}
 
-        {/* ロール-グループ条件フォーム */}
+        {/* ロール/性別-グループ条件フォーム */}
         {conditionType === 'role-group' && (
           <div>
             <div style={{ marginBottom: 'var(--spacing-md)' }}>
               <label className="text-subheadline" style={{ display: 'block', marginBottom: 'var(--spacing-sm)' }}>
-                対象ロール
+                絞り込み条件
               </label>
-              <select
-                value={roleGroupForm.roleId}
-                onChange={(e) => setRoleGroupForm(prev => ({ ...prev, roleId: e.target.value }))}
-                style={{
-                  width: '100%',
-                  padding: 'var(--spacing-sm)',
-                  border: '1px solid var(--color-secondary-300)',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: '1rem'
-                }}
-              >
-                <option value="">ロールを選択</option>
-                {roles.map(role => (
-                  <option key={role.id} value={role.id}>{role.name}</option>
-                ))}
-              </select>
+              <div style={{ display: 'flex', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-sm)' }}>
+                <button
+                  onClick={() => setRoleGroupForm(prev => ({ ...prev, filterType: 'role' }))}
+                  className={`btn ${roleGroupForm.filterType === 'role' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1 }}
+                >
+                  ロール
+                </button>
+                <button
+                  onClick={() => setRoleGroupForm(prev => ({ ...prev, filterType: 'gender' }))}
+                  className={`btn ${roleGroupForm.filterType === 'gender' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1 }}
+                >
+                  性別
+                </button>
+              </div>
+              
+              {roleGroupForm.filterType === 'role' ? (
+                <select
+                  value={roleGroupForm.roleId}
+                  onChange={(e) => setRoleGroupForm(prev => ({ ...prev, roleId: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: 'var(--spacing-sm)',
+                    border: '1px solid var(--color-secondary-300)',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '1rem'
+                  }}
+                >
+                  <option value="">ロールを選択</option>
+                  {roles.map(role => (
+                    <option key={role.id} value={role.id}>{role.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <select
+                  value={roleGroupForm.gender}
+                  onChange={(e) => setRoleGroupForm(prev => ({ ...prev, gender: e.target.value as 'male' | 'female' | 'other' }))}
+                  style={{
+                    width: '100%',
+                    padding: 'var(--spacing-sm)',
+                    border: '1px solid var(--color-secondary-300)',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '1rem'
+                  }}
+                >
+                  <option value="male">男性</option>
+                  <option value="female">女性</option>
+                  <option value="other">その他</option>
+                </select>
+              )}
             </div>
 
             <div style={{ marginBottom: 'var(--spacing-md)' }}>
@@ -689,7 +732,7 @@ export const ConditionManager: React.FC = () => {
             onClick={editingId ? handleUpdateCondition : handleAddCondition}
             disabled={
               (conditionType === 'student-group' && (studentGroupForm.studentIds.length === 0 || studentGroupForm.groupIds.length === 0)) ||
-              (conditionType === 'role-group' && (!roleGroupForm.roleId || roleGroupForm.groupIds.length === 0)) ||
+              (conditionType === 'role-group' && ((roleGroupForm.filterType === 'role' && !roleGroupForm.roleId) || roleGroupForm.groupIds.length === 0)) ||
               (conditionType === 'student-distance' && (!studentDistanceForm.studentId1 || !studentDistanceForm.studentId2))
             }
           >
@@ -742,11 +785,11 @@ export const ConditionManager: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-xs)' }}>
               <Target size={16} color="var(--color-primary-600)" />
               <span className="text-subheadline" style={{ fontWeight: '600', color: 'var(--color-primary-800)' }}>
-                ロール-グループ条件
+                ロール/性別-グループ条件
               </span>
             </div>
             <p className="text-callout" style={{ color: 'var(--color-primary-700)', marginLeft: '28px' }}>
-              「班長を各グループに1人ずつ配置する」「給食当番を前方グループに2人配置する」など
+              「班長を各グループに1人ずつ配置する」「各班に男子を2人配置する」など
             </p>
           </div>
           

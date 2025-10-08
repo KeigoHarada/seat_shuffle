@@ -34,7 +34,8 @@ export interface StudentGroupCondition extends Condition {
 // ロール-グループ条件
 export interface RoleGroupCondition extends Condition {
   type: 'role-group';
-  roleId: string;
+  roleId?: string;
+  gender?: 'male' | 'female' | 'other';
   groupIds: string[];
   count: number; // 配置する人数
 }
