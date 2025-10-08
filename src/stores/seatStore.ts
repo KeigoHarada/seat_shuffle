@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Seat, Student, SeatLayout, AppState, Group, Role, Condition, StudentGroupCondition, RoleGroupCondition, StudentDistanceCondition } from '../types';
-import { generateConditionalSeatAssignment } from '../utils/conditionUtils';
+import { generateConditionalSeatAssignmentWithAnalysis, AssignmentAnalysis } from '../utils/conditionUtils';
+import { validateAllConditions, checkConditionConflicts, ConditionValidationResult } from '../utils/conditionValidator';
 
 interface SeatStore extends AppState {
   // アクション
@@ -43,6 +44,14 @@ interface SeatStore extends AppState {
   initializeDefaultLayout: () => void;
   settingsPanelWidth: number;
   setSettingsPanelWidth: (width: number) => void;
+  
+  // シャッフル結果分析
+  lastShuffleAnalysis: AssignmentAnalysis | null;
+  setLastShuffleAnalysis: (analysis: AssignmentAnalysis | null) => void;
+  
+  // 条件検証
+  validateConditions: () => ConditionValidationResult;
+  checkConditionConflicts: () => ConditionValidationResult;
 }
 
 export const useSeatStore = create<SeatStore>((set, get) => ({
@@ -56,6 +65,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   showSettings: false,
   selectedSeatId: null,
   settingsPanelWidth: 600,
+  lastShuffleAnalysis: null,
 
   // アクション
   setCurrentLayout: (layout) => set({ currentLayout: layout }),
@@ -222,8 +232,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       let newSeats;
       
       if (enabledConditions.length > 0) {
-        // 条件を考慮した席配置を生成
-        const assignments = generateConditionalSeatAssignment(
+        // 条件を考慮した席配置を生成（詳細分析付き）
+        const analysis = generateConditionalSeatAssignmentWithAnalysis(
           students,
           currentLayout.seats,
           enabledConditions,
@@ -231,15 +241,18 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           roles
         );
         
-        if (assignments) {
+        if (analysis) {
           // 条件を満たす配置が見つかった場合
           newSeats = currentLayout.seats.map(seat => {
             if (seat.isEmpty) return seat;
             return {
               ...seat,
-              studentId: assignments[seat.id]
+              studentId: analysis.assignment[seat.id]
             };
           });
+          
+          // 分析結果を保存
+          set({ lastShuffleAnalysis: analysis });
         } else {
           // 条件を満たす配置が見つからない場合、従来のランダム配置にフォールバック
           console.warn('条件を満たす席配置が見つかりません。ランダム配置にフォールバックします。');
@@ -257,6 +270,9 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
               studentId: student?.id
             };
           });
+          
+          // フォールバック時は分析結果をクリア
+          set({ lastShuffleAnalysis: null });
         }
       } else {
         // 条件が設定されていない場合、従来のランダム配置
@@ -274,6 +290,9 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
             studentId: student?.id
           };
         });
+        
+        // 条件なしの場合は分析結果をクリア
+        set({ lastShuffleAnalysis: null });
       }
 
       set({
@@ -519,5 +538,46 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     conditions: state.conditions.map(c => 
       c.id === conditionId ? { ...c, enabled: !c.enabled } : c
     )
-  }))
+  })),
+
+  // シャッフル結果分析の管理
+  setLastShuffleAnalysis: (analysis) => set({ lastShuffleAnalysis: analysis }),
+
+  // 条件検証の実装
+  validateConditions: () => {
+    const state = get();
+    if (!state.currentLayout) {
+      return {
+        isValid: false,
+        errors: ['席配置が設定されていません'],
+        warnings: []
+      };
+    }
+
+    return validateAllConditions(
+      state.conditions,
+      state.students,
+      state.groups,
+      state.roles,
+      state.currentLayout.seats
+    );
+  },
+
+  checkConditionConflicts: () => {
+    const state = get();
+    if (!state.currentLayout) {
+      return {
+        isValid: false,
+        errors: ['席配置が設定されていません'],
+        warnings: []
+      };
+    }
+
+    return checkConditionConflicts(
+      state.conditions,
+      state.students,
+      state.groups,
+      state.roles
+    );
+  }
 }));
