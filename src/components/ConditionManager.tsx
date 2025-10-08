@@ -18,7 +18,9 @@ import {
   Edit3,
   Trash2,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 export const ConditionManager: React.FC = () => {
@@ -36,6 +38,7 @@ export const ConditionManager: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [conditionType, setConditionType] = useState<'student-group' | 'role-group' | 'student-distance'>('student-group');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // 生徒-グループ条件のフォーム状態
   const [studentGroupForm, setStudentGroupForm] = useState({
@@ -744,18 +747,35 @@ export const ConditionManager: React.FC = () => {
   };
 
   return (
-    <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
-        <h2 className="text-title3">条件管理</h2>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowAddForm(true)}
-          disabled={showAddForm}
+    <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isExpanded ? 'var(--spacing-md)' : 0 }}>
+        <div 
+          onClick={() => setIsExpanded(!isExpanded)}
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: 'var(--spacing-sm)',
+            cursor: 'pointer',
+            flex: 1
+          }}
         >
-          <Plus size={16} />
-          条件を追加
-        </button>
+          <h2 className="text-title3">条件管理</h2>
+          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </div>
+        {isExpanded && (
+          <button
+            className="btn btn-primary"
+            onClick={(e) => { e.stopPropagation(); setShowAddForm(true); }}
+            disabled={showAddForm}
+          >
+            <Plus size={16} />
+            条件を追加
+          </button>
+        )}
       </div>
+      
+      {isExpanded && (
+      <>
 
       {/* 使用例の説明 */}
       <div style={{
@@ -854,6 +874,8 @@ export const ConditionManager: React.FC = () => {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 };

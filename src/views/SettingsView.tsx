@@ -78,28 +78,28 @@ export const SettingsView: React.FC = () => {
             transition: 'background-color 0.2s ease'
           }}
         />
-      <div className="container">
+      <div style={{ padding: 'var(--spacing-md)' }}>
         <header style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          marginBottom: 'var(--spacing-2xl)',
-          paddingTop: 'var(--spacing-xl)'
+          marginBottom: 'var(--spacing-lg)',
+          paddingTop: 'var(--spacing-md)'
         }}>
-          <h1 className="text-display" style={{ color: 'var(--color-secondary-900)' }}>
+          <h1 className="text-title2" style={{ color: 'var(--color-secondary-900)' }}>
             設定
           </h1>
           <button
             className="btn btn-secondary"
             onClick={handleClose}
             style={{ 
-              padding: 'var(--spacing-sm)',
+              padding: 'var(--spacing-xs)',
               borderRadius: '50%',
-              width: '48px',
-              height: '48px'
+              width: '40px',
+              height: '40px'
             }}
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </header>
 
@@ -109,85 +109,6 @@ export const SettingsView: React.FC = () => {
           <GroupManager />
           <RoleManager />
           <ConditionManager />
-          
-          <div className="card">
-            <h2 className="text-title3" style={{ marginBottom: 'var(--spacing-lg)' }}>
-              使い方
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  1. 席配置を作成
-                </h3>
-                <p className="text-body">
-                  行数と列数を設定して席配置を作成します。作成後は背景の席替え表で確認・編集できます。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  2. 生徒を追加
-                </h3>
-                <p className="text-body">
-                  生徒名を入力して追加します。追加した生徒は編集・削除が可能です。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  3. グループ・ロール設定
-                </h3>
-                <p className="text-body">
-                  グループを作成して席に割り当て、ロールを作成して生徒に付与できます。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  4. 条件設定
-                </h3>
-                <p className="text-body">
-                  席配置の条件を設定できます。生徒のグループ配置、ロールの配置人数、生徒間の距離などを指定できます。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  5. 席替え表で編集
-                </h3>
-                <p className="text-body">
-                  背景の席替え表で直接編集できます。ダブルクリックで名前変更、右クリックで空席設定・席交換が可能です。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  6. パネルサイズ調整
-                </h3>
-                <p className="text-body">
-                  設定パネルの左端をドラッグして幅を調整できます（400px〜1000px）。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  7. 生徒表示モード
-                </h3>
-                <p className="text-body">
-                  設定画面を閉じることで、生徒に見せる状態になります。シャッフル実行も可能です。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                  8. リアルタイム反映
-                </h3>
-                <p className="text-body">
-                  設定を変更すると、背景の席替え表に即座に反映されます。設定画面と席替え表を同時に操作できます。
-                </p>
-              </div>
-            </div>
-          </div>
         </main>
       </div>
       </div>

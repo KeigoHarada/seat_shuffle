@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export const LayoutSettings: React.FC = () => {
   const { createLayout, currentLayout } = useSeatStore();
   const [rows, setRows] = useState(5);
   const [cols, setCols] = useState(6);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const handleCreateLayout = () => {
     createLayout(rows, cols, '教室レイアウト');
   };
 
   return (
-    <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
-      <h2 className="text-title3" style={{ marginBottom: 'var(--spacing-lg)' }}>
-        席配置設定
-      </h2>
+    <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          cursor: 'pointer',
+          marginBottom: isExpanded ? 'var(--spacing-md)' : 0
+        }}
+      >
+        <h2 className="text-title3">
+          席配置設定
+        </h2>
+        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+      </div>
       
+      {isExpanded && (
       <div className="flex" style={{ marginBottom: 'var(--spacing-lg)', flexWrap: 'wrap', gap: 'var(--spacing-md)' }}>
         <div>
           <label className="text-callout" style={{ display: 'block', marginBottom: 'var(--spacing-xs)' }}>
@@ -66,6 +81,7 @@ export const LayoutSettings: React.FC = () => {
           </button>
         </div>
       </div>
+      )}
 
     </div>
   );

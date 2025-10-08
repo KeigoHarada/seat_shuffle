@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { Group } from '../types';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const GROUP_COLORS = [
   '#ef4444', // red
@@ -23,6 +24,7 @@ export const GroupManager: React.FC = () => {
   const [editingName, setEditingName] = useState('');
   const [editingColor, setEditingColor] = useState('');
   const [editingDescription, setEditingDescription] = useState('');
+  const [isExpanded, setIsExpanded] = useState(true);
   
   // 利用可能な色の最初の色を選択
   const availableColors = GROUP_COLORS.filter((color) => {
@@ -79,11 +81,25 @@ export const GroupManager: React.FC = () => {
   };
 
   return (
-    <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
-      <h2 className="text-title3" style={{ marginBottom: 'var(--spacing-lg)' }}>
-        グループ管理
-      </h2>
+    <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          cursor: 'pointer',
+          marginBottom: isExpanded ? 'var(--spacing-md)' : 0
+        }}
+      >
+        <h2 className="text-title3">
+          グループ管理
+        </h2>
+        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+      </div>
       
+      {isExpanded && (
+      <>
       {/* グループ追加フォーム */}
       <div style={{ marginBottom: 'var(--spacing-lg)' }}>
         <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-md)' }}>
@@ -315,6 +331,8 @@ export const GroupManager: React.FC = () => {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 };

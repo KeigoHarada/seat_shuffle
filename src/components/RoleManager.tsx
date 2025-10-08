@@ -11,7 +11,9 @@ import {
   Calendar,
   MessageSquare,
   Settings,
-  Award
+  Award,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 const ROLE_ICONS = [
@@ -36,6 +38,7 @@ export const RoleManager: React.FC = () => {
   const [editingName, setEditingName] = useState('');
   const [editingIcon, setEditingIcon] = useState('');
   const [editingDescription, setEditingDescription] = useState('');
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const handleAddRole = () => {
     if (newRoleName.trim()) {
@@ -81,11 +84,25 @@ export const RoleManager: React.FC = () => {
   };
 
   return (
-    <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
-      <h2 className="text-title3" style={{ marginBottom: 'var(--spacing-lg)' }}>
-        ロール管理
-      </h2>
+    <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          cursor: 'pointer',
+          marginBottom: isExpanded ? 'var(--spacing-md)' : 0
+        }}
+      >
+        <h2 className="text-title3">
+          ロール管理
+        </h2>
+        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+      </div>
       
+      {isExpanded && (
+      <>
       {/* ロール追加フォーム */}
       <div style={{ marginBottom: 'var(--spacing-lg)' }}>
         <h3 className="text-headline" style={{ marginBottom: 'var(--spacing-md)' }}>
@@ -336,6 +353,8 @@ export const RoleManager: React.FC = () => {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 };

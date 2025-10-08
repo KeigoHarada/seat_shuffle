@@ -40,7 +40,9 @@ export const SeatGrid: React.FC = () => {
     toggleSeatEmpty,
     toggleGroupOnSeat,
     removeStudentFromSeat,
-    initializeDefaultLayout
+    initializeDefaultLayout,
+    settingsPanelWidth,
+    showSettings
   } = useSeatStore();
   
   const [editingSeatId, setEditingSeatId] = useState<string | null>(null);
@@ -280,6 +282,12 @@ export const SeatGrid: React.FC = () => {
     return student?.studentNumber;
   };
 
+  // 設定画面の幅に応じて座席のスケールを調整
+  const availableWidth = showSettings ? window.innerWidth - settingsPanelWidth - 100 : window.innerWidth - 100;
+  const idealSeatWidth = 140;
+  const totalGridWidth = idealSeatWidth * currentLayout.cols + (currentLayout.cols - 1) * 12;
+  const scale = Math.min(1, availableWidth / totalGridWidth);
+
   return (
     <div style={{ position: 'relative' }}>
       <div className="seat-grid" style={{ 
@@ -288,7 +296,10 @@ export const SeatGrid: React.FC = () => {
         gap: 'var(--spacing-sm)',
         maxWidth: 'fit-content',
         margin: '0 auto',
-        padding: 'var(--spacing-lg)'
+        padding: 'var(--spacing-lg)',
+        transform: `scale(${scale})`,
+        transformOrigin: 'center center',
+        transition: 'transform 0.3s ease'
       }}>
         {currentLayout.seats.map((seat, index) => {
           const seatGroups = seat.groupIds.map(gid => groups.find(g => g.id === gid)).filter(Boolean);
@@ -317,9 +328,9 @@ export const SeatGrid: React.FC = () => {
           {!seat.isEmpty && seat.studentId && getAttendanceNumber(seat.studentId) && (
             <div style={{
               position: 'absolute',
-              top: '2px',
-              left: '2px',
-              fontSize: '10px',
+              top: '4px',
+              left: '6px',
+              fontSize: '14px',
               color: 'var(--color-secondary-500)',
               fontWeight: 'bold',
               zIndex: 1
@@ -332,22 +343,22 @@ export const SeatGrid: React.FC = () => {
           {seatGroups.length > 0 && (
             <div style={{
               position: 'absolute',
-              top: '2px',
-              right: '2px',
+              top: '4px',
+              right: '6px',
               display: 'flex',
-              gap: '2px',
+              gap: '3px',
               zIndex: 1
             }}>
               {seatGroups.map((group, idx) => (
                 <div 
                   key={group.id}
                   style={{
-                    width: '12px',
-                    height: '12px',
+                    width: '16px',
+                    height: '16px',
                     borderRadius: '50%',
                     backgroundColor: group.color,
-                    border: '1px solid white',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                    border: '2px solid white',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                   }}
                   title={group.name}
                 />
@@ -359,47 +370,47 @@ export const SeatGrid: React.FC = () => {
           {seat.studentId && (
             <div style={{
               position: 'absolute',
-              bottom: '2px',
-              right: '2px',
+              bottom: '4px',
+              right: '6px',
               display: 'flex',
-              gap: '1px',
+              gap: '2px',
               flexWrap: 'wrap',
-              maxWidth: '60px',
+              maxWidth: '80px',
               justifyContent: 'flex-end'
             }}>
-              {getStudentRoles(seat.studentId).slice(0, 2).map((role) => {
+              {getStudentRoles(seat.studentId).slice(0, 3).map((role) => {
                 const iconData = ROLE_ICONS.find(icon => icon.id === role.icon);
                 const IconComponent = iconData?.component;
                 return (
                   <div
                     key={role.id}
                     style={{
-                      width: '12px',
-                      height: '12px',
+                      width: '18px',
+                      height: '18px',
                       borderRadius: 'var(--radius-sm)',
                       backgroundColor: 'var(--color-secondary-100)',
                       border: '1px solid var(--color-secondary-300)',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
                     title={role.name}
                   >
-                    {IconComponent && <IconComponent size={8} color="var(--color-secondary-600)" />}
+                    {IconComponent && <IconComponent size={12} color="var(--color-secondary-600)" />}
                   </div>
                 );
               })}
-              {getStudentRoles(seat.studentId).length > 2 && (
+              {getStudentRoles(seat.studentId).length > 3 && (
                 <div
                   style={{
-                    width: '12px',
-                    height: '12px',
+                    width: '18px',
+                    height: '18px',
                     borderRadius: 'var(--radius-sm)',
                     backgroundColor: 'var(--color-secondary-400)',
                     border: '1px solid var(--color-secondary-300)',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                    fontSize: '6px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                    fontSize: '9px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -457,8 +468,9 @@ export const SeatGrid: React.FC = () => {
                   border: 'none',
                   outline: 'none',
                   background: 'transparent',
-                  padding: '2px',
-                  fontSize: '14px',
+                  padding: '4px',
+                  fontSize: '18px',
+                  fontWeight: '600',
                   width: '100%',
                   textAlign: 'center',
                   color: 'black',
@@ -469,31 +481,31 @@ export const SeatGrid: React.FC = () => {
             </div>
           ) : (
             /* 通常表示 */
-            <div style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
               {seat.isEmpty ? (
-                <span style={{ opacity: 0.5, fontSize: '12px' }}>空席</span>
+                <span style={{ opacity: 0.5, fontSize: '16px' }}>空席</span>
               ) : seat.studentId ? (
                 <>
                   {(() => {
                     const student = students.find(s => s.id === seat.studentId);
                     return student ? (
                       <>
-                        <span style={{ fontSize: '9px', color: 'var(--color-secondary-500)', lineHeight: '1' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--color-secondary-500)', lineHeight: '1.2' }}>
                           {student.furigana}
                         </span>
-                        <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                        <span style={{ fontSize: '18px', fontWeight: '600', lineHeight: '1.2' }}>
                           {student.name}
                         </span>
                       </>
                     ) : (
-                      <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                      <span style={{ fontSize: '18px', fontWeight: '600' }}>
                         {getStudentName(seat.studentId)}
                       </span>
                     );
                   })()}
                 </>
               ) : (
-                <span style={{ opacity: 0.5, fontSize: '12px' }}>空席</span>
+                <span style={{ opacity: 0.5, fontSize: '16px' }}>空席</span>
               )}
             </div>
           )}

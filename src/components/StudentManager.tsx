@@ -12,7 +12,9 @@ import {
   MessageSquare,
   Settings,
   Award,
-  Upload
+  Upload,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -40,6 +42,7 @@ export const StudentManager: React.FC = () => {
   const [editingFurigana, setEditingFurigana] = useState('');
   const [editingGender, setEditingGender] = useState<'male' | 'female' | 'other'>('male');
   const [showRoleMenu, setShowRoleMenu] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // 出席番号順にソートされた生徒リストを取得
   const getSortedStudents = () => {
@@ -205,32 +208,52 @@ export const StudentManager: React.FC = () => {
   };
 
   return (
-    <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
-        <h2 className="text-title3">生徒管理</h2>
-        <label 
-          htmlFor="file-upload"
-          className="btn btn-secondary"
+    <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isExpanded ? 'var(--spacing-md)' : 0 }}>
+        <div 
+          onClick={() => setIsExpanded(!isExpanded)}
           style={{ 
             display: 'flex', 
-            alignItems: 'center', 
-            gap: 'var(--spacing-xs)',
+            alignItems: 'center',
+            gap: 'var(--spacing-sm)',
             cursor: 'pointer',
-            padding: 'var(--spacing-xs) var(--spacing-sm)', 
-            fontSize: '0.75rem'
+            flex: 1
           }}
         >
-          <Upload size={16} />
-          CSV/Excel読み込み
-        </label>
-        <input
-          id="file-upload"
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          onChange={handleFileUpload}
-          style={{ display: 'none' }}
-        />
+          <h2 className="text-title3">生徒管理</h2>
+          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </div>
+        {isExpanded && (
+          <>
+            <label 
+              htmlFor="file-upload"
+              className="btn btn-secondary"
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 'var(--spacing-xs)',
+                cursor: 'pointer',
+                padding: 'var(--spacing-xs) var(--spacing-sm)', 
+                fontSize: '0.75rem'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Upload size={16} />
+              CSV/Excel読み込み
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+            />
+          </>
+        )}
       </div>
+      
+      {isExpanded && (
+      <>
       
       {/* ファイルフォーマットの説明 */}
       <div style={{ 
@@ -581,6 +604,8 @@ export const StudentManager: React.FC = () => {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 };
