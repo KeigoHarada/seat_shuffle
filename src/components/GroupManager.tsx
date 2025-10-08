@@ -18,22 +18,20 @@ const GROUP_COLORS = [
 export const GroupManager: React.FC = () => {
   const { groups, addGroup, removeGroup, updateGroup } = useSeatStore();
   const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupColor, setNewGroupColor] = useState(GROUP_COLORS[0]);
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editingColor, setEditingColor] = useState('');
   const [editingDescription, setEditingDescription] = useState('');
+  
+  // 利用可能な色の最初の色を選択
+  const availableColors = GROUP_COLORS.filter((color) => {
+    return !groups.some(group => group.color === color);
+  });
+  const [newGroupColor, setNewGroupColor] = useState(availableColors[0] || GROUP_COLORS[0]);
 
   const handleAddGroup = () => {
     if (newGroupName.trim()) {
-      // 同じ色が既に使用されているかチェック
-      const isColorUsed = groups.some(group => group.color === newGroupColor);
-      if (isColorUsed) {
-        alert('この色は既に使用されています。別の色を選択してください。');
-        return;
-      }
-
       const group: Group = {
         id: `group-${Date.now()}`,
         name: newGroupName.trim(),
@@ -43,7 +41,12 @@ export const GroupManager: React.FC = () => {
       addGroup(group);
       setNewGroupName('');
       setNewGroupDescription('');
-      setNewGroupColor(GROUP_COLORS[0]);
+      
+      // 次の利用可能な色を選択
+      const nextAvailableColors = GROUP_COLORS.filter((color) => {
+        return !groups.some(g => g.color === color) && color !== newGroupColor;
+      });
+      setNewGroupColor(nextAvailableColors[0] || GROUP_COLORS[0]);
     }
   };
 
@@ -56,15 +59,6 @@ export const GroupManager: React.FC = () => {
 
   const handleEditSave = () => {
     if (editingId && editingName.trim()) {
-      // 同じ色が既に使用されているかチェック（現在編集中のグループを除く）
-      const isColorUsed = groups.some(group => 
-        group.color === editingColor && group.id !== editingId
-      );
-      if (isColorUsed) {
-        alert('この色は既に使用されています。別の色を選択してください。');
-        return;
-      }
-
       updateGroup(editingId, { 
         name: editingName.trim(), 
         color: editingColor,
@@ -111,42 +105,25 @@ export const GroupManager: React.FC = () => {
             }}
           />
           <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
-            {GROUP_COLORS.map((color) => {
+            {GROUP_COLORS.filter((color) => {
               const isColorUsed = groups.some(group => group.color === color);
-              return (
-                <button
-                  key={color}
-                  onClick={() => setNewGroupColor(color)}
-                  disabled={isColorUsed}
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    backgroundColor: color,
-                    border: newGroupColor === color ? '3px solid var(--color-primary-600)' : '2px solid var(--color-secondary-300)',
-                    cursor: isColorUsed ? 'not-allowed' : 'pointer',
-                    flexShrink: 0,
-                    opacity: isColorUsed ? 0.5 : 1,
-                    position: 'relative'
-                  }}
-                  title={isColorUsed ? `色: ${color} (使用済み)` : `色: ${color}`}
-                >
-                  {isColorUsed && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: '2px',
-                      height: '20px',
-                      backgroundColor: 'var(--color-error-500)',
-                      transformOrigin: 'center',
-                      transform: 'translate(-50%, -50%) rotate(45deg)'
-                    }} />
-                  )}
-                </button>
-              );
-            })}
+              return !isColorUsed;
+            }).map((color) => (
+              <button
+                key={color}
+                onClick={() => setNewGroupColor(color)}
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  backgroundColor: color,
+                  border: newGroupColor === color ? '3px solid var(--color-primary-600)' : '2px solid var(--color-secondary-300)',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+                title={`色: ${color}`}
+              />
+            ))}
           </div>
           <input
             type="text"
@@ -216,42 +193,27 @@ export const GroupManager: React.FC = () => {
                   <>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                       <div style={{ display: 'flex', gap: '2px', flexWrap: 'wrap' }}>
-                        {GROUP_COLORS.map((color) => {
+                        {GROUP_COLORS.filter((color) => {
                           const isColorUsed = groups.some(group => 
                             group.color === color && group.id !== editingId
                           );
-                          return (
-                            <button
-                              key={color}
-                              onClick={() => setEditingColor(color)}
-                              disabled={isColorUsed}
-                              style={{
-                                width: '16px',
-                                height: '16px',
-                                borderRadius: '50%',
-                                backgroundColor: color,
-                                border: editingColor === color ? '2px solid var(--color-primary-600)' : '1px solid var(--color-secondary-300)',
-                                cursor: isColorUsed ? 'not-allowed' : 'pointer',
-                                flexShrink: 0,
-                                opacity: isColorUsed ? 0.5 : 1,
-                                position: 'relative'
-                              }}
-                              title={isColorUsed ? `色: ${color} (使用済み)` : `色: ${color}`}
-                            >
-                              {isColorUsed && (
-                                <div style={{
-                                  position: 'absolute',
-                                  top: '50%',
-                                  left: '50%',
-                                  transform: 'translate(-50%, -50%) rotate(45deg)',
-                                  width: '1px',
-                                  height: '12px',
-                                  backgroundColor: 'var(--color-error-500)'
-                                }} />
-                              )}
-                            </button>
-                          );
-                        })}
+                          return !isColorUsed;
+                        }).map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => setEditingColor(color)}
+                            style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              backgroundColor: color,
+                              border: editingColor === color ? '2px solid var(--color-primary-600)' : '1px solid var(--color-secondary-300)',
+                              cursor: 'pointer',
+                              flexShrink: 0
+                            }}
+                            title={`色: ${color}`}
+                          />
+                        ))}
                       </div>
                     </div>
                     <input
