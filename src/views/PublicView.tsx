@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Shuffle, Settings, Printer, HelpCircle, X } from 'lucide-react';
+import { Shuffle, Settings, Printer, HelpCircle, X, RotateCw } from 'lucide-react';
 import { useSeatStore } from '../stores/seatStore';
 import { SeatGrid } from '../components/SeatGrid';
 
 export const PublicView: React.FC = () => {
-  const { shuffleSeats, toggleSettings, isShuffling, currentLayout, students, showSettings, settingsPanelWidth } = useSeatStore();
+  const { shuffleSeats, toggleSettings, isShuffling, currentLayout, students, showSettings, settingsPanelWidth, toggleTeacherDeskPosition } = useSeatStore();
   const [showHelp, setShowHelp] = useState(false);
 
   const handlePrint = () => {
@@ -15,20 +15,25 @@ export const PublicView: React.FC = () => {
 
   return (
     <div 
-      className="container"
       style={{
         opacity: showSettings ? 0.9 : 1,
         transition: 'opacity 0.3s ease',
         pointerEvents: 'auto',
         marginRight: showSettings ? `${settingsPanelWidth}px` : '0',
-        maxWidth: showSettings ? `calc(100vw - ${settingsPanelWidth}px)` : '100%'
+        maxWidth: showSettings ? `calc(100vw - ${settingsPanelWidth}px)` : '100%',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        padding: 'var(--spacing-lg)'
       }}
     >
       <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        marginBottom: 'var(--spacing-2xl)'
+        marginBottom: 'var(--spacing-lg)',
+        flexShrink: 0
       }}>
         <h1 className="text-display">席替えアプリ</h1>
         <div style={{
@@ -39,6 +44,58 @@ export const PublicView: React.FC = () => {
           display: 'flex',
           gap: 'var(--spacing-sm)'
         }}>
+          <div 
+            onClick={toggleTeacherDeskPosition}
+            style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-xs)',
+              padding: 'var(--spacing-xs) var(--spacing-sm)',
+              backgroundColor: 'white',
+              border: '2px solid var(--color-secondary-300)',
+              borderRadius: 'var(--radius-lg)',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-md)',
+              opacity: 0.9,
+              transition: 'all 0.2s ease'
+            }}
+            title="教壇の位置を切り替え"
+          >
+            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-secondary-700)' }}>
+              教壇:
+            </span>
+            <div style={{
+              position: 'relative',
+              width: '60px',
+              height: '28px',
+              backgroundColor: currentLayout?.teacherDeskPosition === 'top' ? 'var(--color-primary-500)' : 'var(--color-secondary-400)',
+              borderRadius: '14px',
+              transition: 'background-color 0.2s ease'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '2px',
+                left: currentLayout?.teacherDeskPosition === 'top' ? '2px' : '32px',
+                width: '24px',
+                height: '24px',
+                backgroundColor: 'white',
+                borderRadius: '50%',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                transition: 'left 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: 'var(--color-secondary-700)'
+              }}>
+                {currentLayout?.teacherDeskPosition === 'top' ? '↑' : '↓'}
+              </div>
+            </div>
+            <span style={{ fontSize: '0.7rem', color: 'var(--color-secondary-600)', minWidth: '20px' }}>
+              {currentLayout?.teacherDeskPosition === 'top' ? '上' : '下'}
+            </span>
+          </div>
           <button
             className="btn btn-secondary"
             onClick={() => setShowHelp(true)}
@@ -72,10 +129,12 @@ export const PublicView: React.FC = () => {
         </div>
       </header>
 
-      <main>
-        <SeatGrid />
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' }}>
+          <SeatGrid />
+        </div>
         
-        <div className="flex-center" style={{ marginTop: 'var(--spacing-2xl)' }}>
+        <div className="flex-center" style={{ marginTop: 'var(--spacing-lg)', flexShrink: 0 }}>
           <button
             className="btn btn-primary"
             onClick={shuffleSeats}
@@ -104,21 +163,6 @@ export const PublicView: React.FC = () => {
           </button>
         </div>
 
-        {!currentLayout && (
-          <div className="flex-center" style={{ marginTop: 'var(--spacing-2xl)' }}>
-            <p className="text-body" style={{ opacity: 0.7 }}>
-              デフォルトレイアウトを読み込み中...
-            </p>
-          </div>
-        )}
-
-        {currentLayout && students.length === 0 && (
-          <div className="flex-center" style={{ marginTop: 'var(--spacing-2xl)' }}>
-            <p className="text-body" style={{ opacity: 0.7 }}>
-              設定画面で生徒を追加してください
-            </p>
-          </div>
-        )}
       </main>
 
       <style jsx>{`

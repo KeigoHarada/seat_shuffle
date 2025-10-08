@@ -75,6 +75,7 @@ export interface SeatLayout {
   rows: number;
   cols: number;
   seats: Seat[];
+  teacherDeskPosition: 'top' | 'bottom';
 }
 
 // アプリケーションの状態型定義

@@ -16,6 +16,7 @@ interface SeatStore extends AppState {
   shuffleSeats: () => void;
   toggleSettings: () => void;
   setShuffling: (isShuffling: boolean) => void;
+  toggleTeacherDeskPosition: () => void;
   
   // グループ管理
   addGroup: (group: Group) => void;
@@ -178,7 +179,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       name,
       rows,
       cols,
-      seats
+      seats,
+      teacherDeskPosition: 'top'
     };
 
     set({ currentLayout: layout });
@@ -584,6 +586,18 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
 
   // シャッフル結果分析の管理
   setLastShuffleAnalysis: (analysis) => set({ lastShuffleAnalysis: analysis }),
+
+  // 教壇位置の切り替え
+  toggleTeacherDeskPosition: () => set((state) => {
+    if (!state.currentLayout) return state;
+    
+    return {
+      currentLayout: {
+        ...state.currentLayout,
+        teacherDeskPosition: state.currentLayout.teacherDeskPosition === 'top' ? 'bottom' : 'top'
+      }
+    };
+  }),
 
   // 条件検証の実装
   validateConditions: () => {

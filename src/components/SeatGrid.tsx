@@ -42,7 +42,8 @@ export const SeatGrid: React.FC = () => {
     removeStudentFromSeat,
     initializeDefaultLayout,
     settingsPanelWidth,
-    showSettings
+    showSettings,
+    toggleTeacherDeskPosition
   } = useSeatStore();
   
   const [editingSeatId, setEditingSeatId] = useState<string | null>(null);
@@ -288,18 +289,46 @@ export const SeatGrid: React.FC = () => {
   const totalGridWidth = idealSeatWidth * currentLayout.cols + (currentLayout.cols - 1) * 12;
   const scale = Math.min(1, availableWidth / totalGridWidth);
 
+  const isTeacherDeskBottom = currentLayout.teacherDeskPosition === 'bottom';
+
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%' }}>
+      {/* 教壇（上） */}
+      {!isTeacherDeskBottom && (
+        <div 
+          style={{ 
+            width: '200px',
+            height: '50px',
+            backgroundColor: 'var(--color-secondary-700)',
+            border: '3px solid var(--color-secondary-500)',
+            borderRadius: 'var(--radius-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 'var(--spacing-md)',
+            transition: 'all 0.2s ease',
+            transform: `scale(${scale})`
+          }}
+        >
+          <span style={{ 
+            color: 'var(--color-chalk-primary)', 
+            fontWeight: 'bold',
+            fontSize: '16px'
+          }}>
+            教壇
+          </span>
+        </div>
+      )}
+      
       <div className="seat-grid" style={{ 
         display: 'grid', 
         gridTemplateColumns: `repeat(${currentLayout.cols}, 1fr)`,
         gap: 'var(--spacing-sm)',
         maxWidth: 'fit-content',
-        margin: '0 auto',
-        padding: 'var(--spacing-lg)',
-        transform: `scale(${scale})`,
-        transformOrigin: 'center center',
-        transition: 'transform 0.3s ease'
+        margin: '0',
+        padding: 0,
+        transform: `scale(${scale}) ${isTeacherDeskBottom ? 'rotate(180deg)' : ''}`,
+        transformOrigin: 'center center'
       }}>
         {currentLayout.seats.map((seat, index) => {
           const seatGroups = seat.groupIds.map(gid => groups.find(g => g.id === gid)).filter(Boolean);
@@ -321,7 +350,8 @@ export const SeatGrid: React.FC = () => {
               position: 'relative',
               borderColor: seatGroups.length > 0 ? seatGroups[0].color : undefined,
               borderWidth: seatGroups.length > 0 ? '3px' : undefined,
-              cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default'
+              cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default',
+              transform: isTeacherDeskBottom ? 'rotate(180deg)' : 'none'
             }}
           >
           {/* 出席番号 */}
@@ -514,6 +544,33 @@ export const SeatGrid: React.FC = () => {
         );
       })}
       </div>
+
+      {/* 教壇（下） */}
+      {isTeacherDeskBottom && (
+        <div 
+          style={{ 
+            width: '200px',
+            height: '50px',
+            backgroundColor: 'var(--color-secondary-700)',
+            border: '3px solid var(--color-secondary-500)',
+            borderRadius: 'var(--radius-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 'var(--spacing-md)',
+            transition: 'all 0.2s ease',
+            transform: `scale(${scale})`
+          }}
+        >
+          <span style={{ 
+            color: 'var(--color-chalk-primary)', 
+            fontWeight: 'bold',
+            fontSize: '16px'
+          }}>
+            教壇
+          </span>
+        </div>
+      )}
 
       {/* グループメニュー */}
       {showGroupMenu && menuPosition && (
