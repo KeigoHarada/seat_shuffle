@@ -33,7 +33,7 @@ export const StudentManager: React.FC = () => {
   const [newStudentRoles, setNewStudentRoles] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [sortBy, setSortBy] = useState<'studentNo' | 'seat'>('studentNo');
+  const [sortBy, setSortBy] = useState<'attendanceNo' | 'seat'>('attendanceNo');
   const [showRoleMenu, setShowRoleMenu] = useState<string | null>(null);
 
   // 生徒の席番号を取得
@@ -135,18 +135,18 @@ export const StudentManager: React.FC = () => {
         <h2 className="text-title3">生徒管理</h2>
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
           <button
-            className={`btn ${sortBy === 'studentNo' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setSortBy('studentNo')}
+            className={`btn ${sortBy === 'attendanceNo' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setSortBy('attendanceNo')}
             style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
           >
-            生徒No順
+            出席番号順
           </button>
           <button
             className={`btn ${sortBy === 'seat' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setSortBy('seat')}
             style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
           >
-            机番号順
+            座席順
           </button>
         </div>
       </div>
@@ -228,7 +228,7 @@ export const StudentManager: React.FC = () => {
             {/* ヘッダー */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '40px 40px 1fr 1fr 120px',
+              gridTemplateColumns: '60px 1fr 1fr 120px',
               alignItems: 'center',
               gap: 'var(--spacing-sm)',
               padding: 'var(--spacing-sm)',
@@ -238,8 +238,7 @@ export const StudentManager: React.FC = () => {
               fontWeight: 'bold',
               fontSize: '0.875rem'
             }}>
-              <span style={{ textAlign: 'center' }}>生徒No.</span>
-              <span style={{ textAlign: 'center' }}>机No.</span>
+              <span style={{ textAlign: 'center' }}>出席番号</span>
               <span>名前</span>
               <span>ロール</span>
               <span style={{ textAlign: 'center' }}>操作</span>
@@ -250,7 +249,7 @@ export const StudentManager: React.FC = () => {
                 key={student.id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '40px 40px 1fr 1fr 120px',
+                  gridTemplateColumns: '60px 1fr 1fr 120px',
                   alignItems: 'center',
                   gap: 'var(--spacing-sm)',
                   padding: 'var(--spacing-sm)',
@@ -270,16 +269,6 @@ export const StudentManager: React.FC = () => {
                       }}
                     >
                       {student.studentNumber}
-                    </span>
-                    <span 
-                      style={{ 
-                        fontSize: '0.75rem',
-                        fontWeight: 'bold',
-                        color: 'var(--color-secondary-600)',
-                        textAlign: 'center'
-                      }}
-                    >
-                      {student.seatNumber || '-'}
                     </span>
                     <input
                       type="text"
@@ -353,16 +342,6 @@ export const StudentManager: React.FC = () => {
                       }}
                     >
                       {student.studentNumber}
-                    </span>
-                    <span 
-                      style={{ 
-                        fontSize: '0.75rem',
-                        fontWeight: 'bold',
-                        color: 'var(--color-secondary-600)',
-                        textAlign: 'center'
-                      }}
-                    >
-                      {student.seatNumber || '-'}
                     </span>
                     <span className="text-body" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {student.name}

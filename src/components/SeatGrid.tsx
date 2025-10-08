@@ -273,15 +273,11 @@ export const SeatGrid: React.FC = () => {
     setDragOverSeatId(null);
   };
 
-  // 生徒が割り当てられた席の番号を計算
-  const getSeatNumber = (seatIndex: number) => {
-    let seatNumber = 0;
-    for (let i = 0; i <= seatIndex; i++) {
-      if (!currentLayout.seats[i].isEmpty && currentLayout.seats[i].studentId) {
-        seatNumber++;
-      }
-    }
-    return seatNumber;
+  // 生徒の出席番号を取得
+  const getAttendanceNumber = (studentId?: string) => {
+    if (!studentId) return null;
+    const student = students.find(s => s.id === studentId);
+    return student?.studentNumber;
   };
 
   return (
@@ -317,8 +313,8 @@ export const SeatGrid: React.FC = () => {
               cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default'
             }}
           >
-          {/* 席番号 */}
-          {!seat.isEmpty && seat.studentId && (
+          {/* 出席番号 */}
+          {!seat.isEmpty && seat.studentId && getAttendanceNumber(seat.studentId) && (
             <div style={{
               position: 'absolute',
               top: '2px',
@@ -328,7 +324,7 @@ export const SeatGrid: React.FC = () => {
               fontWeight: 'bold',
               zIndex: 1
             }}>
-              {getSeatNumber(index)}
+              {getAttendanceNumber(seat.studentId)}
             </div>
           )}
 
