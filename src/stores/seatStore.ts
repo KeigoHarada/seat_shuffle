@@ -21,7 +21,9 @@ interface SeatStore extends AppState {
   addGroup: (group: Group) => void;
   removeGroup: (groupId: string) => void;
   updateGroup: (groupId: string, updates: Partial<Group>) => void;
-  assignGroupToSeat: (seatId: string, groupId: string | null) => void;
+  toggleGroupOnSeat: (seatId: string, groupId: string) => void;
+  removeGroupFromSeat: (seatId: string, groupId: string) => void;
+  addGroupToSeat: (seatId: string, groupId: string) => void;
   
   // ロール管理
   addRole: (role: Role) => void;
@@ -165,7 +167,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           id: `seat-${row}-${col}`,
           row,
           col,
-          isEmpty: false
+          isEmpty: false,
+          groupIds: []
         });
       }
     }
@@ -459,9 +462,10 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     groups: state.groups.filter(g => g.id !== groupId),
     currentLayout: state.currentLayout ? {
       ...state.currentLayout,
-      seats: state.currentLayout.seats.map(seat => 
-        seat.groupId === groupId ? { ...seat, groupId: undefined } : seat
-      )
+      seats: state.currentLayout.seats.map(seat => ({
+        ...seat,
+        groupIds: seat.groupIds.filter(gid => gid !== groupId)
+      }))
     } : null
   })),
 
@@ -471,14 +475,52 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     )
   })),
 
-  assignGroupToSeat: (seatId, groupId) => set((state) => {
+  toggleGroupOnSeat: (seatId, groupId) => set((state) => {
+    if (!state.currentLayout) return state;
+    
+    return {
+      currentLayout: {
+        ...state.currentLayout,
+        seats: state.currentLayout.seats.map(seat => {
+          if (seat.id !== seatId) return seat;
+          
+          const hasGroup = seat.groupIds.includes(groupId);
+          return {
+            ...seat,
+            groupIds: hasGroup 
+              ? seat.groupIds.filter(gid => gid !== groupId)
+              : [...seat.groupIds, groupId]
+          };
+        })
+      }
+    };
+  }),
+
+  removeGroupFromSeat: (seatId, groupId) => set((state) => {
     if (!state.currentLayout) return state;
     
     return {
       currentLayout: {
         ...state.currentLayout,
         seats: state.currentLayout.seats.map(seat => 
-          seat.id === seatId ? { ...seat, groupId: groupId || undefined } : seat
+          seat.id === seatId 
+            ? { ...seat, groupIds: seat.groupIds.filter(gid => gid !== groupId) }
+            : seat
+        )
+      }
+    };
+  }),
+
+  addGroupToSeat: (seatId, groupId) => set((state) => {
+    if (!state.currentLayout) return state;
+    
+    return {
+      currentLayout: {
+        ...state.currentLayout,
+        seats: state.currentLayout.seats.map(seat => 
+          seat.id === seatId && !seat.groupIds.includes(groupId)
+            ? { ...seat, groupIds: [...seat.groupIds, groupId] }
+            : seat
         )
       }
     };

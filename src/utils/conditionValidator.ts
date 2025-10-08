@@ -44,7 +44,7 @@ export const validateStudentGroupCondition = (
 
   // 対象グループに席が存在するかチェック
   const availableSeatsInGroups = seats.filter(seat => 
-    !seat.isEmpty && condition.groupIds.includes(seat.groupId || '')
+    !seat.isEmpty && seat.groupIds.some(gid => condition.groupIds.includes(gid))
   );
 
   if (availableSeatsInGroups.length === 0) {
@@ -94,7 +94,7 @@ export const validateRoleGroupCondition = (
   // 各グループの席数と配置人数のチェック
   for (const groupId of condition.groupIds) {
     const groupSeats = seats.filter(seat => 
-      !seat.isEmpty && seat.groupId === groupId
+      !seat.isEmpty && seat.groupIds.includes(groupId)
     );
     
     if (groupSeats.length < condition.count) {

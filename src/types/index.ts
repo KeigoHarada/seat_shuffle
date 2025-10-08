@@ -54,7 +54,7 @@ export interface Seat {
   col: number;
   studentId?: string;
   isEmpty: boolean;
-  groupId?: string;
+  groupIds: string[];
 }
 
 // 生徒の型定義

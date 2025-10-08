@@ -36,8 +36,9 @@ export const checkStudentGroupCondition = (
   // 対象生徒でない場合は常にtrue
   if (!condition.studentIds.includes(student.id)) return true;
   
-  // 対象グループでない場合は常にtrue
-  if (!condition.groupIds.includes(seat.groupId || '')) return true;
+  // 対象グループでない場合は常にtrue（いずれかのグループが含まれているかチェック）
+  const hasTargetGroup = seat.groupIds.some(gid => condition.groupIds.includes(gid));
+  if (!hasTargetGroup) return true;
   
   // 配置する/しないの条件をチェック
   return condition.shouldPlace;
@@ -58,20 +59,30 @@ export const checkRoleGroupCondition = (
   // 対象ロールでない場合は常にtrue
   if (!student.roleIds.includes(condition.roleId)) return true;
   
-  // 対象グループでない場合は常にtrue
-  if (!condition.groupIds.includes(seat.groupId || '')) return true;
+  // 対象グループでない場合は常にtrue（いずれかのグループが含まれているかチェック）
+  const hasTargetGroup = seat.groupIds.some(gid => condition.groupIds.includes(gid));
+  if (!hasTargetGroup) return true;
   
-  // 既に配置されているロールの人数をカウント
-  const currentRoleCount = Object.entries(currentAssignments).filter(([seatId, assignedStudentId]) => {
-    const assignedSeat = groups.find(g => g.id === seat.groupId);
-    if (!assignedSeat) return false;
+  // この席のグループのうち、条件に含まれるグループそれぞれで人数制限をチェック
+  // 少なくとも1つのグループで制限内であればOK
+  const relevantGroupIds = seat.groupIds.filter(gid => condition.groupIds.includes(gid));
+  
+  for (const groupId of relevantGroupIds) {
+    const currentRoleCount = Object.entries(currentAssignments).filter(([seatId, assignedStudentId]) => {
+      const assignedSeat = Object.values(currentAssignments);
+      
+      const assignedStudent = students.find(s => s.id === assignedStudentId);
+      return assignedStudent && assignedStudent.roleIds.includes(condition.roleId);
+    }).length;
     
-    const assignedStudent = students.find(s => s.id === assignedStudentId);
-    return assignedStudent && assignedStudent.roleIds.includes(condition.roleId);
-  }).length;
+    // 1つでも制限内のグループがあればOK
+    if (currentRoleCount < condition.count) {
+      return true;
+    }
+  }
   
-  // 配置人数制限をチェック
-  return currentRoleCount < condition.count;
+  // すべてのグループで制限を超えている
+  return false;
 };
 
 // 生徒間距離条件をチェック
@@ -286,12 +297,12 @@ export const analyzeAssignment = (
           const seat = seats.find(s => s.id === assignedSeatId);
           if (!seat) continue;
           
-          const isInTargetGroup = studentGroupCondition.groupIds.includes(seat.groupId || '');
-          if (studentGroupCondition.shouldPlace && !isInTargetGroup) {
+          const hasTargetGroup = seat.groupIds.some(gid => studentGroupCondition.groupIds.includes(gid));
+          if (studentGroupCondition.shouldPlace && !hasTargetGroup) {
             satisfied = false;
             reason = `${students.find(s => s.id === studentId)?.name}が対象グループに配置されていません`;
             break;
-          } else if (!studentGroupCondition.shouldPlace && isInTargetGroup) {
+          } else if (!studentGroupCondition.shouldPlace && hasTargetGroup) {
             satisfied = false;
             reason = `${students.find(s => s.id === studentId)?.name}が対象グループに配置されています`;
             break;
@@ -302,7 +313,7 @@ export const analyzeAssignment = (
       case 'role-group':
         const roleGroupCondition = condition as RoleGroupCondition;
         for (const groupId of roleGroupCondition.groupIds) {
-          const groupSeats = seats.filter(s => s.groupId === groupId);
+          const groupSeats = seats.filter(s => s.groupIds.includes(groupId));
           const roleStudentsInGroup = groupSeats.filter(seat => {
             const studentId = assignments[seat.id];
             if (!studentId) return false;

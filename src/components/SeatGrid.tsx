@@ -38,7 +38,7 @@ export const SeatGrid: React.FC = () => {
     swapSeats,
     assignStudentNameToSeat,
     toggleSeatEmpty,
-    assignGroupToSeat,
+    toggleGroupOnSeat,
     removeStudentFromSeat,
     initializeDefaultLayout
   } = useSeatStore();
@@ -200,10 +200,10 @@ export const SeatGrid: React.FC = () => {
     setEditingName('');
   };
 
-  const handleGroupSelect = (seatIds: string, groupId: string | null) => {
+  const handleGroupSelect = (seatIds: string, groupId: string) => {
     const seatIdArray = seatIds.split(',');
     seatIdArray.forEach(seatId => {
-      assignGroupToSeat(seatId, groupId);
+      toggleGroupOnSeat(seatId, groupId);
     });
     setShowGroupMenu(null);
     setMenuPosition(null);
@@ -295,7 +295,7 @@ export const SeatGrid: React.FC = () => {
         padding: 'var(--spacing-lg)'
       }}>
         {currentLayout.seats.map((seat, index) => {
-          const group = getGroup(seat.groupId);
+          const seatGroups = seat.groupIds.map(gid => groups.find(g => g.id === gid)).filter(Boolean);
           return (
           <div
             key={seat.id}
@@ -312,8 +312,8 @@ export const SeatGrid: React.FC = () => {
             style={{
               animationDelay: `${Math.random() * 0.5}s`,
               position: 'relative',
-              borderColor: group ? group.color : undefined,
-              borderWidth: group ? '3px' : undefined,
+              borderColor: seatGroups.length > 0 ? seatGroups[0].color : undefined,
+              borderWidth: seatGroups.length > 0 ? '3px' : undefined,
               cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default'
             }}
           >
@@ -325,27 +325,38 @@ export const SeatGrid: React.FC = () => {
               left: '2px',
               fontSize: '10px',
               color: 'var(--color-secondary-500)',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              zIndex: 1
             }}>
               {getSeatNumber(index)}
             </div>
           )}
 
-          {/* グループ表示 */}
-          {group && (
+          {/* グループ表示（複数対応） */}
+          {seatGroups.length > 0 && (
             <div style={{
               position: 'absolute',
               top: '2px',
               right: '2px',
-              width: '12px',
-              height: '12px',
-              borderRadius: '50%',
-              backgroundColor: group.color,
-              border: '1px solid white',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
-            }}
-            title={group.name}
-            />
+              display: 'flex',
+              gap: '2px',
+              zIndex: 1
+            }}>
+              {seatGroups.map((group, idx) => (
+                <div 
+                  key={group.id}
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: group.color,
+                    border: '1px solid white',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                  }}
+                  title={group.name}
+                />
+              ))}
+            </div>
           )}
 
           {/* ロール表示 */}
@@ -548,23 +559,21 @@ export const SeatGrid: React.FC = () => {
               margin: '4px 0'
             }} />
             
-            <button
-              onClick={() => handleGroupSelect(showGroupMenu, null)}
-              style={{
-                padding: 'var(--spacing-xs)',
-                border: 'none',
-                background: 'transparent',
-                textAlign: 'left',
-                fontSize: '0.75rem',
-                cursor: 'pointer',
-                borderRadius: 'var(--radius-sm)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              グループなし
-            </button>
-            {groups.map((group) => (
+            <div style={{ 
+              fontSize: '0.7rem', 
+              color: 'var(--color-secondary-600)',
+              marginBottom: 'var(--spacing-xs)',
+              paddingLeft: 'var(--spacing-xs)'
+            }}>
+              グループ（クリックで追加/削除）
+            </div>
+            
+            {groups.map((group) => {
+              const seatIds = showGroupMenu.split(',');
+              const selectedSeats = seatIds.map(id => currentLayout.seats.find(s => s.id === id)).filter(Boolean);
+              const hasGroup = selectedSeats.some(seat => seat.groupIds.includes(group.id));
+              
+              return (
               <button
                 key={group.id}
                 onClick={() => handleGroupSelect(showGroupMenu, group.id)}
@@ -578,7 +587,8 @@ export const SeatGrid: React.FC = () => {
                   borderRadius: 'var(--radius-sm)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 'var(--spacing-xs)'
+                  gap: 'var(--spacing-xs)',
+                  fontWeight: hasGroup ? 'bold' : 'normal'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -592,9 +602,11 @@ export const SeatGrid: React.FC = () => {
                     border: '1px solid var(--color-secondary-300)'
                   }}
                 />
+                {hasGroup && <span>✓</span>}
                 {group.name}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
