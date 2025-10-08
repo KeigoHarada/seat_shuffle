@@ -11,8 +11,10 @@ import {
   Calendar,
   MessageSquare,
   Settings,
-  Award
+  Award,
+  Upload
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const ROLE_ICONS = [
   { id: 'crown', name: '王冠', component: Crown },
@@ -28,60 +30,36 @@ const ROLE_ICONS = [
 ];
 
 export const StudentManager: React.FC = () => {
-  const { students, addStudent, removeStudent, updateStudent, currentLayout, roles, assignRoleToStudent, removeRoleFromStudent } = useSeatStore();
+  const { students, addStudent, removeStudent, updateStudent, roles, assignRoleToStudent, removeRoleFromStudent } = useSeatStore();
   const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentFurigana, setNewStudentFurigana] = useState('');
+  const [newStudentGender, setNewStudentGender] = useState<'male' | 'female' | 'other'>('male');
   const [newStudentRoles, setNewStudentRoles] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [sortBy, setSortBy] = useState<'attendanceNo' | 'seat'>('attendanceNo');
+  const [editingFurigana, setEditingFurigana] = useState('');
+  const [editingGender, setEditingGender] = useState<'male' | 'female' | 'other'>('male');
   const [showRoleMenu, setShowRoleMenu] = useState<string | null>(null);
 
-  // 生徒の席番号を取得
-  const getStudentSeatNumber = (studentId: string) => {
-    if (!currentLayout) return 0;
-    
-    const seatIndex = currentLayout.seats.findIndex(seat => seat.studentId === studentId);
-    if (seatIndex === -1) return 0;
-    
-    // 生徒が割り当てられた席の番号を計算
-    let seatNumber = 0;
-    for (let i = 0; i <= seatIndex; i++) {
-      if (!currentLayout.seats[i].isEmpty && currentLayout.seats[i].studentId) {
-        seatNumber++;
-      }
-    }
-    return seatNumber;
-  };
-
-  // ソートされた生徒リストを取得
+  // 出席番号順にソートされた生徒リストを取得
   const getSortedStudents = () => {
-    const studentsWithSeatNumbers = students.map(student => ({
-      ...student,
-      seatNumber: getStudentSeatNumber(student.id)
-    }));
-
-    if (sortBy === 'seat') {
-      return studentsWithSeatNumbers.sort((a, b) => {
-        if (a.seatNumber === 0 && b.seatNumber === 0) return 0;
-        if (a.seatNumber === 0) return 1;
-        if (b.seatNumber === 0) return -1;
-        return a.seatNumber - b.seatNumber;
-      });
-    } else {
-      return studentsWithSeatNumbers.sort((a, b) => a.studentNumber - b.studentNumber);
-    }
+    return [...students].sort((a, b) => a.studentNumber - b.studentNumber);
   };
 
   const handleAddStudent = () => {
-    if (newStudentName.trim()) {
+    if (newStudentName.trim() && newStudentFurigana.trim()) {
       const student: Student = {
         id: `student-${Date.now()}`,
         name: newStudentName.trim(),
+        furigana: newStudentFurigana.trim(),
+        gender: newStudentGender,
         studentNumber: 0, // ストアで自動割り当てされる
         roleIds: newStudentRoles
       };
       addStudent(student);
       setNewStudentName('');
+      setNewStudentFurigana('');
+      setNewStudentGender('male');
       setNewStudentRoles([]);
     }
   };
@@ -97,19 +75,29 @@ export const StudentManager: React.FC = () => {
   const handleEditStart = (student: Student) => {
     setEditingId(student.id);
     setEditingName(student.name);
+    setEditingFurigana(student.furigana);
+    setEditingGender(student.gender);
   };
 
   const handleEditSave = () => {
-    if (editingId && editingName.trim()) {
-      updateStudent(editingId, { name: editingName.trim() });
+    if (editingId && editingName.trim() && editingFurigana.trim()) {
+      updateStudent(editingId, { 
+        name: editingName.trim(),
+        furigana: editingFurigana.trim(),
+        gender: editingGender
+      });
       setEditingId(null);
       setEditingName('');
+      setEditingFurigana('');
+      setEditingGender('male');
     }
   };
 
   const handleEditCancel = () => {
     setEditingId(null);
     setEditingName('');
+    setEditingFurigana('');
+    setEditingGender('male');
   };
 
   const handleRoleToggle = (studentId: string, roleId: string) => {
@@ -129,52 +117,195 @@ export const StudentManager: React.FC = () => {
     return roles.filter(role => student.roleIds.includes(role.id));
   };
 
+  // ファイル読み込み処理
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = e.target?.result;
+        let rows: any[][] = [];
+
+        if (file.name.endsWith('.csv')) {
+          // CSV処理
+          const text = data as string;
+          rows = text.split('\n').map(row => row.split(',').map(cell => cell.trim()));
+        } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+          // Excel処理
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        } else {
+          alert('CSVまたはExcelファイルを選択してください');
+          return;
+        }
+
+        // データを解析して生徒を追加
+        let successCount = 0;
+        let errorCount = 0;
+
+        rows.forEach((row, index) => {
+          // ヘッダー行をスキップ
+          if (index === 0) return;
+          
+          // 空行をスキップ
+          if (!row || row.length < 4 || !row[1]) return;
+
+          const studentNumber = parseInt(String(row[0])) || 0;
+          const name = String(row[1]).trim();
+          const furigana = String(row[2]).trim();
+          const genderStr = String(row[3]).trim();
+
+          // 性別の変換
+          let gender: 'male' | 'female' | 'other' = 'other';
+          if (genderStr === '男' || genderStr === '男性' || genderStr === 'male') {
+            gender = 'male';
+          } else if (genderStr === '女' || genderStr === '女性' || genderStr === 'female') {
+            gender = 'female';
+          }
+
+          if (name && furigana) {
+            const student: Student = {
+              id: `student-${Date.now()}-${index}`,
+              name,
+              furigana,
+              gender,
+              studentNumber: studentNumber || (students.length + successCount + 1),
+              roleIds: []
+            };
+            addStudent(student);
+            successCount++;
+          } else {
+            errorCount++;
+          }
+        });
+
+        if (successCount > 0) {
+          alert(`${successCount}人の生徒を追加しました` + (errorCount > 0 ? `\n（${errorCount}行のエラーをスキップしました）` : ''));
+        } else {
+          alert('有効なデータが見つかりませんでした');
+        }
+      } catch (error) {
+        console.error('ファイル読み込みエラー:', error);
+        alert('ファイルの読み込みに失敗しました');
+      }
+    };
+
+    if (file.name.endsWith('.csv')) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsBinaryString(file);
+    }
+
+    // inputをリセット
+    event.target.value = '';
+  };
+
   return (
     <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
         <h2 className="text-title3">生徒管理</h2>
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-          <button
-            className={`btn ${sortBy === 'attendanceNo' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setSortBy('attendanceNo')}
-            style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
-          >
-            出席番号順
-          </button>
-          <button
-            className={`btn ${sortBy === 'seat' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setSortBy('seat')}
-            style={{ padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.75rem' }}
-          >
-            座席順
-          </button>
-        </div>
+        <label 
+          htmlFor="file-upload"
+          className="btn btn-secondary"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--spacing-xs)',
+            cursor: 'pointer',
+            padding: 'var(--spacing-xs) var(--spacing-sm)', 
+            fontSize: '0.75rem'
+          }}
+        >
+          <Upload size={16} />
+          CSV/Excel読み込み
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+        />
       </div>
       
+      {/* ファイルフォーマットの説明 */}
+      <div style={{ 
+        marginBottom: 'var(--spacing-md)', 
+        padding: 'var(--spacing-sm)',
+        backgroundColor: 'var(--color-secondary-100)',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--color-secondary-200)'
+      }}>
+        <p style={{ fontSize: '0.75rem', color: 'var(--color-secondary-700)', marginBottom: 'var(--spacing-xs)' }}>
+          <strong>📁 ファイル形式:</strong> CSV形式 (列の順番: 番号, 漢字, ふりがな, 性別)
+        </p>
+        <p style={{ fontSize: '0.7rem', color: 'var(--color-secondary-600)' }}>
+          例: 1, 田中太郎, たなかたろう, 男
+        </p>
+      </div>
+
       <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-        <div className="flex" style={{ marginBottom: 'var(--spacing-sm)', flexWrap: 'wrap', gap: 'var(--spacing-sm)' }}>
-          <input
-            type="text"
-            placeholder="生徒名を入力"
-            value={newStudentName}
-            onChange={(e) => setNewStudentName(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAddStudent()}
-            style={{
-              padding: 'var(--spacing-sm)',
-              border: '1px solid var(--color-secondary-300)',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '1rem',
-              flex: '1',
-              minWidth: '200px'
-            }}
-          />
-          <button
-            className="btn btn-primary"
-            onClick={handleAddStudent}
-            disabled={!newStudentName.trim()}
-          >
-            追加
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-sm)' }}>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              placeholder="ふりがな"
+              value={newStudentFurigana}
+              onChange={(e) => setNewStudentFurigana(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddStudent()}
+              style={{
+                padding: 'var(--spacing-sm)',
+                border: '1px solid var(--color-secondary-300)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.875rem',
+                flex: '1',
+                minWidth: '150px'
+              }}
+            />
+            <select
+              value={newStudentGender}
+              onChange={(e) => setNewStudentGender(e.target.value as 'male' | 'female' | 'other')}
+              style={{
+                padding: 'var(--spacing-sm)',
+                border: '1px solid var(--color-secondary-300)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.875rem',
+                minWidth: '100px'
+              }}
+            >
+              <option value="male">男性</option>
+              <option value="female">女性</option>
+              <option value="other">その他</option>
+            </select>
+          </div>
+          <div className="flex" style={{ gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              placeholder="生徒名を入力"
+              value={newStudentName}
+              onChange={(e) => setNewStudentName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddStudent()}
+              style={{
+                padding: 'var(--spacing-sm)',
+                border: '1px solid var(--color-secondary-300)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '1rem',
+                flex: '1',
+                minWidth: '200px'
+              }}
+            />
+            <button
+              className="btn btn-primary"
+              onClick={handleAddStudent}
+              disabled={!newStudentName.trim() || !newStudentFurigana.trim()}
+            >
+              追加
+            </button>
+          </div>
         </div>
         
         {/* ロール選択 */}
@@ -228,7 +359,7 @@ export const StudentManager: React.FC = () => {
             {/* ヘッダー */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '60px 1fr 1fr 120px',
+              gridTemplateColumns: '60px 1fr 80px 1fr 120px',
               alignItems: 'center',
               gap: 'var(--spacing-sm)',
               padding: 'var(--spacing-sm)',
@@ -240,6 +371,7 @@ export const StudentManager: React.FC = () => {
             }}>
               <span style={{ textAlign: 'center' }}>出席番号</span>
               <span>名前</span>
+              <span style={{ textAlign: 'center' }}>性別</span>
               <span>ロール</span>
               <span style={{ textAlign: 'center' }}>操作</span>
             </div>
@@ -249,7 +381,7 @@ export const StudentManager: React.FC = () => {
                 key={student.id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '60px 1fr 1fr 120px',
+                  gridTemplateColumns: '60px 1fr 80px 1fr 120px',
                   alignItems: 'center',
                   gap: 'var(--spacing-sm)',
                   padding: 'var(--spacing-sm)',
@@ -270,23 +402,58 @@ export const StudentManager: React.FC = () => {
                     >
                       {student.studentNumber}
                     </span>
-                    <input
-                      type="text"
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') handleEditSave();
-                        if (e.key === 'Escape') handleEditCancel();
-                      }}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
+                      <input
+                        type="text"
+                        placeholder="ふりがな"
+                        value={editingFurigana}
+                        onChange={(e) => setEditingFurigana(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') handleEditSave();
+                          if (e.key === 'Escape') handleEditCancel();
+                        }}
+                        style={{
+                          padding: 'var(--spacing-xs)',
+                          border: '1px solid var(--color-primary-300)',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: '0.75rem',
+                          width: '100%'
+                        }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="名前"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') handleEditSave();
+                          if (e.key === 'Escape') handleEditCancel();
+                        }}
+                        style={{
+                          padding: 'var(--spacing-xs)',
+                          border: '1px solid var(--color-primary-300)',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: '0.875rem',
+                          width: '100%'
+                        }}
+                        autoFocus
+                      />
+                    </div>
+                    <select
+                      value={editingGender}
+                      onChange={(e) => setEditingGender(e.target.value as 'male' | 'female' | 'other')}
                       style={{
                         padding: 'var(--spacing-xs)',
                         border: '1px solid var(--color-primary-300)',
                         borderRadius: 'var(--radius-sm)',
-                        fontSize: '0.875rem',
-                        width: '100%'
+                        fontSize: '0.75rem',
+                        textAlign: 'center'
                       }}
-                      autoFocus
-                    />
+                    >
+                      <option value="male">男性</option>
+                      <option value="female">女性</option>
+                      <option value="other">その他</option>
+                    </select>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
                       {roles.map((role) => {
                         const iconData = ROLE_ICONS.find(icon => icon.id === role.icon);
@@ -343,8 +510,22 @@ export const StudentManager: React.FC = () => {
                     >
                       {student.studentNumber}
                     </span>
-                    <span className="text-body" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {student.name}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--color-secondary-500)' }}>
+                        {student.furigana}
+                      </span>
+                      <span className="text-body" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {student.name}
+                      </span>
+                    </div>
+                    <span 
+                      style={{ 
+                        fontSize: '0.75rem',
+                        textAlign: 'center',
+                        color: 'var(--color-secondary-700)'
+                      }}
+                    >
+                      {student.gender === 'male' ? '男性' : student.gender === 'female' ? '女性' : 'その他'}
                     </span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
                       {getStudentRoles(student.id).map((role) => {

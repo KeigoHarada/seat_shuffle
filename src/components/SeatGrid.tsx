@@ -469,13 +469,29 @@ export const SeatGrid: React.FC = () => {
             </div>
           ) : (
             /* 通常表示 */
-            <div style={{ textAlign: 'center', width: '100%' }}>
+            <div style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               {seat.isEmpty ? (
                 <span style={{ opacity: 0.5, fontSize: '12px' }}>空席</span>
               ) : seat.studentId ? (
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>
-                  {getStudentName(seat.studentId)}
-                </span>
+                <>
+                  {(() => {
+                    const student = students.find(s => s.id === seat.studentId);
+                    return student ? (
+                      <>
+                        <span style={{ fontSize: '9px', color: 'var(--color-secondary-500)', lineHeight: '1' }}>
+                          {student.furigana}
+                        </span>
+                        <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                          {student.name}
+                        </span>
+                      </>
+                    ) : (
+                      <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                        {getStudentName(seat.studentId)}
+                      </span>
+                    );
+                  })()}
+                </>
               ) : (
                 <span style={{ opacity: 0.5, fontSize: '12px' }}>空席</span>
               )}

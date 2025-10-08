@@ -67,32 +67,6 @@ export const LayoutSettings: React.FC = () => {
         </div>
       </div>
 
-      {currentLayout && (
-        <div>
-          <p className="text-callout" style={{ marginBottom: 'var(--spacing-sm)', color: 'var(--color-primary-600)' }}>
-            ✅ 席配置が作成されました。背景の席替え表で確認・編集できます。
-          </p>
-          <div style={{ 
-            backgroundColor: 'var(--color-secondary-100)',
-            padding: 'var(--spacing-md)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-secondary-200)'
-          }}>
-            <p className="text-callout" style={{ marginBottom: 'var(--spacing-sm)' }}>
-              <strong>現在の設定:</strong>
-            </p>
-            <p className="text-callout">
-              サイズ: {currentLayout.rows}行 × {currentLayout.cols}列
-            </p>
-            <p className="text-callout">
-              総席数: {currentLayout.seats.length}席
-            </p>
-            <p className="text-callout">
-              空席数: {currentLayout.seats.filter(seat => seat.isEmpty).length}席
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

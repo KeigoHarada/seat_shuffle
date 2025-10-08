@@ -61,6 +61,8 @@ export interface Seat {
 export interface Student {
   id: string;
   name: string;
+  furigana: string;
+  gender: 'male' | 'female' | 'other';
   studentNumber: number;
   roleIds: string[];
 }
