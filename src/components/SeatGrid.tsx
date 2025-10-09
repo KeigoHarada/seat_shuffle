@@ -519,18 +519,18 @@ export const SeatGrid: React.FC = () => {
                   }
                 }}
                 onBlur={() => handleNameSubmit(seat.id)}
-                style={{
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  padding: `${4 * scale}px`,
-                  fontSize: `${22 * scale}px`,
-                  fontWeight: '600',
-                  width: '100%',
-                  textAlign: 'center',
-                  color: 'black',
-                  caretColor: 'var(--color-primary-600)'
-                }}
+                  style={{
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    padding: '4px',
+                    fontSize: '22px',
+                    fontWeight: '600',
+                    width: '100%',
+                    textAlign: 'center',
+                    color: 'black',
+                    caretColor: 'var(--color-primary-600)'
+                  }}
                 autoFocus
               />
             </div>
