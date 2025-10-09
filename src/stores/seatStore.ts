@@ -376,8 +376,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   initializeDefaultLayout: () => {
     const state = get();
     if (!state.currentLayout) {
-      // デフォルトの5x6レイアウトを作成
-      get().createLayout(5, 6, 'デフォルト教室');
+      // デフォルトの7x6レイアウトを作成
+      get().createLayout(7, 6, 'デフォルト教室');
       
       // デバッグ用の生徒データを作成
       const debugStudents = [
