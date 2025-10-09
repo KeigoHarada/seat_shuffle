@@ -32,7 +32,7 @@ const ROLE_ICONS = [
 ];
 
 export const StudentManager: React.FC = () => {
-  const { students, addStudent, removeStudent, updateStudent, roles, assignRoleToStudent, removeRoleFromStudent } = useSeatStore();
+  const { students, addStudent, removeStudent, updateStudent, roles, assignRoleToStudent, removeRoleFromStudent, currentLayout, setSelectedSeatId } = useSeatStore();
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentFurigana, setNewStudentFurigana] = useState('');
   const [newStudentGender, setNewStudentGender] = useState<'male' | 'female' | 'other'>('male');
@@ -47,6 +47,20 @@ export const StudentManager: React.FC = () => {
   // 出席番号順にソートされた生徒リストを取得
   const getSortedStudents = () => {
     return [...students].sort((a, b) => a.studentNumber - b.studentNumber);
+  };
+
+  // 生徒の行をクリックした時に座席表の対応する席を選択
+  const handleStudentRowClick = (studentId: string) => {
+    if (!currentLayout) return;
+    
+    // 生徒が座っている席を探す
+    const seat = currentLayout.seats.find(s => s.studentId === studentId);
+    if (seat) {
+      setSelectedSeatId(seat.id);
+    } else {
+      // 座席に座っていない場合は選択を解除
+      setSelectedSeatId(null);
+    }
   };
 
   const handleAddStudent = () => {
@@ -402,6 +416,7 @@ export const StudentManager: React.FC = () => {
             {getSortedStudents().map((student, index) => (
               <div
                 key={student.id}
+                onClick={() => handleStudentRowClick(student.id)}
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '60px 1fr 80px 1fr 120px',
@@ -410,7 +425,15 @@ export const StudentManager: React.FC = () => {
                   padding: 'var(--spacing-sm)',
                   backgroundColor: 'var(--color-secondary-100)',
                   borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-secondary-200)'
+                  border: '1px solid var(--color-secondary-200)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-secondary-200)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)';
                 }}
               >
                 {editingId === student.id ? (
