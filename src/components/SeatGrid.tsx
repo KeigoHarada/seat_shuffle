@@ -284,14 +284,14 @@ export const SeatGrid: React.FC = () => {
   };
 
   // 設定画面の幅と高さに応じて座席のスケールを調整
-  const availableWidth = showSettings ? window.innerWidth - settingsPanelWidth - 40 : window.innerWidth - 40;
-  const availableHeight = window.innerHeight - 280; // ヘッダー、ボタン、教壇、マージンを最小限に
+  const availableWidth = showSettings ? window.innerWidth - settingsPanelWidth - 10 : window.innerWidth - 10;
+  const availableHeight = window.innerHeight - 150; // ヘッダー、ボタン、教壇、マージンを最小限に
   
-  const idealSeatWidth = 160; // 座席幅を大きく
-  const idealSeatHeight = 130; // 座席高さを大きく
-  const seatGap = 8; // 座席間ギャップを小さくしてより多くの領域を座席に
-  const teacherDeskHeight = 50; // 教壇の高さ（スケール適用前）
-  const teacherDeskMargin = 8; // 教壇のマージン（スケール適用前、最小限に）
+  const idealSeatWidth = 220; // 座席幅をさらに大きく
+  const idealSeatHeight = 160; // 座席高さをさらに大きく
+  const seatGap = 8; // 座席間ギャップを適度に設定
+  const teacherDeskHeight = 80; // 教壇の高さ（スケール適用前、さらに大きく）
+  const teacherDeskMargin = 8; // 教壇のマージン（スケール適用前、適度な隙間）
   
   const totalGridWidth = idealSeatWidth * currentLayout.cols + seatGap * (currentLayout.cols - 1);
   const totalGridHeight = idealSeatHeight * currentLayout.rows + seatGap * (currentLayout.rows - 1);
@@ -318,8 +318,8 @@ export const SeatGrid: React.FC = () => {
       {!isTeacherDeskBottom && (
         <div 
           style={{ 
-            width: `${200 * scale}px`,
-            height: `${50 * scale}px`,
+            width: `${350 * scale}px`,
+            height: `${80 * scale}px`,
             backgroundColor: 'var(--color-secondary-700)',
             border: `${3 * scale}px solid var(--color-secondary-500)`,
             borderRadius: `calc(var(--radius-lg) * ${scale})`,
@@ -333,7 +333,7 @@ export const SeatGrid: React.FC = () => {
           <span style={{ 
             color: 'var(--color-chalk-primary)', 
             fontWeight: 'bold',
-            fontSize: `${20 * scale}px`
+            fontSize: `${32 * scale}px`
           }}>
             教壇
           </span>
@@ -349,10 +349,10 @@ export const SeatGrid: React.FC = () => {
         padding: 0,
         transform: `${isTeacherDeskBottom ? 'rotate(180deg)' : ''}`,
         transformOrigin: 'center center',
-        width: `${(160 * currentLayout.cols + 8 * (currentLayout.cols - 1)) * scale}px`,
-        height: `${(130 * currentLayout.rows + 8 * (currentLayout.rows - 1)) * scale}px`
+        width: `${(220 * currentLayout.cols + 8 * (currentLayout.cols - 1)) * scale}px`,
+        height: `${(160 * currentLayout.rows + 8 * (currentLayout.rows - 1)) * scale}px`
       }}>
-        {currentLayout.seats.map((seat, index) => {
+        {currentLayout.seats.map((seat) => {
           const seatGroups = seat.groupIds.map(gid => groups.find(g => g.id === gid)).filter(Boolean);
           return (
           <div
@@ -370,13 +370,13 @@ export const SeatGrid: React.FC = () => {
             style={{
               animationDelay: `${Math.random() * 0.5}s`,
               position: 'relative',
-              borderColor: seatGroups.length > 0 ? seatGroups[0].color : undefined,
+              borderColor: seatGroups.length > 0 ? seatGroups[0]?.color : undefined,
               borderWidth: seatGroups.length > 0 ? '3px' : undefined,
               cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default',
               transform: isTeacherDeskBottom ? 'rotate(180deg)' : 'none',
-              width: `${160 * scale}px`,
-              height: `${130 * scale}px`,
-              fontSize: `${22 * scale}px`
+              width: `${220 * scale}px`,
+              height: `${160 * scale}px`,
+              fontSize: `${36 * scale}px`
             }}
           >
           {/* 出席番号 */}
@@ -385,7 +385,7 @@ export const SeatGrid: React.FC = () => {
               position: 'absolute',
               top: `${4 * scale}px`,
               left: `${6 * scale}px`,
-              fontSize: `${20 * scale}px`,
+              fontSize: `${30 * scale}px`,
               color: 'var(--color-secondary-500)',
               fontWeight: 'bold',
               zIndex: 1
@@ -404,7 +404,7 @@ export const SeatGrid: React.FC = () => {
               gap: `${3 * scale}px`,
               zIndex: 1
             }}>
-              {seatGroups.map((group, idx) => (
+              {seatGroups.map((group) => (
                 <div 
                   key={group.id}
                   style={{
@@ -538,29 +538,29 @@ export const SeatGrid: React.FC = () => {
             /* 通常表示 */
             <div style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
               {seat.isEmpty ? (
-                <span style={{ opacity: 0.5, fontSize: `${20 * scale}px` }}>空席</span>
+                <span style={{ opacity: 0.5, fontSize: `${32 * scale}px` }}>空席</span>
               ) : seat.studentId ? (
                 <>
                   {(() => {
                     const student = students.find(s => s.id === seat.studentId);
                     return student ? (
                       <>
-                        <span style={{ fontSize: `${14 * scale}px`, color: 'var(--color-secondary-500)', lineHeight: '1.2' }}>
+                        <span style={{ fontSize: `${22 * scale}px`, color: 'var(--color-secondary-500)', lineHeight: '1.2' }}>
                           {student.furigana}
                         </span>
-                        <span style={{ fontSize: `${22 * scale}px`, fontWeight: '600', lineHeight: '1.2' }}>
+                        <span style={{ fontSize: `${36 * scale}px`, fontWeight: '600', lineHeight: '1.2' }}>
                           {student.name}
                         </span>
                       </>
                     ) : (
-                      <span style={{ fontSize: `${22 * scale}px`, fontWeight: '600' }}>
+                      <span style={{ fontSize: `${36 * scale}px`, fontWeight: '600' }}>
                         {getStudentName(seat.studentId)}
                       </span>
                     );
                   })()}
                 </>
               ) : (
-                <span style={{ opacity: 0.5, fontSize: `${20 * scale}px` }}>空席</span>
+                <span style={{ opacity: 0.5, fontSize: `${32 * scale}px` }}>空席</span>
               )}
             </div>
           )}
@@ -574,8 +574,8 @@ export const SeatGrid: React.FC = () => {
       {isTeacherDeskBottom && (
         <div 
           style={{ 
-            width: `${200 * scale}px`,
-            height: `${50 * scale}px`,
+            width: `${350 * scale}px`,
+            height: `${80 * scale}px`,
             backgroundColor: 'var(--color-secondary-700)',
             border: `${3 * scale}px solid var(--color-secondary-500)`,
             borderRadius: `calc(var(--radius-lg) * ${scale})`,
@@ -589,7 +589,7 @@ export const SeatGrid: React.FC = () => {
           <span style={{ 
             color: 'var(--color-chalk-primary)', 
             fontWeight: 'bold',
-            fontSize: `${20 * scale}px`
+            fontSize: `${32 * scale}px`
           }}>
             教壇
           </span>
