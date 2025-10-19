@@ -270,7 +270,7 @@ export const SeatGrid: React.FC = () => {
             onClick={(e) => handleClick(seat.id, e)}
             onDoubleClick={() => handleDoubleClick(seat.id, getStudentName(seat.studentId))}
             onContextMenu={(e) => handleRightClick(e, seat.id)}
-            draggable={!seat.isEmpty && !!seat.studentId}
+            draggable={true}
             onDragStart={(e) => handleDragStart(e, seat.id)}
             onDragOver={(e) => handleDragOver(e, seat.id)}
             onDragLeave={handleDragLeave}

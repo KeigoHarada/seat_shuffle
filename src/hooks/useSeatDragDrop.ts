@@ -4,9 +4,7 @@ import { useSeatStore } from '../stores/seatStore';
 export const useSeatDragDrop = () => {
   const { 
     currentLayout, 
-    swapSeats, 
-    assignStudentToSeat, 
-    removeStudentFromSeat 
+    swapSeats
   } = useSeatStore();
 
   const [draggedSeatId, setDraggedSeatId] = useState<string | null>(null);
@@ -17,7 +15,7 @@ export const useSeatDragDrop = () => {
     if (!currentLayout) return;
     
     const seat = currentLayout.seats.find(s => s.id === seatId);
-    if (!seat || seat.isEmpty || !seat.studentId) return;
+    if (!seat) return;
 
     setDraggedSeatId(seatId);
     e.dataTransfer.effectAllowed = 'move';
@@ -51,17 +49,10 @@ export const useSeatDragDrop = () => {
       return;
     }
 
-    // 両方の席に生徒がいる場合は交換
-    if (draggedSeat.studentId && targetSeat.studentId) {
-      swapSeats(draggedSeatId, targetSeatId);
-      setSwappedSeats(new Set([draggedSeatId, targetSeatId]));
-      setTimeout(() => setSwappedSeats(new Set()), 1000);
-    }
-    // ドラッグ元に生徒がいて、ターゲットが空席の場合は移動
-    else if (draggedSeat.studentId && !targetSeat.studentId && !targetSeat.isEmpty) {
-      assignStudentToSeat(draggedSeat.studentId, targetSeatId);
-      removeStudentFromSeat(draggedSeatId);
-    }
+    // 全ての席の組み合わせで交換を実行
+    swapSeats(draggedSeatId, targetSeatId);
+    setSwappedSeats(new Set([draggedSeatId, targetSeatId]));
+    setTimeout(() => setSwappedSeats(new Set()), 1000);
 
     setDraggedSeatId(null);
   };

@@ -331,10 +331,10 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
         ...state.currentLayout,
         seats: state.currentLayout.seats.map(seat => {
           if (seat.id === seatId1) {
-            return { ...seat, studentId: seat2.studentId };
+            return { ...seat, studentId: seat2.studentId, isEmpty: seat2.isEmpty };
           }
           if (seat.id === seatId2) {
-            return { ...seat, studentId: seat1.studentId };
+            return { ...seat, studentId: seat1.studentId, isEmpty: seat1.isEmpty };
           }
           return seat;
         })
