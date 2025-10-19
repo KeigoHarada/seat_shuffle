@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { DEFAULT_LAYOUT_ROWS, DEFAULT_LAYOUT_COLS, DEFAULT_LAYOUT_NAME } from '../constants/layout';
 
 export const LayoutSettings: React.FC = () => {
   const { createLayout, currentLayout } = useSeatStore();
-  const [rows, setRows] = useState(5);
-  const [cols, setCols] = useState(6);
+  const [rows, setRows] = useState(DEFAULT_LAYOUT_ROWS);
+  const [cols, setCols] = useState(DEFAULT_LAYOUT_COLS);
   const [isExpanded, setIsExpanded] = useState(true);
 
   const handleCreateLayout = () => {
-    createLayout(rows, cols, '教室レイアウト');
+    createLayout(rows, cols, DEFAULT_LAYOUT_NAME);
   };
 
   return (

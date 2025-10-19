@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { ROLE_ICONS } from '../constants/roleIcons';
+import { UI_CONSTANTS } from '../constants/ui';
 import { GroupMenu } from './seat/GroupMenu';
 import { SeatEditor } from './seat/SeatEditor';
 import { useSeatDragDrop } from '../hooks/useSeatDragDrop';
@@ -193,14 +194,14 @@ export const SeatGrid: React.FC = () => {
   };
 
   // 設定画面の幅と高さに応じて座席のスケールを調整
-  const availableWidth = showSettings ? window.innerWidth - settingsPanelWidth - 10 : window.innerWidth - 10;
-  const availableHeight = window.innerHeight - 150; // ヘッダー、ボタン、教壇、マージンを最小限に
+  const availableWidth = showSettings ? window.innerWidth - settingsPanelWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN : window.innerWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN;
+  const availableHeight = window.innerHeight - UI_CONSTANTS.LAYOUT.HEADER_HEIGHT; // ヘッダー、ボタン、教壇、マージンを最小限に
   
-  const idealSeatWidth = 220; // 座席幅をさらに大きく
-  const idealSeatHeight = 160; // 座席高さをさらに大きく
-  const seatGap = 8; // 座席間ギャップを適度に設定
-  const teacherDeskHeight = 80; // 教壇の高さ（スケール適用前、さらに大きく）
-  const teacherDeskMargin = 8; // 教壇のマージン（スケール適用前、適度な隙間）
+  const idealSeatWidth = UI_CONSTANTS.SEAT_WIDTH; // 座席幅をさらに大きく
+  const idealSeatHeight = UI_CONSTANTS.SEAT_HEIGHT; // 座席高さをさらに大きく
+  const seatGap = UI_CONSTANTS.SEAT_GAP; // 座席間ギャップを適度に設定
+  const teacherDeskHeight = UI_CONSTANTS.TEACHER_DESK_HEIGHT; // 教壇の高さ（スケール適用前、さらに大きく）
+  const teacherDeskMargin = UI_CONSTANTS.TEACHER_DESK_MARGIN; // 教壇のマージン（スケール適用前、適度な隙間）
   
   const totalGridWidth = idealSeatWidth * currentLayout.cols + seatGap * (currentLayout.cols - 1);
   const totalGridHeight = idealSeatHeight * currentLayout.rows + seatGap * (currentLayout.rows - 1);
@@ -227,15 +228,15 @@ export const SeatGrid: React.FC = () => {
       {!isTeacherDeskBottom && (
         <div 
           style={{ 
-            width: `${350 * scale}px`,
-            height: `${80 * scale}px`,
+            width: `${UI_CONSTANTS.TEACHER_DESK_WIDTH * scale}px`,
+            height: `${UI_CONSTANTS.TEACHER_DESK_HEIGHT * scale}px`,
             backgroundColor: 'var(--color-secondary-700)',
             border: `${3 * scale}px solid var(--color-secondary-500)`,
             borderRadius: `calc(var(--radius-lg) * ${scale})`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: `${8 * scale}px`,
+            marginBottom: `${UI_CONSTANTS.TEACHER_DESK_MARGIN * scale}px`,
             transition: 'all 0.2s ease'
           }}
         >
@@ -252,14 +253,14 @@ export const SeatGrid: React.FC = () => {
       <div className="seat-grid" style={{ 
         display: 'grid', 
         gridTemplateColumns: `repeat(${currentLayout.cols}, 1fr)`,
-        gap: `${8 * scale}px`,
+        gap: `${UI_CONSTANTS.SEAT_GAP * scale}px`,
         maxWidth: 'fit-content',
         margin: '0',
         padding: 0,
         transform: `${isTeacherDeskBottom ? 'rotate(180deg)' : ''}`,
         transformOrigin: 'center center',
-        width: `${(220 * currentLayout.cols + 8 * (currentLayout.cols - 1)) * scale}px`,
-        height: `${(160 * currentLayout.rows + 8 * (currentLayout.rows - 1)) * scale}px`
+        width: `${(UI_CONSTANTS.SEAT_WIDTH * currentLayout.cols + UI_CONSTANTS.SEAT_GAP * (currentLayout.cols - 1)) * scale}px`,
+        height: `${(UI_CONSTANTS.SEAT_HEIGHT * currentLayout.rows + UI_CONSTANTS.SEAT_GAP * (currentLayout.rows - 1)) * scale}px`
       }}>
         {currentLayout.seats.map((seat) => {
           const seatGroups = seat.groupIds.map(gid => groups.find(g => g.id === gid)).filter(Boolean);
@@ -277,24 +278,24 @@ export const SeatGrid: React.FC = () => {
             onDrop={(e) => handleDrop(e, seat.id)}
             onDragEnd={handleDragEnd}
             style={{
-              animationDelay: `${Math.random() * 0.5}s`,
+              animationDelay: `${Math.random() * UI_CONSTANTS.ANIMATION.MAX_DELAY}s`,
               position: 'relative',
               borderColor: seatGroups.length > 0 ? seatGroups[0]?.color : undefined,
               borderWidth: seatGroups.length > 0 ? '3px' : undefined,
               cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default',
               transform: isTeacherDeskBottom ? 'rotate(180deg)' : 'none',
-              width: `${220 * scale}px`,
-              height: `${160 * scale}px`,
-              fontSize: `${36 * scale}px`
+              width: `${UI_CONSTANTS.SEAT_WIDTH * scale}px`,
+              height: `${UI_CONSTANTS.SEAT_HEIGHT * scale}px`,
+              fontSize: `${UI_CONSTANTS.FONT_SIZE.LARGE * scale}px`
             }}
           >
           {/* 出席番号 */}
           {!seat.isEmpty && seat.studentId && getAttendanceNumber(seat.studentId) && (
             <div style={{
               position: 'absolute',
-              top: `${4 * scale}px`,
-              left: `${6 * scale}px`,
-              fontSize: `${30 * scale}px`,
+              top: `${UI_CONSTANTS.MARGIN.MEDIUM * scale}px`,
+              left: `${UI_CONSTANTS.MARGIN.LARGE * scale}px`,
+              fontSize: `${UI_CONSTANTS.FONT_SIZE.SMALL * scale}px`,
               color: 'var(--color-secondary-500)',
               fontWeight: 'bold',
               zIndex: 1
@@ -307,10 +308,10 @@ export const SeatGrid: React.FC = () => {
           {seatGroups.length > 0 && (
             <div style={{
               position: 'absolute',
-              top: `${4 * scale}px`,
-              right: `${6 * scale}px`,
+              top: `${UI_CONSTANTS.MARGIN.MEDIUM * scale}px`,
+              right: `${UI_CONSTANTS.MARGIN.LARGE * scale}px`,
               display: 'flex',
-              gap: `${3 * scale}px`,
+              gap: `${UI_CONSTANTS.MARGIN.SMALL * scale}px`,
               zIndex: 1
             }}>
               {seatGroups.map((group) => {
@@ -319,11 +320,11 @@ export const SeatGrid: React.FC = () => {
                   <div 
                     key={group.id}
                     style={{
-                      width: `${16 * scale}px`,
-                      height: `${16 * scale}px`,
+                      width: `${UI_CONSTANTS.ICON_SIZE.MEDIUM * scale}px`,
+                      height: `${UI_CONSTANTS.ICON_SIZE.MEDIUM * scale}px`,
                       borderRadius: '50%',
                       backgroundColor: group.color,
-                      border: `${2 * scale}px solid white`,
+                      border: `${UI_CONSTANTS.MARGIN.SMALL * scale}px solid white`,
                       boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                     }}
                     title={group.name}
@@ -337,26 +338,26 @@ export const SeatGrid: React.FC = () => {
           {seat.studentId && (
             <div style={{
               position: 'absolute',
-              bottom: `${4 * scale}px`,
-              right: `${6 * scale}px`,
+              bottom: `${UI_CONSTANTS.MARGIN.MEDIUM * scale}px`,
+              right: `${UI_CONSTANTS.MARGIN.LARGE * scale}px`,
               display: 'flex',
-              gap: `${2 * scale}px`,
+              gap: `${UI_CONSTANTS.MARGIN.SMALL * scale}px`,
               flexWrap: 'wrap',
               maxWidth: `${80 * scale}px`,
               justifyContent: 'flex-end'
             }}>
-              {getStudentRoles(seat.studentId).slice(0, 3).map((role) => {
+              {getStudentRoles(seat.studentId).slice(0, UI_CONSTANTS.LAYOUT.MAX_ROLES_DISPLAY).map((role) => {
                 const iconData = ROLE_ICONS.find(icon => icon.id === role.icon);
                 const IconComponent = iconData?.component;
                 return (
                   <div
                     key={role.id}
                     style={{
-                      width: `${18 * scale}px`,
-                      height: `${18 * scale}px`,
+                      width: `${UI_CONSTANTS.ICON_SIZE.LARGE * scale}px`,
+                      height: `${UI_CONSTANTS.ICON_SIZE.LARGE * scale}px`,
                       borderRadius: `calc(var(--radius-sm) * ${scale})`,
                       backgroundColor: 'var(--color-secondary-100)',
-                      border: `${1 * scale}px solid var(--color-secondary-300)`,
+                      border: `${UI_CONSTANTS.MARGIN.SMALL * scale}px solid var(--color-secondary-300)`,
                       boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                       display: 'flex',
                       alignItems: 'center',
@@ -364,20 +365,20 @@ export const SeatGrid: React.FC = () => {
                     }}
                     title={role.name}
                   >
-                    {IconComponent && <IconComponent size={12 * scale} color="var(--color-secondary-600)" />}
+                    {IconComponent && <IconComponent size={UI_CONSTANTS.ICON_SIZE.SMALL * scale} color="var(--color-secondary-600)" />}
                   </div>
                 );
               })}
-              {getStudentRoles(seat.studentId).length > 3 && (
+              {getStudentRoles(seat.studentId).length > UI_CONSTANTS.LAYOUT.MAX_ROLES_DISPLAY && (
                 <div
                   style={{
-                    width: `${18 * scale}px`,
-                    height: `${18 * scale}px`,
+                    width: `${UI_CONSTANTS.ICON_SIZE.LARGE * scale}px`,
+                    height: `${UI_CONSTANTS.ICON_SIZE.LARGE * scale}px`,
                     borderRadius: `calc(var(--radius-sm) * ${scale})`,
                     backgroundColor: 'var(--color-secondary-400)',
-                    border: `${1 * scale}px solid var(--color-secondary-300)`,
+                    border: `${UI_CONSTANTS.MARGIN.SMALL * scale}px solid var(--color-secondary-300)`,
                     boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                    fontSize: `${9 * scale}px`,
+                    fontSize: `${UI_CONSTANTS.FONT_SIZE.PICO * scale}px`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -414,15 +415,15 @@ export const SeatGrid: React.FC = () => {
                     const student = students.find(s => s.id === seat.studentId);
                     return student ? (
                       <>
-                        <span style={{ fontSize: `${22 * scale}px`, color: 'var(--color-secondary-500)', lineHeight: '1.2' }}>
+                        <span style={{ fontSize: `${UI_CONSTANTS.FONT_SIZE.TINY * scale}px`, color: 'var(--color-secondary-500)', lineHeight: '1.2' }}>
                           {student.furigana}
                         </span>
-                        <span style={{ fontSize: `${36 * scale}px`, fontWeight: '600', lineHeight: '1.2' }}>
+                        <span style={{ fontSize: `${UI_CONSTANTS.FONT_SIZE.LARGE * scale}px`, fontWeight: '600', lineHeight: '1.2' }}>
                           {student.name}
                         </span>
                       </>
                     ) : (
-                      <span style={{ fontSize: `${36 * scale}px`, fontWeight: '600' }}>
+                      <span style={{ fontSize: `${UI_CONSTANTS.FONT_SIZE.LARGE * scale}px`, fontWeight: '600' }}>
                         {getStudentName(seat.studentId)}
                       </span>
                     );

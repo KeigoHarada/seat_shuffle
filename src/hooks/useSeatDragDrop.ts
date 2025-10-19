@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
+import { UI_CONSTANTS } from '../constants/ui';
 
 export const useSeatDragDrop = () => {
   const { 
@@ -52,7 +53,7 @@ export const useSeatDragDrop = () => {
     // 全ての席の組み合わせで交換を実行
     swapSeats(draggedSeatId, targetSeatId);
     setSwappedSeats(new Set([draggedSeatId, targetSeatId]));
-    setTimeout(() => setSwappedSeats(new Set()), 1000);
+    setTimeout(() => setSwappedSeats(new Set()), UI_CONSTANTS.ANIMATION.DURATION);
 
     setDraggedSeatId(null);
   };

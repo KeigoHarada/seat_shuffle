@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { Seat, Student, SeatLayout, AppState, Group, Role, Condition, StudentGroupCondition, RoleGroupCondition, StudentDistanceCondition } from '../types';
 import { generateConditionalSeatAssignmentWithAnalysis, AssignmentAnalysis } from '../utils/conditionUtils';
 import { validateAllConditions, checkConditionConflicts, ConditionValidationResult } from '../utils/conditionValidator';
+import { DEFAULT_LAYOUT_ROWS, DEFAULT_LAYOUT_COLS, DEFAULT_LAYOUT_NAME } from '../constants/layout';
+import { UI_CONSTANTS } from '../constants/ui';
 
 interface SeatStore extends AppState {
   // アクション
@@ -261,7 +263,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           // 条件を満たす配置が見つからない場合、従来のランダム配置にフォールバック
           console.warn('条件を満たす席配置が見つかりません。ランダム配置にフォールバックします。');
           const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
-          const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
+          const shuffledStudents = [...students].sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET);
           
           newSeats = currentLayout.seats.map(seat => {
             if (seat.isEmpty) return seat;
@@ -281,7 +283,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       } else {
         // 条件が設定されていない場合、従来のランダム配置
         const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
-        const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
+        const shuffledStudents = [...students].sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET);
         
         newSeats = currentLayout.seats.map(seat => {
           if (seat.isEmpty) return seat;
@@ -378,7 +380,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     const state = get();
     if (!state.currentLayout) {
       // デフォルトレイアウトを作成
-      get().createLayout(7, 6, 'デフォルト教室');
+      get().createLayout(DEFAULT_LAYOUT_ROWS, DEFAULT_LAYOUT_COLS, DEFAULT_LAYOUT_NAME);
       
       // デバッグ用の生徒データを作成・追加
       const debugStudents = [
@@ -399,12 +401,12 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       const currentLayout = get().currentLayout;
       if (currentLayout) {
         const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
-        const shuffledStudents = [...debugStudents].sort(() => Math.random() - 0.5);
+        const shuffledStudents = [...debugStudents].sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET);
         
         // 一部の席を空席にする（約20%）
-        const emptySeatCount = Math.floor(availableSeats.length * 0.2);
+        const emptySeatCount = Math.floor(availableSeats.length * UI_CONSTANTS.EMPTY_SEAT_RATIO);
         const seatsToEmpty = availableSeats
-          .sort(() => Math.random() - 0.5)
+          .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
           .slice(0, emptySeatCount);
         
         seatsToEmpty.forEach(seat => {
