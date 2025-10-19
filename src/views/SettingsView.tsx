@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useSeatStore } from '../stores/seatStore';
 import { LayoutSettings } from '../components/LayoutSettings';
@@ -11,6 +11,7 @@ export const SettingsView: React.FC = () => {
   const { toggleSettings, settingsPanelWidth, setSettingsPanelWidth } = useSeatStore();
   const [isClosing, setIsClosing] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [resizeHandleLeft, setResizeHandleLeft] = useState(window.innerWidth - settingsPanelWidth);
 
   const handleClose = () => {
     setIsClosing(true);
@@ -27,14 +28,21 @@ export const SettingsView: React.FC = () => {
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing) return;
     const newWidth = window.innerWidth - e.clientX;
-    setSettingsPanelWidth(Math.max(400, Math.min(1000, newWidth)));
+    const clampedWidth = Math.max(400, Math.min(1000, newWidth));
+    setSettingsPanelWidth(clampedWidth);
+    setResizeHandleLeft(e.clientX);
   };
 
   const handleMouseUp = () => {
     setIsResizing(false);
   };
 
-  React.useEffect(() => {
+  // リサイズハンドルの位置を更新
+  useEffect(() => {
+    setResizeHandleLeft(window.innerWidth - settingsPanelWidth);
+  }, [settingsPanelWidth]);
+
+  useEffect(() => {
     if (isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -68,14 +76,15 @@ export const SettingsView: React.FC = () => {
         <div
           onMouseDown={handleMouseDown}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: 0,
-            left: 0,
+            left: `${resizeHandleLeft}px`,
             width: '4px',
-            height: '100%',
+            height: '100vh',
             cursor: 'col-resize',
             backgroundColor: isResizing ? 'var(--color-primary-500)' : 'transparent',
-            transition: 'background-color 0.2s ease'
+            transition: 'background-color 0.2s ease',
+            zIndex: 3001
           }}
         />
       <div style={{ padding: 'var(--spacing-md)' }}>
