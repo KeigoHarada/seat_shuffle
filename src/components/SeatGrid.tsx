@@ -1,30 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSeatStore } from '../stores/seatStore';
-import { 
-  Crown, 
-  Shield, 
-  Utensils, 
-  BookOpen, 
-  Users, 
-  Clipboard, 
-  Calendar,
-  MessageSquare,
-  Settings,
-  Award
-} from 'lucide-react';
-
-const ROLE_ICONS = [
-  { id: 'crown', name: '王冠', component: Crown },
-  { id: 'shield', name: '盾', component: Shield },
-  { id: 'utensils', name: '給食', component: Utensils },
-  { id: 'book', name: '学習', component: BookOpen },
-  { id: 'users', name: 'グループ', component: Users },
-  { id: 'clipboard', name: '記録', component: Clipboard },
-  { id: 'calendar', name: '予定', component: Calendar },
-  { id: 'message', name: '連絡', component: MessageSquare },
-  { id: 'settings', name: '設定', component: Settings },
-  { id: 'award', name: '表彰', component: Award }
-];
+import { ROLE_ICONS } from '../constants/roleIcons';
+import { GroupMenu } from './seat/GroupMenu';
+import { SeatEditor } from './seat/SeatEditor';
+import { useSeatDragDrop } from '../hooks/useSeatDragDrop';
 
 export const SeatGrid: React.FC = () => {
   const { 
@@ -37,24 +16,29 @@ export const SeatGrid: React.FC = () => {
     setSelectedSeatId,
     swapSeats,
     assignStudentNameToSeat,
-    toggleSeatEmpty,
-    toggleGroupOnSeat,
     removeStudentFromSeat,
     initializeDefaultLayout,
     settingsPanelWidth,
     showSettings,
-    toggleTeacherDeskPosition
   } = useSeatStore();
   
   const [editingSeatId, setEditingSeatId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [editingFurigana, setEditingFurigana] = useState('');
   const [focusedSeatId, setFocusedSeatId] = useState<string | null>(null);
   const [showGroupMenu, setShowGroupMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [multiSelectedSeats, setMultiSelectedSeats] = useState<Set<string>>(new Set());
-  const [draggedSeatId, setDraggedSeatId] = useState<string | null>(null);
-  const [dragOverSeatId, setDragOverSeatId] = useState<string | null>(null);
-  const [swappedSeats, setSwappedSeats] = useState<Set<string>>(new Set());
+  const {
+    draggedSeatId,
+    dragOverSeatId,
+    swappedSeats,
+    handleDragStart,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleDragEnd
+  } = useSeatDragDrop();
 
   // デフォルトレイアウトを初期化
   useEffect(() => {
@@ -122,10 +106,6 @@ export const SeatGrid: React.FC = () => {
     return student?.name || '';
   };
 
-  const getGroup = (groupId?: string) => {
-    if (!groupId) return null;
-    return groups.find(g => g.id === groupId) || null;
-  };
 
   const getStudentRoles = (studentId?: string) => {
     if (!studentId) return [];
@@ -203,78 +183,7 @@ export const SeatGrid: React.FC = () => {
     setEditingName('');
   };
 
-  const handleGroupSelect = (seatIds: string, groupId: string) => {
-    const seatIdArray = seatIds.split(',');
-    seatIdArray.forEach(seatId => {
-      toggleGroupOnSeat(seatId, groupId);
-    });
-    setShowGroupMenu(null);
-    setMenuPosition(null);
-    setMultiSelectedSeats(new Set());
-  };
 
-  const handleEmptyToggle = (seatIds: string) => {
-    const seatIdArray = seatIds.split(',');
-    seatIdArray.forEach(seatId => {
-      toggleSeatEmpty(seatId);
-    });
-    setShowGroupMenu(null);
-    setMenuPosition(null);
-    setMultiSelectedSeats(new Set());
-  };
-
-  // ドラッグ&ドロップのイベントハンドラー
-  const handleDragStart = (e: React.DragEvent, seatId: string) => {
-    const seat = currentLayout.seats.find(s => s.id === seatId);
-    if (seat && !seat.isEmpty && seat.studentId) {
-      setDraggedSeatId(seatId);
-      e.dataTransfer.effectAllowed = 'move';
-    } else {
-      e.preventDefault();
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent, seatId: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    
-    const targetSeat = currentLayout.seats.find(s => s.id === seatId);
-    if (targetSeat && !targetSeat.isEmpty) {
-      setDragOverSeatId(seatId);
-    }
-  };
-
-  const handleDragLeave = () => {
-    setDragOverSeatId(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, targetSeatId: string) => {
-    e.preventDefault();
-    setDragOverSeatId(null);
-    
-    if (draggedSeatId && draggedSeatId !== targetSeatId) {
-      const targetSeat = currentLayout.seats.find(s => s.id === targetSeatId);
-      if (targetSeat && !targetSeat.isEmpty) {
-        // 交換アニメーションを開始
-        setSwappedSeats(new Set([draggedSeatId, targetSeatId]));
-        
-        // 少し遅延してから実際の交換を実行
-        setTimeout(() => {
-          swapSeats(draggedSeatId, targetSeatId);
-          // アニメーション完了後にクリア
-          setTimeout(() => {
-            setSwappedSeats(new Set());
-          }, 300);
-        }, 50);
-      }
-    }
-    setDraggedSeatId(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedSeatId(null);
-    setDragOverSeatId(null);
-  };
 
   // 生徒の出席番号を取得
   const getAttendanceNumber = (studentId?: string) => {
@@ -404,20 +313,23 @@ export const SeatGrid: React.FC = () => {
               gap: `${3 * scale}px`,
               zIndex: 1
             }}>
-              {seatGroups.map((group) => (
-                <div 
-                  key={group.id}
-                  style={{
-                    width: `${16 * scale}px`,
-                    height: `${16 * scale}px`,
-                    borderRadius: '50%',
-                    backgroundColor: group.color,
-                    border: `${2 * scale}px solid white`,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-                  }}
-                  title={group.name}
-                />
-              ))}
+              {seatGroups.map((group) => {
+                if (!group) return null;
+                return (
+                  <div 
+                    key={group.id}
+                    style={{
+                      width: `${16 * scale}px`,
+                      height: `${16 * scale}px`,
+                      borderRadius: '50%',
+                      backgroundColor: group.color,
+                      border: `${2 * scale}px solid white`,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                    }}
+                    title={group.name}
+                  />
+                );
+              })}
             </div>
           )}
 
@@ -482,58 +394,15 @@ export const SeatGrid: React.FC = () => {
           
           {/* 編集モード */}
           {editingSeatId === seat.id ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%' }}>
-              <input
-                type="text"
-                value={editingName}
-                onChange={(e) => setEditingName(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleNameSubmit(seat.id);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Tab') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // 名前を登録して次の席に移動
-                    if (editingName.trim()) {
-                      assignStudentNameToSeat(seat.id, editingName.trim());
-                    } else {
-                      // 名前が空の場合は席から生徒を削除
-                      removeStudentFromSeat(seat.id);
-                    }
-                    setEditingSeatId(null);
-                    setEditingName('');
-                    
-                    // 次の席にフォーカス
-                    const currentIndex = currentLayout.seats.findIndex(s => s.id === seat.id);
-                    const nextIndex = (currentIndex + 1) % currentLayout.seats.length;
-                    const nextSeat = currentLayout.seats[nextIndex];
-                    setFocusedSeatId(nextSeat.id);
-                  } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleNameCancel();
-                  }
-                }}
-                onBlur={() => handleNameSubmit(seat.id)}
-                  style={{
-                    border: 'none',
-                    outline: 'none',
-                    background: 'transparent',
-                    padding: '4px',
-                    fontSize: '22px',
-                    fontWeight: '600',
-                    width: '100%',
-                    textAlign: 'center',
-                    color: 'black',
-                    caretColor: 'var(--color-primary-600)'
-                  }}
-                autoFocus
-              />
-            </div>
+            <SeatEditor
+              seatId={seat.id}
+              editingName={editingName}
+              editingFurigana={editingFurigana}
+              onNameChange={setEditingName}
+              onFuriganaChange={setEditingFurigana}
+              onSubmit={handleNameSubmit}
+              onCancel={handleNameCancel}
+            />
           ) : (
             /* 通常表示 */
             <div style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
@@ -597,124 +466,14 @@ export const SeatGrid: React.FC = () => {
       )}
 
       {/* グループメニュー */}
-      {showGroupMenu && menuPosition && (
-        <div style={{
-          position: 'fixed',
-          left: menuPosition.x,
-          top: menuPosition.y,
-          backgroundColor: 'white',
-          border: '1px solid var(--color-secondary-300)',
-          borderRadius: 'var(--radius-md)',
-          boxShadow: 'var(--shadow-lg)',
-          zIndex: 9999,
-          padding: 'var(--spacing-sm)',
-          minWidth: '150px'
-        }}>
-          <div style={{ 
-            fontSize: '0.75rem', 
-            fontWeight: 'bold', 
-            marginBottom: 'var(--spacing-xs)',
-            color: 'var(--color-secondary-700)'
-          }}>
-            {showGroupMenu.includes(',') ? `${showGroupMenu.split(',').length}席の設定` : '席の設定'}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {/* 空席設定 */}
-            {(() => {
-              const seatIds = showGroupMenu.split(',');
-              const firstSeat = currentLayout.seats.find(s => s.id === seatIds[0]);
-              if (firstSeat) {
-                const allEmpty = seatIds.every(id => {
-                  const seat = currentLayout.seats.find(s => s.id === id);
-                  return seat?.isEmpty;
-                });
-                const allNotEmpty = seatIds.every(id => {
-                  const seat = currentLayout.seats.find(s => s.id === id);
-                  return !seat?.isEmpty;
-                });
-                
-                return (
-                  <button
-                    onClick={() => handleEmptyToggle(showGroupMenu)}
-                    style={{
-                      padding: 'var(--spacing-xs)',
-                      border: 'none',
-                      background: 'transparent',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      cursor: 'pointer',
-                      borderRadius: 'var(--radius-sm)',
-                      color: allEmpty ? 'var(--color-primary-600)' : 'var(--color-secondary-600)',
-                      fontWeight: allEmpty ? 'bold' : 'normal'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    {allEmpty ? '✓ 空席を解除' : allNotEmpty ? '空席にする' : '空席状態を統一'}
-                  </button>
-                );
-              }
-              return null;
-            })()}
-            
-            {/* 区切り線 */}
-            <div style={{ 
-              height: '1px', 
-              backgroundColor: 'var(--color-secondary-200)', 
-              margin: '4px 0'
-            }} />
-            
-            <div style={{ 
-              fontSize: '0.7rem', 
-              color: 'var(--color-secondary-600)',
-              marginBottom: 'var(--spacing-xs)',
-              paddingLeft: 'var(--spacing-xs)'
-            }}>
-              グループ（クリックで追加/削除）
-            </div>
-            
-            {groups.map((group) => {
-              const seatIds = showGroupMenu.split(',');
-              const selectedSeats = seatIds.map(id => currentLayout.seats.find(s => s.id === id)).filter(Boolean);
-              const hasGroup = selectedSeats.some(seat => seat.groupIds.includes(group.id));
-              
-              return (
-              <button
-                key={group.id}
-                onClick={() => handleGroupSelect(showGroupMenu, group.id)}
-                style={{
-                  padding: 'var(--spacing-xs)',
-                  border: 'none',
-                  background: 'transparent',
-                  textAlign: 'left',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  borderRadius: 'var(--radius-sm)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)',
-                  fontWeight: hasGroup ? 'bold' : 'normal'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <div
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    backgroundColor: group.color,
-                    border: '1px solid var(--color-secondary-300)'
-                  }}
-                />
-                {hasGroup && <span>✓</span>}
-                {group.name}
-              </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <GroupMenu
+        showGroupMenu={showGroupMenu}
+        menuPosition={menuPosition}
+        onClose={() => {
+          setShowGroupMenu(null);
+          setMenuPosition(null);
+        }}
+      />
     </div>
   );
 };

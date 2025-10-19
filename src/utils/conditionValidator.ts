@@ -81,7 +81,7 @@ export const validateRoleGroupCondition = (
     if (!role) {
       errors.push(`対象ロール「${condition.roleId}」が見つかりません`);
     }
-    targetStudents = students.filter(s => s.roleIds.includes(condition.roleId));
+    targetStudents = students.filter(s => condition.roleId && s.roleIds.includes(condition.roleId));
     filterName = role?.name || condition.roleId;
     
     if (targetStudents.length === 0) {

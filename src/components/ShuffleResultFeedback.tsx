@@ -1,40 +1,16 @@
 import React from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { CheckCircle, XCircle, AlertCircle, Users, Target, UserCheck } from 'lucide-react';
+import { getConditionIconId, getConditionName } from '../utils/conditionHelpers';
 
 export const ShuffleResultFeedback: React.FC = () => {
-  const { lastShuffleAnalysis, conditions, students, groups, roles } = useSeatStore();
+  const { lastShuffleAnalysis, conditions } = useSeatStore();
 
   if (!lastShuffleAnalysis) return null;
 
   const { totalConditions, satisfiedConditions, failedConditions } = lastShuffleAnalysis;
   const satisfactionRate = totalConditions > 0 ? (satisfiedConditions / totalConditions) * 100 : 100;
 
-  const getConditionIcon = (conditionType: string) => {
-    switch (conditionType) {
-      case 'student-group':
-        return <Users size={16} />;
-      case 'role-group':
-        return <Target size={16} />;
-      case 'student-distance':
-        return <UserCheck size={16} />;
-      default:
-        return <AlertCircle size={16} />;
-    }
-  };
-
-  const getConditionName = (conditionType: string) => {
-    switch (conditionType) {
-      case 'student-group':
-        return '生徒-グループ条件';
-      case 'role-group':
-        return 'ロール-グループ条件';
-      case 'student-distance':
-        return '生徒間距離条件';
-      default:
-        return '不明な条件';
-    }
-  };
 
   return (
     <div style={{
@@ -142,7 +118,15 @@ export const ShuffleResultFeedback: React.FC = () => {
                 }}
               >
                 <div style={{ color: 'var(--color-error-600)', marginTop: '2px' }}>
-                  {getConditionIcon(failedCondition.condition.type)}
+                  {(() => {
+                    const iconId = getConditionIconId(failedCondition.condition.type);
+                    switch (iconId) {
+                      case 'users': return <Users size={16} />;
+                      case 'target': return <Target size={16} />;
+                      case 'user-check': return <UserCheck size={16} />;
+                      default: return <AlertCircle size={16} />;
+                    }
+                  })()}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div className="text-subheadline" style={{ 
@@ -204,7 +188,15 @@ export const ShuffleResultFeedback: React.FC = () => {
                   }}
                 >
                   <div style={{ color: 'var(--color-success-600)', marginTop: '2px' }}>
-                    {getConditionIcon(condition.type)}
+                    {(() => {
+                      const iconId = getConditionIconId(condition.type);
+                      switch (iconId) {
+                        case 'users': return <Users size={16} />;
+                        case 'target': return <Target size={16} />;
+                        case 'user-check': return <UserCheck size={16} />;
+                        default: return <AlertCircle size={16} />;
+                      }
+                    })()}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div className="text-subheadline" style={{ 

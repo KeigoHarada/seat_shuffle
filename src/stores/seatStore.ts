@@ -16,7 +16,6 @@ interface SeatStore extends AppState {
   shuffleSeats: () => void;
   toggleSettings: () => void;
   setShuffling: (isShuffling: boolean) => void;
-  toggleTeacherDeskPosition: () => void;
   
   // グループ管理
   addGroup: (group: Group) => void;
@@ -354,6 +353,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       student = {
         id: `student-${Date.now()}`,
         name: studentName,
+        furigana: '',
+        gender: 'other' as const,
         studentNumber: state.students.length + 1,
         roleIds: []
       };
@@ -376,41 +377,25 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   initializeDefaultLayout: () => {
     const state = get();
     if (!state.currentLayout) {
-      // デフォルトの7x6レイアウトを作成
+      // デフォルトレイアウトを作成
       get().createLayout(7, 6, 'デフォルト教室');
       
-      // デバッグ用の生徒データを作成
+      // デバッグ用の生徒データを作成・追加
       const debugStudents = [
         { id: 'student-1', name: '田中太郎', furigana: 'たなかたろう', gender: 'male' as const, studentNumber: 1, roleIds: [] },
         { id: 'student-2', name: '佐藤花子', furigana: 'さとうはなこ', gender: 'female' as const, studentNumber: 2, roleIds: [] },
         { id: 'student-3', name: '鈴木次郎', furigana: 'すずきじろう', gender: 'male' as const, studentNumber: 3, roleIds: [] },
         { id: 'student-4', name: '高橋美咲', furigana: 'たかはしみさき', gender: 'female' as const, studentNumber: 4, roleIds: [] },
-        { id: 'student-5', name: '伊藤健太', furigana: 'いとうけんた', gender: 'male' as const, studentNumber: 5, roleIds: [] },
-        { id: 'student-6', name: '渡辺さくら', furigana: 'わたなべさくら', gender: 'female' as const, studentNumber: 6, roleIds: [] },
-        { id: 'student-7', name: '山本大輔', furigana: 'やまもとだいすけ', gender: 'male' as const, studentNumber: 7, roleIds: [] },
-        { id: 'student-8', name: '中村優子', furigana: 'なかむらゆうこ', gender: 'female' as const, studentNumber: 8, roleIds: [] },
-        { id: 'student-9', name: '小林翔太', furigana: 'こばやししょうた', gender: 'male' as const, studentNumber: 9, roleIds: [] },
-        { id: 'student-10', name: '加藤愛美', furigana: 'かとうまなみ', gender: 'female' as const, studentNumber: 10, roleIds: [] },
-        { id: 'student-11', name: '吉田直樹', furigana: 'よしだなおき', gender: 'male' as const, studentNumber: 11, roleIds: [] },
-        { id: 'student-12', name: '松本麻衣', furigana: 'まつもとまい', gender: 'female' as const, studentNumber: 12, roleIds: [] },
-        { id: 'student-13', name: '井上雄介', furigana: 'いのうえゆうすけ', gender: 'male' as const, studentNumber: 13, roleIds: [] },
-        { id: 'student-14', name: '木村由美', furigana: 'きむらゆみ', gender: 'female' as const, studentNumber: 14, roleIds: [] },
-        { id: 'student-15', name: '林健一', furigana: 'はやしけんいち', gender: 'male' as const, studentNumber: 15, roleIds: [] },
-        { id: 'student-16', name: '清水美穂', furigana: 'しみずみほ', gender: 'female' as const, studentNumber: 16, roleIds: [] },
-        { id: 'student-17', name: '山口拓也', furigana: 'やまぐちたくや', gender: 'male' as const, studentNumber: 17, roleIds: [] },
-        { id: 'student-18', name: '池田理恵', furigana: 'いけだりえ', gender: 'female' as const, studentNumber: 18, roleIds: [] },
-        { id: 'student-19', name: '前田和也', furigana: 'まえだかずや', gender: 'male' as const, studentNumber: 19, roleIds: [] },
-        { id: 'student-20', name: '藤原香織', furigana: 'ふじわらかおり', gender: 'female' as const, studentNumber: 20, roleIds: [] }
+        { id: 'student-5', name: '伊藤健太', furigana: 'いとうけんた', gender: 'male' as const, studentNumber: 5, roleIds: [] }
       ];
       
-      // 生徒を追加
       debugStudents.forEach(student => {
         set((state) => ({
           students: [...state.students, student]
         }));
       });
       
-      // 席に生徒をランダムに割り当て（一部空席も作成）
+      // 席に生徒をランダムに割り当て
       const currentLayout = get().currentLayout;
       if (currentLayout) {
         const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
@@ -426,32 +411,20 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           get().toggleSeatEmpty(seat.id);
         });
         
-        // 残りの席に生徒を割り当て（全ての席に名前を登録）
+        // 残りの席に生徒を割り当て
         const remainingSeats = availableSeats.filter(seat => 
           !seatsToEmpty.some(emptySeat => emptySeat.id === seat.id)
         );
         
-        // 全ての席に生徒を割り当て（生徒数が足りない場合は追加の生徒を作成）
         remainingSeats.forEach((seat, index) => {
           if (index < shuffledStudents.length) {
             get().assignStudentToSeat(shuffledStudents[index].id, seat.id);
-          } else {
-            // 追加の生徒を作成
-            const additionalStudent = {
-              id: `student-${Date.now()}-${index}`,
-              name: `生徒${index + 1}`,
-              studentNumber: shuffledStudents.length + index + 1,
-              roleIds: []
-            };
-            set((state) => ({
-              students: [...state.students, additionalStudent]
-            }));
-            get().assignStudentToSeat(additionalStudent.id, seat.id);
           }
         });
       }
     }
   },
+
 
   setSettingsPanelWidth: (width) => set({ settingsPanelWidth: width }),
 
@@ -587,17 +560,6 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   // シャッフル結果分析の管理
   setLastShuffleAnalysis: (analysis) => set({ lastShuffleAnalysis: analysis }),
 
-  // 教壇位置の切り替え
-  toggleTeacherDeskPosition: () => set((state) => {
-    if (!state.currentLayout) return state;
-    
-    return {
-      currentLayout: {
-        ...state.currentLayout,
-        teacherDeskPosition: state.currentLayout.teacherDeskPosition === 'top' ? 'bottom' : 'top'
-      }
-    };
-  }),
 
   // 条件検証の実装
   validateConditions: () => {

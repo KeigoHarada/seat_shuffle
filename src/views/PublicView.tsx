@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Shuffle, Settings, Printer, HelpCircle, X, RotateCw } from 'lucide-react';
+import { Shuffle, Settings, Printer, HelpCircle, X } from 'lucide-react';
 import { useSeatStore } from '../stores/seatStore';
 import { SeatGrid } from '../components/SeatGrid';
 
 export const PublicView: React.FC = () => {
-  const { shuffleSeats, toggleSettings, isShuffling, currentLayout, students, showSettings, settingsPanelWidth, toggleTeacherDeskPosition } = useSeatStore();
+  const { shuffleSeats, toggleSettings, isShuffling, currentLayout, students, showSettings, settingsPanelWidth } = useSeatStore();
   const [showHelp, setShowHelp] = useState(false);
 
   const handlePrint = () => {
@@ -44,58 +44,6 @@ export const PublicView: React.FC = () => {
           display: 'flex',
           gap: 'var(--spacing-sm)'
         }}>
-          <div 
-            onClick={toggleTeacherDeskPosition}
-            style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-              padding: 'var(--spacing-xs) var(--spacing-sm)',
-              backgroundColor: 'white',
-              border: '2px solid var(--color-secondary-300)',
-              borderRadius: 'var(--radius-lg)',
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-md)',
-              opacity: 0.9,
-              transition: 'all 0.2s ease'
-            }}
-            title="教壇の位置を切り替え"
-          >
-            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-secondary-700)' }}>
-              教壇:
-            </span>
-            <div style={{
-              position: 'relative',
-              width: '60px',
-              height: '28px',
-              backgroundColor: currentLayout?.teacherDeskPosition === 'top' ? 'var(--color-primary-500)' : 'var(--color-secondary-400)',
-              borderRadius: '14px',
-              transition: 'background-color 0.2s ease'
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '2px',
-                left: currentLayout?.teacherDeskPosition === 'top' ? '2px' : '32px',
-                width: '24px',
-                height: '24px',
-                backgroundColor: 'white',
-                borderRadius: '50%',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                transition: 'left 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '10px',
-                fontWeight: 'bold',
-                color: 'var(--color-secondary-700)'
-              }}>
-                {currentLayout?.teacherDeskPosition === 'top' ? '↑' : '↓'}
-              </div>
-            </div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--color-secondary-600)', minWidth: '20px' }}>
-              {currentLayout?.teacherDeskPosition === 'top' ? '上' : '下'}
-            </span>
-          </div>
           <button
             className="btn btn-secondary"
             onClick={() => setShowHelp(true)}
@@ -165,7 +113,7 @@ export const PublicView: React.FC = () => {
 
       </main>
 
-      <style jsx>{`
+      <style>{`
         @media print {
           .btn {
             display: none !important;

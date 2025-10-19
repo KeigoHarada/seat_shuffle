@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
-import { Shuffle, AlertTriangle, CheckCircle, XCircle, Users, Target, UserCheck } from 'lucide-react';
+import { Shuffle, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { getConditionName } from '../utils/conditionHelpers';
 
 export const ShuffleControlPanel: React.FC = () => {
   const { 
@@ -42,31 +43,6 @@ export const ShuffleControlPanel: React.FC = () => {
     shuffleSeats();
   };
 
-  const getConditionIcon = (conditionType: string) => {
-    switch (conditionType) {
-      case 'student-group':
-        return <Users size={16} />;
-      case 'role-group':
-        return <Target size={16} />;
-      case 'student-distance':
-        return <UserCheck size={16} />;
-      default:
-        return null;
-    }
-  };
-
-  const getConditionName = (conditionType: string) => {
-    switch (conditionType) {
-      case 'student-group':
-        return '生徒-グループ条件';
-      case 'role-group':
-        return 'ロール-グループ条件';
-      case 'student-distance':
-        return '生徒間距離条件';
-      default:
-        return '不明な条件';
-    }
-  };
 
   return (
     <>
@@ -103,7 +79,6 @@ export const ShuffleControlPanel: React.FC = () => {
                     fontSize: '0.875rem'
                   }}
                 >
-                  {getConditionIcon(condition.type)}
                   <span style={{ color: 'var(--color-primary-800)', fontWeight: '500' }}>
                     {condition.name}
                   </span>

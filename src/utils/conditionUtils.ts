@@ -335,12 +335,12 @@ export const analyzeAssignment = (
             const studentId = assignments[seat.id];
             if (!studentId) return false;
             const student = students.find(s => s.id === studentId);
-            return student && student.roleIds.includes(roleGroupCondition.roleId);
+            return student && roleGroupCondition.roleId && student.roleIds.includes(roleGroupCondition.roleId);
           }).length;
           
           if (roleStudentsInGroup !== roleGroupCondition.count) {
             satisfied = false;
-            reason = `${roles.find(r => r.id === roleGroupCondition.roleId)?.name}が${groups.find(g => g.id === groupId)?.name}に${roleGroupCondition.count}人配置されていません（実際: ${roleStudentsInGroup}人）`;
+            reason = `${roles.find(r => r.id === roleGroupCondition.roleId)?.name || 'ロール'}が${groups.find(g => g.id === groupId)?.name || 'グループ'}に${roleGroupCondition.count}人配置されていません（実際: ${roleStudentsInGroup}人）`;
             break;
           }
         }

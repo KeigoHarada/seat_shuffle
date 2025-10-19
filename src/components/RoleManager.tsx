@@ -2,32 +2,10 @@ import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { Role } from '../types';
 import { 
-  Crown, 
-  Shield, 
-  Utensils, 
-  BookOpen, 
-  Users, 
-  Clipboard, 
-  Calendar,
-  MessageSquare,
-  Settings,
-  Award,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-
-const ROLE_ICONS = [
-  { id: 'crown', name: '王冠', component: Crown },
-  { id: 'shield', name: '盾', component: Shield },
-  { id: 'utensils', name: '給食', component: Utensils },
-  { id: 'book', name: '学習', component: BookOpen },
-  { id: 'users', name: 'グループ', component: Users },
-  { id: 'clipboard', name: '記録', component: Clipboard },
-  { id: 'calendar', name: '予定', component: Calendar },
-  { id: 'message', name: '連絡', component: MessageSquare },
-  { id: 'settings', name: '設定', component: Settings },
-  { id: 'award', name: '表彰', component: Award }
-];
+import { ROLE_ICONS } from '../constants/roleIcons';
 
 export const RoleManager: React.FC = () => {
   const { roles, addRole, removeRole, updateRole } = useSeatStore();
