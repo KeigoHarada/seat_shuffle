@@ -382,46 +382,109 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       // デフォルトレイアウトを作成
       get().createLayout(DEFAULT_LAYOUT_ROWS, DEFAULT_LAYOUT_COLS, DEFAULT_LAYOUT_NAME);
       
-      // デバッグ用の生徒データを作成・追加
-      const debugStudents = [
-        { id: 'student-1', name: '田中太郎', furigana: 'たなかたろう', gender: 'male' as const, studentNumber: 1, roleIds: [] },
-        { id: 'student-2', name: '佐藤花子', furigana: 'さとうはなこ', gender: 'female' as const, studentNumber: 2, roleIds: [] },
-        { id: 'student-3', name: '鈴木次郎', furigana: 'すずきじろう', gender: 'male' as const, studentNumber: 3, roleIds: [] },
-        { id: 'student-4', name: '高橋美咲', furigana: 'たかはしみさき', gender: 'female' as const, studentNumber: 4, roleIds: [] },
-        { id: 'student-5', name: '伊藤健太', furigana: 'いとうけんた', gender: 'male' as const, studentNumber: 5, roleIds: [] }
+        // サンプルデータを作成・追加
+        const sampleStudents = [
+          { id: 'student-1', name: '田中太郎', furigana: 'たなかたろう', gender: 'male' as const, studentNumber: 1, roleIds: [] },
+          { id: 'student-2', name: '佐藤花子', furigana: 'さとうはなこ', gender: 'female' as const, studentNumber: 2, roleIds: [] },
+          { id: 'student-3', name: '鈴木次郎', furigana: 'すずきじろう', gender: 'male' as const, studentNumber: 3, roleIds: [] },
+          { id: 'student-4', name: '高橋美咲', furigana: 'たかはしみさき', gender: 'female' as const, studentNumber: 4, roleIds: [] },
+          { id: 'student-5', name: '伊藤健太', furigana: 'いとうけんた', gender: 'male' as const, studentNumber: 5, roleIds: [] },
+          { id: 'student-6', name: '山田一郎', furigana: 'やまだいちろう', gender: 'male' as const, studentNumber: 6, roleIds: [] },
+          { id: 'student-7', name: '中村花子', furigana: 'なかむらはなこ', gender: 'female' as const, studentNumber: 7, roleIds: [] },
+          { id: 'student-8', name: '小林三郎', furigana: 'こばやしさぶろう', gender: 'male' as const, studentNumber: 8, roleIds: [] },
+          { id: 'student-9', name: '加藤美咲', furigana: 'かとうみさき', gender: 'female' as const, studentNumber: 9, roleIds: [] },
+          { id: 'student-10', name: '吉田健太', furigana: 'よしだけんた', gender: 'male' as const, studentNumber: 10, roleIds: [] },
+          { id: 'student-11', name: '松本一郎', furigana: 'まつもといちろう', gender: 'male' as const, studentNumber: 11, roleIds: [] },
+          { id: 'student-12', name: '木村花子', furigana: 'きむらはなこ', gender: 'female' as const, studentNumber: 12, roleIds: [] },
+          { id: 'student-13', name: '林三郎', furigana: 'はやしさぶろう', gender: 'male' as const, studentNumber: 13, roleIds: [] },
+          { id: 'student-14', name: '森美咲', furigana: 'もりみさき', gender: 'female' as const, studentNumber: 14, roleIds: [] },
+          { id: 'student-15', name: '清水健太', furigana: 'しみずけんた', gender: 'male' as const, studentNumber: 15, roleIds: [] },
+          { id: 'student-16', name: '斎藤一郎', furigana: 'さいとういちろう', gender: 'male' as const, studentNumber: 16, roleIds: [] },
+          { id: 'student-17', name: '渡辺花子', furigana: 'わたなべはなこ', gender: 'female' as const, studentNumber: 17, roleIds: [] },
+          { id: 'student-18', name: '石川三郎', furigana: 'いしかわさぶろう', gender: 'male' as const, studentNumber: 18, roleIds: [] },
+          { id: 'student-19', name: '阿部美咲', furigana: 'あべみさき', gender: 'female' as const, studentNumber: 19, roleIds: [] },
+          { id: 'student-20', name: '福田健太', furigana: 'ふくだけんた', gender: 'male' as const, studentNumber: 20, roleIds: [] },
+          { id: 'student-21', name: '岡田一郎', furigana: 'おかだいちろう', gender: 'male' as const, studentNumber: 21, roleIds: [] },
+          { id: 'student-22', name: '中島花子', furigana: 'なかじまはなこ', gender: 'female' as const, studentNumber: 22, roleIds: [] },
+          { id: 'student-23', name: '藤田三郎', furigana: 'ふじたさぶろう', gender: 'male' as const, studentNumber: 23, roleIds: [] },
+          { id: 'student-24', name: '村上美咲', furigana: 'むらかみみさき', gender: 'female' as const, studentNumber: 24, roleIds: [] },
+          { id: 'student-25', name: '西村健太', furigana: 'にしむらけんた', gender: 'male' as const, studentNumber: 25, roleIds: [] },
+          { id: 'student-26', name: '東一郎', furigana: 'ひがしいちろう', gender: 'male' as const, studentNumber: 26, roleIds: [] },
+          { id: 'student-27', name: '南花子', furigana: 'みなみはなこ', gender: 'female' as const, studentNumber: 27, roleIds: [] },
+          { id: 'student-28', name: '北三郎', furigana: 'きたさぶろう', gender: 'male' as const, studentNumber: 28, roleIds: [] },
+          { id: 'student-29', name: '上美咲', furigana: 'うえみさき', gender: 'female' as const, studentNumber: 29, roleIds: [] },
+          { id: 'student-30', name: '下健太', furigana: 'しもけんた', gender: 'male' as const, studentNumber: 30, roleIds: [] },
+          { id: 'student-31', name: '前田一郎', furigana: 'まえだいちろう', gender: 'male' as const, studentNumber: 31, roleIds: [] },
+          { id: 'student-32', name: '後藤花子', furigana: 'ごとうはなこ', gender: 'female' as const, studentNumber: 32, roleIds: [] },
+          { id: 'student-33', name: '左藤三郎', furigana: 'さとうさぶろう', gender: 'male' as const, studentNumber: 33, roleIds: [] },
+          { id: 'student-34', name: '右田美咲', furigana: 'みぎたみさき', gender: 'female' as const, studentNumber: 34, roleIds: [] },
+          { id: 'student-35', name: '中央健太', furigana: 'ちゅうおうけんた', gender: 'male' as const, studentNumber: 35, roleIds: [] },
+          { id: 'student-36', name: '外側一郎', furigana: 'そとがわいちろう', gender: 'male' as const, studentNumber: 36, roleIds: [] },
+          { id: 'student-37', name: '内側花子', furigana: 'うちがわはなこ', gender: 'female' as const, studentNumber: 37, roleIds: [] },
+          { id: 'student-38', name: '上側三郎', furigana: 'うえがわさぶろう', gender: 'male' as const, studentNumber: 38, roleIds: [] },
+          { id: 'student-39', name: '下側美咲', furigana: 'したがわみさき', gender: 'female' as const, studentNumber: 39, roleIds: [] }
+        ];
+      
+      // サンプルグループを作成
+      const sampleGroups = [
+        { id: 'group-1', name: 'A組', color: '#FF6B6B' },
+        { id: 'group-2', name: 'B組', color: '#4ECDC4' },
+        { id: 'group-3', name: 'C組', color: '#45B7D1' },
+        { id: 'group-4', name: 'D組', color: '#96CEB4' },
+        { id: 'group-5', name: 'E組', color: '#FFEAA7' }
       ];
       
-      debugStudents.forEach(student => {
+      // サンプルデータを追加
+      sampleStudents.forEach(student => {
         set((state) => ({
           students: [...state.students, student]
+        }));
+      });
+      
+      sampleGroups.forEach(group => {
+        set((state) => ({
+          groups: [...state.groups, group]
         }));
       });
       
       // 席に生徒をランダムに割り当て
       const currentLayout = get().currentLayout;
       if (currentLayout) {
-        const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
-        const shuffledStudents = [...debugStudents].sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET);
+        const allSeats = [...currentLayout.seats];
+        const shuffledStudents = [...sampleStudents].sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET);
         
-        // 一部の席を空席にする（約20%）
-        const emptySeatCount = Math.floor(availableSeats.length * UI_CONSTANTS.EMPTY_SEAT_RATIO);
-        const seatsToEmpty = availableSeats
+        // 3席を空席にする
+        const emptySeats = allSeats
           .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
-          .slice(0, emptySeatCount);
+          .slice(0, 3);
         
-        seatsToEmpty.forEach(seat => {
+        emptySeats.forEach(seat => {
           get().toggleSeatEmpty(seat.id);
         });
         
+        // 2席を名無し席にする（生徒IDは設定しない）
+        const unnamedSeats = allSeats
+          .filter(seat => !emptySeats.some(emptySeat => emptySeat.id === seat.id))
+          .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
+          .slice(0, 2);
+        
         // 残りの席に生徒を割り当て
-        const remainingSeats = availableSeats.filter(seat => 
-          !seatsToEmpty.some(emptySeat => emptySeat.id === seat.id)
+        const remainingSeats = allSeats.filter(seat => 
+          !emptySeats.some(emptySeat => emptySeat.id === seat.id) &&
+          !unnamedSeats.some(unnamedSeat => unnamedSeat.id === seat.id)
         );
         
         remainingSeats.forEach((seat, index) => {
           if (index < shuffledStudents.length) {
             get().assignStudentToSeat(shuffledStudents[index].id, seat.id);
           }
+        });
+        
+        // ランダムにグループを割り当て
+        const assignedSeats = remainingSeats.slice(0, Math.min(remainingSeats.length, shuffledStudents.length));
+        assignedSeats.forEach(seat => {
+          const randomGroup = sampleGroups[Math.floor(Math.random() * sampleGroups.length)];
+          get().toggleGroupOnSeat(seat.id, randomGroup.id);
         });
       }
     }
