@@ -1,11 +1,18 @@
 import { create } from 'zustand';
 import { Seat, Student, SeatLayout, AppState, Group, Role, Condition, StudentGroupCondition, RoleGroupCondition, StudentDistanceCondition } from '../types';
-import { generateConditionalSeatAssignmentWithAnalysis, AssignmentAnalysis } from '../utils/conditionUtils';
+import { AssignmentAnalysis } from '../utils/conditionUtils';
 import { validateAllConditions, checkConditionConflicts, ConditionValidationResult } from '../utils/conditionValidator';
 import { DEFAULT_LAYOUT_ROWS, DEFAULT_LAYOUT_COLS, DEFAULT_LAYOUT_NAME } from '../constants/layout';
 import { UI_CONSTANTS } from '../constants/ui';
+import { ShuffleManager } from '../utils/ShuffleManager';
+import { ConditionalShuffleAlgorithm } from '../algorithms/ConditionalShuffleAlgorithm';
+import { RandomShuffleAlgorithm } from '../algorithms/RandomShuffleAlgorithm';
+import { GroupBalancedShuffleAlgorithm } from '../algorithms/GroupBalancedShuffleAlgorithm';
 
 interface SeatStore extends AppState {
+  // シャッフルマネージャー
+  shuffleManager: ShuffleManager;
+  
   // アクション
   setCurrentLayout: (layout: SeatLayout) => void;
   addStudent: (student: Student) => void;
@@ -15,7 +22,9 @@ interface SeatStore extends AppState {
   removeStudentFromSeat: (seatId: string) => void;
   createLayout: (rows: number, cols: number, name: string) => void;
   toggleSeatEmpty: (seatId: string) => void;
-  shuffleSeats: () => void;
+  shuffleSeats: () => Promise<void>;
+  setShuffleAlgorithm: (algorithmName: string) => boolean;
+  getAvailableAlgorithms: () => { name: string; description: string }[];
   toggleSettings: () => void;
   setShuffling: (isShuffling: boolean) => void;
   
@@ -58,6 +67,20 @@ interface SeatStore extends AppState {
   checkConditionConflicts: () => ConditionValidationResult;
 }
 
+// シャッフルマネージャーの初期化
+const createShuffleManager = (): ShuffleManager => {
+  return new ShuffleManager({
+    defaultAlgorithm: 'conditional',
+    algorithms: {
+      conditional: new ConditionalShuffleAlgorithm(),
+      random: new RandomShuffleAlgorithm(),
+      'group-balanced': new GroupBalancedShuffleAlgorithm()
+    },
+    maxAttempts: 1000,
+    timeout: 10000 // 10秒
+  });
+};
+
 export const useSeatStore = create<SeatStore>((set, get) => ({
   // 初期状態
   currentLayout: null,
@@ -70,6 +93,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   selectedSeatId: null,
   settingsPanelWidth: 600,
   lastShuffleAnalysis: null,
+  shuffleManager: createShuffleManager(),
 
   // アクション
   setCurrentLayout: (layout) => set({ currentLayout: layout }),
@@ -221,94 +245,94 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
     };
   }),
 
-  shuffleSeats: () => {
+  shuffleSeats: async () => {
     const state = get();
     if (!state.currentLayout) return;
 
     set({ isShuffling: true });
 
-    // シャッフルエフェクトのための遅延
-    setTimeout(() => {
-      const { currentLayout, students, conditions, groups, roles } = get();
+    try {
+      // シャッフルエフェクトのための遅延
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const { currentLayout, students, conditions, groups, roles, shuffleManager } = get();
       if (!currentLayout) return;
 
-      // 有効な条件のみを取得
+      // 有効な条件があるかチェック
       const enabledConditions = conditions.filter(c => c.enabled);
       
-      let newSeats;
-      
-      if (enabledConditions.length > 0) {
-        // 条件を考慮した席配置を生成（詳細分析付き）
-        const analysis = generateConditionalSeatAssignmentWithAnalysis(
-          students,
-          currentLayout.seats,
-          enabledConditions,
-          groups,
-          roles
-        );
-        
-        if (analysis) {
-          // 条件を満たす配置が見つかった場合
-          newSeats = currentLayout.seats.map(seat => {
-            if (seat.isEmpty) return seat;
-            return {
-              ...seat,
-              studentId: analysis.assignment[seat.id]
-            };
-          });
-          
-          // 分析結果を保存
-          set({ lastShuffleAnalysis: analysis });
-        } else {
-          // 条件を満たす配置が見つからない場合、従来のランダム配置にフォールバック
-          console.warn('条件を満たす席配置が見つかりません。ランダム配置にフォールバックします。');
-          const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
-          const shuffledStudents = [...students].sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET);
-          
-          newSeats = currentLayout.seats.map(seat => {
-            if (seat.isEmpty) return seat;
-            
-            const studentIndex = availableSeats.indexOf(seat);
-            const student = shuffledStudents[studentIndex];
-            
-            return {
-              ...seat,
-              studentId: student?.id
-            };
-          });
-          
-          // フォールバック時は分析結果をクリア
-          set({ lastShuffleAnalysis: null });
-        }
+      // 条件がない場合はランダムアルゴリズムを使用
+      if (enabledConditions.length === 0) {
+        shuffleManager.setAlgorithm('random');
       } else {
-        // 条件が設定されていない場合、従来のランダム配置
-        const availableSeats = currentLayout.seats.filter(seat => !seat.isEmpty);
-        const shuffledStudents = [...students].sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET);
-        
-        newSeats = currentLayout.seats.map(seat => {
+        shuffleManager.setAlgorithm('conditional');
+      }
+      
+      // シャッフルマネージャーを使用してシャッフル実行
+      const result = await shuffleManager.shuffle(students, currentLayout.seats, conditions, groups, roles);
+
+      if (result.success) {
+        // 成功した場合、席の配置を更新
+        const newSeats = currentLayout.seats.map(seat => {
           if (seat.isEmpty) return seat;
           
-          const studentIndex = availableSeats.indexOf(seat);
-          const student = shuffledStudents[studentIndex];
+          const assignedStudentId = result.assignment[seat.id];
           
-          return {
-            ...seat,
-            studentId: student?.id
-          };
+          if (assignedStudentId) {
+            return {
+              ...seat,
+              studentId: assignedStudentId
+            };
+          } else {
+            // 名無し席の場合、studentIdプロパティを削除
+            const { studentId, ...seatWithoutStudentId } = seat;
+            return seatWithoutStudentId;
+          }
         });
-        
-        // 条件なしの場合は分析結果をクリア
+
+        set({
+          currentLayout: {
+            ...currentLayout,
+            seats: newSeats
+          },
+          lastShuffleAnalysis: result.analysis ? {
+            totalConditions: result.analysis.totalConditions,
+            satisfiedConditions: result.analysis.satisfiedConditions,
+            failedConditions: result.analysis.conditionDetails
+              .filter(d => !d.satisfied)
+              .map(d => ({
+                condition: { id: d.conditionId, name: d.conditionName } as any,
+                satisfied: d.satisfied,
+                reason: d.reason
+              })),
+            assignment: Object.fromEntries(
+              Object.entries(result.assignment).filter(([_, value]) => value !== undefined)
+            ) as { [seatId: string]: string }
+          } : null
+        });
+      } else {
+        // 失敗した場合、エラーメッセージを表示
+        console.error('シャッフルに失敗しました:', result.error);
         set({ lastShuffleAnalysis: null });
       }
+    } catch (error) {
+      console.error('シャッフル中にエラーが発生しました:', error);
+      set({ lastShuffleAnalysis: null });
+    } finally {
+      set({ isShuffling: false });
+    }
+  },
 
-      set({
-        currentLayout: {
-          ...currentLayout,
-          seats: newSeats
-        },
-        isShuffling: false
-      });
-    }, 2000); // 2秒間のシャッフルエフェクト
+  // シャッフルアルゴリズムを変更
+  setShuffleAlgorithm: (algorithmName: string) => {
+    const { shuffleManager } = get();
+    return shuffleManager.setAlgorithm(algorithmName);
+  },
+
+  // 利用可能なアルゴリズム一覧を取得
+  getAvailableAlgorithms: () => {
+    const { shuffleManager } = get();
+    return shuffleManager.getAvailableAlgorithms();
   },
 
   toggleSettings: () => set((state) => ({
@@ -467,6 +491,17 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           .filter(seat => !emptySeats.some(emptySeat => emptySeat.id === seat.id))
           .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
           .slice(0, 2);
+        
+        // 名無し席のstudentIdプロパティを削除
+        unnamedSeats.forEach(seat => {
+          const { studentId, ...seatWithoutStudentId } = seat;
+          get().setCurrentLayout({
+            ...get().currentLayout!,
+            seats: get().currentLayout!.seats.map(s => 
+              s.id === seat.id ? seatWithoutStudentId : s
+            )
+          });
+        });
         
         // 残りの席に生徒を割り当て
         const remainingSeats = allSeats.filter(seat => 

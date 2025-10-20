@@ -430,7 +430,7 @@ export const SeatGrid: React.FC = () => {
                   })()}
                 </>
               ) : (
-                <span style={{ opacity: 0.5, fontSize: `${32 * scale}px` }}>空席</span>
+                <span style={{ opacity: 0.5, fontSize: `${32 * scale}px` }}>名無し</span>
               )}
             </div>
           )}
