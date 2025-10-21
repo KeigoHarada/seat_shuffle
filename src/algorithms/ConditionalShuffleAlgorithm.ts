@@ -1,6 +1,6 @@
 import { ShuffleAlgorithm, ShuffleResult, ShuffleAnalysis } from '../types/shuffle';
 import { Seat, Student, Group, Role, Condition } from '../types';
-import { generateConditionalSeatAssignmentWithAnalysis } from '../utils/conditionUtils';
+import { generateCSPSeatAssignmentWithAnalysis } from '../utils/conditionUtils';
 
 export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
   name = 'conditional';
@@ -36,43 +36,36 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
         return {
           success: true,
           assignment,
-          analysis: {
-            totalConditions: 0,
-            satisfiedConditions: 0,
-            failedConditions: 0,
-            conditionDetails: []
-          }
+        analysis: {
+          totalConditions: 0,
+          failedConditions: []
+        }
         };
       }
 
-      // 条件を考慮した席配置を生成
-      const analysis = generateConditionalSeatAssignmentWithAnalysis(
+      // CSPアルゴリズムで条件を考慮した席配置を生成
+      const analysis = generateCSPSeatAssignmentWithAnalysis(
         students,
         seats,
         enabledConditions,
         groups,
-        roles
+        roles,
+        1000, // maxAttempts
+        10000 // timeoutMs (10秒)
       );
 
       if (!analysis) {
         return {
           success: false,
           assignment: {},
-          error: '条件を満たす席配置が見つかりませんでした'
+          error: '制約充足問題として解けませんでした。条件が複雑すぎるか、解が存在しない可能性があります。'
         };
       }
 
       // 分析結果をShuffleAnalysis形式に変換
       const shuffleAnalysis: ShuffleAnalysis = {
         totalConditions: analysis.totalConditions,
-        satisfiedConditions: analysis.satisfiedConditions,
-        failedConditions: analysis.failedConditions,
-        conditionDetails: enabledConditions.map(condition => ({
-          conditionId: condition.id,
-          conditionName: condition.name || '無名の条件',
-          satisfied: analysis.satisfiedConditions > 0,
-          reason: analysis.satisfiedConditions > 0 ? '条件を満たしています' : '条件を満たしていません'
-        }))
+        failedConditions: analysis.failedConditions
       };
 
       return {

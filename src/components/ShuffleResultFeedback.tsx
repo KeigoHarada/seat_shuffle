@@ -8,7 +8,8 @@ export const ShuffleResultFeedback: React.FC = () => {
 
   if (!lastShuffleAnalysis) return null;
 
-  const { totalConditions, satisfiedConditions, failedConditions } = lastShuffleAnalysis;
+  const { totalConditions, failedConditions } = lastShuffleAnalysis;
+  const satisfiedConditions = totalConditions - failedConditions.length;
   const satisfactionRate = totalConditions > 0 ? (satisfiedConditions / totalConditions) * 100 : 100;
 
 

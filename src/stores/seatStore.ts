@@ -7,7 +7,6 @@ import { UI_CONSTANTS } from '../constants/ui';
 import { ShuffleManager } from '../utils/ShuffleManager';
 import { ConditionalShuffleAlgorithm } from '../algorithms/ConditionalShuffleAlgorithm';
 import { RandomShuffleAlgorithm } from '../algorithms/RandomShuffleAlgorithm';
-import { GroupBalancedShuffleAlgorithm } from '../algorithms/GroupBalancedShuffleAlgorithm';
 
 interface SeatStore extends AppState {
   // シャッフルマネージャー
@@ -73,8 +72,7 @@ const createShuffleManager = (): ShuffleManager => {
     defaultAlgorithm: 'conditional',
     algorithms: {
       conditional: new ConditionalShuffleAlgorithm(),
-      random: new RandomShuffleAlgorithm(),
-      'group-balanced': new GroupBalancedShuffleAlgorithm()
+      random: new RandomShuffleAlgorithm()
     },
     maxAttempts: 1000,
     timeout: 10000 // 10秒
@@ -85,9 +83,81 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   // 初期状態
   currentLayout: null,
   students: [],
-  groups: [],
-  roles: [],
-  conditions: [],
+  groups: [
+    // サンプルグループ
+    {
+      id: 'group-front-row',
+      name: '前列',
+      color: '#3B82F6',
+      description: '教室の前列の席'
+    },
+    {
+      id: 'group-back-row',
+      name: '後列',
+      color: '#10B981',
+      description: '教室の後列の席'
+    },
+    {
+      id: 'group-left-side',
+      name: '左側',
+      color: '#F59E0B',
+      description: '教室の左側の席'
+    },
+    {
+      id: 'group-right-side',
+      name: '右側',
+      color: '#EF4444',
+      description: '教室の右側の席'
+    }
+  ],
+  roles: [
+    // サンプルロール
+    {
+      id: 'role-class-leader',
+      name: '学級委員',
+      icon: 'crown',
+      description: 'クラスの代表として活動する'
+    },
+    {
+      id: 'role-vice-leader',
+      name: '副学級委員',
+      icon: 'shield',
+      description: '学級委員をサポートする'
+    }
+  ],
+  conditions: [
+    // サンプル条件
+    {
+      id: 'condition-front-row-leaders',
+      name: '前列に学級委員を配置',
+      type: 'role-group' as const,
+      enabled: true,
+      description: '前列に学級委員を1人配置する',
+      roleId: 'role-class-leader',
+      groupIds: ['group-front-row'],
+      count: 1
+    },
+    {
+      id: 'condition-gender-balance',
+      name: '男女バランスを考慮',
+      type: 'role-group' as const,
+      enabled: true,
+      description: '各列に男女をバランスよく配置する',
+      gender: 'male' as const,
+      groupIds: ['group-front-row', 'group-back-row'],
+      count: 2
+    },
+    {
+      id: 'condition-separate-troublemakers',
+      name: '問題児を離す',
+      type: 'student-distance' as const,
+      enabled: false,
+      description: '特定の生徒同士を離して配置する',
+      studentId1: 'student-1',
+      studentId2: 'student-2',
+      shouldBeClose: false
+    }
+  ],
   isShuffling: false,
   showSettings: false,
   selectedSeatId: null,
@@ -297,14 +367,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           },
           lastShuffleAnalysis: result.analysis ? {
             totalConditions: result.analysis.totalConditions,
-            satisfiedConditions: result.analysis.satisfiedConditions,
-            failedConditions: result.analysis.conditionDetails
-              .filter(d => !d.satisfied)
-              .map(d => ({
-                condition: { id: d.conditionId, name: d.conditionName } as any,
-                satisfied: d.satisfied,
-                reason: d.reason
-              })),
+            failedConditions: result.analysis.failedConditions,
             assignment: Object.fromEntries(
               Object.entries(result.assignment).filter(([_, value]) => value !== undefined)
             ) as { [seatId: string]: string }
@@ -408,8 +471,8 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
       
         // サンプルデータを作成・追加
         const sampleStudents = [
-          { id: 'student-1', name: '田中太郎', furigana: 'たなかたろう', gender: 'male' as const, studentNumber: 1, roleIds: [] },
-          { id: 'student-2', name: '佐藤花子', furigana: 'さとうはなこ', gender: 'female' as const, studentNumber: 2, roleIds: [] },
+          { id: 'student-1', name: '田中太郎', furigana: 'たなかたろう', gender: 'male' as const, studentNumber: 1, roleIds: ['role-class-leader'] },
+          { id: 'student-2', name: '佐藤花子', furigana: 'さとうはなこ', gender: 'female' as const, studentNumber: 2, roleIds: ['role-vice-leader'] },
           { id: 'student-3', name: '鈴木次郎', furigana: 'すずきじろう', gender: 'male' as const, studentNumber: 3, roleIds: [] },
           { id: 'student-4', name: '高橋美咲', furigana: 'たかはしみさき', gender: 'female' as const, studentNumber: 4, roleIds: [] },
           { id: 'student-5', name: '伊藤健太', furigana: 'いとうけんた', gender: 'male' as const, studentNumber: 5, roleIds: [] },
@@ -449,25 +512,10 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           { id: 'student-39', name: '下側美咲', furigana: 'したがわみさき', gender: 'female' as const, studentNumber: 39, roleIds: [] }
         ];
       
-      // サンプルグループを作成
-      const sampleGroups = [
-        { id: 'group-1', name: 'A組', color: '#FF6B6B' },
-        { id: 'group-2', name: 'B組', color: '#4ECDC4' },
-        { id: 'group-3', name: 'C組', color: '#45B7D1' },
-        { id: 'group-4', name: 'D組', color: '#96CEB4' },
-        { id: 'group-5', name: 'E組', color: '#FFEAA7' }
-      ];
-      
       // サンプルデータを追加
       sampleStudents.forEach(student => {
         set((state) => ({
           students: [...state.students, student]
-        }));
-      });
-      
-      sampleGroups.forEach(group => {
-        set((state) => ({
-          groups: [...state.groups, group]
         }));
       });
       
@@ -513,13 +561,6 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
           if (index < shuffledStudents.length) {
             get().assignStudentToSeat(shuffledStudents[index].id, seat.id);
           }
-        });
-        
-        // ランダムにグループを割り当て
-        const assignedSeats = remainingSeats.slice(0, Math.min(remainingSeats.length, shuffledStudents.length));
-        assignedSeats.forEach(seat => {
-          const randomGroup = sampleGroups[Math.floor(Math.random() * sampleGroups.length)];
-          get().toggleGroupOnSeat(seat.id, randomGroup.id);
         });
       }
     }

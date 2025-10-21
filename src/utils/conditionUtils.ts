@@ -227,7 +227,6 @@ export interface ConditionCheckResult {
 // 配置結果の詳細分析
 export interface AssignmentAnalysis {
   totalConditions: number;
-  satisfiedConditions: number;
   failedConditions: ConditionCheckResult[];
   assignment: { [seatId: string]: string };
 }
@@ -284,6 +283,63 @@ export const generateConditionalSeatAssignmentWithAnalysis = (
   }
   
   return null; // 条件を満たす配置が見つからない
+};
+
+// 制約難易度を計算
+export const calculateConstraintDifficulty = (
+  student: Student,
+  seats: Seat[],
+  conditions: Condition[],
+  groups: Group[],
+  roles: Role[],
+  currentAssignments: { [seatId: string]: string } = {}
+): number => {
+  const availableSeats = seats.filter(seat => !seat.isEmpty);
+  
+  // 条件を満たす席の数をカウント
+  const validSeats = availableSeats.filter(seat => 
+    checkAllConditions(student, seat, conditions, groups, roles, [student], currentAssignments, seats)
+  );
+  
+  // 配置可能席数が少ないほど難易度が高い
+  let difficulty = availableSeats.length - validSeats.length;
+  
+  // 生徒間距離条件の影響を評価
+  const distanceConditions = conditions.filter(c => 
+    c.type === 'student-distance' && 
+    c.enabled && 
+    (c as StudentDistanceCondition).studentId1 === student.id || 
+    (c as StudentDistanceCondition).studentId2 === student.id
+  );
+  
+  // 距離条件があると難易度が上がる
+  difficulty += distanceConditions.length * 2;
+  
+  // 生徒-グループ条件の影響を評価
+  const studentGroupConditions = conditions.filter(c => 
+    c.type === 'student-group' && 
+    c.enabled && 
+    (c as StudentGroupCondition).studentIds.includes(student.id)
+  );
+  
+  difficulty += studentGroupConditions.length;
+  
+  return difficulty;
+};
+
+// 生徒を制約の厳しさでソート
+export const sortStudentsByConstraintDifficulty = (
+  students: Student[],
+  seats: Seat[],
+  conditions: Condition[],
+  groups: Group[],
+  roles: Role[]
+): Student[] => {
+  return [...students].sort((a, b) => {
+    const difficultyA = calculateConstraintDifficulty(a, seats, conditions, groups, roles);
+    const difficultyB = calculateConstraintDifficulty(b, seats, conditions, groups, roles);
+    return difficultyB - difficultyA; // 難易度の高い順
+  });
 };
 
 // 配置結果を分析
@@ -383,8 +439,144 @@ export const analyzeAssignment = (
   
   return {
     totalConditions: conditions.filter(c => c.enabled).length,
-    satisfiedConditions: conditions.filter(c => c.enabled).length - failedConditions.length,
     failedConditions,
     assignment: assignments
   };
+};
+
+// バックトラッキング用の型定義
+interface BacktrackAssignment {
+  [seatId: string]: string | undefined;
+}
+
+// 制約充足問題として席配置を生成（バックトラッキング版）
+export const generateCSPSeatAssignment = (
+  students: Student[],
+  seats: Seat[],
+  conditions: Condition[],
+  groups: Group[],
+  roles: Role[],
+  maxAttempts: number = 1000,
+  timeoutMs: number = 10000
+): { [seatId: string]: string | undefined } | null => {
+  const availableSeats = seats.filter(seat => !seat.isEmpty);
+  
+  // 現在の名無し席の数をカウント
+  const currentUnnamedCount = availableSeats.filter(seat => !('studentId' in seat) || seat.studentId === undefined).length;
+  
+  // 生徒数と席数が合わない場合はnullを返す
+  if (students.length > availableSeats.length) {
+    return null;
+  }
+  
+  // 制約の厳しさで生徒をソート
+  const sortedStudents = sortStudentsByConstraintDifficulty(students, seats, conditions, groups, roles);
+  
+  const startTime = Date.now();
+  
+  // バックトラッキング関数
+  const backtrack = (
+    studentIndex: number,
+    assignments: BacktrackAssignment,
+    remainingSeats: Seat[]
+  ): BacktrackAssignment | null => {
+    // タイムアウトチェック
+    if (Date.now() - startTime > timeoutMs) {
+      return null;
+    }
+    
+    // ベースケース: すべての生徒を配置完了
+    if (studentIndex === sortedStudents.length) {
+      // 名無し席の数をチェック
+      const assignedSeats = Object.keys(assignments).length;
+      const unnamedSeatsNeeded = availableSeats.length - assignedSeats;
+      
+      if (unnamedSeatsNeeded === currentUnnamedCount) {
+        return assignments;
+      } else {
+        return null; // 名無し席の数が合わない
+      }
+    }
+    
+    const student = sortedStudents[studentIndex];
+    
+    // 条件を満たす席をフィルタリング
+    const validSeats = remainingSeats.filter(seat => 
+      checkAllConditions(student, seat, conditions, groups, roles, sortedStudents, assignments as { [seatId: string]: string }, seats)
+    );
+    
+    // 候補席がない場合は失敗
+    if (validSeats.length === 0) {
+      return null;
+    }
+    
+    // 各候補席を試す（ランダムな順序で）
+    const shuffledValidSeats = [...validSeats].sort(() => Math.random() - 0.5);
+    
+    for (const seat of shuffledValidSeats) {
+      // 席に生徒を割り当て
+      assignments[seat.id] = student.id;
+      
+      // 次の生徒を再帰的に配置
+      const result = backtrack(
+        studentIndex + 1,
+        { ...assignments },
+        remainingSeats.filter(s => s.id !== seat.id)
+      );
+      
+      if (result) {
+        return result; // 成功
+      }
+      
+      // 失敗したので取り消して次の席を試す
+      delete assignments[seat.id];
+    }
+    
+    return null; // すべての席を試したが解なし
+  };
+  
+  // バックトラッキングを実行
+  const assignments: BacktrackAssignment = {};
+  const result = backtrack(0, assignments, availableSeats);
+  
+  if (result) {
+    // 空席はundefinedとして設定
+    seats.forEach(seat => {
+      if (seat.isEmpty) {
+        result[seat.id] = undefined;
+      }
+    });
+    
+    // 名無し席を設定（生徒が配置されていない席）
+    availableSeats.forEach(seat => {
+      if (!result[seat.id]) {
+        result[seat.id] = undefined;
+      }
+    });
+    
+    return result;
+  }
+  
+  return null; // 解が見つからない
+};
+
+// 制約充足問題として席配置を生成（詳細分析付き）
+export const generateCSPSeatAssignmentWithAnalysis = (
+  students: Student[],
+  seats: Seat[],
+  conditions: Condition[],
+  groups: Group[],
+  roles: Role[],
+  maxAttempts: number = 1000,
+  timeoutMs: number = 10000
+): AssignmentAnalysis | null => {
+  const assignment = generateCSPSeatAssignment(students, seats, conditions, groups, roles, maxAttempts, timeoutMs);
+  
+  if (!assignment) {
+    return null;
+  }
+  
+  // 配置結果を分析
+  const analysis = analyzeAssignment(assignment as { [seatId: string]: string }, conditions, students, seats, groups, roles);
+  return analysis;
 };

@@ -11,11 +11,8 @@ export interface ShuffleResult {
 // シャッフル分析結果
 export interface ShuffleAnalysis {
   totalConditions: number;
-  satisfiedConditions: number;
-  failedConditions: number;
-  conditionDetails: Array<{
-    conditionId: string;
-    conditionName: string;
+  failedConditions: Array<{
+    condition: Condition;
     satisfied: boolean;
     reason?: string;
   }>;

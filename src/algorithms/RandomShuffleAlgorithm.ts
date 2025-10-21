@@ -55,11 +55,8 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
       const enabledConditions = conditions.filter(c => c.enabled);
       const analysis: ShuffleAnalysis = {
         totalConditions: enabledConditions.length,
-        satisfiedConditions: 0, // ランダムなので条件は考慮しない
-        failedConditions: enabledConditions.length,
-        conditionDetails: enabledConditions.map(condition => ({
-          conditionId: condition.id,
-          conditionName: condition.name || '無名の条件',
+        failedConditions: enabledConditions.map(condition => ({
+          condition,
           satisfied: false,
           reason: 'ランダムアルゴリズムでは条件を考慮しません'
         }))
