@@ -1,4 +1,27 @@
-<!-- 52ba7210-88fc-47d1-8685-3ff4b32ebec6 a863239f-498f-42a1-9b45-f4b38000dd71 -->
+---
+name: 名無し席シャッフルバグ修正計画
+overview: ""
+todos:
+  - id: 4be5454e-de08-421b-82f5-6f4089ba3623
+    content: 定数ファイルを作成（roleIcons.ts, colors.ts, layout.ts）
+    status: pending
+  - id: 7fad268e-4ddf-4a8c-a757-9faae1a565e6
+    content: ユーティリティヘルパーを作成（studentHelpers.ts, conditionHelpers.ts）
+    status: pending
+  - id: 6bb075dd-60d6-4ae4-9044-820bdc6b417e
+    content: 大きな関数を分割（initializeDefaultLayout等）
+    status: pending
+  - id: 3978999e-880e-41cb-9992-670a4a4260b2
+    content: SeatGridコンポーネントを分割（GroupMenu, SeatEditor, hooks）
+    status: pending
+  - id: 7af5386f-08a8-4b4b-b1e9-ab142f8b4ae0
+    content: ConditionManagerコンポーネントを分割（各種Form, ConditionCard）
+    status: pending
+  - id: 2429ee6f-a1ab-4a7c-81df-7e87c9ff5b63
+    content: 型エラー修正と未使用コード削除
+    status: pending
+---
+
 # 名無し席シャッフルバグ修正計画
 
 ## 問題の原因分析
@@ -67,12 +90,3 @@ const currentNamedSeats = availableSeats.filter(seat => 'studentId' in seat && s
 - シャッフル実行後も名無し席が2席のまま保持される
 - 名無し席には「名無し」と表示される
 - 生徒はシャッフルされるが、名無し席の位置は変わらない
-
-### To-dos
-
-- [ ] 定数ファイルを作成（roleIcons.ts, colors.ts, layout.ts）
-- [ ] ユーティリティヘルパーを作成（studentHelpers.ts, conditionHelpers.ts）
-- [ ] 大きな関数を分割（initializeDefaultLayout等）
-- [ ] SeatGridコンポーネントを分割（GroupMenu, SeatEditor, hooks）
-- [ ] ConditionManagerコンポーネントを分割（各種Form, ConditionCard）
-- [ ] 型エラー修正と未使用コード削除
