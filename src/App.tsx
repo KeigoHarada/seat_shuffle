@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSeatStore } from './stores/seatStore';
 import { PublicView } from './views/PublicView';
 import { SettingsView } from './views/SettingsView';

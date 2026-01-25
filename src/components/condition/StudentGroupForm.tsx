@@ -28,16 +28,16 @@ export const StudentGroupForm: React.FC<StudentGroupFormProps> = ({ onAdd, onCan
   };
 
   const handleStudentToggle = (studentId: string) => {
-    setSelectedStudentIds(prev => 
-      prev.includes(studentId) 
+    setSelectedStudentIds(prev =>
+      prev.includes(studentId)
         ? prev.filter(id => id !== studentId)
         : [...prev, studentId]
     );
   };
 
   const handleGroupToggle = (groupId: string) => {
-    setSelectedGroupIds(prev => 
-      prev.includes(groupId) 
+    setSelectedGroupIds(prev =>
+      prev.includes(groupId)
         ? prev.filter(id => id !== groupId)
         : [...prev, groupId]
     );
@@ -46,7 +46,7 @@ export const StudentGroupForm: React.FC<StudentGroupFormProps> = ({ onAdd, onCan
   return (
     <form onSubmit={handleSubmit} style={{ padding: 'var(--spacing-md)' }}>
       <h3 style={{ marginBottom: 'var(--spacing-md)' }}>生徒-グループ条件を追加</h3>
-      
+
       <div style={{ marginBottom: 'var(--spacing-md)' }}>
         <label className="text-subheadline" style={{ display: 'block', marginBottom: 'var(--spacing-sm)' }}>
           生徒を選択（複数選択可）
@@ -120,8 +120,8 @@ export const StudentGroupForm: React.FC<StudentGroupFormProps> = ({ onAdd, onCan
         <button type="button" onClick={onCancel} className="btn btn-secondary">
           キャンセル
         </button>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="btn btn-primary"
           disabled={selectedStudentIds.length === 0 || selectedGroupIds.length === 0}
         >
