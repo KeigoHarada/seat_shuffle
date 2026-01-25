@@ -19,7 +19,6 @@ export const StudentManager: React.FC = () => {
   const [editingName, setEditingName] = useState('');
   const [editingFurigana, setEditingFurigana] = useState('');
   const [editingGender, setEditingGender] = useState<'male' | 'female' | 'other'>('male');
-  const [showRoleMenu, setShowRoleMenu] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
 
   // 出席番号順にソートされた生徒リストを取得
@@ -391,7 +390,7 @@ export const StudentManager: React.FC = () => {
               <span style={{ textAlign: 'center' }}>操作</span>
             </div>
             
-            {getSortedStudents().map((student, index) => (
+            {getSortedStudents().map((student) => (
               <div
                 key={student.id}
                 onClick={() => handleStudentRowClick(student.id)}

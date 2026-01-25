@@ -66,7 +66,7 @@ export const ShuffleControlPanel: React.FC = () => {
               設定中の条件 ({enabledConditions.length}件)
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-              {enabledConditions.map((condition, index) => (
+              {enabledConditions.map((condition) => (
                 <div
                   key={condition.id}
                   style={{

@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { DEFAULT_LAYOUT_ROWS, DEFAULT_LAYOUT_COLS, DEFAULT_LAYOUT_NAME } from '../constants/layout';
 
 export const LayoutSettings: React.FC = () => {
-  const { createLayout, currentLayout } = useSeatStore();
+  const { createLayout } = useSeatStore();
   const [rows, setRows] = useState(DEFAULT_LAYOUT_ROWS);
   const [cols, setCols] = useState(DEFAULT_LAYOUT_COLS);
   const [isExpanded, setIsExpanded] = useState(true);

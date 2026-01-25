@@ -28,7 +28,7 @@ export const checkStudentGroupCondition = (
   condition: StudentGroupCondition,
   student: Student,
   seat: Seat,
-  groups: Group[],
+  _groups: Group[],
 ): boolean => {
   // 条件が無効な場合は常にtrue
   if (!condition.enabled) return true;
@@ -51,7 +51,7 @@ export const checkRoleGroupCondition = (
   condition: RoleGroupCondition,
   student: Student,
   seat: Seat,
-  groups: Group[],
+  _groups: Group[],
   students: Student[],
   currentAssignments: { [seatId: string]: string },
 ): boolean => {
@@ -82,11 +82,9 @@ export const checkRoleGroupCondition = (
     condition.groupIds.includes(gid),
   );
 
-  for (const groupId of relevantGroupIds) {
+  for (const _groupId of relevantGroupIds) {
     const currentRoleCount = Object.entries(currentAssignments).filter(
-      ([seatId, assignedStudentId]) => {
-        const assignedSeat = Object.values(currentAssignments);
-
+      ([_seatId, assignedStudentId]) => {
         const assignedStudent = students.find(
           (s) => s.id === assignedStudentId,
         );
@@ -163,7 +161,7 @@ export const checkAllConditions = (
   seat: Seat,
   conditions: Condition[],
   groups: Group[],
-  roles: Role[],
+  _roles: Role[],
   students: Student[],
   currentAssignments: { [seatId: string]: string },
   allSeats: Seat[],
@@ -562,7 +560,7 @@ export const generateCSPSeatAssignment = (
   conditions: Condition[],
   groups: Group[],
   roles: Role[],
-  maxAttempts: number = 1000,
+  _maxAttempts: number = 1000,
   timeoutMs: number = 10000,
 ): { [seatId: string]: string | undefined } | null => {
   const availableSeats = seats.filter((seat) => !seat.isEmpty);

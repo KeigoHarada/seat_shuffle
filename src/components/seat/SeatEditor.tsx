@@ -20,7 +20,7 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
   onSubmit,
   onCancel
 }) => {
-  const { removeStudentFromSeat, currentLayout } = useSeatStore();
+  const { removeStudentFromSeat } = useSeatStore();
 
   const handleKeyDown = (e: React.KeyboardEvent, field: 'furigana' | 'name') => {
     if (e.key === 'Tab' && e.shiftKey) {
