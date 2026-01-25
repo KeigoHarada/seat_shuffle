@@ -229,7 +229,7 @@ export const SeatGrid: React.FC = () => {
 
   const BORDER_WIDTH = 6;
   const OUTLINE_WIDTH = 2;
-  const WRAP_WIDTH = 3;
+  const WRAP_WIDTH = 4;
 
   const buildClusterBoxShadow = (seatId: string) => {
     const entries = clusterBorders.get(seatId);
@@ -247,11 +247,12 @@ export const SeatGrid: React.FC = () => {
       hasLeft: boolean,
       offset: number,
       color: string,
+      spread: number = 0,
     ) => {
-      if (hasTop) shadows.push(`0 -${offset}px 0 0 ${color}`);
-      if (hasRight) shadows.push(`${offset}px 0 0 0 ${color}`);
-      if (hasBottom) shadows.push(`0 ${offset}px 0 0 ${color}`);
-      if (hasLeft) shadows.push(`-${offset}px 0 0 0 ${color}`);
+      if (hasTop) shadows.push(`0 -${offset}px 0 ${spread}px ${color}`);
+      if (hasRight) shadows.push(`${offset}px 0 0 ${spread}px ${color}`);
+      if (hasBottom) shadows.push(`0 ${offset}px 0 ${spread}px ${color}`);
+      if (hasLeft) shadows.push(`-${offset}px 0 0 ${spread}px ${color}`);
     };
 
     for (let i = 0; i < entries.length; i++) {
@@ -264,7 +265,7 @@ export const SeatGrid: React.FC = () => {
 
       push(top, right, bottom, left, inner, color);
       push(top, right, bottom, left, outer, BORDER_OUTLINE);
-      push(top, right, bottom, left, wrap, color);
+      push(top, right, bottom, left, wrap, color, ww);
     }
     return shadows.length ? shadows.join(', ') : undefined;
   };
