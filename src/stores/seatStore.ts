@@ -81,7 +81,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   settingsPanelWidth: 600,
   lastShuffleAnalysis: null,
 
-  ...createStudentSlice(set as (p: unknown) => void, get as () => SeatStore),
+  ...createStudentSlice(set as (p: unknown) => void),
   ...createLayoutSlice(set as (p: unknown) => void, get as () => SeatStore),
   ...createGroupSlice(set as (p: unknown) => void),
   ...createRoleSlice(set as (p: unknown) => void),

@@ -1,12 +1,13 @@
 import type {
   Condition,
   Student,
+  Seat,
+  Group,
+  Role,
   StudentGroupCondition,
   RoleGroupCondition,
   StudentDistanceCondition,
 } from "../../types";
-import type { Seat } from "../../types";
-import type { Group, Role } from "../../types";
 import {
   validateAllConditions,
   checkConditionConflicts,

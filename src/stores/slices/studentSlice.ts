@@ -1,9 +1,8 @@
 import type { Student } from "../../types";
 
 type SetState = (partial: unknown) => void;
-type GetState = () => unknown;
 
-export function createStudentSlice(set: SetState, _get: GetState) {
+export function createStudentSlice(set: SetState) {
   return {
     addStudent: (student: Student) =>
       set((state: { students: Student[] }) => {
