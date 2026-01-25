@@ -158,6 +158,14 @@ export const SeatGrid: React.FC = () => {
     return roles.filter(role => student.roleIds.includes(role.id));
   };
 
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    if (e.target instanceof Element && !e.target.closest('.seat')) {
+      setSelectedSeatId(null);
+      setFocusedSeatId(null);
+      setMultiSelectedSeats(new Set());
+    }
+  };
+
   const handleClick = (seatId: string, e: React.MouseEvent) => {
     if (e.ctrlKey || e.metaKey) {
       // コントロールキーが押されている場合は複数選択
@@ -256,17 +264,21 @@ export const SeatGrid: React.FC = () => {
   const isTeacherDeskBottom = currentLayout.teacherDeskPosition === 'bottom';
 
   return (
-    <div style={{ 
-      position: 'relative', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      width: '100%', 
-      height: '100%',
-      maxWidth: `${availableWidth}px`,
-      maxHeight: `${availableHeight}px`,
-      overflow: 'hidden'
-    }}>
+    <div
+      role="presentation"
+      onClick={handleBackgroundClick}
+      style={{ 
+        position: 'relative', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        width: '100%', 
+        height: '100%',
+        maxWidth: `${availableWidth}px`,
+        maxHeight: `${availableHeight}px`,
+        overflow: 'hidden'
+      }}
+    >
       {/* 教壇（上） */}
       {!isTeacherDeskBottom && (
         <div 
