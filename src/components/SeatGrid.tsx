@@ -6,6 +6,48 @@ import { GroupMenu } from './seat/GroupMenu';
 import { SeatEditor } from './seat/SeatEditor';
 import { useSeatDragDrop } from '../hooks/useSeatDragDrop';
 
+function lightenColor(hex: string, targetLightness: number): string {
+  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+  if (!m) return hex;
+  let r = parseInt(m[1], 16) / 255;
+  let g = parseInt(m[2], 16) / 255;
+  let b = parseInt(m[3], 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const currentL = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = currentL > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
+    }
+  }
+  const l = targetLightness;
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+  const toHex = (x: number) => Math.round(Math.max(0, Math.min(1, x)) * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 export const SeatGrid: React.FC = () => {
   const { 
     currentLayout, 
@@ -265,6 +307,7 @@ export const SeatGrid: React.FC = () => {
       }}>
         {currentLayout.seats.map((seat) => {
           const seatGroups = seat.groupIds.map(gid => groups.find(g => g.id === gid)).filter(Boolean);
+          const primaryGroup = seatGroups[0];
           const stateRings: string[] = [];
           if (selectedSeatId === seat.id) stateRings.push('0 0 0 2px var(--color-primary-200)');
           if (focusedSeatId === seat.id || dragOverSeatId === seat.id) stateRings.push('0 0 0 3px var(--color-accent-200)');
@@ -285,6 +328,8 @@ export const SeatGrid: React.FC = () => {
             style={{
               animationDelay: `${Math.random() * UI_CONSTANTS.ANIMATION.MAX_DELAY}s`,
               position: 'relative',
+              backgroundColor: primaryGroup?.color ? lightenColor(primaryGroup.color, 0.95) : undefined,
+              border: primaryGroup?.color ? `2px solid ${primaryGroup.color}` : undefined,
               boxShadow,
               cursor: !seat.isEmpty && seat.studentId ? 'grab' : 'default',
               transform: isTeacherDeskBottom ? 'rotate(180deg)' : 'none',
@@ -434,7 +479,7 @@ export const SeatGrid: React.FC = () => {
                   })()}
                 </>
               ) : (
-                <span style={{ opacity: 0.5, fontSize: `${32 * scale}px` }}>名無し</span>
+                <span style={{ fontSize: `${UI_CONSTANTS.FONT_SIZE.LARGE * scale}px`, fontWeight: '600', lineHeight: '1.2' }}>名無し</span>
               )}
             </div>
           )}
