@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { ROLE_ICONS } from '../constants/roleIcons';
 import { UI_CONSTANTS } from '../constants/ui';
 import { GroupMenu } from './seat/GroupMenu';
 import { SeatEditor } from './seat/SeatEditor';
 import { useSeatDragDrop } from '../hooks/useSeatDragDrop';
-import { getGroupClusterBorders } from '../utils/groupClusters';
-
-const BORDER_OUTLINE = '#1a1a1a';
 
 export const SeatGrid: React.FC = () => {
   const { 
@@ -96,17 +93,6 @@ export const SeatGrid: React.FC = () => {
     };
   }, [currentLayout, focusedSeatId, editingSeatId]);
 
-  const clusterBorders = useMemo(() => {
-    if (!currentLayout || !groups || groups.length === 0) {
-      return new Map();
-    }
-    try {
-      return getGroupClusterBorders(currentLayout, groups);
-    } catch (error) {
-      console.error('Error calculating cluster borders:', error);
-      return new Map();
-    }
-  }, [currentLayout, groups]);
 
   if (!currentLayout) {
     return (
@@ -227,49 +213,6 @@ export const SeatGrid: React.FC = () => {
 
   const isTeacherDeskBottom = currentLayout.teacherDeskPosition === 'bottom';
 
-  const BORDER_WIDTH = 6;
-  const OUTLINE_WIDTH = 2;
-  const WRAP_WIDTH = 4;
-
-  const buildClusterBoxShadow = (seatId: string) => {
-    const entries = clusterBorders.get(seatId);
-    if (!entries?.length) return undefined;
-    const shadows: string[] = [];
-    const w = Math.max(1, Math.floor(BORDER_WIDTH * (isNaN(scale) || scale <= 0 ? 1 : scale)));
-    const ow = Math.max(1, Math.floor(OUTLINE_WIDTH * (isNaN(scale) || scale <= 0 ? 1 : scale)));
-    const ww = Math.max(1, Math.floor(WRAP_WIDTH * (isNaN(scale) || scale <= 0 ? 1 : scale)));
-    const bandStep = w + ow + ww;
-
-    const push = (
-      hasTop: boolean,
-      hasRight: boolean,
-      hasBottom: boolean,
-      hasLeft: boolean,
-      offset: number,
-      color: string,
-      spread: number = 0,
-    ) => {
-      if (hasTop) shadows.push(`0 -${offset}px 0 ${spread}px ${color}`);
-      if (hasRight) shadows.push(`${offset}px 0 0 ${spread}px ${color}`);
-      if (hasBottom) shadows.push(`0 ${offset}px 0 ${spread}px ${color}`);
-      if (hasLeft) shadows.push(`-${offset}px 0 0 ${spread}px ${color}`);
-    };
-
-    for (let i = 0; i < entries.length; i++) {
-      const { color, top, right, bottom, left } = entries[i];
-      if (!color) continue;
-      const base = i * bandStep;
-      const inner = base + w;
-      const outer = base + w + ow;
-      const wrap = base + w + ow + ww;
-
-      push(top, right, bottom, left, inner, color);
-      push(top, right, bottom, left, outer, BORDER_OUTLINE);
-      push(top, right, bottom, left, wrap, color, ww);
-    }
-    return shadows.length ? shadows.join(', ') : undefined;
-  };
-
   return (
     <div style={{ 
       position: 'relative', 
@@ -322,11 +265,10 @@ export const SeatGrid: React.FC = () => {
       }}>
         {currentLayout.seats.map((seat) => {
           const seatGroups = seat.groupIds.map(gid => groups.find(g => g.id === gid)).filter(Boolean);
-          const clusterShadow = buildClusterBoxShadow(seat.id);
           const stateRings: string[] = [];
           if (selectedSeatId === seat.id) stateRings.push('0 0 0 2px var(--color-primary-200)');
           if (focusedSeatId === seat.id || dragOverSeatId === seat.id) stateRings.push('0 0 0 3px var(--color-accent-200)');
-          const boxShadow = [clusterShadow, ...stateRings].filter(Boolean).join(', ') || undefined;
+          const boxShadow = stateRings.length ? stateRings.join(', ') : undefined;
           return (
           <div
             key={seat.id}
