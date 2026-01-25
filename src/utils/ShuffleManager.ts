@@ -1,9 +1,9 @@
-import { 
-  ShuffleAlgorithm, 
-  ShuffleResult, 
-  ShuffleManagerConfig 
-} from '../types/shuffle';
-import { Seat, Student, Group, Role, Condition } from '../types';
+import {
+  ShuffleAlgorithm,
+  ShuffleResult,
+  ShuffleManagerConfig,
+} from "../types/shuffle";
+import { Seat, Student, Group, Role, Condition } from "../types";
 
 export class ShuffleManager {
   private config: ShuffleManagerConfig;
@@ -32,9 +32,9 @@ export class ShuffleManager {
 
   // 利用可能なアルゴリズム一覧を取得
   getAvailableAlgorithms(): { name: string; description: string }[] {
-    return Object.values(this.config.algorithms).map(alg => ({
+    return Object.values(this.config.algorithms).map((alg) => ({
       name: alg.name,
-      description: alg.description
+      description: alg.description,
     }));
   }
 
@@ -44,29 +44,37 @@ export class ShuffleManager {
     seats: Seat[],
     conditions: Condition[],
     groups: Group[],
-    roles: Role[]
+    roles: Role[],
   ): Promise<ShuffleResult> {
     // アルゴリズムの有効性をチェック
-    if (this.currentAlgorithm.canHandle && 
-        !this.currentAlgorithm.canHandle(students, seats)) {
+    if (
+      this.currentAlgorithm.canHandle &&
+      !this.currentAlgorithm.canHandle(students, seats)
+    ) {
       return {
         success: false,
         assignment: {},
-        error: '現在のアルゴリズムではこのデータを処理できません'
+        error: "現在のアルゴリズムではこのデータを処理できません",
       };
     }
 
     // タイムアウト付きでシャッフル実行
     const timeoutPromise = new Promise<ShuffleResult>((_, reject) => {
       setTimeout(() => {
-        reject(new Error('シャッフルがタイムアウトしました'));
+        reject(new Error("シャッフルがタイムアウトしました"));
       }, this.config.timeout);
     });
 
     try {
       const result = await Promise.race([
-        this.currentAlgorithm.shuffle(students, seats, conditions, groups, roles),
-        timeoutPromise
+        this.currentAlgorithm.shuffle(
+          students,
+          seats,
+          conditions,
+          groups,
+          roles,
+        ),
+        timeoutPromise,
       ]);
 
       return result;
@@ -74,7 +82,8 @@ export class ShuffleManager {
       return {
         success: false,
         assignment: {},
-        error: error instanceof Error ? error.message : '不明なエラーが発生しました'
+        error:
+          error instanceof Error ? error.message : "不明なエラーが発生しました",
       };
     }
   }

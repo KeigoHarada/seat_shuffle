@@ -9,7 +9,7 @@ export const FAR_DISTANCE_THRESHOLD = 3;
 // レイアウト関連の定数
 export const DEFAULT_LAYOUT_ROWS = 7;
 export const DEFAULT_LAYOUT_COLS = 6;
-export const DEFAULT_LAYOUT_NAME = 'デフォルト教室';
+export const DEFAULT_LAYOUT_NAME = "デフォルト教室";
 
 // 座席関連の定数
 export const IDEAL_SEAT_WIDTH = 220;

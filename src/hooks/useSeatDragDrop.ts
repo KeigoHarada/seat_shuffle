@@ -1,12 +1,9 @@
-import { useState } from 'react';
-import { useSeatStore } from '../stores/seatStore';
-import { UI_CONSTANTS } from '../constants/ui';
+import { useState } from "react";
+import { useSeatStore } from "../stores/seatStore";
+import { UI_CONSTANTS } from "../constants/ui";
 
 export const useSeatDragDrop = () => {
-  const { 
-    currentLayout, 
-    swapSeats
-  } = useSeatStore();
+  const { currentLayout, swapSeats } = useSeatStore();
 
   const [draggedSeatId, setDraggedSeatId] = useState<string | null>(null);
   const [dragOverSeatId, setDragOverSeatId] = useState<string | null>(null);
@@ -14,18 +11,18 @@ export const useSeatDragDrop = () => {
 
   const handleDragStart = (e: React.DragEvent, seatId: string) => {
     if (!currentLayout) return;
-    
-    const seat = currentLayout.seats.find(s => s.id === seatId);
+
+    const seat = currentLayout.seats.find((s) => s.id === seatId);
     if (!seat) return;
 
     setDraggedSeatId(seatId);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', seatId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", seatId);
   };
 
   const handleDragOver = (e: React.DragEvent, seatId: string) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
     setDragOverSeatId(seatId);
   };
 
@@ -42,8 +39,8 @@ export const useSeatDragDrop = () => {
       return;
     }
 
-    const draggedSeat = currentLayout.seats.find(s => s.id === draggedSeatId);
-    const targetSeat = currentLayout.seats.find(s => s.id === targetSeatId);
+    const draggedSeat = currentLayout.seats.find((s) => s.id === draggedSeatId);
+    const targetSeat = currentLayout.seats.find((s) => s.id === targetSeatId);
 
     if (!draggedSeat || !targetSeat) {
       setDraggedSeatId(null);
@@ -53,7 +50,10 @@ export const useSeatDragDrop = () => {
     // 全ての席の組み合わせで交換を実行
     swapSeats(draggedSeatId, targetSeatId);
     setSwappedSeats(new Set([draggedSeatId, targetSeatId]));
-    setTimeout(() => setSwappedSeats(new Set()), UI_CONSTANTS.ANIMATION.DURATION);
+    setTimeout(
+      () => setSwappedSeats(new Set()),
+      UI_CONSTANTS.ANIMATION.DURATION,
+    );
 
     setDraggedSeatId(null);
   };
@@ -71,6 +71,6 @@ export const useSeatDragDrop = () => {
     handleDragOver,
     handleDragLeave,
     handleDrop,
-    handleDragEnd
+    handleDragEnd,
   };
 };

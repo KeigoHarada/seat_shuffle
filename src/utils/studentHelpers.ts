@@ -1,4 +1,4 @@
-import { Student } from '../types';
+import { Student } from "../types";
 
 /**
  * 生徒の出席番号を1から連番で再採番する
@@ -8,7 +8,7 @@ import { Student } from '../types';
 export const renumberStudents = (students: Student[]): Student[] => {
   return students.map((student, index) => ({
     ...student,
-    studentNumber: index + 1
+    studentNumber: index + 1,
   }));
 };
 

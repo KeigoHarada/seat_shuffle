@@ -18,14 +18,14 @@ export interface Role {
 export interface Condition {
   id: string;
   name: string;
-  type: 'student-group' | 'role-group' | 'student-distance';
+  type: "student-group" | "role-group" | "student-distance";
   enabled: boolean;
   description?: string;
 }
 
 // 生徒-グループ条件
 export interface StudentGroupCondition extends Condition {
-  type: 'student-group';
+  type: "student-group";
   studentIds: string[];
   groupIds: string[];
   shouldPlace: boolean; // true: 配置する, false: 配置しない
@@ -33,16 +33,16 @@ export interface StudentGroupCondition extends Condition {
 
 // ロール-グループ条件
 export interface RoleGroupCondition extends Condition {
-  type: 'role-group';
+  type: "role-group";
   roleId?: string;
-  gender?: 'male' | 'female' | 'other';
+  gender?: "male" | "female" | "other";
   groupIds: string[];
   count: number; // 配置する人数
 }
 
 // 生徒間距離条件
 export interface StudentDistanceCondition extends Condition {
-  type: 'student-distance';
+  type: "student-distance";
   studentId1: string;
   studentId2: string;
   shouldBeClose: boolean; // true: 近くに配置, false: 遠くに配置
@@ -63,7 +63,7 @@ export interface Student {
   id: string;
   name: string;
   furigana: string;
-  gender: 'male' | 'female' | 'other';
+  gender: "male" | "female" | "other";
   studentNumber: number;
   roleIds: string[];
 }
@@ -75,7 +75,7 @@ export interface SeatLayout {
   rows: number;
   cols: number;
   seats: Seat[];
-  teacherDeskPosition: 'top' | 'bottom';
+  teacherDeskPosition: "top" | "bottom";
 }
 
 // アプリケーションの状態型定義

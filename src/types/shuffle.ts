@@ -1,4 +1,4 @@
-import { Seat, Student, Group, Role, Condition } from './index';
+import { Seat, Student, Group, Role, Condition } from "./index";
 
 // シャッフル結果のインターフェース
 export interface ShuffleResult {
@@ -22,19 +22,19 @@ export interface ShuffleAnalysis {
 export interface ShuffleAlgorithm {
   name: string;
   description: string;
-  
+
   // メインのシャッフル実行メソッド
   shuffle(
     students: Student[],
     seats: Seat[],
     conditions: Condition[],
     groups: Group[],
-    roles: Role[]
+    roles: Role[],
   ): Promise<ShuffleResult>;
-  
+
   // アルゴリズム固有の設定（オプション）
   configure?(options: Record<string, any>): void;
-  
+
   // アルゴリズムの有効性チェック
   canHandle?(students: Student[], seats: Seat[]): boolean;
 }
