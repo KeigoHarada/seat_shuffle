@@ -77,12 +77,12 @@ export const PublicView: React.FC = () => {
         </div>
       </header>
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', minHeight: 0 }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', minHeight: 0, gap: 'var(--spacing-xs)' }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', minHeight: 0 }}>
           <SeatGrid />
         </div>
         
-        <div className="flex-center" style={{ marginTop: 'var(--spacing-lg)', flexShrink: 0 }}>
+        <div className="flex-center" style={{ flexShrink: 0 }}>
           <button
             className="btn btn-primary"
             onClick={shuffleSeats}

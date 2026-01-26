@@ -50,6 +50,7 @@ function lightenColor(hex: string, targetLightness: number): string {
 }
 
 export const SeatGrid: React.FC = () => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const { 
     currentLayout, 
     students, 
@@ -261,9 +262,33 @@ export const SeatGrid: React.FC = () => {
     return student?.studentNumber;
   };
 
-  // 設定画面の幅と高さに応じて座席のスケールを調整
-  const availableWidth = showSettings ? window.innerWidth - settingsPanelWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN : window.innerWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN;
-  const availableHeight = window.innerHeight - UI_CONSTANTS.LAYOUT.HEADER_HEIGHT; // ヘッダー、ボタン、教壇、マージンを最小限に
+  // 親コンテナのサイズを取得（親コンテナが存在する場合）
+  const [containerSize, setContainerSize] = React.useState({ width: 0, height: 0 });
+  
+  React.useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current?.parentElement) {
+        const parent = containerRef.current.parentElement;
+        setContainerSize({
+          width: parent.clientWidth,
+          height: parent.clientHeight,
+        });
+      } else {
+        // フォールバック: windowサイズから計算
+        const width = showSettings ? window.innerWidth - settingsPanelWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2 : window.innerWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2;
+        const buttonAreaHeight = 70;
+        const height = window.innerHeight - UI_CONSTANTS.LAYOUT.HEADER_HEIGHT - buttonAreaHeight - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2;
+        setContainerSize({ width, height });
+      }
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, [showSettings, settingsPanelWidth]);
+  
+  const availableWidth = containerSize.width || (showSettings ? window.innerWidth - settingsPanelWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2 : window.innerWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2);
+  const availableHeight = containerSize.height || (window.innerHeight - UI_CONSTANTS.LAYOUT.HEADER_HEIGHT - 70 - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2);
   
   const idealSeatWidth = UI_CONSTANTS.SEAT_WIDTH; // 座席幅をさらに大きく
   const idealSeatHeight = UI_CONSTANTS.SEAT_HEIGHT; // 座席高さをさらに大きく
@@ -274,15 +299,29 @@ export const SeatGrid: React.FC = () => {
   const totalGridWidth = idealSeatWidth * currentLayout.cols + seatGap * (currentLayout.cols - 1);
   const totalGridHeight = idealSeatHeight * currentLayout.rows + seatGap * (currentLayout.rows - 1);
   
+  // 教壇の高さとマージンを考慮してスケールを計算
+  // 最初の計算（教壇のスペースを概算で考慮）
+  const estimatedTeacherDeskSpace = teacherDeskHeight + teacherDeskMargin;
+  const availableHeightForGrid = availableHeight - estimatedTeacherDeskSpace;
+  
   const scaleByWidth = totalGridWidth > 0 ? availableWidth / totalGridWidth : 1;
-  const scaleByHeight = totalGridHeight > 0 ? (availableHeight - (teacherDeskHeight + teacherDeskMargin) * 2) / totalGridHeight : 1;
-  const scale = Math.max(0.1, Math.min(scaleByWidth, scaleByHeight)); // 最小0.1、最大サイズまで活用
+  const scaleByHeight = totalGridHeight > 0 ? availableHeightForGrid / totalGridHeight : 1;
+  
+  // スケールを計算（教壇のスペースを考慮するため、再帰的に計算）
+  let scale = Math.max(0.1, Math.min(scaleByWidth, scaleByHeight));
+  
+  // 教壇のスペースを考慮して再計算（2回目の計算でより正確になる）
+  const recalculatedTeacherDeskSpace = (teacherDeskHeight + teacherDeskMargin) * scale;
+  const recalculatedAvailableHeightForGrid = availableHeight - recalculatedTeacherDeskSpace;
+  const recalculatedScaleByHeight = totalGridHeight > 0 ? recalculatedAvailableHeightForGrid / totalGridHeight : 1;
+  scale = Math.max(0.1, Math.min(scaleByWidth, recalculatedScaleByHeight));
 
   const isTeacherDeskBottom = currentLayout.teacherDeskPosition === 'bottom';
   const shuffleAnimation = isShuffling ? getShuffleAnimation() : null;
 
   return (
     <div
+      ref={containerRef}
       role="presentation"
       onClick={handleBackgroundClick}
       style={{ 
@@ -290,10 +329,9 @@ export const SeatGrid: React.FC = () => {
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center', 
+        justifyContent: 'center',
         width: '100%', 
         height: '100%',
-        maxWidth: `${availableWidth}px`,
-        maxHeight: `${availableHeight}px`,
         overflow: 'hidden'
       }}
     >
