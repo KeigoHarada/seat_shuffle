@@ -60,7 +60,7 @@ export interface SeatStore extends AppState {
   selectedSeatId: string | null;
   setSelectedSeatId: (seatId: string | null) => void;
   swapSeats: (seatId1: string, seatId2: string) => void;
-  assignStudentNameToSeat: (seatId: string, studentName: string) => void;
+  assignStudentNameToSeat: (seatId: string, studentName: string, furigana?: string) => void;
   initializeDefaultLayout: () => void;
   settingsPanelWidth: number;
   setSettingsPanelWidth: (width: number) => void;

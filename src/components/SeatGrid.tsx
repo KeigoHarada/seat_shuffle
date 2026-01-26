@@ -167,6 +167,9 @@ export const SeatGrid: React.FC = () => {
   };
 
   const handleClick = (seatId: string, e: React.MouseEvent) => {
+    if (editingSeatId === seatId) {
+      return;
+    }
     if (e.ctrlKey || e.metaKey) {
       // コントロールキーが押されている場合は複数選択
       setMultiSelectedSeats(prev => {
@@ -191,8 +194,17 @@ export const SeatGrid: React.FC = () => {
   };
 
   const handleDoubleClick = (seatId: string, currentName: string) => {
+    const seat = currentLayout.seats.find(s => s.id === seatId);
+    let currentFurigana = '';
+    if (seat && seat.studentId) {
+      const student = students.find(s => s.id === seat.studentId);
+      if (student) {
+        currentFurigana = student.furigana || '';
+      }
+    }
     setEditingSeatId(seatId);
     setEditingName(currentName);
+    setEditingFurigana(currentFurigana);
     setFocusedSeatId(null);
   };
 
@@ -221,18 +233,20 @@ export const SeatGrid: React.FC = () => {
   const handleNameSubmit = (seatId: string) => {
     if (editingName.trim()) {
       // 名前が入力されている場合は生徒を割り当て
-      assignStudentNameToSeat(seatId, editingName.trim());
+      assignStudentNameToSeat(seatId, editingName.trim(), editingFurigana.trim() || undefined);
     } else {
       // 名前が空の場合は席から生徒を削除
       removeStudentFromSeat(seatId);
     }
     setEditingSeatId(null);
     setEditingName('');
+    setEditingFurigana('');
   };
 
   const handleNameCancel = () => {
     setEditingSeatId(null);
     setEditingName('');
+    setEditingFurigana('');
   };
 
 
@@ -464,6 +478,7 @@ export const SeatGrid: React.FC = () => {
               onFuriganaChange={setEditingFurigana}
               onSubmit={handleNameSubmit}
               onCancel={handleNameCancel}
+              scale={scale}
             />
           ) : (
             /* 通常表示 */

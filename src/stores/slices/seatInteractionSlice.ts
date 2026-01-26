@@ -50,7 +50,7 @@ export function createSeatInteractionSlice(set: SetState, get: GetState) {
         },
       ),
 
-    assignStudentNameToSeat: (seatId: string, studentName: string) => {
+    assignStudentNameToSeat: (seatId: string, studentName: string, furigana?: string) => {
       const state = get() as {
         currentLayout: {
           seats: { id: string; studentId?: string; isEmpty: boolean }[];
@@ -74,7 +74,10 @@ export function createSeatInteractionSlice(set: SetState, get: GetState) {
           (s) => s.id === seat.studentId,
         );
         if (currentStudent) {
-          state.updateStudent(seat.studentId, { name: studentName });
+          state.updateStudent(seat.studentId, { 
+            name: studentName,
+            furigana: furigana ?? currentStudent.furigana
+          });
           return;
         }
       }
@@ -82,7 +85,7 @@ export function createSeatInteractionSlice(set: SetState, get: GetState) {
       const student: Student = {
         id: `student-${Date.now()}`,
         name: studentName,
-        furigana: "",
+        furigana: furigana ?? "",
         gender: "other",
         studentNumber: state.students.length + 1,
         roleIds: [],

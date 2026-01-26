@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSeatStore } from '../../stores/seatStore';
+import { UI_CONSTANTS } from '../../constants/ui';
 
 interface SeatEditorProps {
   seatId: string;
@@ -9,6 +10,7 @@ interface SeatEditorProps {
   onFuriganaChange: (furigana: string) => void;
   onSubmit: (seatId: string) => void;
   onCancel: () => void;
+  scale: number;
 }
 
 export const SeatEditor: React.FC<SeatEditorProps> = ({
@@ -18,7 +20,8 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
   onNameChange,
   onFuriganaChange,
   onSubmit,
-  onCancel
+  onCancel,
+  scale
 }) => {
   const { removeStudentFromSeat } = useSeatStore();
 
@@ -68,9 +71,13 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
 
   return (
     <div 
-      style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%' }}
-      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-      onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', width: '100%' }}
+      onMouseDown={(e) => { 
+        e.stopPropagation();
+      }}
+      onClick={(e) => { 
+        e.stopPropagation();
+      }}
     >
       <input
         type="text"
@@ -78,19 +85,31 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
         onChange={(e) => onFuriganaChange(e.target.value)}
         placeholder="ふりがな"
         onKeyDown={(e) => handleKeyDown(e, 'furigana')}
-        onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-        onClick={(e) => { e.stopPropagation(); e.preventDefault(); e.currentTarget.focus(); }}
-        onFocus={(e) => { e.stopPropagation(); }}
+        onMouseDown={(e) => { 
+          e.stopPropagation();
+          e.preventDefault();
+          e.currentTarget.focus();
+        }}
+        onClick={(e) => { 
+          e.stopPropagation();
+          e.currentTarget.focus();
+        }}
+        onFocus={(e) => { 
+          e.stopPropagation();
+        }}
         style={{
           border: 'none',
           outline: 'none',
           background: 'transparent',
-          padding: '4px',
-          fontSize: '22px',
+          padding: 0,
+          fontSize: `${UI_CONSTANTS.FONT_SIZE.TINY * scale}px`,
           color: 'var(--color-secondary-500)',
           width: '100%',
           textAlign: 'center',
-          caretColor: 'var(--color-primary-600)'
+          caretColor: 'var(--color-primary-600)',
+          lineHeight: '1.2',
+          cursor: 'text',
+          pointerEvents: 'auto'
         }}
       />
       <input
@@ -101,9 +120,18 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
         onKeyPress={handleSubmit}
         onKeyDown={(e) => handleKeyDown(e, 'name')}
         onBlur={() => onSubmit(seatId)}
-        onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-        onClick={(e) => { e.stopPropagation(); e.preventDefault(); e.currentTarget.focus(); }}
-        onFocus={(e) => { e.stopPropagation(); }}
+        onMouseDown={(e) => { 
+          e.stopPropagation();
+          e.preventDefault();
+          e.currentTarget.focus();
+        }}
+        onClick={(e) => { 
+          e.stopPropagation();
+          e.currentTarget.focus();
+        }}
+        onFocus={(e) => { 
+          e.stopPropagation();
+        }}
         ref={(input) => {
           // 編集モード開始時に名前欄にフォーカス
           if (input) {
@@ -114,13 +142,16 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
           border: 'none',
           outline: 'none',
           background: 'transparent',
-          padding: '4px',
-          fontSize: '22px',
+          padding: 0,
+          fontSize: `${UI_CONSTANTS.FONT_SIZE.LARGE * scale}px`,
           fontWeight: '600',
           width: '100%',
           textAlign: 'center',
           color: 'black',
-          caretColor: 'var(--color-primary-600)'
+          caretColor: 'var(--color-primary-600)',
+          lineHeight: '1.2',
+          cursor: 'text',
+          pointerEvents: 'auto'
         }}
       />
     </div>
