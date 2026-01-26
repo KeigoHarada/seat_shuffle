@@ -92,8 +92,9 @@ export function createShuffleSlice(set: SetState, get: GetState) {
         const beforeUnnamedCount = currentLayout.seats.filter(
           (s) => !s.isEmpty && !s.studentId,
         ).length;
-        const beforeEmptyCount = currentLayout.seats.filter((s) => s.isEmpty)
-          .length;
+        const beforeEmptyCount = currentLayout.seats.filter(
+          (s) => s.isEmpty,
+        ).length;
 
         console.log(
           "\n【シャッフル前】\n" +
@@ -115,12 +116,12 @@ export function createShuffleSlice(set: SetState, get: GetState) {
           const afterAssignedStudents = new Set(
             Object.values(result.assignment).filter((id) => id !== undefined),
           );
-          const afterUnnamedCount = Object.values(result.assignment).filter(
-            (v, i) =>
-              !currentLayout.seats[i]!.isEmpty && v === undefined,
+          const afterUnnamedCount = currentLayout.seats.filter(
+            (seat) => !seat.isEmpty && result.assignment[seat.id] === undefined,
           ).length;
-          const afterEmptyCount = currentLayout.seats.filter((s) => s.isEmpty)
-            .length;
+          const afterEmptyCount = currentLayout.seats.filter(
+            (s) => s.isEmpty,
+          ).length;
 
           console.log(
             "\n【シャッフル後】\n" +

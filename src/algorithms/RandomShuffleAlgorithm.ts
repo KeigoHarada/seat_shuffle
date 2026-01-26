@@ -32,9 +32,9 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
         assignedStudentIds.has(s.id),
       );
 
-      // 現在の名無し席の数をカウント
+      // 現在の名無し席の数をカウント（空席ではない席で、studentIdがundefinedの席）
       const currentUnnamedCount = availableSeats.filter(
-        (seat) => !("studentId" in seat) || seat.studentId === undefined,
+        (seat) => seat.studentId === undefined,
       ).length;
 
       // 割り当て済み生徒をランダムにシャッフル
@@ -54,6 +54,13 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
       // 全スロットをランダムにシャッフル
       const shuffledSlots = allSlots.sort(() => Math.random() - 0.5);
 
+      // デバッグ: 数が一致しているか確認
+      if (shuffledSlots.length !== availableSeats.length) {
+        console.error(
+          `[RandomShuffleAlgorithm] スロット数が一致しません: shuffledSlots=${shuffledSlots.length}, availableSeats=${availableSeats.length}, assignedStudents=${assignedStudents.length}, currentUnnamedCount=${currentUnnamedCount}`
+        );
+      }
+
       const assignment: { [seatId: string]: string | undefined } = {};
 
       // 空席はそのまま
@@ -68,8 +75,13 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
         () => Math.random() - 0.5,
       );
       shuffledAvailableSeats.forEach((seat, index) => {
-        const slot = shuffledSlots[index];
-        assignment[seat.id] = slot === "unnamed" ? undefined : slot;
+        if (index >= shuffledSlots.length) {
+          // スロットが足りない場合は名無し席として扱う
+          assignment[seat.id] = undefined;
+        } else {
+          const slot = shuffledSlots[index];
+          assignment[seat.id] = slot === "unnamed" ? undefined : slot;
+        }
       });
 
       // 条件チェック（簡易版）

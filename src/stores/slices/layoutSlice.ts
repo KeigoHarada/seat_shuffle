@@ -116,22 +116,31 @@ export function createLayoutSlice(set: SetState, get: GetState) {
         });
       }
 
-      SAMPLE_STUDENTS.forEach((student) => {
-        (
-          get() as { addStudent: (s: (typeof SAMPLE_STUDENTS)[0]) => void }
-        ).addStudent(student);
-      });
-
       const currentLayout = (get() as { currentLayout: SeatLayout | null })
         .currentLayout;
       if (currentLayout) {
         const allSeats = [...currentLayout.seats];
+        const emptySeatsCount = 3;
+        const unnamedSeatsCount = 2;
+        const totalUnusedSeats = emptySeatsCount + unnamedSeatsCount;
+
         const shuffledStudents = [...SAMPLE_STUDENTS].sort(
           () => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET,
         );
+        const studentsToAdd = shuffledStudents.slice(
+          0,
+          shuffledStudents.length - totalUnusedSeats,
+        );
+
+        studentsToAdd.forEach((student) => {
+          (
+            get() as { addStudent: (s: (typeof SAMPLE_STUDENTS)[0]) => void }
+          ).addStudent(student);
+        });
+
         const emptySeats = allSeats
           .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
-          .slice(0, 3);
+          .slice(0, emptySeatsCount);
         emptySeats.forEach((seat) => {
           (get() as { toggleSeatEmpty: (id: string) => void }).toggleSeatEmpty(
             seat.id,
@@ -141,7 +150,7 @@ export function createLayoutSlice(set: SetState, get: GetState) {
         const unnamedSeats = allSeats
           .filter((s) => !emptySeats.some((e) => e.id === s.id))
           .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
-          .slice(0, 2);
+          .slice(0, unnamedSeatsCount);
 
         const setLayout = (
           get() as { setCurrentLayout: (l: SeatLayout) => void }
@@ -166,8 +175,8 @@ export function createLayoutSlice(set: SetState, get: GetState) {
           }
         ).assignStudentToSeat;
         remainingSeats.forEach((seat, i) => {
-          if (i < shuffledStudents.length) {
-            assign(shuffledStudents[i]!.id, seat.id);
+          if (i < studentsToAdd.length) {
+            assign(studentsToAdd[i]!.id, seat.id);
           }
         });
       }

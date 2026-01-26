@@ -313,4 +313,28 @@ export const SAMPLE_STUDENTS: Student[] = [
     studentNumber: 39,
     roleIds: [],
   },
+  {
+    id: "student-40",
+    name: "松本一郎",
+    furigana: "まつもといちろう",
+    gender: "male",
+    studentNumber: 40,
+    roleIds: [],
+  },
+  {
+    id: "student-41",
+    name: "中川花子",
+    furigana: "なかがわはなこ",
+    gender: "female",
+    studentNumber: 41,
+    roleIds: [],
+  },
+  {
+    id: "student-42",
+    name: "田村健太",
+    furigana: "たむらけんた",
+    gender: "male",
+    studentNumber: 42,
+    roleIds: [],
+  },
 ];
