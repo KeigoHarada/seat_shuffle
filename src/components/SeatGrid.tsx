@@ -4,6 +4,7 @@ import { ROLE_ICONS } from '../constants/roleIcons';
 import { UI_CONSTANTS } from '../constants/ui';
 import { GroupMenu } from './seat/GroupMenu';
 import { SeatEditor } from './seat/SeatEditor';
+import { ShufflingName } from './seat/ShufflingName';
 import { useSeatDragDrop } from '../hooks/useSeatDragDrop';
 
 function lightenColor(hex: string, targetLightness: number): string {
@@ -54,6 +55,7 @@ export const SeatGrid: React.FC = () => {
     students, 
     groups,
     roles,
+    conditions,
     isShuffling, 
     selectedSeatId,
     setSelectedSeatId,
@@ -63,6 +65,7 @@ export const SeatGrid: React.FC = () => {
     initializeDefaultLayout,
     settingsPanelWidth,
     showSettings,
+    getShuffleAnimation,
   } = useSeatStore();
   
   const [editingSeatId, setEditingSeatId] = useState<string | null>(null);
@@ -276,6 +279,7 @@ export const SeatGrid: React.FC = () => {
   const scale = Math.max(0.1, Math.min(scaleByWidth, scaleByHeight)); // 最小0.1、最大サイズまで活用
 
   const isTeacherDeskBottom = currentLayout.teacherDeskPosition === 'bottom';
+  const shuffleAnimation = isShuffling ? getShuffleAnimation() : null;
 
   return (
     <div
@@ -293,6 +297,25 @@ export const SeatGrid: React.FC = () => {
         overflow: 'hidden'
       }}
     >
+      {/* オーバーレイアニメーション（将来の拡張用） */}
+      {isShuffling && shuffleAnimation?.renderOverlay && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+            pointerEvents: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {shuffleAnimation.renderOverlay()}
+        </div>
+      )}
       {/* 教壇（上） */}
       {!isTeacherDeskBottom && (
         <div 
@@ -341,7 +364,7 @@ export const SeatGrid: React.FC = () => {
           return (
           <div
             key={seat.id}
-            className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''} ${draggedSeatId === seat.id ? 'dragging' : ''} ${dragOverSeatId === seat.id ? 'drag-over' : ''} ${swappedSeats.has(seat.id) ? 'drag-swap' : ''}`}
+            className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''} ${draggedSeatId === seat.id ? 'dragging' : ''} ${dragOverSeatId === seat.id ? 'drag-over' : ''} ${swappedSeats.has(seat.id) ? 'drag-swap' : ''}`}
             onMouseDown={editingSeatId === seat.id ? undefined : undefined}
             onClick={editingSeatId === seat.id ? (e) => {
               e.stopPropagation();
@@ -500,6 +523,26 @@ export const SeatGrid: React.FC = () => {
                 <>
                   {(() => {
                     const student = students.find(s => s.id === seat.studentId);
+                    if (isShuffling && (getShuffleAnimation().getShufflingName || getShuffleAnimation().getShufflingAssignment)) {
+                      const shuffleAnimation = getShuffleAnimation();
+                      const allStudentData = students.map(s => ({ id: s.id, name: s.name, furigana: s.furigana }));
+                      return (
+                        <ShufflingName
+                          seatId={seat.id}
+                          originalName={student?.name || getStudentName(seat.studentId)}
+                          originalFurigana={student?.furigana}
+                          allStudents={allStudentData}
+                          shuffleAnimation={shuffleAnimation}
+                          isShuffling={isShuffling}
+                          scale={scale}
+                          students={students}
+                          seats={currentLayout.seats}
+                          conditions={conditions}
+                          groups={groups}
+                          roles={roles}
+                        />
+                      );
+                    }
                     return student ? (
                       <>
                         <span style={{ fontSize: `${UI_CONSTANTS.FONT_SIZE.TINY * scale}px`, color: 'var(--color-secondary-500)', lineHeight: '1.2' }}>

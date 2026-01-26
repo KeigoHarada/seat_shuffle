@@ -3,6 +3,11 @@ import type { AssignmentAnalysis } from "../../utils/conditionUtils";
 import { ShuffleManager } from "../../utils/ShuffleManager";
 import { ConditionalShuffleAlgorithm } from "../../algorithms/ConditionalShuffleAlgorithm";
 import { RandomShuffleAlgorithm } from "../../algorithms/RandomShuffleAlgorithm";
+import {
+  SHUFFLE_ANIMATIONS,
+  CURRENT_SHUFFLE_ANIMATION,
+  type ShuffleAnimation,
+} from "../../utils/shuffleAnimations";
 
 type SetState = (partial: unknown) => void;
 type GetState = () => unknown;
@@ -22,8 +27,23 @@ function createShuffleManager(): ShuffleManager {
 export function createShuffleSlice(set: SetState, get: GetState) {
   const shuffleManager = createShuffleManager();
 
+  let currentAnimation: ShuffleAnimation =
+    SHUFFLE_ANIMATIONS[CURRENT_SHUFFLE_ANIMATION] ||
+    SHUFFLE_ANIMATIONS["rotate"]!;
+
   return {
     shuffleManager,
+
+    setShuffleAnimation: (animationName: string) => {
+      const animation = SHUFFLE_ANIMATIONS[animationName];
+      if (animation) {
+        currentAnimation = animation;
+      }
+    },
+
+    getShuffleAnimation: (): ShuffleAnimation => {
+      return currentAnimation;
+    },
 
     shuffleSeats: async () => {
       type ShuffleState = {
@@ -37,10 +57,13 @@ export function createShuffleSlice(set: SetState, get: GetState) {
       const state = get() as ShuffleState;
       if (!state.currentLayout) return;
 
+      const animation = currentAnimation;
+      const startTime = Date.now();
+      (window as any).__shuffleStartTime = startTime;
       set({ isShuffling: true });
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, animation.duration));
 
         const {
           currentLayout,

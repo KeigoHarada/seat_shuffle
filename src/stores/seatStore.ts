@@ -67,6 +67,8 @@ export interface SeatStore extends AppState {
   lastShuffleAnalysis: AssignmentAnalysis | null;
   validateConditions: () => ConditionValidationResult;
   checkConditionConflicts: () => ConditionValidationResult;
+  setShuffleAnimation: (animationName: string) => void;
+  getShuffleAnimation: () => import("../utils/shuffleAnimations").ShuffleAnimation;
 }
 
 export const useSeatStore = create<SeatStore>((set, get) => ({
