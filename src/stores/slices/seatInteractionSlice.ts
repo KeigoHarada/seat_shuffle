@@ -52,27 +52,50 @@ export function createSeatInteractionSlice(set: SetState, get: GetState) {
 
     assignStudentNameToSeat: (seatId: string, studentName: string) => {
       const state = get() as {
-        currentLayout: { seats: { id: string }[] } | null;
+        currentLayout: {
+          seats: { id: string; studentId?: string; isEmpty: boolean }[];
+        } | null;
         students: Student[];
+        updateStudent: (id: string, updates: Partial<Student>) => void;
+        removeStudentFromSeat: (seatId: string) => void;
       };
       if (!state.currentLayout) return;
 
-      let student = state.students.find((s) => s.name === studentName);
-      if (!student) {
-        student = {
-          id: `student-${Date.now()}`,
-          name: studentName,
-          furigana: "",
-          gender: "other",
-          studentNumber: state.students.length + 1,
-          roleIds: [],
-        };
-        set((s: { students: Student[] }) => ({
-          students: [...s.students, student!],
-        }));
+      if (!studentName.trim()) {
+        state.removeStudentFromSeat(seatId);
+        return;
       }
 
-      set((s: { currentLayout: { seats: { id: string }[] } | null }) => ({
+      const seat = state.currentLayout.seats.find((s) => s.id === seatId);
+      if (!seat) return;
+
+      if (seat.studentId) {
+        const currentStudent = state.students.find(
+          (s) => s.id === seat.studentId,
+        );
+        if (currentStudent) {
+          state.updateStudent(seat.studentId, { name: studentName });
+          return;
+        }
+      }
+
+      const student: Student = {
+        id: `student-${Date.now()}`,
+        name: studentName,
+        furigana: "",
+        gender: "other",
+        studentNumber: state.students.length + 1,
+        roleIds: [],
+      };
+      set((s: { students: Student[] }) => ({
+        students: [...s.students, student],
+      }));
+
+      set((s: {
+        currentLayout: {
+          seats: { id: string; studentId?: string; isEmpty: boolean }[];
+        } | null;
+      }) => ({
         currentLayout: s.currentLayout
           ? {
               ...s.currentLayout,
