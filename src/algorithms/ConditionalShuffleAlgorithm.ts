@@ -1,37 +1,46 @@
-import { ShuffleAlgorithm, ShuffleResult } from '../types/shuffle';
-import { Seat, Student, Group, Role, Condition, StudentGroupCondition, RoleGroupCondition, StudentDistanceCondition } from '../types';
-import GLPK, { type LP, type Result } from 'glpk.js';
-import { calculateDistance } from '../utils/conditionUtils';
+import { ShuffleAlgorithm, ShuffleResult } from "../types/shuffle";
+import {
+  Seat,
+  Student,
+  Group,
+  Role,
+  Condition,
+  StudentGroupCondition,
+  RoleGroupCondition,
+  StudentDistanceCondition,
+} from "../types";
+import GLPK, { type LP, type Result } from "glpk.js";
+import { calculateDistance } from "../utils/conditionUtils";
 
 export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
-  name = 'conditional';
-  description = 'GLPKを使用した条件を考慮した高度なシャッフルアルゴリズム';
+  name = "conditional";
+  description = "GLPKを使用した条件を考慮した高度なシャッフルアルゴリズム";
 
   async shuffle(
     students: Student[],
     seats: Seat[],
     conditions: Condition[],
     groups: Group[],
-    roles: Role[]
+    roles: Role[],
   ): Promise<ShuffleResult> {
     try {
       const glpk = await GLPK();
-      const enabledConditions = conditions.filter(c => c.enabled);
-      const availableSeats = seats.filter(seat => !seat.isEmpty);
+      const enabledConditions = conditions.filter((c) => c.enabled);
+      const availableSeats = seats.filter((seat) => !seat.isEmpty);
 
       if (students.length > availableSeats.length) {
         return {
           success: false,
           assignment: {},
-          error: '生徒数が利用可能な席数を超えています。'
+          error: "生徒数が利用可能な席数を超えています。",
         };
       }
 
       if (enabledConditions.length === 0) {
         const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
         const assignment: { [seatId: string]: string | undefined } = {};
-        
-        seats.forEach(seat => {
+
+        seats.forEach((seat) => {
           if (seat.isEmpty) {
             assignment[seat.id] = undefined;
           } else {
@@ -39,14 +48,14 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
             assignment[seat.id] = shuffledStudents[seatIndex]?.id;
           }
         });
-        
+
         return {
           success: true,
           assignment,
           analysis: {
             totalConditions: 0,
-            failedConditions: []
-          }
+            failedConditions: [],
+          },
         };
       }
 
@@ -61,45 +70,53 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
         }
       }
 
-      const subjectTo: LP['subjectTo'] = [];
+      const subjectTo: LP["subjectTo"] = [];
 
       for (const student of students) {
         subjectTo.push({
           name: `assign_${student.id}`,
-          vars: availableSeats.map(seat => ({ name: `x_${student.id}_${seat.id}`, coef: 1 })),
-          bnds: { type: glpk.GLP_FX, lb: 1, ub: 1 }
+          vars: availableSeats.map((seat) => ({
+            name: `x_${student.id}_${seat.id}`,
+            coef: 1,
+          })),
+          bnds: { type: glpk.GLP_FX, lb: 1, ub: 1 },
         });
       }
 
       for (const seat of availableSeats) {
         subjectTo.push({
           name: `seat_${seat.id}`,
-          vars: students.map(student => ({ name: `x_${student.id}_${seat.id}`, coef: 1 })),
-          bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 }
+          vars: students.map((student) => ({
+            name: `x_${student.id}_${seat.id}`,
+            coef: 1,
+          })),
+          bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
         });
       }
 
       for (const condition of enabledConditions) {
         switch (condition.type) {
-          case 'student-group': {
+          case "student-group": {
             const c = condition as StudentGroupCondition;
             for (const studentId of c.studentIds) {
-              const student = students.find(s => s.id === studentId);
+              const student = students.find((s) => s.id === studentId);
               if (!student) continue;
 
               for (const seat of availableSeats) {
-                const hasTargetGroup = seat.groupIds.some(gid => c.groupIds.includes(gid));
+                const hasTargetGroup = seat.groupIds.some((gid) =>
+                  c.groupIds.includes(gid),
+                );
                 if (c.shouldPlace && !hasTargetGroup) {
                   subjectTo.push({
                     name: `student_group_${studentId}_${seat.id}`,
                     vars: [{ name: `x_${studentId}_${seat.id}`, coef: 1 }],
-                    bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 }
+                    bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 },
                   });
                 } else if (!c.shouldPlace && hasTargetGroup) {
                   subjectTo.push({
                     name: `student_group_${studentId}_${seat.id}`,
                     vars: [{ name: `x_${studentId}_${seat.id}`, coef: 1 }],
-                    bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 }
+                    bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 },
                   });
                 }
               }
@@ -107,13 +124,15 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
             break;
           }
 
-          case 'role-group': {
+          case "role-group": {
             const c = condition as RoleGroupCondition;
             for (const groupId of c.groupIds) {
-              const groupSeats = availableSeats.filter(s => s.groupIds.includes(groupId));
+              const groupSeats = availableSeats.filter((s) =>
+                s.groupIds.includes(groupId),
+              );
               if (groupSeats.length === 0) continue;
 
-              const targetStudents = students.filter(s => {
+              const targetStudents = students.filter((s) => {
                 if (c.roleId) return s.roleIds.includes(c.roleId);
                 if (c.gender) return s.gender === c.gender;
                 return false;
@@ -123,27 +142,33 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
 
               subjectTo.push({
                 name: `role_group_${groupId}_min`,
-                vars: targetStudents.flatMap(student =>
-                  groupSeats.map(seat => ({ name: `x_${student.id}_${seat.id}`, coef: 1 }))
+                vars: targetStudents.flatMap((student) =>
+                  groupSeats.map((seat) => ({
+                    name: `x_${student.id}_${seat.id}`,
+                    coef: 1,
+                  })),
                 ),
-                bnds: { type: glpk.GLP_LO, lb: c.count, ub: Number.MAX_VALUE }
+                bnds: { type: glpk.GLP_LO, lb: c.count, ub: Number.MAX_VALUE },
               });
 
               subjectTo.push({
                 name: `role_group_${groupId}_max`,
-                vars: targetStudents.flatMap(student =>
-                  groupSeats.map(seat => ({ name: `x_${student.id}_${seat.id}`, coef: 1 }))
+                vars: targetStudents.flatMap((student) =>
+                  groupSeats.map((seat) => ({
+                    name: `x_${student.id}_${seat.id}`,
+                    coef: 1,
+                  })),
                 ),
-                bnds: { type: glpk.GLP_UP, lb: 0, ub: c.count }
+                bnds: { type: glpk.GLP_UP, lb: 0, ub: c.count },
               });
             }
             break;
           }
 
-          case 'student-distance': {
+          case "student-distance": {
             const c = condition as StudentDistanceCondition;
-            const student1 = students.find(s => s.id === c.studentId1);
-            const student2 = students.find(s => s.id === c.studentId2);
+            const student1 = students.find((s) => s.id === c.studentId1);
+            const student2 = students.find((s) => s.id === c.studentId2);
             if (!student1 || !student2) break;
 
             if (c.shouldBeClose) {
@@ -162,7 +187,7 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
                 return {
                   success: false,
                   assignment: {},
-                  error: '近くに配置する条件を満たす席のペアが存在しません。'
+                  error: "近くに配置する条件を満たす席のペアが存在しません。",
                 };
               }
 
@@ -175,9 +200,9 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
                       name: `distance_close_${c.studentId1}_${seat1.id}_${c.studentId2}_${seat2.id}`,
                       vars: [
                         { name: `x_${c.studentId1}_${seat1.id}`, coef: 1 },
-                        { name: `x_${c.studentId2}_${seat2.id}`, coef: 1 }
+                        { name: `x_${c.studentId2}_${seat2.id}`, coef: 1 },
                       ],
-                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 }
+                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
                     });
                   }
                 }
@@ -192,17 +217,17 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
                       name: `distance_far_${seat1.id}_${seat2.id}`,
                       vars: [
                         { name: `x_${c.studentId1}_${seat1.id}`, coef: 1 },
-                        { name: `x_${c.studentId2}_${seat2.id}`, coef: 1 }
+                        { name: `x_${c.studentId2}_${seat2.id}`, coef: 1 },
                       ],
-                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 }
+                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
                     });
                     subjectTo.push({
                       name: `distance_far_${seat2.id}_${seat1.id}`,
                       vars: [
                         { name: `x_${c.studentId1}_${seat2.id}`, coef: 1 },
-                        { name: `x_${c.studentId2}_${seat1.id}`, coef: 1 }
+                        { name: `x_${c.studentId2}_${seat1.id}`, coef: 1 },
                       ],
-                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 }
+                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
                     });
                   }
                 }
@@ -214,28 +239,32 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
       }
 
       const lp: LP = {
-        name: 'seat_assignment',
+        name: "seat_assignment",
         objective: {
           direction: glpk.GLP_MIN,
-          name: 'obj',
-          vars
+          name: "obj",
+          vars,
         },
         subjectTo,
-        binaries
+        binaries,
       };
 
       const res: Result = await glpk.solve(lp, glpk.GLP_MSG_OFF);
 
-      if (res.result.status !== glpk.GLP_OPT && res.result.status !== glpk.GLP_FEAS) {
+      if (
+        res.result.status !== glpk.GLP_OPT &&
+        res.result.status !== glpk.GLP_FEAS
+      ) {
         return {
           success: false,
           assignment: {},
-          error: '最適解が見つかりませんでした。条件が複雑すぎるか、解が存在しない可能性があります。'
+          error:
+            "最適解が見つかりませんでした。条件が複雑すぎるか、解が存在しない可能性があります。",
         };
       }
 
       const assignment: { [seatId: string]: string | undefined } = {};
-      
+
       for (const seat of seats) {
         if (seat.isEmpty) {
           assignment[seat.id] = undefined;
@@ -255,22 +284,29 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
         }
       }
 
-      const failedConditions = this.analyzeConditions(assignment, enabledConditions, students, seats, groups, roles);
+      const failedConditions = this.analyzeConditions(
+        assignment,
+        enabledConditions,
+        students,
+        seats,
+        groups,
+        roles,
+      );
 
       return {
         success: true,
         assignment,
         analysis: {
           totalConditions: enabledConditions.length,
-          failedConditions
-        }
+          failedConditions,
+        },
       };
-
     } catch (error) {
       return {
         success: false,
         assignment: {},
-        error: error instanceof Error ? error.message : '不明なエラーが発生しました'
+        error:
+          error instanceof Error ? error.message : "不明なエラーが発生しました",
       };
     }
   }
@@ -281,75 +317,93 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
     students: Student[],
     seats: Seat[],
     groups: Group[],
-    roles: Role[]
+    roles: Role[],
   ): Array<{ condition: Condition; satisfied: boolean; reason?: string }> {
-    const failedConditions: Array<{ condition: Condition; satisfied: boolean; reason?: string }> = [];
+    const failedConditions: Array<{
+      condition: Condition;
+      satisfied: boolean;
+      reason?: string;
+    }> = [];
 
     for (const condition of conditions) {
       let satisfied = true;
-      let reason = '';
+      let reason = "";
 
       switch (condition.type) {
-        case 'student-group': {
+        case "student-group": {
           const c = condition as StudentGroupCondition;
           for (const studentId of c.studentIds) {
-            const assignedSeatId = Object.keys(assignment).find(seatId => assignment[seatId] === studentId);
+            const assignedSeatId = Object.keys(assignment).find(
+              (seatId) => assignment[seatId] === studentId,
+            );
             if (!assignedSeatId) continue;
-            
-            const seat = seats.find(s => s.id === assignedSeatId);
+
+            const seat = seats.find((s) => s.id === assignedSeatId);
             if (!seat) continue;
-            
-            const hasTargetGroup = seat.groupIds.some(gid => c.groupIds.includes(gid));
+
+            const hasTargetGroup = seat.groupIds.some((gid) =>
+              c.groupIds.includes(gid),
+            );
             if (c.shouldPlace && !hasTargetGroup) {
               satisfied = false;
-              reason = `${students.find(s => s.id === studentId)?.name}が対象グループに配置されていません`;
+              reason = `${students.find((s) => s.id === studentId)?.name}が対象グループに配置されていません`;
               break;
             } else if (!c.shouldPlace && hasTargetGroup) {
               satisfied = false;
-              reason = `${students.find(s => s.id === studentId)?.name}が対象グループに配置されています`;
+              reason = `${students.find((s) => s.id === studentId)?.name}が対象グループに配置されています`;
               break;
             }
           }
           break;
         }
 
-        case 'role-group': {
+        case "role-group": {
           const c = condition as RoleGroupCondition;
           for (const groupId of c.groupIds) {
-            const groupSeats = seats.filter(s => s.groupIds.includes(groupId) && !s.isEmpty);
-            const roleStudentsInGroup = groupSeats.filter(seat => {
+            const groupSeats = seats.filter(
+              (s) => s.groupIds.includes(groupId) && !s.isEmpty,
+            );
+            const roleStudentsInGroup = groupSeats.filter((seat) => {
               const studentId = assignment[seat.id];
               if (!studentId) return false;
-              const student = students.find(s => s.id === studentId);
+              const student = students.find((s) => s.id === studentId);
               if (!student) return false;
               if (c.roleId) return student.roleIds.includes(c.roleId);
               if (c.gender) return student.gender === c.gender;
               return false;
             }).length;
-            
+
             if (roleStudentsInGroup !== c.count) {
               satisfied = false;
-              reason = `${roles.find(r => r.id === c.roleId)?.name || 'ロール'}が${groups.find(g => g.id === groupId)?.name || 'グループ'}に${c.count}人配置されていません（実際: ${roleStudentsInGroup}人）`;
+              reason = `${roles.find((r) => r.id === c.roleId)?.name || "ロール"}が${groups.find((g) => g.id === groupId)?.name || "グループ"}に${c.count}人配置されていません（実際: ${roleStudentsInGroup}人）`;
               break;
             }
           }
           break;
         }
 
-        case 'student-distance': {
+        case "student-distance": {
           const c = condition as StudentDistanceCondition;
-          const student1SeatId = Object.keys(assignment).find(seatId => assignment[seatId] === c.studentId1);
-          const student2SeatId = Object.keys(assignment).find(seatId => assignment[seatId] === c.studentId2);
-          
+          const student1SeatId = Object.keys(assignment).find(
+            (seatId) => assignment[seatId] === c.studentId1,
+          );
+          const student2SeatId = Object.keys(assignment).find(
+            (seatId) => assignment[seatId] === c.studentId2,
+          );
+
           if (student1SeatId && student2SeatId) {
-            const seat1 = seats.find(s => s.id === student1SeatId);
-            const seat2 = seats.find(s => s.id === student2SeatId);
-            
+            const seat1 = seats.find((s) => s.id === student1SeatId);
+            const seat2 = seats.find((s) => s.id === student2SeatId);
+
             if (seat1 && seat2) {
               const distance = calculateDistance(seat1, seat2);
-              const student1Name = students.find(s => s.id === c.studentId1)?.name;
-              const student2Name = students.find(s => s.id === c.studentId2)?.name;
-              
+              const student1Name = students.find(
+                (s) => s.id === c.studentId1,
+              )?.name;
+              const student2Name = students.find(
+                (s) => s.id === c.studentId2,
+              )?.name;
+
               if (c.shouldBeClose && distance > 2) {
                 satisfied = false;
                 reason = `${student1Name}と${student2Name}が近くに配置されていません（距離: ${distance.toFixed(1)}）`;
@@ -367,7 +421,7 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
         failedConditions.push({
           condition,
           satisfied: false,
-          reason
+          reason,
         });
       }
     }
