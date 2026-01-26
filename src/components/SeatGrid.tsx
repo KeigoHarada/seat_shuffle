@@ -167,9 +167,7 @@ export const SeatGrid: React.FC = () => {
   };
 
   const handleClick = (seatId: string, e: React.MouseEvent) => {
-    console.log('[DEBUG] handleClick called, seatId:', seatId, 'editingSeatId:', editingSeatId, 'target:', e.target);
     if (editingSeatId === seatId) {
-      console.log('[DEBUG] handleClick: editing mode, returning early');
       return;
     }
     if (e.ctrlKey || e.metaKey) {
@@ -346,11 +344,9 @@ export const SeatGrid: React.FC = () => {
             className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''} ${draggedSeatId === seat.id ? 'dragging' : ''} ${dragOverSeatId === seat.id ? 'drag-over' : ''} ${swappedSeats.has(seat.id) ? 'drag-swap' : ''}`}
             onMouseDown={editingSeatId === seat.id ? undefined : undefined}
             onClick={editingSeatId === seat.id ? (e) => {
-              console.log('[DEBUG] 席のdiv onClick: editing mode, stopping propagation');
               e.stopPropagation();
               e.preventDefault();
             } : (e) => {
-              console.log('[DEBUG] 席のdiv onClick, seatId:', seat.id, 'editingSeatId:', editingSeatId, 'target:', e.target);
               handleClick(seat.id, e);
             }}
             onDoubleClick={editingSeatId === seat.id ? undefined : () => {
