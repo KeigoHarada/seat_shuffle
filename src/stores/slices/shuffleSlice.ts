@@ -75,16 +75,12 @@ export function createShuffleSlice(set: SetState, get: GetState) {
         } = get() as ShuffleState;
         if (!currentLayout) return;
 
-        // 一時的に常にランダムシャッフルを使用
-        manager.setAlgorithm("random");
-
-        // 元のコード（条件に応じて切り替え）
-        // const enabledConditions = conditions.filter((c) => c.enabled);
-        // if (enabledConditions.length === 0) {
-        //   manager.setAlgorithm("random");
-        // } else {
-        //   manager.setAlgorithm("conditional");
-        // }
+        const enabledConditions = conditions.filter((c) => c.enabled);
+        if (enabledConditions.length === 0) {
+          manager.setAlgorithm("random");
+        } else {
+          manager.setAlgorithm("conditional");
+        }
 
         const beforeAssignment: Record<string, string | undefined> = {};
         for (const seat of currentLayout.seats) {
