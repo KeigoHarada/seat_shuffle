@@ -167,7 +167,9 @@ export const SeatGrid: React.FC = () => {
   };
 
   const handleClick = (seatId: string, e: React.MouseEvent) => {
+    console.log('[DEBUG] handleClick called, seatId:', seatId, 'editingSeatId:', editingSeatId, 'target:', e.target);
     if (editingSeatId === seatId) {
+      console.log('[DEBUG] handleClick: editing mode, returning early');
       return;
     }
     if (e.ctrlKey || e.metaKey) {
@@ -342,15 +344,28 @@ export const SeatGrid: React.FC = () => {
           <div
             key={seat.id}
             className={`seat ${seat.isEmpty ? 'empty' : seat.studentId ? 'occupied' : ''} ${isShuffling ? 'shuffling' : ''} ${selectedSeatId === seat.id ? 'selected' : ''} ${focusedSeatId === seat.id ? 'focused' : ''} ${multiSelectedSeats.has(seat.id) ? 'multi-selected' : ''} ${draggedSeatId === seat.id ? 'dragging' : ''} ${dragOverSeatId === seat.id ? 'drag-over' : ''} ${swappedSeats.has(seat.id) ? 'drag-swap' : ''}`}
-            onClick={(e) => handleClick(seat.id, e)}
-            onDoubleClick={() => handleDoubleClick(seat.id, getStudentName(seat.studentId))}
-            onContextMenu={(e) => handleRightClick(e, seat.id)}
-            draggable={true}
-            onDragStart={(e) => handleDragStart(e, seat.id)}
-            onDragOver={(e) => handleDragOver(e, seat.id)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, seat.id)}
-            onDragEnd={handleDragEnd}
+            onMouseDown={editingSeatId === seat.id ? undefined : undefined}
+            onClick={editingSeatId === seat.id ? (e) => {
+              console.log('[DEBUG] 席のdiv onClick: editing mode, stopping propagation');
+              e.stopPropagation();
+              e.preventDefault();
+            } : (e) => {
+              console.log('[DEBUG] 席のdiv onClick, seatId:', seat.id, 'editingSeatId:', editingSeatId, 'target:', e.target);
+              handleClick(seat.id, e);
+            }}
+            onDoubleClick={editingSeatId === seat.id ? undefined : () => {
+              handleDoubleClick(seat.id, getStudentName(seat.studentId));
+            }}
+            onContextMenu={editingSeatId === seat.id ? (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            } : (e) => handleRightClick(e, seat.id)}
+            draggable={editingSeatId !== seat.id}
+            onDragStart={editingSeatId === seat.id ? undefined : (e) => handleDragStart(e, seat.id)}
+            onDragOver={editingSeatId === seat.id ? undefined : (e) => handleDragOver(e, seat.id)}
+            onDragLeave={editingSeatId === seat.id ? undefined : handleDragLeave}
+            onDrop={editingSeatId === seat.id ? undefined : (e) => handleDrop(e, seat.id)}
+            onDragEnd={editingSeatId === seat.id ? undefined : handleDragEnd}
             style={{
               animationDelay: `${Math.random() * UI_CONSTANTS.ANIMATION.MAX_DELAY}s`,
               position: 'relative',

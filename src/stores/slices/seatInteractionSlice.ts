@@ -74,10 +74,13 @@ export function createSeatInteractionSlice(set: SetState, get: GetState) {
           (s) => s.id === seat.studentId,
         );
         if (currentStudent) {
-          state.updateStudent(seat.studentId, { 
-            name: studentName,
-            furigana: furigana ?? currentStudent.furigana
-          });
+          set((s: { students: Student[] }) => ({
+            students: s.students.map((s) =>
+              s.id === seat.studentId
+                ? { ...s, name: studentName, furigana: furigana ?? s.furigana }
+                : s,
+            ),
+          }));
           return;
         }
       }

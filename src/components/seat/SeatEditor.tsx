@@ -24,6 +24,8 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
   scale
 }) => {
   const { removeStudentFromSeat } = useSeatStore();
+  const furiganaInputRef = React.useRef<HTMLInputElement>(null);
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent, field: 'furigana' | 'name') => {
     if (e.key === 'Tab' && e.shiftKey) {
@@ -73,29 +75,53 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
     <div 
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', width: '100%' }}
       onMouseDown={(e) => { 
-        e.stopPropagation();
+        console.log('[DEBUG] SeatEditor親div onMouseDown, target:', e.target, 'currentTarget:', e.currentTarget);
+        if (e.target === e.currentTarget) {
+          e.stopPropagation();
+        }
       }}
       onClick={(e) => { 
-        e.stopPropagation();
+        console.log('[DEBUG] SeatEditor親div onClick, target:', e.target, 'currentTarget:', e.currentTarget);
+        if (e.target === e.currentTarget) {
+          e.stopPropagation();
+        }
       }}
     >
       <input
+        ref={furiganaInputRef}
         type="text"
         value={editingFurigana}
-        onChange={(e) => onFuriganaChange(e.target.value)}
+        onChange={(e) => {
+          console.log('[DEBUG] ふりがな onChange:', e.target.value);
+          onFuriganaChange(e.target.value);
+          setTimeout(() => {
+            if (furiganaInputRef.current) {
+              furiganaInputRef.current.focus();
+            }
+          }, 0);
+        }}
         placeholder="ふりがな"
         onKeyDown={(e) => handleKeyDown(e, 'furigana')}
         onMouseDown={(e) => { 
-          e.stopPropagation();
-          e.preventDefault();
-          e.currentTarget.focus();
+          console.log('[DEBUG] ふりがな onMouseDown, target:', e.target);
         }}
         onClick={(e) => { 
+          console.log('[DEBUG] ふりがな onClick, target:', e.target);
           e.stopPropagation();
-          e.currentTarget.focus();
         }}
         onFocus={(e) => { 
+          console.log('[DEBUG] ふりがな onFocus, target:', e.target);
           e.stopPropagation();
+        }}
+        onMouseUp={(e) => {
+          console.log('[DEBUG] ふりがな onMouseUp, target:', e.target);
+          e.stopPropagation();
+        }}
+        onInput={(e) => {
+          console.log('[DEBUG] ふりがな onInput, value:', (e.target as HTMLInputElement).value);
+        }}
+        onBlur={() => {
+          console.log('[DEBUG] ふりがな onBlur');
         }}
         style={{
           border: 'none',
@@ -108,8 +134,7 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
           textAlign: 'center',
           caretColor: 'var(--color-primary-600)',
           lineHeight: '1.2',
-          cursor: 'text',
-          pointerEvents: 'auto'
+          cursor: 'text'
         }}
       />
       <input
@@ -119,23 +144,32 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
         placeholder="名前"
         onKeyPress={handleSubmit}
         onKeyDown={(e) => handleKeyDown(e, 'name')}
-        onBlur={() => onSubmit(seatId)}
+        onBlur={(e) => {
+          const relatedTarget = e.relatedTarget as HTMLElement | null;
+          const furiganaInput = e.currentTarget.parentElement?.querySelector('input[placeholder="ふりがな"]') as HTMLInputElement;
+          if (relatedTarget === furiganaInput) {
+            return;
+          }
+          onSubmit(seatId);
+        }}
         onMouseDown={(e) => { 
           e.stopPropagation();
-          e.preventDefault();
-          e.currentTarget.focus();
         }}
         onClick={(e) => { 
           e.stopPropagation();
-          e.currentTarget.focus();
         }}
         onFocus={(e) => { 
           e.stopPropagation();
         }}
         ref={(input) => {
-          // 編集モード開始時に名前欄にフォーカス
-          if (input) {
-            setTimeout(() => input.focus(), 0);
+          nameInputRef.current = input;
+          // 編集モード開始時に名前欄にフォーカス（ふりがな欄にフォーカスがない場合のみ）
+          if (input && !furiganaInputRef.current?.matches(':focus')) {
+            setTimeout(() => {
+              if (!furiganaInputRef.current?.matches(':focus')) {
+                input.focus();
+              }
+            }, 0);
           }
         }}
         style={{
@@ -150,8 +184,7 @@ export const SeatEditor: React.FC<SeatEditorProps> = ({
           color: 'black',
           caretColor: 'var(--color-primary-600)',
           lineHeight: '1.2',
-          cursor: 'text',
-          pointerEvents: 'auto'
+          cursor: 'text'
         }}
       />
     </div>
