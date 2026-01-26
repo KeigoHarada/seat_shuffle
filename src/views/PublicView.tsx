@@ -35,7 +35,7 @@ export const PublicView: React.FC = () => {
         marginBottom: 'var(--spacing-lg)',
         flexShrink: 0
       }}>
-        <h1 className="text-display">席替えアプリ</h1>
+        <h1 className="text-title3">席替えアプリ</h1>
         <div style={{
           position: 'fixed',
           top: 'var(--spacing-lg)',

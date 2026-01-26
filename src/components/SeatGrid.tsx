@@ -139,6 +139,29 @@ export const SeatGrid: React.FC = () => {
     };
   }, [currentLayout, focusedSeatId, editingSeatId]);
 
+  const [containerSize, setContainerSize] = React.useState({ width: 0, height: 0 });
+  
+  React.useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current?.parentElement) {
+        const parent = containerRef.current.parentElement;
+        setContainerSize({
+          width: parent.clientWidth,
+          height: parent.clientHeight,
+        });
+      } else {
+        // フォールバック: windowサイズから計算
+        const width = showSettings ? window.innerWidth - settingsPanelWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2 : window.innerWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2;
+        const buttonAreaHeight = 70;
+        const height = window.innerHeight - UI_CONSTANTS.LAYOUT.HEADER_HEIGHT - buttonAreaHeight - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2;
+        setContainerSize({ width, height });
+      }
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, [showSettings, settingsPanelWidth]);
 
   if (!currentLayout) {
     return (
@@ -261,31 +284,6 @@ export const SeatGrid: React.FC = () => {
     const student = students.find(s => s.id === studentId);
     return student?.studentNumber;
   };
-
-  // 親コンテナのサイズを取得（親コンテナが存在する場合）
-  const [containerSize, setContainerSize] = React.useState({ width: 0, height: 0 });
-  
-  React.useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current?.parentElement) {
-        const parent = containerRef.current.parentElement;
-        setContainerSize({
-          width: parent.clientWidth,
-          height: parent.clientHeight,
-        });
-      } else {
-        // フォールバック: windowサイズから計算
-        const width = showSettings ? window.innerWidth - settingsPanelWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2 : window.innerWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2;
-        const buttonAreaHeight = 70;
-        const height = window.innerHeight - UI_CONSTANTS.LAYOUT.HEADER_HEIGHT - buttonAreaHeight - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2;
-        setContainerSize({ width, height });
-      }
-    };
-    
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, [showSettings, settingsPanelWidth]);
   
   const availableWidth = containerSize.width || (showSettings ? window.innerWidth - settingsPanelWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2 : window.innerWidth - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2);
   const availableHeight = containerSize.height || (window.innerHeight - UI_CONSTANTS.LAYOUT.HEADER_HEIGHT - 70 - UI_CONSTANTS.LAYOUT.WINDOW_MARGIN * 2);
