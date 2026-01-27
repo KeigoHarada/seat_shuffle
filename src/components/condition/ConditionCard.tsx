@@ -11,6 +11,7 @@ interface ConditionCardProps {
   students: any[];
   groups: any[];
   roles: any[];
+  checkResult?: { satisfied: boolean };
 }
 
 export const ConditionCard: React.FC<ConditionCardProps> = ({
@@ -20,7 +21,8 @@ export const ConditionCard: React.FC<ConditionCardProps> = ({
   onDelete,
   students,
   groups,
-  roles
+  roles,
+  checkResult
 }) => {
   const getConditionDescription = (condition: Condition): string => {
     switch (condition.type) {
@@ -49,11 +51,33 @@ export const ConditionCard: React.FC<ConditionCardProps> = ({
     }
   };
 
+  const getCardStyle = () => {
+    if (!checkResult) {
+      return {
+        backgroundColor: '#f7fafc',
+        border: '1px solid #e2e8f0'
+      };
+    }
+    if (checkResult.satisfied) {
+      return {
+        backgroundColor: '#d1fae5',
+        border: '2px solid #10b981'
+      };
+    } else {
+      return {
+        backgroundColor: '#fee2e2',
+        border: '2px solid #ef4444'
+      };
+    }
+  };
+
+  const cardStyle = getCardStyle();
+
   return (
     <div style={{
       padding: 'var(--spacing-md)',
-      backgroundColor: 'var(--color-secondary-50)',
-      border: '1px solid var(--color-secondary-200)',
+      backgroundColor: cardStyle.backgroundColor,
+      border: cardStyle.border,
       borderRadius: 'var(--radius-md)',
       marginBottom: 'var(--spacing-sm)'
     }}>

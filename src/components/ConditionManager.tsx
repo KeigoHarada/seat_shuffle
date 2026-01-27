@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { 
   StudentGroupCondition, 
@@ -13,6 +13,7 @@ import { StudentGroupForm } from './condition/StudentGroupForm';
 import { RoleGroupForm } from './condition/RoleGroupForm';
 import { StudentDistanceForm } from './condition/StudentDistanceForm';
 import { ConditionCard } from './condition/ConditionCard';
+import { analyzeAssignment } from '../utils/conditionUtils';
 
 export const ConditionManager: React.FC = () => {
   const { 
@@ -20,6 +21,7 @@ export const ConditionManager: React.FC = () => {
     students, 
     groups, 
     roles, 
+    currentLayout,
     addCondition, 
     removeCondition, 
     toggleCondition 
@@ -27,6 +29,40 @@ export const ConditionManager: React.FC = () => {
   
   const [isExpanded, setIsExpanded] = useState(true);
   const [showForm, setShowForm] = useState<'student-group' | 'role-group' | 'student-distance' | null>(null);
+
+  const conditionCheckResults = useMemo(() => {
+    if (!currentLayout) return new Map<string, { satisfied: boolean }>();
+
+    const assignment: { [seatId: string]: string } = {};
+    for (const seat of currentLayout.seats) {
+      if (!seat.isEmpty && seat.studentId) {
+        assignment[seat.id] = seat.studentId;
+      }
+    }
+
+    const analysis = analyzeAssignment(
+      assignment,
+      conditions,
+      students,
+      currentLayout.seats,
+      groups,
+      roles
+    );
+
+    const resultMap = new Map<string, { satisfied: boolean }>();
+    
+    for (const condition of conditions) {
+      if (!condition.enabled) {
+        continue;
+      }
+      const failed = analysis.failedConditions.find(fc => fc.condition.id === condition.id);
+      resultMap.set(condition.id, {
+        satisfied: !failed
+      });
+    }
+
+    return resultMap;
+  }, [currentLayout, conditions, students, groups, roles]);
 
   const handleAddCondition = (condition: Omit<StudentGroupCondition | RoleGroupCondition | StudentDistanceCondition, 'id'>) => {
     const newCondition = {
@@ -96,18 +132,22 @@ export const ConditionManager: React.FC = () => {
                 条件が設定されていません
               </div>
             ) : (
-              conditions.map(condition => (
-                <ConditionCard
-                  key={condition.id}
-                  condition={condition}
-                  onToggle={handleToggleCondition}
-                  onEdit={handleEditCondition}
-                  onDelete={handleDeleteCondition}
-                  students={students}
-                  groups={groups}
-                  roles={roles}
-                />
-              ))
+              conditions.map(condition => {
+                const checkResult = conditionCheckResults.get(condition.id);
+                return (
+                  <ConditionCard
+                    key={condition.id}
+                    condition={condition}
+                    onToggle={handleToggleCondition}
+                    onEdit={handleEditCondition}
+                    onDelete={handleDeleteCondition}
+                    students={students}
+                    groups={groups}
+                    roles={roles}
+                    checkResult={checkResult}
+                  />
+                );
+              })
             )}
           </div>
 

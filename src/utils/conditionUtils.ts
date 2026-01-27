@@ -473,21 +473,33 @@ export const analyzeAssignment = (
       case "role-group":
         const roleGroupCondition = condition as RoleGroupCondition;
         for (const groupId of roleGroupCondition.groupIds) {
-          const groupSeats = seats.filter((s) => s.groupIds.includes(groupId));
+          const groupSeats = seats.filter(
+            (s) => s.groupIds.includes(groupId) && !s.isEmpty
+          );
           const roleStudentsInGroup = groupSeats.filter((seat) => {
             const studentId = assignments[seat.id];
             if (!studentId) return false;
             const student = students.find((s) => s.id === studentId);
-            return (
-              student &&
-              roleGroupCondition.roleId &&
-              student.roleIds.includes(roleGroupCondition.roleId)
-            );
+            if (!student) return false;
+            if (roleGroupCondition.roleId) {
+              return student.roleIds.includes(roleGroupCondition.roleId);
+            }
+            if (roleGroupCondition.gender) {
+              return student.gender === roleGroupCondition.gender;
+            }
+            return false;
           }).length;
 
           if (roleStudentsInGroup !== roleGroupCondition.count) {
             satisfied = false;
-            reason = `${roles.find((r) => r.id === roleGroupCondition.roleId)?.name || "ロール"}が${groups.find((g) => g.id === groupId)?.name || "グループ"}に${roleGroupCondition.count}人配置されていません（実際: ${roleStudentsInGroup}人）`;
+            const filterName = roleGroupCondition.roleId
+              ? roles.find((r) => r.id === roleGroupCondition.roleId)?.name || "ロール"
+              : roleGroupCondition.gender === "male"
+                ? "男性"
+                : roleGroupCondition.gender === "female"
+                  ? "女性"
+                  : "その他";
+            reason = `${filterName}が${groups.find((g) => g.id === groupId)?.name || "グループ"}に${roleGroupCondition.count}人配置されていません（実際: ${roleStudentsInGroup}人）`;
             break;
           }
         }
