@@ -9,8 +9,31 @@ import {
   RoleGroupCondition,
   StudentDistanceCondition,
 } from "../types";
-import GLPK, { type LP, type Result } from "glpk.js";
 import { calculateDistance } from "../utils/conditionUtils";
+import type { LP, Result } from "glpk.js";
+
+async function loadGLPK() {
+  const isNode = typeof window === "undefined";
+  try {
+    if (isNode) {
+      const glpkModule = await import("glpk.js/node");
+      return glpkModule.default;
+    } else {
+      const glpkModule = await import("glpk.js");
+      return glpkModule.default;
+    }
+  } catch (error) {
+    if (isNode) {
+      throw new Error(
+        `glpk.js/nodeの読み込みに失敗しました: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    } else {
+      throw new Error(
+        `glpk.jsの読み込みに失敗しました: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+}
 
 export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
   name = "conditional";
@@ -24,7 +47,27 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
     roles: Role[],
   ): Promise<ShuffleResult> {
     try {
-      const glpk = await GLPK();
+      let GLPK;
+      try {
+        GLPK = await loadGLPK();
+      } catch (loadError) {
+        return {
+          success: false,
+          assignment: {},
+          error: `GLPKの読み込みに失敗しました: ${loadError instanceof Error ? loadError.message : String(loadError)}`,
+        };
+      }
+
+      let glpk;
+      try {
+        glpk = await GLPK();
+      } catch (initError) {
+        return {
+          success: false,
+          assignment: {},
+          error: `GLPKの初期化に失敗しました: ${initError instanceof Error ? initError.message : String(initError)}`,
+        };
+      }
       const enabledConditions = conditions.filter((c) => c.enabled);
       const availableSeats = seats.filter((seat) => !seat.isEmpty);
 
