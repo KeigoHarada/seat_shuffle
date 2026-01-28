@@ -1,14 +1,5 @@
 import { create } from "zustand";
-import type {
-  SeatLayout,
-  Student,
-  Group,
-  Role,
-  Condition,
-  StudentGroupCondition,
-  RoleGroupCondition,
-  StudentDistanceCondition,
-} from "../types";
+import type { SeatLayout, Student, Group, Role, Condition } from "../types";
 import type { AppState } from "../types";
 import type { ConditionValidationResult } from "../utils/condition/validate";
 import type { ShuffleManager } from "../utils/ShuffleManager";
@@ -47,12 +38,7 @@ export interface SeatStore extends AppState {
   updateRole: (roleId: string, updates: Partial<Role>) => void;
   assignRoleToStudent: (studentId: string, roleId: string) => void;
   removeRoleFromStudent: (studentId: string, roleId: string) => void;
-  addCondition: (
-    condition:
-      | StudentGroupCondition
-      | RoleGroupCondition
-      | StudentDistanceCondition,
-  ) => void;
+  addCondition: (condition: Condition) => void;
   removeCondition: (conditionId: string) => void;
   updateCondition: (conditionId: string, updates: Partial<Condition>) => void;
   toggleCondition: (conditionId: string) => void;

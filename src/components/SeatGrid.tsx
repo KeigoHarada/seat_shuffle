@@ -56,7 +56,6 @@ export const SeatGrid: React.FC = () => {
     students, 
     groups,
     roles,
-    conditions,
     isShuffling, 
     selectedSeatId,
     setSelectedSeatId,

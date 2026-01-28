@@ -60,7 +60,12 @@ export const ConditionManager: React.FC = () => {
     return resultMap;
   }, [currentLayout, conditions, students, groups, roles]);
 
-  const handleAddCondition = (condition: Omit<Condition, 'id'>) => {
+  const handleAddCondition = (
+    condition:
+      | Omit<Extract<Condition, { type: 'student-group' }>, 'id'>
+      | Omit<Extract<Condition, { type: 'role-group' }>, 'id'>
+      | Omit<Extract<Condition, { type: 'student-distance' }>, 'id'>
+  ) => {
     const newCondition: Condition = {
       ...condition,
       id: `condition-${Date.now()}`

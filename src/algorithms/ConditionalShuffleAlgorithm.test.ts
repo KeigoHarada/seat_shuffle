@@ -2,16 +2,7 @@ import { describe, it, expect } from "vitest";
 import { ConditionalShuffleAlgorithm } from "./ConditionalShuffleAlgorithm";
 import { SAMPLE_STUDENTS } from "../stores/sampleData";
 import { analyzeAssignment } from "../utils/condition/conditionCheck";
-import type {
-  Seat,
-  Student,
-  Condition,
-  Group,
-  Role,
-  StudentGroupCondition,
-  RoleGroupCondition,
-  StudentDistanceCondition,
-} from "../types";
+import type { Seat, Student, Condition, Group, Role } from "../types";
 
 function buildTestSeats(students: Student[]): Seat[] {
   const seats: Seat[] = [];
@@ -452,8 +443,14 @@ describe("ConditionalShuffleAlgorithm", () => {
       condition2,
       condition3,
     ]);
+    const assignmentForAnalysis: { [seatId: string]: string } = {};
+    for (const [seatId, studentId] of Object.entries(assignment)) {
+      if (studentId !== undefined) {
+        assignmentForAnalysis[seatId] = studentId;
+      }
+    }
     const analysis = analyzeAssignment(
-      assignment,
+      assignmentForAnalysis,
       [condition1, condition2, condition3],
       students,
       seats,

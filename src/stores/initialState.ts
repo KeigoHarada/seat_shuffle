@@ -1,9 +1,4 @@
-import type {
-  Group,
-  Role,
-  RoleGroupCondition,
-  StudentDistanceCondition,
-} from "../types";
+import type { Group, Role, Condition } from "../types";
 
 export const DEFAULT_GROUPS: Group[] = [
   { id: "group-han-1", name: "班1", color: "#3B82F6" },
