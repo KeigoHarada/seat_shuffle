@@ -7,6 +7,7 @@ import {
   DEFAULT_SHUFFLE_ANIMATION,
   type ShuffleAnimation,
 } from "../../utils/shuffleAnimations";
+import { SHUFFLE_CONSTANTS } from "../../constants/shuffle";
 
 type SetState = (partial: unknown) => void;
 type GetState = () => unknown;
@@ -18,8 +19,8 @@ function createShuffleManager(): ShuffleManager {
       conditional: new ConditionalShuffleAlgorithm(),
       random: new RandomShuffleAlgorithm(),
     },
-    maxAttempts: 1000,
-    timeout: 10000,
+    maxAttempts: SHUFFLE_CONSTANTS.MAX_ATTEMPTS,
+    timeout: SHUFFLE_CONSTANTS.TIMEOUT,
   });
 }
 

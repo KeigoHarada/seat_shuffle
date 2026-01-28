@@ -1,4 +1,5 @@
 import { Seat, Student, Condition, ConditionCheckResult } from "../../types";
+import { CONDITION_CONSTANTS } from "../../constants/condition";
 
 // 席の座標から距離を計算
 export const calculateDistance = (seat1: Seat, seat2: Seat): number => {
@@ -47,7 +48,10 @@ export const checkStudentDistanceCondition = (
     (s) => s.id === condition.studentId2,
   )?.name;
 
-  if (condition.shouldBeClose && distance > 2) {
+  if (
+    condition.shouldBeClose &&
+    distance > CONDITION_CONSTANTS.DISTANCE.CLOSE_THRESHOLD
+  ) {
     return {
       condition,
       satisfied: false,
@@ -55,7 +59,10 @@ export const checkStudentDistanceCondition = (
     };
   }
 
-  if (!condition.shouldBeClose && distance < 3) {
+  if (
+    !condition.shouldBeClose &&
+    distance < CONDITION_CONSTANTS.DISTANCE.FAR_THRESHOLD
+  ) {
     return {
       condition,
       satisfied: false,

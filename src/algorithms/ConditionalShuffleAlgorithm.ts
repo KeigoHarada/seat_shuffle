@@ -1,6 +1,7 @@
 import { ShuffleAlgorithm, ShuffleResult } from "../types/shuffle";
 import { Seat, Student, Condition } from "../types";
 import { calculateDistance } from "../utils/condition/distanceCheck";
+import { CONDITION_CONSTANTS } from "../constants/condition";
 import type { LP, Result } from "glpk.js";
 
 async function loadGLPK() {
@@ -199,7 +200,9 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
                 for (const seat2 of availableSeats) {
                   if (seat1.id >= seat2.id) continue;
                   const distance = calculateDistance(seat1, seat2);
-                  if (distance <= 2) {
+                  if (
+                    distance <= CONDITION_CONSTANTS.DISTANCE.CLOSE_THRESHOLD
+                  ) {
                     closeSeatPairs.push([seat1, seat2]);
                   }
                 }
@@ -215,7 +218,7 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
                 for (const seat2 of availableSeats) {
                   if (seat1.id === seat2.id) continue;
                   const distance = calculateDistance(seat1, seat2);
-                  if (distance > 2) {
+                  if (distance > CONDITION_CONSTANTS.DISTANCE.CLOSE_THRESHOLD) {
                     subjectTo.push({
                       name: `distance_close_${condition.studentId1}_${seat1.id}_${condition.studentId2}_${seat2.id}`,
                       vars: [
@@ -238,7 +241,7 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
                 for (const seat2 of availableSeats) {
                   if (seat1.id >= seat2.id) continue;
                   const distance = calculateDistance(seat1, seat2);
-                  if (distance < 3) {
+                  if (distance < CONDITION_CONSTANTS.DISTANCE.FAR_THRESHOLD) {
                     subjectTo.push({
                       name: `distance_far_${seat1.id}_${seat2.id}`,
                       vars: [
