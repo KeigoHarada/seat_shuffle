@@ -82,7 +82,10 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
       for (const student of students) {
         for (const seat of availableSeats) {
           const name = `x_${student.id}_${seat.id}`;
-          vars.push({ name, coef: 0 });
+          vars.push({
+            name,
+            coef: Math.random(),
+          });
           binaries.push(name);
         }
       }
@@ -156,30 +159,23 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
 
               if (targetStudents.length === 0) continue;
 
-              subjectTo.push({
-                name: `role_group_${groupId}_min`,
-                vars: targetStudents.flatMap((student) =>
-                  groupSeats.map((seat) => ({
-                    name: `x_${student.id}_${seat.id}`,
-                    coef: 1,
-                  })),
-                ),
-                bnds: {
-                  type: glpk.GLP_LO,
-                  lb: condition.count,
-                  ub: Number.MAX_VALUE,
-                },
-              });
+              const roleGroupVars = targetStudents.flatMap((student) =>
+                groupSeats.map((seat) => ({
+                  name: `x_${student.id}_${seat.id}`,
+                  coef: 1,
+                })),
+              );
+
+              if (roleGroupVars.length === 0) continue;
 
               subjectTo.push({
-                name: `role_group_${groupId}_max`,
-                vars: targetStudents.flatMap((student) =>
-                  groupSeats.map((seat) => ({
-                    name: `x_${student.id}_${seat.id}`,
-                    coef: 1,
-                  })),
-                ),
-                bnds: { type: glpk.GLP_UP, lb: 0, ub: condition.count },
+                name: `role_group_${groupId}`,
+                vars: roleGroupVars,
+                bnds: {
+                  type: glpk.GLP_FX,
+                  lb: condition.count,
+                  ub: condition.count,
+                },
               });
             }
             break;
@@ -290,16 +286,16 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
         binaries,
       };
 
-      const res: Result = await glpk.solve(lp, glpk.GLP_MSG_OFF);
+      console.log(
+        `[GLPK] 変数数: ${vars.length}, 制約数: ${subjectTo.length}, バイナリ変数数: ${binaries.length}`,
+      );
 
-      if (
-        res.result.status !== glpk.GLP_OPT &&
-        res.result.status !== glpk.GLP_FEAS
-      ) {
-        throw new Error(
-          "最適解が見つかりませんでした。条件が複雑すぎるか、解が存在しない可能性があります。",
-        );
-      }
+      const startTime = Date.now();
+      const res: Result = await glpk.solve(lp, glpk.GLP_MSG_OFF);
+      const solveTime = Date.now() - startTime;
+      console.log(
+        `[GLPK] 求解時間: ${solveTime}ms, ステータス: ${res.result.status}`,
+      );
 
       const assignment: ShuffleResult = {};
 
@@ -320,6 +316,20 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
             assignment[seat.id] = undefined;
           }
         }
+      }
+
+      const assignedCount = Object.values(assignment).filter(
+        (v) => v !== undefined,
+      ).length;
+
+      if (
+        res.result.status !== glpk.GLP_OPT &&
+        res.result.status !== glpk.GLP_FEAS &&
+        assignedCount < students.length
+      ) {
+        throw new Error(
+          `最適解が見つかりませんでした（ステータス: ${res.result.status}）。条件が複雑すぎるか、解が存在しない可能性があります。`,
+        );
       }
 
       return assignment;

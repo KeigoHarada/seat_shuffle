@@ -496,4 +496,155 @@ describe("ConditionalShuffleAlgorithm", () => {
       "\n【全条件】満たされていない条件: " + analysis.failedConditions.length,
     );
   });
+
+  it("同じ配置状態から2回シャッフルして異なる結果になることを確認（条件5個）", async () => {
+    const students = SAMPLE_STUDENTS.slice(0, 30);
+    const seats = buildTestSeats(students);
+
+    const groupA: Group = {
+      id: "group-a",
+      name: "グループA",
+      color: "#ff0000",
+    };
+    const groupB: Group = {
+      id: "group-b",
+      name: "グループB",
+      color: "#0000ff",
+    };
+    const groupC: Group = {
+      id: "group-c",
+      name: "グループC",
+      color: "#00ff00",
+    };
+
+    seats[0]!.groupIds = [groupA.id];
+    seats[1]!.groupIds = [groupA.id];
+    seats[2]!.groupIds = [groupA.id];
+    seats[3]!.groupIds = [groupA.id];
+    seats[4]!.groupIds = [groupB.id];
+    seats[5]!.groupIds = [groupB.id];
+    seats[6]!.groupIds = [groupB.id];
+    seats[7]!.groupIds = [groupB.id];
+    seats[8]!.groupIds = [groupC.id];
+    seats[9]!.groupIds = [groupC.id];
+    seats[10]!.groupIds = [groupC.id];
+    seats[11]!.groupIds = [groupC.id];
+
+    const roleClassLeader: Role = {
+      id: "role-class-leader",
+      name: "学級委員長",
+      icon: "user",
+    };
+
+    students[0]!.roleIds = [roleClassLeader.id];
+    students[1]!.roleIds = [roleClassLeader.id];
+    students[2]!.roleIds = [roleClassLeader.id];
+
+    const conditions: Condition[] = [
+      {
+        id: "condition-1",
+        name: "田中太郎をグループAに配置",
+        type: "student-group",
+        enabled: true,
+        studentIds: [students[0]!.id],
+        groupIds: [groupA.id],
+        shouldPlace: true,
+      },
+      {
+        id: "condition-2",
+        name: "佐藤花子をグループBに配置",
+        type: "student-group",
+        enabled: true,
+        studentIds: [students[1]!.id],
+        groupIds: [groupB.id],
+        shouldPlace: true,
+      },
+      {
+        id: "condition-3",
+        name: "グループAに学級委員長を1人配置",
+        type: "role-group",
+        enabled: true,
+        roleId: roleClassLeader.id,
+        groupIds: [groupA.id],
+        count: 1,
+      },
+      {
+        id: "condition-4",
+        name: "鈴木次郎と高橋美咲を近くに配置",
+        type: "student-distance",
+        enabled: true,
+        studentId1: students[2]!.id,
+        studentId2: students[3]!.id,
+        shouldBeClose: true,
+      },
+      {
+        id: "condition-5",
+        name: "伊藤健太と山田一郎を遠くに配置",
+        type: "student-distance",
+        enabled: true,
+        studentId1: students[4]!.id,
+        studentId2: students[5]!.id,
+        shouldBeClose: false,
+      },
+    ];
+
+    const initialSeats = seats.map((seat) => ({ ...seat }));
+    const initialAssignment = buildInitialAssignment(initialSeats);
+
+    const alg = new ConditionalShuffleAlgorithm();
+
+    const assignment1 = await alg.shuffle(students, initialSeats, conditions);
+    const assignment2 = await alg.shuffle(students, initialSeats, conditions);
+
+    const assignment1Str = JSON.stringify(
+      Object.entries(assignment1)
+        .filter(([_, v]) => v !== undefined)
+        .sort(([id1], [id2]) => id1.localeCompare(id2)),
+    );
+    const assignment2Str = JSON.stringify(
+      Object.entries(assignment2)
+        .filter(([_, v]) => v !== undefined)
+        .sort(([id1], [id2]) => id1.localeCompare(id2)),
+    );
+
+    expect(assignment1Str).not.toBe(assignment2Str);
+
+    const analysis1 = analyzeAssignment(
+      assignment1 as { [seatId: string]: string },
+      conditions,
+      students,
+      seats,
+      [groupA, groupB, groupC],
+      [roleClassLeader],
+    );
+    const analysis2 = analyzeAssignment(
+      assignment2 as { [seatId: string]: string },
+      conditions,
+      students,
+      seats,
+      [groupA, groupB, groupC],
+      [roleClassLeader],
+    );
+
+    expect(analysis1.failedConditions).toHaveLength(0);
+    expect(analysis2.failedConditions).toHaveLength(0);
+
+    console.log("\n【設定条件（5個）】");
+    console.log(formatConditions(conditions));
+    console.log("\n【初期配置】");
+    console.log(formatDisplay(seats, initialAssignment, students));
+    console.log("\n【1回目のシャッフル結果】");
+    console.log(formatDisplay(seats, assignment1, students));
+    console.log("\n【2回目のシャッフル結果】");
+    console.log(formatDisplay(seats, assignment2, students));
+    console.log(
+      `\n【1回目】満たされていない条件: ${analysis1.failedConditions.length}`,
+    );
+    console.log(
+      `\n【2回目】満たされていない条件: ${analysis2.failedConditions.length}`,
+    );
+    console.log(
+      `\n【ランダム性】1回目と2回目は異なる配置: ${assignment1Str !== assignment2Str}`,
+    );
+  });
 });
