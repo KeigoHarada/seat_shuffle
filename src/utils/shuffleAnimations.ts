@@ -4,6 +4,7 @@ export interface ShuffleAnimation {
   name: string;
   duration: number;
   renderOverlay?: () => React.ReactNode;
+  audioUrl?: string;
   getShufflingName?: (
     seatId: string,
     originalName: string | null,
@@ -15,7 +16,8 @@ export interface ShuffleAnimation {
 
 export class NameShuffleAnimation implements ShuffleAnimation {
   name = "name-shuffle";
-  duration = 2000;
+  duration = 7200;
+  audioUrl = "/sounds/Short_8Bit_07.mp3";
 
   getShufflingName(
     _seatId: string,
@@ -32,7 +34,7 @@ export class NameShuffleAnimation implements ShuffleAnimation {
 
 export class NameShuffleWithOverlayAnimation implements ShuffleAnimation {
   name = "name-shuffle-overlay";
-  duration = 2000;
+  duration = 7000;
 
   renderOverlay(): React.ReactNode {
     // 例: <img src="/animations/majin-mixing.gif" alt="シャッフル中" />

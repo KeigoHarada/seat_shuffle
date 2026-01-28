@@ -59,6 +59,47 @@ export function createShuffleSlice(set: SetState, get: GetState) {
       (window as any).__shuffleStartTime = startTime;
       set({ isShuffling: true });
 
+      let audio: HTMLAudioElement | null = null;
+      if (animation.audioUrl) {
+        try {
+          const baseUrl = import.meta.env.BASE_URL || "/";
+          const audioPath = baseUrl + animation.audioUrl.replace(/^\//, "");
+          console.log(
+            "音楽ファイルを読み込みます:",
+            audioPath,
+            "BASE_URL:",
+            baseUrl,
+          );
+          audio = new Audio(audioPath);
+          audio.volume = 0.5;
+          audio.loop = true;
+
+          const currentAudio = audio;
+          currentAudio.addEventListener("canplaythrough", () => {
+            console.log("音楽ファイルの読み込み完了:", audioPath);
+          });
+
+          currentAudio.addEventListener("error", (e) => {
+            console.error("音楽ファイルの読み込みエラー:", e, audioPath);
+            console.error("Audio要素のエラー詳細:", currentAudio.error);
+          });
+
+          const playPromise = currentAudio.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log("音楽の再生を開始しました:", audioPath);
+              })
+              .catch((error) => {
+                console.error("音楽の再生に失敗しました:", error, audioPath);
+                console.error("エラー詳細:", error.name, error.message);
+              });
+          }
+        } catch (error) {
+          console.error("音楽ファイルの読み込みに失敗しました:", error);
+        }
+      }
+
       try {
         const {
           currentLayout,
@@ -81,14 +122,16 @@ export function createShuffleSlice(set: SetState, get: GetState) {
           conditions,
         );
 
-        const animationPromise = new Promise((resolve) =>
-          setTimeout(resolve, animation.duration),
-        );
+        const animationPromise = new Promise<void>((resolve) => {
+          setTimeout(() => {
+            resolve();
+          }, animation.duration);
+        });
 
-        const assignment = await Promise.all([
+        const [assignment] = await Promise.all([
           shufflePromise,
           animationPromise,
-        ]).then(([result]) => result);
+        ]);
 
         const beforeAssignment: Record<string, string | undefined> = {};
         for (const seat of currentLayout.seats) {
@@ -181,6 +224,10 @@ export function createShuffleSlice(set: SetState, get: GetState) {
       } catch (error) {
         console.error("シャッフル中にエラーが発生しました:", error);
       } finally {
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
         set({ isShuffling: false });
       }
     },
