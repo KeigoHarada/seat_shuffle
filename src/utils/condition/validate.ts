@@ -1,9 +1,4 @@
 import { Student, Seat, Group, Role, Condition } from "../../types";
-import {
-  isStudentGroupCondition,
-  isRoleGroupCondition,
-  isStudentDistanceCondition,
-} from "./typeGuards";
 
 // 条件検証結果
 export interface ConditionValidationResult {
@@ -198,29 +193,33 @@ export const validateAllConditions = (
   for (const condition of enabledConditions) {
     let result: ConditionValidationResult;
 
-    if (isStudentGroupCondition(condition)) {
-      result = validateStudentGroupCondition(
-        condition,
-        students,
-        groups,
-        seats,
-      );
-    } else if (isRoleGroupCondition(condition)) {
-      result = validateRoleGroupCondition(
-        condition,
-        students,
-        groups,
-        roles,
-        seats,
-      );
-    } else if (isStudentDistanceCondition(condition)) {
-      result = validateStudentDistanceCondition(condition, students, seats);
-    } else {
-      result = {
-        isValid: true,
-        errors: [],
-        warnings: [],
-      };
+    switch (condition.type) {
+      case "student-group":
+        result = validateStudentGroupCondition(
+          condition,
+          students,
+          groups,
+          seats,
+        );
+        break;
+      case "role-group":
+        result = validateRoleGroupCondition(
+          condition,
+          students,
+          groups,
+          roles,
+          seats,
+        );
+        break;
+      case "student-distance":
+        result = validateStudentDistanceCondition(condition, students, seats);
+        break;
+      default:
+        result = {
+          isValid: true,
+          errors: [],
+          warnings: [],
+        };
     }
 
     allErrors.push(
@@ -251,7 +250,8 @@ export const checkConditionConflicts = (
   const enabledConditions = conditions.filter((c) => c.enabled);
 
   const studentGroupConditions = enabledConditions.filter(
-    isStudentGroupCondition,
+    (c): c is Extract<Condition, { type: "student-group" }> =>
+      c.type === "student-group",
   );
 
   for (let i = 0; i < studentGroupConditions.length; i++) {
@@ -282,7 +282,10 @@ export const checkConditionConflicts = (
     }
   }
 
-  const roleGroupConditions = enabledConditions.filter(isRoleGroupCondition);
+  const roleGroupConditions = enabledConditions.filter(
+    (c): c is Extract<Condition, { type: "role-group" }> =>
+      c.type === "role-group",
+  );
 
   for (let i = 0; i < roleGroupConditions.length; i++) {
     for (let j = i + 1; j < roleGroupConditions.length; j++) {

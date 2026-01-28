@@ -4,7 +4,7 @@ import { ConditionalShuffleAlgorithm } from "../../algorithms/ConditionalShuffle
 import { RandomShuffleAlgorithm } from "../../algorithms/RandomShuffleAlgorithm";
 import {
   SHUFFLE_ANIMATIONS,
-  CURRENT_SHUFFLE_ANIMATION,
+  DEFAULT_SHUFFLE_ANIMATION,
   type ShuffleAnimation,
 } from "../../utils/shuffleAnimations";
 
@@ -27,8 +27,8 @@ export function createShuffleSlice(set: SetState, get: GetState) {
   const shuffleManager = createShuffleManager();
 
   let currentAnimation: ShuffleAnimation =
-    SHUFFLE_ANIMATIONS[CURRENT_SHUFFLE_ANIMATION] ||
-    SHUFFLE_ANIMATIONS["rotate"]!;
+    SHUFFLE_ANIMATIONS[DEFAULT_SHUFFLE_ANIMATION] ||
+    SHUFFLE_ANIMATIONS["name-shuffle"]!;
 
   return {
     shuffleManager,
@@ -60,8 +60,6 @@ export function createShuffleSlice(set: SetState, get: GetState) {
       set({ isShuffling: true });
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, animation.duration));
-
         const {
           currentLayout,
           students,
@@ -76,6 +74,21 @@ export function createShuffleSlice(set: SetState, get: GetState) {
         } else {
           manager.setAlgorithm("conditional");
         }
+
+        const shufflePromise = manager.shuffle(
+          students,
+          currentLayout.seats,
+          conditions,
+        );
+
+        const animationPromise = new Promise((resolve) =>
+          setTimeout(resolve, animation.duration),
+        );
+
+        const assignment = await Promise.all([
+          shufflePromise,
+          animationPromise,
+        ]).then(([result]) => result);
 
         const beforeAssignment: Record<string, string | undefined> = {};
         for (const seat of currentLayout.seats) {
@@ -116,12 +129,6 @@ export function createShuffleSlice(set: SetState, get: GetState) {
         );
         console.log(
           `\n【統計】割り当て済み生徒: ${beforeAssignedStudents.size}人, 名無し席: ${beforeUnnamedCount}席, 空席: ${beforeEmptyCount}席, 全生徒数: ${students.length}人`,
-        );
-
-        const assignment = await manager.shuffle(
-          students,
-          currentLayout.seats,
-          conditions,
         );
 
         const afterAssignedStudents = new Set(

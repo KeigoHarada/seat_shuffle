@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { ShuffleAnimation } from '../../utils/shuffleAnimations';
-import type { Seat, Student, Group, Role, Condition } from '../../types';
-import { RandomShuffleAlgorithm } from '../../algorithms/RandomShuffleAlgorithm';
 import { UI_CONSTANTS } from '../../constants/ui';
 
 interface ShufflingNameProps {
@@ -12,11 +10,6 @@ interface ShufflingNameProps {
   shuffleAnimation: ShuffleAnimation;
   isShuffling: boolean;
   scale: number;
-  students: Student[];
-  seats: Seat[];
-  conditions: Condition[];
-  groups: Group[];
-  roles: Role[];
 }
 
 export const ShufflingName: React.FC<ShufflingNameProps> = ({
@@ -27,13 +20,7 @@ export const ShufflingName: React.FC<ShufflingNameProps> = ({
   shuffleAnimation,
   isShuffling,
   scale,
-  students,
-  seats,
-  conditions,
-  groups,
-  roles,
 }) => {
-  const randomAlgorithm = React.useMemo(() => new RandomShuffleAlgorithm(), []);
   const [shufflingName, setShufflingName] = useState<string | null>(originalName);
   const [shufflingFurigana, setShufflingFurigana] = useState<string | undefined>(originalFurigana);
 
@@ -44,41 +31,7 @@ export const ShufflingName: React.FC<ShufflingNameProps> = ({
       return;
     }
 
-    if (shuffleAnimation.getShufflingAssignment) {
-      const interval = setInterval(async () => {
-        try {
-          const assignment = await shuffleAnimation.getShufflingAssignment!(
-            students,
-            seats,
-            conditions,
-            groups,
-            roles,
-            randomAlgorithm,
-          );
-          
-          const assignedStudentId = assignment[seatId];
-          if (assignedStudentId) {
-            const student = students.find(s => s.id === assignedStudentId);
-            if (student) {
-              setShufflingName(student.name);
-              setShufflingFurigana(student.furigana);
-            } else {
-              setShufflingName(originalName);
-              setShufflingFurigana(originalFurigana);
-            }
-          } else {
-            setShufflingName(null);
-            setShufflingFurigana(undefined);
-          }
-        } catch (error) {
-          console.error('シャッフルアニメーションエラー:', error);
-          setShufflingName(originalName);
-          setShufflingFurigana(originalFurigana);
-        }
-      }, 100);
-
-      return () => clearInterval(interval);
-    } else if (shuffleAnimation.getShufflingName) {
+    if (shuffleAnimation.getShufflingName) {
       const interval = setInterval(() => {
         const startTime = (window as any).__shuffleStartTime || Date.now();
         const elapsedTime = Date.now() - startTime;
@@ -101,7 +54,7 @@ export const ShufflingName: React.FC<ShufflingNameProps> = ({
 
       return () => clearInterval(interval);
     }
-  }, [isShuffling, seatId, originalName, originalFurigana, allStudents, shuffleAnimation, students, seats, conditions, groups, roles, randomAlgorithm]);
+  }, [isShuffling, seatId, originalName, originalFurigana, allStudents, shuffleAnimation]);
 
   if (originalFurigana || shufflingFurigana) {
     return (

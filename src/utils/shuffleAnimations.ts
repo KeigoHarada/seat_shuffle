@@ -1,6 +1,4 @@
 import React from "react";
-import type { Seat, Student, Group, Role, Condition } from "../types";
-import type { ShuffleAlgorithm } from "../types/shuffle";
 
 export interface ShuffleAnimation {
   name: string;
@@ -13,60 +11,28 @@ export interface ShuffleAnimation {
     elapsedTime: number,
     totalDuration: number,
   ) => string | null;
-  getShufflingAssignment?: (
-    students: Student[],
-    seats: Seat[],
-    conditions: Condition[],
-    groups: Group[],
-    roles: Role[],
-    algorithm: ShuffleAlgorithm,
-  ) => Promise<{ [seatId: string]: string | undefined }>;
 }
 
 export class NameShuffleAnimation implements ShuffleAnimation {
   name = "name-shuffle";
   duration = 2000;
 
-  async getShufflingAssignment(
-    students: Student[],
-    seats: Seat[],
-    conditions: Condition[],
-    groups: Group[],
-    roles: Role[],
-    algorithm: ShuffleAlgorithm,
-  ): Promise<{ [seatId: string]: string | undefined }> {
-    const result = await algorithm.shuffle(
-      students,
-      seats,
-      conditions,
-      groups,
-      roles,
-    );
-    return result.success ? result.assignment : {};
+  getShufflingName(
+    _seatId: string,
+    _originalName: string | null,
+    allStudents: Array<{ id: string; name: string; furigana?: string }>,
+    _elapsedTime: number,
+    _totalDuration: number,
+  ): string | null {
+    if (allStudents.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * allStudents.length);
+    return allStudents[randomIndex]?.name || null;
   }
 }
 
 export class NameShuffleWithOverlayAnimation implements ShuffleAnimation {
   name = "name-shuffle-overlay";
   duration = 2000;
-
-  async getShufflingAssignment(
-    students: Student[],
-    seats: Seat[],
-    conditions: Condition[],
-    groups: Group[],
-    roles: Role[],
-    algorithm: ShuffleAlgorithm,
-  ): Promise<{ [seatId: string]: string | undefined }> {
-    const result = await algorithm.shuffle(
-      students,
-      seats,
-      conditions,
-      groups,
-      roles,
-    );
-    return result.success ? result.assignment : {};
-  }
 
   renderOverlay(): React.ReactNode {
     // 例: <img src="/animations/majin-mixing.gif" alt="シャッフル中" />
@@ -80,7 +46,3 @@ export const SHUFFLE_ANIMATIONS: Record<string, ShuffleAnimation> = {
 };
 
 export const DEFAULT_SHUFFLE_ANIMATION = "name-shuffle";
-
-// アニメーションを変更する場合は、この値を変更してください
-// 利用可能なアニメーション: "name-shuffle", "name-shuffle-overlay"
-export const CURRENT_SHUFFLE_ANIMATION = "name-shuffle";

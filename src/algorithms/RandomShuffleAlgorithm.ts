@@ -54,7 +54,7 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
         );
       }
 
-      const assignment: { [seatId: string]: string | undefined } = {};
+      const assignment: ShuffleResult = {};
 
       // 空席はそのまま
       seats.forEach((seat) => {

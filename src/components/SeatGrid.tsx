@@ -559,7 +559,7 @@ export const SeatGrid: React.FC = () => {
                 <>
                   {(() => {
                     const student = students.find(s => s.id === seat.studentId);
-                    if (isShuffling && (getShuffleAnimation().getShufflingName || getShuffleAnimation().getShufflingAssignment)) {
+                    if (isShuffling && getShuffleAnimation().getShufflingName) {
                       const shuffleAnimation = getShuffleAnimation();
                       const allStudentData = students.map(s => ({ id: s.id, name: s.name, furigana: s.furigana }));
                       return (
@@ -571,11 +571,6 @@ export const SeatGrid: React.FC = () => {
                           shuffleAnimation={shuffleAnimation}
                           isShuffling={isShuffling}
                           scale={scale}
-                          students={students}
-                          seats={currentLayout.seats}
-                          conditions={conditions}
-                          groups={groups}
-                          roles={roles}
                         />
                       );
                     }
