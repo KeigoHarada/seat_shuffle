@@ -1,9 +1,5 @@
-import {
-  ShuffleAlgorithm,
-  ShuffleResult,
-  ShuffleAnalysis,
-} from "../types/shuffle";
-import { Seat, Student, Group, Role, Condition } from "../types";
+import { ShuffleAlgorithm, ShuffleResult } from "../types/shuffle";
+import { Seat, Student, Condition } from "../types";
 
 export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
   name = "random";
@@ -12,9 +8,7 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
   async shuffle(
     students: Student[],
     seats: Seat[],
-    conditions: Condition[],
-    _groups: Group[],
-    _roles: Role[],
+    _conditions: Condition[],
   ): Promise<ShuffleResult> {
     try {
       // 空席を除外した利用可能な席を取得
@@ -57,7 +51,7 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
       // デバッグ: 数が一致しているか確認
       if (shuffledSlots.length !== availableSeats.length) {
         console.error(
-          `[RandomShuffleAlgorithm] スロット数が一致しません: shuffledSlots=${shuffledSlots.length}, availableSeats=${availableSeats.length}, assignedStudents=${assignedStudents.length}, currentUnnamedCount=${currentUnnamedCount}`
+          `[RandomShuffleAlgorithm] スロット数が一致しません: shuffledSlots=${shuffledSlots.length}, availableSeats=${availableSeats.length}, assignedStudents=${assignedStudents.length}, currentUnnamedCount=${currentUnnamedCount}`,
         );
       }
 
@@ -84,29 +78,11 @@ export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
         }
       });
 
-      // 条件チェック（簡易版）
-      const enabledConditions = conditions.filter((c) => c.enabled);
-      const analysis: ShuffleAnalysis = {
-        totalConditions: enabledConditions.length,
-        failedConditions: enabledConditions.map((condition) => ({
-          condition,
-          satisfied: false,
-          reason: "ランダムアルゴリズムでは条件を考慮しません",
-        })),
-      };
-
-      return {
-        success: true,
-        assignment,
-        analysis,
-      };
+      return assignment;
     } catch (error) {
-      return {
-        success: false,
-        assignment: {},
-        error:
-          error instanceof Error ? error.message : "不明なエラーが発生しました",
-      };
+      throw new Error(
+        error instanceof Error ? error.message : "不明なエラーが発生しました",
+      );
     }
   }
 

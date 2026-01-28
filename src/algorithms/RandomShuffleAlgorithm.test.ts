@@ -64,25 +64,11 @@ describe("RandomShuffleAlgorithm", () => {
     const students = SAMPLE_STUDENTS.slice(0, 8);
     const seats = buildTestSeats(students);
     const conditions: Condition[] = [];
-    const groups: readonly { id: string }[] = [];
-    const roles: readonly { id: string }[] = [];
 
     const beforeAssignment = buildInitialAssignment(seats);
 
     const alg = new RandomShuffleAlgorithm();
-    const result = await alg.shuffle(
-      students,
-      seats,
-      conditions,
-      groups as never,
-      roles as never,
-    );
-
-    expect(result.success).toBe(true);
-    expect(result.assignment).toBeDefined();
-    expect(result.error).toBeUndefined();
-
-    const assignment = result.assignment!;
+    const assignment = await alg.shuffle(students, seats, conditions);
 
     const assignedCount = Object.values(assignment).filter(
       (v) => v !== undefined,

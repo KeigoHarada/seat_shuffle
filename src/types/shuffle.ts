@@ -1,22 +1,7 @@
-import { Seat, Student, Group, Role, Condition } from "./index";
+import { Seat, Student, Condition } from "./index";
 
-// シャッフル結果のインターフェース
-export interface ShuffleResult {
-  success: boolean;
-  assignment: { [seatId: string]: string | undefined };
-  analysis?: ShuffleAnalysis;
-  error?: string;
-}
-
-// シャッフル分析結果
-export interface ShuffleAnalysis {
-  totalConditions: number;
-  failedConditions: Array<{
-    condition: Condition;
-    satisfied: boolean;
-    reason?: string;
-  }>;
-}
+// シャッフル結果：席IDと生徒IDのマッピング
+export type ShuffleResult = { [seatId: string]: string | undefined };
 
 // シャッフルアルゴリズムのインターフェース
 export interface ShuffleAlgorithm {
@@ -28,8 +13,6 @@ export interface ShuffleAlgorithm {
     students: Student[],
     seats: Seat[],
     conditions: Condition[],
-    groups: Group[],
-    roles: Role[],
   ): Promise<ShuffleResult>;
 
   // アルゴリズム固有の設定（オプション）

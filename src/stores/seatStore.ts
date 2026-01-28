@@ -10,7 +10,6 @@ import type {
   StudentDistanceCondition,
 } from "../types";
 import type { AppState } from "../types";
-import type { AssignmentAnalysis } from "../utils/conditionUtils";
 import type { ConditionValidationResult } from "../utils/conditionValidator";
 import type { ShuffleManager } from "../utils/ShuffleManager";
 import {
@@ -64,7 +63,6 @@ export interface SeatStore extends AppState {
   initializeDefaultLayout: () => void;
   settingsPanelWidth: number;
   setSettingsPanelWidth: (width: number) => void;
-  lastShuffleAnalysis: AssignmentAnalysis | null;
   validateConditions: () => ConditionValidationResult;
   checkConditionConflicts: () => ConditionValidationResult;
   setShuffleAnimation: (animationName: string) => void;
@@ -81,7 +79,6 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   showSettings: false,
   selectedSeatId: null,
   settingsPanelWidth: 600,
-  lastShuffleAnalysis: null,
 
   ...createStudentSlice(set as (p: unknown) => void),
   ...createLayoutSlice(set as (p: unknown) => void, get as () => SeatStore),

@@ -43,40 +43,30 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
     students: Student[],
     seats: Seat[],
     conditions: Condition[],
-    groups: Group[],
-    roles: Role[],
   ): Promise<ShuffleResult> {
     try {
       let GLPK;
       try {
         GLPK = await loadGLPK();
       } catch (loadError) {
-        return {
-          success: false,
-          assignment: {},
-          error: `GLPKの読み込みに失敗しました: ${loadError instanceof Error ? loadError.message : String(loadError)}`,
-        };
+        throw new Error(
+          `GLPKの読み込みに失敗しました: ${loadError instanceof Error ? loadError.message : String(loadError)}`,
+        );
       }
 
       let glpk;
       try {
         glpk = await GLPK();
       } catch (initError) {
-        return {
-          success: false,
-          assignment: {},
-          error: `GLPKの初期化に失敗しました: ${initError instanceof Error ? initError.message : String(initError)}`,
-        };
+        throw new Error(
+          `GLPKの初期化に失敗しました: ${initError instanceof Error ? initError.message : String(initError)}`,
+        );
       }
       const enabledConditions = conditions.filter((c) => c.enabled);
       const availableSeats = seats.filter((seat) => !seat.isEmpty);
 
       if (students.length > availableSeats.length) {
-        return {
-          success: false,
-          assignment: {},
-          error: "生徒数が利用可能な席数を超えています。",
-        };
+        throw new Error("生徒数が利用可能な席数を超えています。");
       }
 
       if (enabledConditions.length === 0) {
@@ -92,14 +82,7 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
           }
         });
 
-        return {
-          success: true,
-          assignment,
-          analysis: {
-            totalConditions: 0,
-            failedConditions: [],
-          },
-        };
+        return assignment;
       }
 
       const vars: { name: string; coef: number }[] = [];
@@ -227,11 +210,9 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
               }
 
               if (closeSeatPairs.length === 0) {
-                return {
-                  success: false,
-                  assignment: {},
-                  error: "近くに配置する条件を満たす席のペアが存在しません。",
-                };
+                throw new Error(
+                  "近くに配置する条件を満たす席のペアが存在しません。",
+                );
               }
 
               for (const seat1 of availableSeats) {
@@ -298,12 +279,9 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
         res.result.status !== glpk.GLP_OPT &&
         res.result.status !== glpk.GLP_FEAS
       ) {
-        return {
-          success: false,
-          assignment: {},
-          error:
-            "最適解が見つかりませんでした。条件が複雑すぎるか、解が存在しない可能性があります。",
-        };
+        throw new Error(
+          "最適解が見つかりませんでした。条件が複雑すぎるか、解が存在しない可能性があります。",
+        );
       }
 
       const assignment: { [seatId: string]: string | undefined } = {};
@@ -327,150 +305,14 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
         }
       }
 
-      const failedConditions = this.analyzeConditions(
-        assignment,
-        enabledConditions,
-        students,
-        seats,
-        groups,
-        roles,
-      );
-
-      return {
-        success: true,
-        assignment,
-        analysis: {
-          totalConditions: enabledConditions.length,
-          failedConditions,
-        },
-      };
+      return assignment;
     } catch (error) {
-      return {
-        success: false,
-        assignment: {},
-        error:
-          error instanceof Error ? error.message : "不明なエラーが発生しました",
-      };
+      throw new Error(
+        error instanceof Error ? error.message : "不明なエラーが発生しました",
+      );
     }
   }
 
-  private analyzeConditions(
-    assignment: { [seatId: string]: string | undefined },
-    conditions: Condition[],
-    students: Student[],
-    seats: Seat[],
-    groups: Group[],
-    roles: Role[],
-  ): Array<{ condition: Condition; satisfied: boolean; reason?: string }> {
-    const failedConditions: Array<{
-      condition: Condition;
-      satisfied: boolean;
-      reason?: string;
-    }> = [];
-
-    for (const condition of conditions) {
-      let satisfied = true;
-      let reason = "";
-
-      switch (condition.type) {
-        case "student-group": {
-          const c = condition as StudentGroupCondition;
-          for (const studentId of c.studentIds) {
-            const assignedSeatId = Object.keys(assignment).find(
-              (seatId) => assignment[seatId] === studentId,
-            );
-            if (!assignedSeatId) continue;
-
-            const seat = seats.find((s) => s.id === assignedSeatId);
-            if (!seat) continue;
-
-            const hasTargetGroup = seat.groupIds.some((gid) =>
-              c.groupIds.includes(gid),
-            );
-            if (c.shouldPlace && !hasTargetGroup) {
-              satisfied = false;
-              reason = `${students.find((s) => s.id === studentId)?.name}が対象グループに配置されていません`;
-              break;
-            } else if (!c.shouldPlace && hasTargetGroup) {
-              satisfied = false;
-              reason = `${students.find((s) => s.id === studentId)?.name}が対象グループに配置されています`;
-              break;
-            }
-          }
-          break;
-        }
-
-        case "role-group": {
-          const c = condition as RoleGroupCondition;
-          for (const groupId of c.groupIds) {
-            const groupSeats = seats.filter(
-              (s) => s.groupIds.includes(groupId) && !s.isEmpty,
-            );
-            const roleStudentsInGroup = groupSeats.filter((seat) => {
-              const studentId = assignment[seat.id];
-              if (!studentId) return false;
-              const student = students.find((s) => s.id === studentId);
-              if (!student) return false;
-              if (c.roleId) return student.roleIds.includes(c.roleId);
-              if (c.gender) return student.gender === c.gender;
-              return false;
-            }).length;
-
-            if (roleStudentsInGroup !== c.count) {
-              satisfied = false;
-              reason = `${roles.find((r) => r.id === c.roleId)?.name || "ロール"}が${groups.find((g) => g.id === groupId)?.name || "グループ"}に${c.count}人配置されていません（実際: ${roleStudentsInGroup}人）`;
-              break;
-            }
-          }
-          break;
-        }
-
-        case "student-distance": {
-          const c = condition as StudentDistanceCondition;
-          const student1SeatId = Object.keys(assignment).find(
-            (seatId) => assignment[seatId] === c.studentId1,
-          );
-          const student2SeatId = Object.keys(assignment).find(
-            (seatId) => assignment[seatId] === c.studentId2,
-          );
-
-          if (student1SeatId && student2SeatId) {
-            const seat1 = seats.find((s) => s.id === student1SeatId);
-            const seat2 = seats.find((s) => s.id === student2SeatId);
-
-            if (seat1 && seat2) {
-              const distance = calculateDistance(seat1, seat2);
-              const student1Name = students.find(
-                (s) => s.id === c.studentId1,
-              )?.name;
-              const student2Name = students.find(
-                (s) => s.id === c.studentId2,
-              )?.name;
-
-              if (c.shouldBeClose && distance > 2) {
-                satisfied = false;
-                reason = `${student1Name}と${student2Name}が近くに配置されていません（距離: ${distance.toFixed(1)}）`;
-              } else if (!c.shouldBeClose && distance < 3) {
-                satisfied = false;
-                reason = `${student1Name}と${student2Name}が遠くに配置されていません（距離: ${distance.toFixed(1)}）`;
-              }
-            }
-          }
-          break;
-        }
-      }
-
-      if (!satisfied) {
-        failedConditions.push({
-          condition,
-          satisfied: false,
-          reason,
-        });
-      }
-    }
-
-    return failedConditions;
-  }
 
   canHandle(students: Student[], seats: Seat[]): boolean {
     return students.length > 0 && seats.length > 0;

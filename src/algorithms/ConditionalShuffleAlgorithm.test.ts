@@ -127,23 +127,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     const beforeAssignment = buildInitialAssignment(seats);
 
     const alg = new ConditionalShuffleAlgorithm();
-    const result = await alg.shuffle(
-      students,
-      seats,
-      conditions,
-      groups,
-      roles,
-    );
-
-    if (!result.success) {
-      console.error("エラー:", result.error);
-    }
-
-    expect(result.success).toBe(true);
-    expect(result.assignment).toBeDefined();
-    expect(result.error).toBeUndefined();
-
-    const assignment = result.assignment!;
+    const assignment = await alg.shuffle(students, seats, conditions);
     const assignedCount = Object.values(assignment).filter(
       (v) => v !== undefined,
     ).length;
@@ -211,18 +195,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     const beforeAssignment = buildInitialAssignment(seats);
 
     const alg = new ConditionalShuffleAlgorithm();
-    const result = await alg.shuffle(
-      students,
-      seats,
-      [condition],
-      [groupA],
-      [],
-    );
-
-    expect(result.success).toBe(true);
-    expect(result.assignment).toBeDefined();
-
-    const assignment = result.assignment!;
+    const assignment = await alg.shuffle(students, seats, [condition]);
     const analysis = analyzeAssignment(
       assignment as { [seatId: string]: string },
       [condition],
@@ -302,18 +275,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     const beforeAssignment = buildInitialAssignment(seats);
 
     const alg = new ConditionalShuffleAlgorithm();
-    const result = await alg.shuffle(
-      students,
-      seats,
-      [condition],
-      [groupA],
-      [roleClassLeader],
-    );
-
-    expect(result.success).toBe(true);
-    expect(result.assignment).toBeDefined();
-
-    const assignment = result.assignment!;
+    const assignment = await alg.shuffle(students, seats, [condition]);
     const analysis = analyzeAssignment(
       assignment as { [seatId: string]: string },
       [condition],
@@ -380,12 +342,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     const beforeAssignment = buildInitialAssignment(seats);
 
     const alg = new ConditionalShuffleAlgorithm();
-    const result = await alg.shuffle(students, seats, [condition], [], []);
-
-    expect(result.success).toBe(true);
-    expect(result.assignment).toBeDefined();
-
-    const assignment = result.assignment!;
+    const assignment = await alg.shuffle(students, seats, [condition]);
     const analysis = analyzeAssignment(
       assignment as { [seatId: string]: string },
       [condition],
@@ -490,18 +447,11 @@ describe("ConditionalShuffleAlgorithm", () => {
     const beforeAssignment = buildInitialAssignment(seats);
 
     const alg = new ConditionalShuffleAlgorithm();
-    const result = await alg.shuffle(
+    const assignment = await alg.shuffle(
       students,
       seats,
       [condition1, condition2, condition3],
-      [groupA],
-      [roleClassLeader],
     );
-
-    expect(result.success).toBe(true);
-    expect(result.assignment).toBeDefined();
-
-    const assignment = result.assignment!;
     const analysis = analyzeAssignment(
       assignment as { [seatId: string]: string },
       [condition1, condition2, condition3],

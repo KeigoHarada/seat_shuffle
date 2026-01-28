@@ -3,7 +3,7 @@ import {
   ShuffleResult,
   ShuffleManagerConfig,
 } from "../types/shuffle";
-import { Seat, Student, Group, Role, Condition } from "../types";
+import { Seat, Student, Condition } from "../types";
 
 export class ShuffleManager {
   private config: ShuffleManagerConfig;
@@ -43,19 +43,13 @@ export class ShuffleManager {
     students: Student[],
     seats: Seat[],
     conditions: Condition[],
-    groups: Group[],
-    roles: Role[],
   ): Promise<ShuffleResult> {
     // アルゴリズムの有効性をチェック
     if (
       this.currentAlgorithm.canHandle &&
       !this.currentAlgorithm.canHandle(students, seats)
     ) {
-      return {
-        success: false,
-        assignment: {},
-        error: "現在のアルゴリズムではこのデータを処理できません",
-      };
+      throw new Error("現在のアルゴリズムではこのデータを処理できません");
     }
 
     // タイムアウト付きでシャッフル実行
@@ -65,27 +59,12 @@ export class ShuffleManager {
       }, this.config.timeout);
     });
 
-    try {
-      const result = await Promise.race([
-        this.currentAlgorithm.shuffle(
-          students,
-          seats,
-          conditions,
-          groups,
-          roles,
-        ),
-        timeoutPromise,
-      ]);
+    const result = await Promise.race([
+      this.currentAlgorithm.shuffle(students, seats, conditions),
+      timeoutPromise,
+    ]);
 
-      return result;
-    } catch (error) {
-      return {
-        success: false,
-        assignment: {},
-        error:
-          error instanceof Error ? error.message : "不明なエラーが発生しました",
-      };
-    }
+    return result;
   }
 
   // アルゴリズムの設定を更新

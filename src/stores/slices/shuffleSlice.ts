@@ -1,5 +1,4 @@
-import type { Student, Seat, Condition, Group, Role } from "../../types";
-import type { AssignmentAnalysis } from "../../utils/conditionUtils";
+import type { Student, Seat, Condition } from "../../types";
 import { ShuffleManager } from "../../utils/ShuffleManager";
 import { ConditionalShuffleAlgorithm } from "../../algorithms/ConditionalShuffleAlgorithm";
 import { RandomShuffleAlgorithm } from "../../algorithms/RandomShuffleAlgorithm";
@@ -50,8 +49,6 @@ export function createShuffleSlice(set: SetState, get: GetState) {
         currentLayout: { seats: Seat[] } | null;
         students: Student[];
         conditions: Condition[];
-        groups: Group[];
-        roles: Role[];
         shuffleManager: ShuffleManager;
       };
       const state = get() as ShuffleState;
@@ -69,8 +66,6 @@ export function createShuffleSlice(set: SetState, get: GetState) {
           currentLayout,
           students,
           conditions,
-          groups,
-          roles,
           shuffleManager: manager,
         } = get() as ShuffleState;
         if (!currentLayout) return;
@@ -123,82 +118,61 @@ export function createShuffleSlice(set: SetState, get: GetState) {
           `\n【統計】割り当て済み生徒: ${beforeAssignedStudents.size}人, 名無し席: ${beforeUnnamedCount}席, 空席: ${beforeEmptyCount}席, 全生徒数: ${students.length}人`,
         );
 
-        const result = await manager.shuffle(
+        const assignment = await manager.shuffle(
           students,
           currentLayout.seats,
           conditions,
-          groups,
-          roles,
         );
 
-        if (result.success) {
-          const afterAssignedStudents = new Set(
-            Object.values(result.assignment).filter((id) => id !== undefined),
-          );
-          const afterUnnamedCount = currentLayout.seats.filter(
-            (seat) => !seat.isEmpty && result.assignment[seat.id] === undefined,
-          ).length;
-          const afterEmptyCount = currentLayout.seats.filter(
-            (s) => s.isEmpty,
-          ).length;
+        const afterAssignedStudents = new Set(
+          Object.values(assignment).filter((id) => id !== undefined),
+        );
+        const afterUnnamedCount = currentLayout.seats.filter(
+          (seat) => !seat.isEmpty && assignment[seat.id] === undefined,
+        ).length;
+        const afterEmptyCount = currentLayout.seats.filter(
+          (s) => s.isEmpty,
+        ).length;
 
+        console.log(
+          "\n【シャッフル後】\n" +
+            formatDisplay(currentLayout.seats, assignment),
+        );
+        console.log(
+          `\n【統計】割り当て済み生徒: ${afterAssignedStudents.size}人, 名無し席: ${afterUnnamedCount}席, 空席: ${afterEmptyCount}席`,
+        );
+
+        const newStudents = Array.from(afterAssignedStudents).filter(
+          (id) => !beforeAssignedStudents.has(id),
+        );
+        const removedStudents = Array.from(beforeAssignedStudents).filter(
+          (id) => !afterAssignedStudents.has(id),
+        );
+        if (newStudents.length > 0) {
           console.log(
-            "\n【シャッフル後】\n" +
-              formatDisplay(currentLayout.seats, result.assignment),
+            `\n【追加された生徒】${newStudents.map((id) => students.find((s) => s.id === id)?.name ?? id).join(", ")}`,
           );
-          console.log(
-            `\n【統計】割り当て済み生徒: ${afterAssignedStudents.size}人, 名無し席: ${afterUnnamedCount}席, 空席: ${afterEmptyCount}席`,
-          );
-
-          const newStudents = Array.from(afterAssignedStudents).filter(
-            (id) => !beforeAssignedStudents.has(id),
-          );
-          const removedStudents = Array.from(beforeAssignedStudents).filter(
-            (id) => !afterAssignedStudents.has(id),
-          );
-          if (newStudents.length > 0) {
-            console.log(
-              `\n【追加された生徒】${newStudents.map((id) => students.find((s) => s.id === id)?.name ?? id).join(", ")}`,
-            );
-          }
-          if (removedStudents.length > 0) {
-            console.log(
-              `\n【削除された生徒】${removedStudents.map((id) => students.find((s) => s.id === id)?.name ?? id).join(", ")}`,
-            );
-          }
-          const newSeats = currentLayout.seats.map((seat) => {
-            if (seat.isEmpty) return seat;
-            const assignedStudentId = result.assignment[seat.id];
-            if (assignedStudentId) {
-              return { ...seat, studentId: assignedStudentId };
-            }
-            const { studentId, ...rest } = seat;
-            return rest;
-          });
-
-          const analysis: AssignmentAnalysis | null = result.analysis
-            ? {
-                totalConditions: result.analysis.totalConditions,
-                failedConditions: result.analysis.failedConditions,
-                assignment: Object.fromEntries(
-                  Object.entries(result.assignment).filter(
-                    ([_, v]) => v !== undefined,
-                  ),
-                ) as { [seatId: string]: string },
-              }
-            : null;
-
-          set({
-            currentLayout: { ...currentLayout, seats: newSeats },
-            lastShuffleAnalysis: analysis,
-          });
-        } else {
-          console.error("シャッフルに失敗しました:", result.error);
-          set({ lastShuffleAnalysis: null });
         }
+        if (removedStudents.length > 0) {
+          console.log(
+            `\n【削除された生徒】${removedStudents.map((id) => students.find((s) => s.id === id)?.name ?? id).join(", ")}`,
+          );
+        }
+        const newSeats = currentLayout.seats.map((seat) => {
+          if (seat.isEmpty) return seat;
+          const assignedStudentId = assignment[seat.id];
+          if (assignedStudentId) {
+            return { ...seat, studentId: assignedStudentId };
+          }
+          const { studentId, ...rest } = seat;
+          return rest;
+        });
+
+        set({
+          currentLayout: { ...currentLayout, seats: newSeats },
+        });
       } catch (error) {
         console.error("シャッフル中にエラーが発生しました:", error);
-        set({ lastShuffleAnalysis: null });
       } finally {
         set({ isShuffling: false });
       }
