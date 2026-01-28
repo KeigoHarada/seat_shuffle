@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ConditionalShuffleAlgorithm } from "./ConditionalShuffleAlgorithm";
 import { SAMPLE_STUDENTS } from "../stores/sampleData";
-import { analyzeAssignment } from "../utils/conditionUtils";
+import { analyzeAssignment } from "../utils/condition/conditionCheck";
 import type {
   Seat,
   Student,
@@ -182,7 +182,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     seats[6]!.groupIds = [groupA.id];
     seats[7]!.groupIds = [groupA.id];
 
-    const condition: StudentGroupCondition = {
+    const condition: Extract<Condition, { type: "student-group" }> = {
       id: "condition-1",
       name: "田中太郎をグループAに配置",
       type: "student-group",
@@ -262,7 +262,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     seats[6]!.groupIds = [groupA.id];
     seats[7]!.groupIds = [groupA.id];
 
-    const condition: RoleGroupCondition = {
+    const condition: Extract<Condition, { type: "role-group" }> = {
       id: "condition-2",
       name: "グループAに学級委員長を1人配置",
       type: "role-group",
@@ -329,7 +329,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     const students = SAMPLE_STUDENTS.slice(0, 40);
     const seats = buildTestSeats(students);
 
-    const condition: StudentDistanceCondition = {
+    const condition: Extract<Condition, { type: "student-distance" }> = {
       id: "condition-3",
       name: "田中太郎と佐藤花子を近くに配置",
       type: "student-distance",
@@ -414,7 +414,7 @@ describe("ConditionalShuffleAlgorithm", () => {
     seats[6]!.groupIds = [groupA.id];
     seats[7]!.groupIds = [groupA.id];
 
-    const condition1: StudentGroupCondition = {
+    const condition1: Extract<Condition, { type: "student-group" }> = {
       id: "condition-1",
       name: "田中太郎をグループAに配置",
       type: "student-group",
@@ -424,7 +424,7 @@ describe("ConditionalShuffleAlgorithm", () => {
       shouldPlace: true,
     };
 
-    const condition2: RoleGroupCondition = {
+    const condition2: Extract<Condition, { type: "role-group" }> = {
       id: "condition-2",
       name: "グループAに学級委員長を1人配置",
       type: "role-group",
@@ -434,7 +434,7 @@ describe("ConditionalShuffleAlgorithm", () => {
       count: 1,
     };
 
-    const condition3: StudentDistanceCondition = {
+    const condition3: Extract<Condition, { type: "student-distance" }> = {
       id: "condition-3",
       name: "鈴木次郎と高橋美咲を近くに配置",
       type: "student-distance",
@@ -447,13 +447,13 @@ describe("ConditionalShuffleAlgorithm", () => {
     const beforeAssignment = buildInitialAssignment(seats);
 
     const alg = new ConditionalShuffleAlgorithm();
-    const assignment = await alg.shuffle(
-      students,
-      seats,
-      [condition1, condition2, condition3],
-    );
+    const assignment = await alg.shuffle(students, seats, [
+      condition1,
+      condition2,
+      condition3,
+    ]);
     const analysis = analyzeAssignment(
-      assignment as { [seatId: string]: string },
+      assignment,
       [condition1, condition2, condition3],
       students,
       seats,

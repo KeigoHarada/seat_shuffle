@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../../stores/seatStore';
-import { StudentGroupCondition } from '../../types';
+import { Condition } from '../../types';
 
 interface StudentGroupFormProps {
-  onAdd: (condition: Omit<StudentGroupCondition, 'id'>) => void;
+  onAdd: (condition: Omit<Extract<Condition, { type: 'student-group' }>, 'id'>) => void;
   onCancel: () => void;
 }
 

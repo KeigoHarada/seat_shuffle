@@ -1,10 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useSeatStore } from '../stores/seatStore';
-import { 
-  StudentGroupCondition, 
-  RoleGroupCondition, 
-  StudentDistanceCondition
-} from '../types';
+import { Condition } from '../types';
 import { 
   ChevronDown,
   ChevronUp
@@ -13,7 +9,7 @@ import { StudentGroupForm } from './condition/StudentGroupForm';
 import { RoleGroupForm } from './condition/RoleGroupForm';
 import { StudentDistanceForm } from './condition/StudentDistanceForm';
 import { ConditionCard } from './condition/ConditionCard';
-import { analyzeAssignment } from '../utils/conditionUtils';
+import { analyzeAssignment } from '../utils/condition/conditionCheck';
 
 export const ConditionManager: React.FC = () => {
   const { 
@@ -64,19 +60,19 @@ export const ConditionManager: React.FC = () => {
     return resultMap;
   }, [currentLayout, conditions, students, groups, roles]);
 
-  const handleAddCondition = (condition: Omit<StudentGroupCondition | RoleGroupCondition | StudentDistanceCondition, 'id'>) => {
-    const newCondition = {
+  const handleAddCondition = (condition: Omit<Condition, 'id'>) => {
+    const newCondition: Condition = {
       ...condition,
       id: `condition-${Date.now()}`
-    } as StudentGroupCondition | RoleGroupCondition | StudentDistanceCondition;
+    };
     addCondition(newCondition);
     setShowForm(null);
   };
 
   const handleEditCondition = (conditionId: string) => {
     const condition = conditions.find(c => c.id === conditionId);
-    if (condition) {
-      setShowForm(condition.type as 'student-group' | 'role-group' | 'student-distance');
+    if (condition && (condition.type === 'student-group' || condition.type === 'role-group' || condition.type === 'student-distance')) {
+      setShowForm(condition.type);
     }
   };
 

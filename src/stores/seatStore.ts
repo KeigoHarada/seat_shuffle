@@ -10,7 +10,7 @@ import type {
   StudentDistanceCondition,
 } from "../types";
 import type { AppState } from "../types";
-import type { ConditionValidationResult } from "../utils/conditionValidator";
+import type { ConditionValidationResult } from "../utils/condition/validate";
 import type { ShuffleManager } from "../utils/ShuffleManager";
 import {
   DEFAULT_GROUPS,
@@ -59,7 +59,11 @@ export interface SeatStore extends AppState {
   selectedSeatId: string | null;
   setSelectedSeatId: (seatId: string | null) => void;
   swapSeats: (seatId1: string, seatId2: string) => void;
-  assignStudentNameToSeat: (seatId: string, studentName: string, furigana?: string) => void;
+  assignStudentNameToSeat: (
+    seatId: string,
+    studentName: string,
+    furigana?: string,
+  ) => void;
   initializeDefaultLayout: () => void;
   settingsPanelWidth: number;
   setSettingsPanelWidth: (width: number) => void;
@@ -74,7 +78,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   students: [],
   groups: DEFAULT_GROUPS,
   roles: DEFAULT_ROLES,
-  conditions: DEFAULT_CONDITIONS as Condition[],
+  conditions: DEFAULT_CONDITIONS,
   isShuffling: false,
   showSettings: false,
   selectedSeatId: null,

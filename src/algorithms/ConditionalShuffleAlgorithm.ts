@@ -1,15 +1,11 @@
 import { ShuffleAlgorithm, ShuffleResult } from "../types/shuffle";
+import { Seat, Student, Condition } from "../types";
+import { calculateDistance } from "../utils/condition/distanceCheck";
 import {
-  Seat,
-  Student,
-  Group,
-  Role,
-  Condition,
-  StudentGroupCondition,
-  RoleGroupCondition,
-  StudentDistanceCondition,
-} from "../types";
-import { calculateDistance } from "../utils/conditionUtils";
+  isStudentGroupCondition,
+  isRoleGroupCondition,
+  isStudentDistanceCondition,
+} from "../utils/condition/typeGuards";
 import type { LP, Result } from "glpk.js";
 
 async function loadGLPK() {
@@ -37,7 +33,6 @@ async function loadGLPK() {
 
 export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
   name = "conditional";
-  description = "GLPKを使用した条件を考慮した高度なシャッフルアルゴリズム";
 
   async shuffle(
     students: Student[],
@@ -121,143 +116,153 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
       }
 
       for (const condition of enabledConditions) {
-        switch (condition.type) {
-          case "student-group": {
-            const c = condition as StudentGroupCondition;
-            for (const studentId of c.studentIds) {
-              const student = students.find((s) => s.id === studentId);
-              if (!student) continue;
+        if (isStudentGroupCondition(condition)) {
+          for (const studentId of condition.studentIds) {
+            const student = students.find((s) => s.id === studentId);
+            if (!student) continue;
 
-              for (const seat of availableSeats) {
-                const hasTargetGroup = seat.groupIds.some((gid) =>
-                  c.groupIds.includes(gid),
-                );
-                if (c.shouldPlace && !hasTargetGroup) {
-                  subjectTo.push({
-                    name: `student_group_${studentId}_${seat.id}`,
-                    vars: [{ name: `x_${studentId}_${seat.id}`, coef: 1 }],
-                    bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 },
-                  });
-                } else if (!c.shouldPlace && hasTargetGroup) {
-                  subjectTo.push({
-                    name: `student_group_${studentId}_${seat.id}`,
-                    vars: [{ name: `x_${studentId}_${seat.id}`, coef: 1 }],
-                    bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 },
-                  });
-                }
-              }
-            }
-            break;
-          }
-
-          case "role-group": {
-            const c = condition as RoleGroupCondition;
-            for (const groupId of c.groupIds) {
-              const groupSeats = availableSeats.filter((s) =>
-                s.groupIds.includes(groupId),
+            for (const seat of availableSeats) {
+              const hasTargetGroup = seat.groupIds.some((gid) =>
+                condition.groupIds.includes(gid),
               );
-              if (groupSeats.length === 0) continue;
-
-              const targetStudents = students.filter((s) => {
-                if (c.roleId) return s.roleIds.includes(c.roleId);
-                if (c.gender) return s.gender === c.gender;
-                return false;
-              });
-
-              if (targetStudents.length === 0) continue;
-
-              subjectTo.push({
-                name: `role_group_${groupId}_min`,
-                vars: targetStudents.flatMap((student) =>
-                  groupSeats.map((seat) => ({
-                    name: `x_${student.id}_${seat.id}`,
-                    coef: 1,
-                  })),
-                ),
-                bnds: { type: glpk.GLP_LO, lb: c.count, ub: Number.MAX_VALUE },
-              });
-
-              subjectTo.push({
-                name: `role_group_${groupId}_max`,
-                vars: targetStudents.flatMap((student) =>
-                  groupSeats.map((seat) => ({
-                    name: `x_${student.id}_${seat.id}`,
-                    coef: 1,
-                  })),
-                ),
-                bnds: { type: glpk.GLP_UP, lb: 0, ub: c.count },
-              });
+              if (condition.shouldPlace && !hasTargetGroup) {
+                subjectTo.push({
+                  name: `student_group_${studentId}_${seat.id}`,
+                  vars: [{ name: `x_${studentId}_${seat.id}`, coef: 1 }],
+                  bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 },
+                });
+              } else if (!condition.shouldPlace && hasTargetGroup) {
+                subjectTo.push({
+                  name: `student_group_${studentId}_${seat.id}`,
+                  vars: [{ name: `x_${studentId}_${seat.id}`, coef: 1 }],
+                  bnds: { type: glpk.GLP_FX, lb: 0, ub: 0 },
+                });
+              }
             }
-            break;
           }
+        } else if (isRoleGroupCondition(condition)) {
+          for (const groupId of condition.groupIds) {
+            const groupSeats = availableSeats.filter((s) =>
+              s.groupIds.includes(groupId),
+            );
+            if (groupSeats.length === 0) continue;
 
-          case "student-distance": {
-            const c = condition as StudentDistanceCondition;
-            const student1 = students.find((s) => s.id === c.studentId1);
-            const student2 = students.find((s) => s.id === c.studentId2);
-            if (!student1 || !student2) break;
+            const targetStudents = students.filter((s) => {
+              if (condition.roleId) return s.roleIds.includes(condition.roleId);
+              if (condition.gender) return s.gender === condition.gender;
+              return false;
+            });
 
-            if (c.shouldBeClose) {
-              const closeSeatPairs: Array<[Seat, Seat]> = [];
-              for (const seat1 of availableSeats) {
-                for (const seat2 of availableSeats) {
-                  if (seat1.id >= seat2.id) continue;
-                  const distance = calculateDistance(seat1, seat2);
-                  if (distance <= 2) {
-                    closeSeatPairs.push([seat1, seat2]);
-                  }
-                }
-              }
+            if (targetStudents.length === 0) continue;
 
-              if (closeSeatPairs.length === 0) {
-                throw new Error(
-                  "近くに配置する条件を満たす席のペアが存在しません。",
-                );
-              }
+            subjectTo.push({
+              name: `role_group_${groupId}_min`,
+              vars: targetStudents.flatMap((student) =>
+                groupSeats.map((seat) => ({
+                  name: `x_${student.id}_${seat.id}`,
+                  coef: 1,
+                })),
+              ),
+              bnds: {
+                type: glpk.GLP_LO,
+                lb: condition.count,
+                ub: Number.MAX_VALUE,
+              },
+            });
 
-              for (const seat1 of availableSeats) {
-                for (const seat2 of availableSeats) {
-                  if (seat1.id === seat2.id) continue;
-                  const distance = calculateDistance(seat1, seat2);
-                  if (distance > 2) {
-                    subjectTo.push({
-                      name: `distance_close_${c.studentId1}_${seat1.id}_${c.studentId2}_${seat2.id}`,
-                      vars: [
-                        { name: `x_${c.studentId1}_${seat1.id}`, coef: 1 },
-                        { name: `x_${c.studentId2}_${seat2.id}`, coef: 1 },
-                      ],
-                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
-                    });
-                  }
-                }
-              }
-            } else {
-              for (const seat1 of availableSeats) {
-                for (const seat2 of availableSeats) {
-                  if (seat1.id >= seat2.id) continue;
-                  const distance = calculateDistance(seat1, seat2);
-                  if (distance < 3) {
-                    subjectTo.push({
-                      name: `distance_far_${seat1.id}_${seat2.id}`,
-                      vars: [
-                        { name: `x_${c.studentId1}_${seat1.id}`, coef: 1 },
-                        { name: `x_${c.studentId2}_${seat2.id}`, coef: 1 },
-                      ],
-                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
-                    });
-                    subjectTo.push({
-                      name: `distance_far_${seat2.id}_${seat1.id}`,
-                      vars: [
-                        { name: `x_${c.studentId1}_${seat2.id}`, coef: 1 },
-                        { name: `x_${c.studentId2}_${seat1.id}`, coef: 1 },
-                      ],
-                      bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
-                    });
-                  }
+            subjectTo.push({
+              name: `role_group_${groupId}_max`,
+              vars: targetStudents.flatMap((student) =>
+                groupSeats.map((seat) => ({
+                  name: `x_${student.id}_${seat.id}`,
+                  coef: 1,
+                })),
+              ),
+              bnds: { type: glpk.GLP_UP, lb: 0, ub: condition.count },
+            });
+          }
+        } else if (isStudentDistanceCondition(condition)) {
+          const student1 = students.find((s) => s.id === condition.studentId1);
+          const student2 = students.find((s) => s.id === condition.studentId2);
+          if (!student1 || !student2) continue;
+
+          if (condition.shouldBeClose) {
+            const closeSeatPairs: Array<[Seat, Seat]> = [];
+            for (const seat1 of availableSeats) {
+              for (const seat2 of availableSeats) {
+                if (seat1.id >= seat2.id) continue;
+                const distance = calculateDistance(seat1, seat2);
+                if (distance <= 2) {
+                  closeSeatPairs.push([seat1, seat2]);
                 }
               }
             }
-            break;
+
+            if (closeSeatPairs.length === 0) {
+              throw new Error(
+                "近くに配置する条件を満たす席のペアが存在しません。",
+              );
+            }
+
+            for (const seat1 of availableSeats) {
+              for (const seat2 of availableSeats) {
+                if (seat1.id === seat2.id) continue;
+                const distance = calculateDistance(seat1, seat2);
+                if (distance > 2) {
+                  subjectTo.push({
+                    name: `distance_close_${condition.studentId1}_${seat1.id}_${condition.studentId2}_${seat2.id}`,
+                    vars: [
+                      {
+                        name: `x_${condition.studentId1}_${seat1.id}`,
+                        coef: 1,
+                      },
+                      {
+                        name: `x_${condition.studentId2}_${seat2.id}`,
+                        coef: 1,
+                      },
+                    ],
+                    bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
+                  });
+                }
+              }
+            }
+          } else {
+            for (const seat1 of availableSeats) {
+              for (const seat2 of availableSeats) {
+                if (seat1.id >= seat2.id) continue;
+                const distance = calculateDistance(seat1, seat2);
+                if (distance < 3) {
+                  subjectTo.push({
+                    name: `distance_far_${seat1.id}_${seat2.id}`,
+                    vars: [
+                      {
+                        name: `x_${condition.studentId1}_${seat1.id}`,
+                        coef: 1,
+                      },
+                      {
+                        name: `x_${condition.studentId2}_${seat2.id}`,
+                        coef: 1,
+                      },
+                    ],
+                    bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
+                  });
+                  subjectTo.push({
+                    name: `distance_far_${seat2.id}_${seat1.id}`,
+                    vars: [
+                      {
+                        name: `x_${condition.studentId1}_${seat2.id}`,
+                        coef: 1,
+                      },
+                      {
+                        name: `x_${condition.studentId2}_${seat1.id}`,
+                        coef: 1,
+                      },
+                    ],
+                    bnds: { type: glpk.GLP_UP, lb: 0, ub: 1 },
+                  });
+                }
+              }
+            }
           }
         }
       }
@@ -312,7 +317,6 @@ export class ConditionalShuffleAlgorithm implements ShuffleAlgorithm {
       );
     }
   }
-
 
   canHandle(students: Student[], seats: Seat[]): boolean {
     return students.length > 0 && seats.length > 0;

@@ -3,7 +3,6 @@ import { Seat, Student, Condition } from "../types";
 
 export class RandomShuffleAlgorithm implements ShuffleAlgorithm {
   name = "random";
-  description = "名無し席も含めて全体をランダムシャッフルするアルゴリズム";
 
   async shuffle(
     students: Student[],

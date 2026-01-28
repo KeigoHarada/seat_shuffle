@@ -1,6 +1,7 @@
 import React from 'react';
-import { Condition, StudentGroupCondition, RoleGroupCondition, StudentDistanceCondition } from '../../types';
-import { getConditionIconId, getConditionName } from '../../utils/conditionHelpers';
+import { Condition } from '../../types';
+import { getConditionIconId, getConditionName } from '../../utils/condition/helpers';
+import { isStudentGroupCondition, isRoleGroupCondition, isStudentDistanceCondition } from '../../utils/condition/typeGuards';
 import { Users, Target, UserCheck, AlertCircle } from 'lucide-react';
 
 interface ConditionCardProps {
@@ -25,30 +26,24 @@ export const ConditionCard: React.FC<ConditionCardProps> = ({
   checkResult
 }) => {
   const getConditionDescription = (condition: Condition): string => {
-    switch (condition.type) {
-      case 'student-group': {
-        const c = condition as StudentGroupCondition;
-        const studentNames = c.studentIds.map(sid => students.find(s => s.id === sid)?.name).filter(Boolean);
-        const groupNames = c.groupIds.map(gid => groups.find(g => g.id === gid)?.name).filter(Boolean);
-        return `${studentNames.join(', ')}を${groupNames.join(', ')}に${c.shouldPlace ? '配置' : '配置しない'}`;
-      }
-      case 'role-group': {
-        const c = condition as RoleGroupCondition;
-        const groupNames = c.groupIds.map(gid => groups.find(g => g.id === gid)?.name).filter(Boolean);
-        const filterName = c.roleId 
-          ? roles.find(r => r.id === c.roleId)?.name || '不明なロール'
-          : c.gender === 'male' ? '男性' : c.gender === 'female' ? '女性' : 'その他';
-        return `${filterName}を${groupNames.join(', ')}に${c.count}人配置`;
-      }
-      case 'student-distance': {
-        const c = condition as StudentDistanceCondition;
-        const student1 = students.find(s => s.id === c.studentId1);
-        const student2 = students.find(s => s.id === c.studentId2);
-        return `${student1?.name || '不明'}と${student2?.name || '不明'}を${c.shouldBeClose ? '近く' : '遠く'}に配置`;
-      }
-      default:
-        return '不明な条件';
+    if (isStudentGroupCondition(condition)) {
+      const studentNames = condition.studentIds.map(sid => students.find(s => s.id === sid)?.name).filter(Boolean);
+      const groupNames = condition.groupIds.map(gid => groups.find(g => g.id === gid)?.name).filter(Boolean);
+      return `${studentNames.join(', ')}を${groupNames.join(', ')}に${condition.shouldPlace ? '配置' : '配置しない'}`;
     }
+    if (isRoleGroupCondition(condition)) {
+      const groupNames = condition.groupIds.map(gid => groups.find(g => g.id === gid)?.name).filter(Boolean);
+      const filterName = condition.roleId 
+        ? roles.find(r => r.id === condition.roleId)?.name || '不明なロール'
+        : condition.gender === 'male' ? '男性' : condition.gender === 'female' ? '女性' : 'その他';
+      return `${filterName}を${groupNames.join(', ')}に${condition.count}人配置`;
+    }
+    if (isStudentDistanceCondition(condition)) {
+      const student1 = students.find(s => s.id === condition.studentId1);
+      const student2 = students.find(s => s.id === condition.studentId2);
+      return `${student1?.name || '不明'}と${student2?.name || '不明'}を${condition.shouldBeClose ? '近く' : '遠く'}に配置`;
+    }
+    return '不明な条件';
   };
 
   const getCardStyle = () => {

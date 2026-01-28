@@ -31,10 +31,9 @@ export class ShuffleManager {
   }
 
   // 利用可能なアルゴリズム一覧を取得
-  getAvailableAlgorithms(): { name: string; description: string }[] {
+  getAvailableAlgorithms(): { name: string }[] {
     return Object.values(this.config.algorithms).map((alg) => ({
       name: alg.name,
-      description: alg.description,
     }));
   }
 

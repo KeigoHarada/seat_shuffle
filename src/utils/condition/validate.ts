@@ -1,13 +1,9 @@
+import { Student, Seat, Group, Role, Condition } from "../../types";
 import {
-  Student,
-  Seat,
-  Group,
-  Role,
-  StudentGroupCondition,
-  RoleGroupCondition,
-  StudentDistanceCondition,
-  Condition,
-} from "../types";
+  isStudentGroupCondition,
+  isRoleGroupCondition,
+  isStudentDistanceCondition,
+} from "./typeGuards";
 
 // 条件検証結果
 export interface ConditionValidationResult {
@@ -18,7 +14,7 @@ export interface ConditionValidationResult {
 
 // 生徒-グループ条件の検証
 export const validateStudentGroupCondition = (
-  condition: StudentGroupCondition,
+  condition: Extract<Condition, { type: "student-group" }>,
   students: Student[],
   groups: Group[],
   seats: Seat[],
@@ -26,7 +22,6 @@ export const validateStudentGroupCondition = (
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // 対象生徒の存在チェック
   for (const studentId of condition.studentIds) {
     const student = students.find((s) => s.id === studentId);
     if (!student) {
@@ -34,7 +29,6 @@ export const validateStudentGroupCondition = (
     }
   }
 
-  // 対象グループの存在チェック
   for (const groupId of condition.groupIds) {
     const group = groups.find((g) => g.id === groupId);
     if (!group) {
@@ -42,7 +36,6 @@ export const validateStudentGroupCondition = (
     }
   }
 
-  // 対象グループに席が存在するかチェック
   const availableSeatsInGroups = seats.filter(
     (seat) =>
       !seat.isEmpty &&
@@ -66,7 +59,7 @@ export const validateStudentGroupCondition = (
 
 // ロール-グループ条件の検証
 export const validateRoleGroupCondition = (
-  condition: RoleGroupCondition,
+  condition: Extract<Condition, { type: "role-group" }>,
   students: Student[],
   groups: Group[],
   roles: Role[],
@@ -75,12 +68,10 @@ export const validateRoleGroupCondition = (
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // ロールまたは性別のチェック
   let targetStudents: Student[] = [];
   let filterName = "";
 
   if (condition.roleId) {
-    // ロールでフィルタリング
     const role = roles.find((r) => r.id === condition.roleId);
     if (!role) {
       errors.push(`対象ロール「${condition.roleId}」が見つかりません`);
@@ -94,7 +85,6 @@ export const validateRoleGroupCondition = (
       errors.push(`対象ロール「${filterName}」を持つ生徒がいません`);
     }
   } else if (condition.gender) {
-    // 性別でフィルタリング
     const genderLabels = { male: "男性", female: "女性", other: "その他" };
     filterName = genderLabels[condition.gender];
     targetStudents = students.filter((s) => s.gender === condition.gender);
@@ -106,7 +96,6 @@ export const validateRoleGroupCondition = (
     errors.push(`ロールまたは性別のいずれかを指定してください`);
   }
 
-  // 対象グループの存在チェック
   for (const groupId of condition.groupIds) {
     const group = groups.find((g) => g.id === groupId);
     if (!group) {
@@ -114,7 +103,6 @@ export const validateRoleGroupCondition = (
     }
   }
 
-  // 各グループの席数と配置人数のチェック
   for (const groupId of condition.groupIds) {
     const groupSeats = seats.filter(
       (seat) => !seat.isEmpty && seat.groupIds.includes(groupId),
@@ -128,7 +116,6 @@ export const validateRoleGroupCondition = (
     }
   }
 
-  // 全体の配置人数チェック
   const totalRequiredCount = condition.groupIds.length * condition.count;
   if (targetStudents.length < totalRequiredCount) {
     warnings.push(
@@ -145,14 +132,13 @@ export const validateRoleGroupCondition = (
 
 // 生徒間距離条件の検証
 export const validateStudentDistanceCondition = (
-  condition: StudentDistanceCondition,
+  condition: Extract<Condition, { type: "student-distance" }>,
   students: Student[],
   seats: Seat[],
 ): ConditionValidationResult => {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // 対象生徒の存在チェック
   const student1 = students.find((s) => s.id === condition.studentId1);
   const student2 = students.find((s) => s.id === condition.studentId2);
 
@@ -163,18 +149,15 @@ export const validateStudentDistanceCondition = (
     errors.push(`対象生徒2「${condition.studentId2}」が見つかりません`);
   }
 
-  // 同じ生徒が指定されている場合
   if (condition.studentId1 === condition.studentId2) {
     errors.push(`同じ生徒が指定されています`);
   }
 
-  // 利用可能席数のチェック
   const availableSeats = seats.filter((seat) => !seat.isEmpty);
   if (availableSeats.length < 2) {
     errors.push(`利用可能な席が2席以上ありません`);
   }
 
-  // 近くに配置する場合の席配置可能性チェック
   if (condition.shouldBeClose && availableSeats.length >= 2) {
     const hasAdjacentSeats = availableSeats.some((seat1) =>
       availableSeats.some(
@@ -210,46 +193,36 @@ export const validateAllConditions = (
   const allErrors: string[] = [];
   const allWarnings: string[] = [];
 
-  // 有効な条件のみを検証
   const enabledConditions = conditions.filter((c) => c.enabled);
 
   for (const condition of enabledConditions) {
     let result: ConditionValidationResult;
 
-    switch (condition.type) {
-      case "student-group":
-        result = validateStudentGroupCondition(
-          condition as StudentGroupCondition,
-          students,
-          groups,
-          seats,
-        );
-        break;
-      case "role-group":
-        result = validateRoleGroupCondition(
-          condition as RoleGroupCondition,
-          students,
-          groups,
-          roles,
-          seats,
-        );
-        break;
-      case "student-distance":
-        result = validateStudentDistanceCondition(
-          condition as StudentDistanceCondition,
-          students,
-          seats,
-        );
-        break;
-      default:
-        result = {
-          isValid: true,
-          errors: [],
-          warnings: [],
-        };
+    if (isStudentGroupCondition(condition)) {
+      result = validateStudentGroupCondition(
+        condition,
+        students,
+        groups,
+        seats,
+      );
+    } else if (isRoleGroupCondition(condition)) {
+      result = validateRoleGroupCondition(
+        condition,
+        students,
+        groups,
+        roles,
+        seats,
+      );
+    } else if (isStudentDistanceCondition(condition)) {
+      result = validateStudentDistanceCondition(condition, students, seats);
+    } else {
+      result = {
+        isValid: true,
+        errors: [],
+        warnings: [],
+      };
     }
 
-    // 条件名を付けてエラー・警告を追加
     allErrors.push(
       ...result.errors.map((error) => `「${condition.name}」: ${error}`),
     );
@@ -277,17 +250,15 @@ export const checkConditionConflicts = (
 
   const enabledConditions = conditions.filter((c) => c.enabled);
 
-  // 生徒-グループ条件の競合チェック
   const studentGroupConditions = enabledConditions.filter(
-    (c) => c.type === "student-group",
-  ) as StudentGroupCondition[];
+    isStudentGroupCondition,
+  );
 
   for (let i = 0; i < studentGroupConditions.length; i++) {
     for (let j = i + 1; j < studentGroupConditions.length; j++) {
       const condition1 = studentGroupConditions[i];
       const condition2 = studentGroupConditions[j];
 
-      // 同じ生徒に対して矛盾する条件があるかチェック
       const commonStudents = condition1.studentIds.filter((id) =>
         condition2.studentIds.includes(id),
       );
@@ -311,17 +282,13 @@ export const checkConditionConflicts = (
     }
   }
 
-  // ロール-グループ条件の競合チェック
-  const roleGroupConditions = enabledConditions.filter(
-    (c) => c.type === "role-group",
-  ) as RoleGroupCondition[];
+  const roleGroupConditions = enabledConditions.filter(isRoleGroupCondition);
 
   for (let i = 0; i < roleGroupConditions.length; i++) {
     for (let j = i + 1; j < roleGroupConditions.length; j++) {
       const condition1 = roleGroupConditions[i];
       const condition2 = roleGroupConditions[j];
 
-      // 同じロールとグループの組み合わせで矛盾する条件があるかチェック
       if (condition1.roleId === condition2.roleId) {
         const commonGroups = condition1.groupIds.filter((id) =>
           condition2.groupIds.includes(id),

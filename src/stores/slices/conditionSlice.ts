@@ -1,30 +1,16 @@
-import type {
-  Condition,
-  Student,
-  Seat,
-  Group,
-  Role,
-  StudentGroupCondition,
-  RoleGroupCondition,
-  StudentDistanceCondition,
-} from "../../types";
+import type { Condition, Student, Seat, Group, Role } from "../../types";
 import {
   validateAllConditions,
   checkConditionConflicts,
   type ConditionValidationResult,
-} from "../../utils/conditionValidator";
+} from "../../utils/condition/validate";
 
 type SetState = (partial: unknown) => void;
 type GetState = () => unknown;
 
 export function createConditionSlice(set: SetState, get: GetState) {
   return {
-    addCondition: (
-      condition:
-        | StudentGroupCondition
-        | RoleGroupCondition
-        | StudentDistanceCondition,
-    ) =>
+    addCondition: (condition: Condition) =>
       set((state: { conditions: Condition[] }) => ({
         conditions: [...state.conditions, condition],
       })),

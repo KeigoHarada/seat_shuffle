@@ -29,10 +29,7 @@ export const DEFAULT_ROLES: Role[] = [
   },
 ];
 
-export const DEFAULT_CONDITIONS: (
-  | RoleGroupCondition
-  | StudentDistanceCondition
-)[] = [
+export const DEFAULT_CONDITIONS: Condition[] = [
   {
     id: "condition-han-1-leaders",
     name: "班1に学級委員を配置",

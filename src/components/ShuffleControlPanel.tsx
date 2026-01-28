@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { Shuffle, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { getConditionName } from '../utils/conditionHelpers';
+import { getConditionName } from '../utils/condition/helpers';
 
 export const ShuffleControlPanel: React.FC = () => {
   const { 

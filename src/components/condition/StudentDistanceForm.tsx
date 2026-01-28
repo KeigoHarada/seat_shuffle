@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../../stores/seatStore';
-import { StudentDistanceCondition } from '../../types';
+import { Condition } from '../../types';
 
 interface StudentDistanceFormProps {
-  onAdd: (condition: Omit<StudentDistanceCondition, 'id'>) => void;
+  onAdd: (condition: Omit<Extract<Condition, { type: 'student-distance' }>, 'id'>) => void;
   onCancel: () => void;
 }
 

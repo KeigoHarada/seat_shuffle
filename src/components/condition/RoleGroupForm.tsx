@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useSeatStore } from '../../stores/seatStore';
-import { RoleGroupCondition } from '../../types';
+import { Condition } from '../../types';
 
 interface RoleGroupFormProps {
-  onAdd: (condition: Omit<RoleGroupCondition, 'id'>) => void;
+  onAdd: (condition: Omit<Extract<Condition, { type: 'role-group' }>, 'id'>) => void;
   onCancel: () => void;
 }
 

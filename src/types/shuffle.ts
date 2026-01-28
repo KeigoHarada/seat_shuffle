@@ -6,7 +6,6 @@ export type ShuffleResult = { [seatId: string]: string | undefined };
 // シャッフルアルゴリズムのインターフェース
 export interface ShuffleAlgorithm {
   name: string;
-  description: string;
 
   // メインのシャッフル実行メソッド
   shuffle(
