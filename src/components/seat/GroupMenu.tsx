@@ -34,19 +34,19 @@ export const GroupMenu: React.FC<GroupMenuProps> = ({
       borderRadius: 'var(--radius-md)',
       boxShadow: 'var(--shadow-lg)',
       zIndex: 9999,
-      padding: 'var(--spacing-sm)',
+      padding: '6px',
       minWidth: '150px'
     }}>
       <div style={{ 
         fontSize: '0.75rem', 
         fontWeight: 'bold', 
-        marginBottom: 'var(--spacing-xs)',
+        marginBottom: '4px',
         color: 'var(--color-secondary-700)'
       }}>
         {showGroupMenu.includes(',') ? `${showGroupMenu.split(',').length}席の設定` : '席の設定'}
       </div>
       
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         {/* 空席設定 */}
         {(() => {
           const firstSeat = currentLayout.seats.find(s => s.id === seatIds[0]);
@@ -66,7 +66,7 @@ export const GroupMenu: React.FC<GroupMenuProps> = ({
                   onClose();
                 }}
                 style={{
-                  padding: 'var(--spacing-xs)',
+                  padding: '4px 6px',
                   border: 'none',
                   background: 'transparent',
                   textAlign: 'left',
@@ -90,14 +90,14 @@ export const GroupMenu: React.FC<GroupMenuProps> = ({
         <div style={{ 
           height: '1px', 
           backgroundColor: 'var(--color-secondary-200)', 
-          margin: '4px 0'
+          margin: '2px 0'
         }} />
         
         <div style={{ 
           fontSize: '0.7rem', 
           color: 'var(--color-secondary-600)',
-          marginBottom: 'var(--spacing-xs)',
-          paddingLeft: 'var(--spacing-xs)'
+          marginBottom: '2px',
+          paddingLeft: '4px'
         }}>
           グループ（クリックで追加/削除）
         </div>
@@ -113,7 +113,7 @@ export const GroupMenu: React.FC<GroupMenuProps> = ({
                 onClose();
               }}
               style={{
-                padding: 'var(--spacing-xs)',
+                padding: '4px 6px',
                 border: 'none',
                 background: 'transparent',
                 textAlign: 'left',
@@ -122,7 +122,7 @@ export const GroupMenu: React.FC<GroupMenuProps> = ({
                 borderRadius: 'var(--radius-sm)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 'var(--spacing-xs)',
+                gap: '6px',
                 fontWeight: hasGroup ? 'bold' : 'normal'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary-100)'}

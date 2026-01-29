@@ -251,7 +251,24 @@ export const SeatGrid: React.FC = () => {
       // 複数選択がある場合は、その席も含めてメニュー表示
       const seatsToShow = multiSelectedSeats.size > 0 ? Array.from(multiSelectedSeats) : [seatId];
       const rect = e.currentTarget.getBoundingClientRect();
-      setMenuPosition({ x: rect.left, y: rect.bottom });
+      
+      // メニューの推定高さ（グループ数に応じて変動、安全のため余裕を持たせる）
+      const estimatedMenuHeight = 200;
+      const windowHeight = window.innerHeight;
+      
+      // ウィンドウの下端を超える場合は上側に表示
+      let menuY: number;
+      if (rect.bottom + estimatedMenuHeight > windowHeight) {
+        menuY = rect.top - estimatedMenuHeight;
+        // 上側もウィンドウを超える場合は、ウィンドウ内に収める
+        if (menuY < 0) {
+          menuY = Math.max(10, windowHeight - estimatedMenuHeight - 10);
+        }
+      } else {
+        menuY = rect.bottom;
+      }
+      
+      setMenuPosition({ x: rect.left, y: menuY });
       setShowGroupMenu(seatsToShow.join(','));
     }
   };
