@@ -25,6 +25,7 @@ export function createLayoutSlice(set: SetState, get: GetState) {
             id: `seat-${row}-${col}`,
             row,
             col,
+            studentId: undefined,
             isEmpty: false,
             groupIds: [],
           });
@@ -108,6 +109,7 @@ export function createLayoutSlice(set: SetState, get: GetState) {
           }
           return {
             ...seat,
+            studentId: undefined,
             groupIds: assignedGroupId ? [assignedGroupId] : [],
           };
         });
@@ -124,60 +126,47 @@ export function createLayoutSlice(set: SetState, get: GetState) {
         const unnamedSeatsCount = 2;
         const totalUnusedSeats = emptySeatsCount + unnamedSeatsCount;
 
+        const shuffledForUnused = [...allSeats].sort(
+          () => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET,
+        );
+        const emptySeatIds = new Set(
+          shuffledForUnused.slice(0, emptySeatsCount).map((s) => s.id),
+        );
+        const unnamedSeatIds = new Set(
+          shuffledForUnused
+            .slice(emptySeatsCount, emptySeatsCount + unnamedSeatsCount)
+            .map((s) => s.id),
+        );
+
+        const seatsAfterUnused = currentLayout.seats.map((seat) => {
+          if (emptySeatIds.has(seat.id)) {
+            return { ...seat, isEmpty: true, studentId: undefined };
+          }
+          if (unnamedSeatIds.has(seat.id)) {
+            return { ...seat, isEmpty: false, studentId: undefined };
+          }
+          return seat;
+        });
+
+        (
+          get() as { setCurrentLayout: (l: SeatLayout) => void }
+        ).setCurrentLayout({
+          ...currentLayout,
+          seats: seatsAfterUnused,
+        });
+
         const shuffledStudents = [...SAMPLE_STUDENTS].sort(
           () => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET,
         );
         const studentsToAdd = shuffledStudents.slice(
           0,
-          shuffledStudents.length - totalUnusedSeats,
+          Math.max(0, shuffledStudents.length - totalUnusedSeats),
         );
 
         studentsToAdd.forEach((student) => {
           (
             get() as { addStudent: (s: (typeof SAMPLE_STUDENTS)[0]) => void }
           ).addStudent(student);
-        });
-
-        const emptySeats = allSeats
-          .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
-          .slice(0, emptySeatsCount);
-        emptySeats.forEach((seat) => {
-          (get() as { toggleSeatEmpty: (id: string) => void }).toggleSeatEmpty(
-            seat.id,
-          );
-        });
-
-        const unnamedSeats = allSeats
-          .filter((s) => !emptySeats.some((e) => e.id === s.id))
-          .sort(() => Math.random() - UI_CONSTANTS.LAYOUT.RANDOM_SORT_OFFSET)
-          .slice(0, unnamedSeatsCount);
-
-        const setLayout = (
-          get() as { setCurrentLayout: (l: SeatLayout) => void }
-        ).setCurrentLayout;
-        unnamedSeats.forEach((seat) => {
-          const { studentId, ...rest } = seat;
-          const layout = (get() as { currentLayout: SeatLayout }).currentLayout;
-          setLayout({
-            ...layout,
-            seats: layout.seats.map((s) => (s.id === seat.id ? rest : s)),
-          });
-        });
-
-        const remainingSeats = allSeats.filter(
-          (s) =>
-            !emptySeats.some((e) => e.id === s.id) &&
-            !unnamedSeats.some((u) => u.id === s.id),
-        );
-        const assign = (
-          get() as {
-            assignStudentToSeat: (sid: string, seatId: string) => void;
-          }
-        ).assignStudentToSeat;
-        remainingSeats.forEach((seat, i) => {
-          if (i < studentsToAdd.length) {
-            assign(studentsToAdd[i]!.id, seat.id);
-          }
         });
       }
     },

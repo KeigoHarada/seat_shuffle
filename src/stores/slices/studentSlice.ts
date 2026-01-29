@@ -4,15 +4,49 @@ type SetState = (partial: unknown) => void;
 
 export function createStudentSlice(set: SetState) {
   return {
-    addStudent: (student: Student) =>
-      set((state: { students: Student[] }) => {
-        const studentWithNumber = {
-          ...student,
-          studentNumber: state.students.length + 1,
-          roleIds: student.roleIds ?? [],
-        };
-        return { students: [...state.students, studentWithNumber] };
-      }),
+    addStudent: (student: Student) => {
+      set(
+        (state: {
+          students: Student[];
+          currentLayout: {
+            seats: { id: string; isEmpty: boolean; studentId?: string }[];
+          } | null;
+        }) => {
+          if (!state.currentLayout) {
+            throw new Error("レイアウトが設定されていません");
+          }
+
+          const unnamedSeats = state.currentLayout.seats.filter(
+            (seat) => !seat.isEmpty && seat.studentId === undefined,
+          );
+
+          if (unnamedSeats.length === 0) {
+            throw new Error("名無し席がありません。追加できません。");
+          }
+
+          const studentWithNumber = {
+            ...student,
+            studentNumber: state.students.length + 1,
+            roleIds: student.roleIds ?? [],
+          };
+
+          const firstUnnamedSeat = unnamedSeats[0]!;
+          const updatedSeats = state.currentLayout.seats.map((seat) =>
+            seat.id === firstUnnamedSeat.id
+              ? { ...seat, studentId: studentWithNumber.id, isEmpty: false }
+              : seat,
+          );
+
+          return {
+            students: [...state.students, studentWithNumber],
+            currentLayout: {
+              ...state.currentLayout,
+              seats: updatedSeats,
+            },
+          };
+        },
+      );
+    },
 
     removeStudent: (studentId: string) =>
       set(

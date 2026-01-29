@@ -5,7 +5,9 @@ import {
   Upload,
   ChevronDown,
   ChevronUp,
-  Trash2
+  Trash2,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { ROLE_ICONS } from '../constants/roleIcons';
@@ -22,6 +24,7 @@ export const StudentManager: React.FC = () => {
   const [editingGender, setEditingGender] = useState<'male' | 'female' | 'other'>('male');
   const [isExpanded, setIsExpanded] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   // 出席番号順にソートされた生徒リストを取得
   const getSortedStudents = () => {
@@ -44,19 +47,24 @@ export const StudentManager: React.FC = () => {
 
   const handleAddStudent = () => {
     if (newStudentName.trim() && newStudentFurigana.trim()) {
-      const student: Student = {
-        id: `student-${Date.now()}`,
-        name: newStudentName.trim(),
-        furigana: newStudentFurigana.trim(),
-        gender: newStudentGender,
-        studentNumber: 0, // ストアで自動割り当てされる
-        roleIds: newStudentRoles
-      };
-      addStudent(student);
-      setNewStudentName('');
-      setNewStudentFurigana('');
-      setNewStudentGender('male');
-      setNewStudentRoles([]);
+      try {
+        setAddError(null);
+        const student: Student = {
+          id: `student-${Date.now()}`,
+          name: newStudentName.trim(),
+          furigana: newStudentFurigana.trim(),
+          gender: newStudentGender,
+          studentNumber: 0,
+          roleIds: newStudentRoles
+        };
+        addStudent(student);
+        setNewStudentName('');
+        setNewStudentFurigana('');
+        setNewStudentGender('male');
+        setNewStudentRoles([]);
+      } catch (error) {
+        setAddError(error instanceof Error ? error.message : "生徒の追加に失敗しました");
+      }
     }
   };
 
@@ -139,23 +147,21 @@ export const StudentManager: React.FC = () => {
           return;
         }
 
-        // データを解析して生徒を追加
+        setAddError(null);
         let successCount = 0;
         let errorCount = 0;
+        let addErrorMsg: string | null = null;
 
-        rows.forEach((row, index) => {
-          // ヘッダー行をスキップ
-          if (index === 0) return;
-          
-          // 空行をスキップ
-          if (!row || row.length < 4 || !row[1]) return;
+        for (let index = 0; index < rows.length; index++) {
+          const row = rows[index];
+          if (index === 0) continue;
+          if (!row || row.length < 4 || !row[1]) continue;
 
           const studentNumber = parseInt(String(row[0])) || 0;
           const name = String(row[1]).trim();
           const furigana = String(row[2]).trim();
           const genderStr = String(row[3]).trim();
 
-          // 性別の変換
           let gender: 'male' | 'female' | 'other' = 'other';
           if (genderStr === '男' || genderStr === '男性' || genderStr === 'male') {
             gender = 'male';
@@ -164,24 +170,32 @@ export const StudentManager: React.FC = () => {
           }
 
           if (name && furigana) {
-            const student: Student = {
-              id: `student-${Date.now()}-${index}`,
-              name,
-              furigana,
-              gender,
-              studentNumber: studentNumber || (students.length + successCount + 1),
-              roleIds: []
-            };
-            addStudent(student);
-            successCount++;
+            try {
+              const student: Student = {
+                id: `student-${Date.now()}-${index}`,
+                name,
+                furigana,
+                gender,
+                studentNumber: studentNumber || (students.length + successCount + 1),
+                roleIds: []
+              };
+              addStudent(student);
+              successCount++;
+            } catch (err) {
+              addErrorMsg = err instanceof Error ? err.message : "生徒の追加に失敗しました";
+              break;
+            }
           } else {
             errorCount++;
           }
-        });
+        }
 
-        if (successCount > 0) {
+        if (addErrorMsg) {
+          setAddError(addErrorMsg);
+        }
+        if (successCount > 0 && !addErrorMsg) {
           alert(`${successCount}人の生徒を追加しました` + (errorCount > 0 ? `\n（${errorCount}行のエラーをスキップしました）` : ''));
-        } else {
+        } else if (!addErrorMsg) {
           alert('有効なデータが見つかりませんでした');
         }
       } catch (error) {
@@ -270,6 +284,37 @@ export const StudentManager: React.FC = () => {
       {isExpanded && (
       <>
       
+      {addError && (
+        <div style={{
+          marginBottom: 'var(--spacing-md)',
+          padding: 'var(--spacing-sm)',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #fca5a5',
+          borderRadius: 'var(--radius-md)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--spacing-sm)'
+        }}>
+          <AlertCircle size={20} color="#dc2626" />
+          <span style={{ fontSize: '0.875rem', color: '#991b1b', flex: 1 }}>
+            {addError}
+          </span>
+          <button
+            onClick={() => setAddError(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <X size={16} color="#991b1b" />
+          </button>
+        </div>
+      )}
+
       {/* ファイルフォーマットの説明 */}
       <div style={{ 
         marginBottom: 'var(--spacing-md)', 
