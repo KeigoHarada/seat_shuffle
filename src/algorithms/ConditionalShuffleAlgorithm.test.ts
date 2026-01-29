@@ -647,4 +647,226 @@ describe("ConditionalShuffleAlgorithm", () => {
       `\n【ランダム性】1回目と2回目は異なる配置: ${assignment1Str !== assignment2Str}`,
     );
   });
+
+  it("100回繰り返しテスト（ランダムな条件と席配置）", async () => {
+    const students = SAMPLE_STUDENTS.slice(0, 30);
+    const alg = new ConditionalShuffleAlgorithm();
+
+    const groups: Group[] = [
+      { id: "group-a", name: "グループA", color: "#ff0000" },
+      { id: "group-b", name: "グループB", color: "#0000ff" },
+      { id: "group-c", name: "グループC", color: "#00ff00" },
+    ];
+
+    const roles: Role[] = [
+      { id: "role-class-leader", name: "学級委員長", icon: "user" },
+      { id: "role-vice-leader", name: "副委員長", icon: "user" },
+    ];
+
+    const testResults = {
+      total: 0,
+      success: 0,
+      timeout: 0,
+      error: 0,
+      durations: [] as number[],
+      errors: [] as string[],
+    };
+
+    const iterations = 100;
+    const timeoutMs = 30000;
+
+    console.log(`\n【100回繰り返しテスト開始】`);
+
+    for (let i = 0; i < iterations; i++) {
+      testResults.total++;
+
+      const rows = Math.floor(Math.random() * 5) + 5;
+      const cols = Math.floor(Math.random() * 5) + 6;
+      const seats: Seat[] = [];
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const isEmpty = Math.random() < 0.1;
+          const groupIds: string[] = [];
+          if (Math.random() < 0.3) {
+            const randomGroup =
+              groups[Math.floor(Math.random() * groups.length)];
+            if (randomGroup) groupIds.push(randomGroup.id);
+          }
+
+          seats.push({
+            id: `seat-${row}-${col}`,
+            row,
+            col,
+            isEmpty,
+            groupIds,
+          });
+        }
+      }
+
+      const availableSeats = seats.filter((s) => !s.isEmpty);
+      const testStudents = students.slice(
+        0,
+        Math.min(students.length, availableSeats.length),
+      );
+
+      const conditions: Condition[] = [];
+      const conditionCount = Math.floor(Math.random() * 5) + 1;
+
+      for (let j = 0; j < conditionCount; j++) {
+        const conditionType = Math.random();
+        if (conditionType < 0.4 && testStudents.length >= 2) {
+          const student1 =
+            testStudents[Math.floor(Math.random() * testStudents.length)];
+          const student2 =
+            testStudents[Math.floor(Math.random() * testStudents.length)];
+          if (student1 && student2 && student1.id !== student2.id) {
+            const group = groups[Math.floor(Math.random() * groups.length)];
+            if (group) {
+              conditions.push({
+                id: `condition-${i}-${j}-student-group`,
+                name: `${student1.name}を${group.name}に配置`,
+                type: "student-group",
+                enabled: true,
+                studentIds: [student1.id],
+                groupIds: [group.id],
+                shouldPlace: Math.random() < 0.7,
+              });
+            }
+          }
+        } else if (conditionType < 0.7 && groups.length > 0) {
+          const group = groups[Math.floor(Math.random() * groups.length)];
+          const role = roles[Math.floor(Math.random() * roles.length)];
+          if (group && role) {
+            const studentsWithRole = testStudents.filter((s) =>
+              s.roleIds.includes(role.id),
+            );
+            if (studentsWithRole.length > 0) {
+              conditions.push({
+                id: `condition-${i}-${j}-role-group`,
+                name: `${group.name}に${role.name}を配置`,
+                type: "role-group",
+                enabled: true,
+                roleId: role.id,
+                groupIds: [group.id],
+                count: Math.min(
+                  Math.floor(Math.random() * 3) + 1,
+                  studentsWithRole.length,
+                ),
+              });
+            }
+          }
+        } else if (conditionType < 1.0 && testStudents.length >= 2) {
+          const student1 =
+            testStudents[Math.floor(Math.random() * testStudents.length)];
+          const student2 =
+            testStudents[Math.floor(Math.random() * testStudents.length)];
+          if (student1 && student2 && student1.id !== student2.id) {
+            conditions.push({
+              id: `condition-${i}-${j}-distance`,
+              name: `${student1.name}と${student2.name}を${Math.random() < 0.5 ? "近く" : "遠く"}に配置`,
+              type: "student-distance",
+              enabled: true,
+              studentId1: student1.id,
+              studentId2: student2.id,
+              shouldBeClose: Math.random() < 0.5,
+            });
+          }
+        }
+      }
+
+      const startTime = Date.now();
+      try {
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error("タイムアウト"));
+          }, timeoutMs);
+        });
+
+        const assignment = await Promise.race([
+          alg.shuffle(testStudents, seats, conditions),
+          timeoutPromise,
+        ]);
+
+        const duration = Date.now() - startTime;
+        testResults.durations.push(duration);
+        testResults.success++;
+
+        const analysis = analyzeAssignment(
+          assignment as { [seatId: string]: string },
+          conditions,
+          testStudents,
+          seats,
+          groups,
+          roles,
+        );
+
+        if (analysis.failedConditions.length > 0) {
+          testResults.error++;
+          testResults.errors.push(
+            `試行${i + 1}: ${analysis.failedConditions.length}個の条件が満たされませんでした`,
+          );
+        }
+      } catch (error) {
+        const duration = Date.now() - startTime;
+        testResults.durations.push(duration);
+
+        if (error instanceof Error && error.message === "タイムアウト") {
+          testResults.timeout++;
+          testResults.errors.push(
+            `試行${i + 1}: タイムアウト（${duration}ms）`,
+          );
+        } else {
+          testResults.error++;
+          testResults.errors.push(
+            `試行${i + 1}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }
+
+      if ((i + 1) % 10 === 0) {
+        console.log(
+          `進捗: ${i + 1}/${iterations}回完了 (成功: ${testResults.success}, タイムアウト: ${testResults.timeout}, エラー: ${testResults.error})`,
+        );
+      }
+    }
+
+    const avgDuration =
+      testResults.durations.length > 0
+        ? testResults.durations.reduce((a, b) => a + b, 0) /
+          testResults.durations.length
+        : 0;
+    const maxDuration =
+      testResults.durations.length > 0 ? Math.max(...testResults.durations) : 0;
+    const minDuration =
+      testResults.durations.length > 0 ? Math.min(...testResults.durations) : 0;
+
+    console.log(`\n【100回繰り返しテスト結果】`);
+    console.log(`  総試行回数: ${testResults.total}`);
+    console.log(
+      `  成功: ${testResults.success} (${((testResults.success / testResults.total) * 100).toFixed(1)}%)`,
+    );
+    console.log(
+      `  タイムアウト: ${testResults.timeout} (${((testResults.timeout / testResults.total) * 100).toFixed(1)}%)`,
+    );
+    console.log(
+      `  エラー: ${testResults.error} (${((testResults.error / testResults.total) * 100).toFixed(1)}%)`,
+    );
+    console.log(`  平均処理時間: ${avgDuration.toFixed(1)}ms`);
+    console.log(`  最大処理時間: ${maxDuration}ms`);
+    console.log(`  最小処理時間: ${minDuration}ms`);
+
+    if (testResults.errors.length > 0) {
+      console.log(`\n【エラー詳細】`);
+      testResults.errors.slice(0, 10).forEach((error) => {
+        console.log(`  ${error}`);
+      });
+      if (testResults.errors.length > 10) {
+        console.log(`  ... (他${testResults.errors.length - 10}件)`);
+      }
+    }
+
+    expect(testResults.success).toBeGreaterThan(testResults.total * 0.8);
+    expect(testResults.timeout).toBeLessThan(testResults.total * 0.2);
+  });
 });
