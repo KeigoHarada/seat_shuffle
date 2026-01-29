@@ -15,7 +15,7 @@ import { createRoleSlice } from "./slices/roleSlice";
 import { createConditionSlice } from "./slices/conditionSlice";
 import { createSeatInteractionSlice } from "./slices/seatInteractionSlice";
 import { createShuffleSlice } from "./slices/shuffleSlice";
-import { createSettingsSlice } from "./slices/settingsSlice";
+import { createSettingsSlice, loadBgmEnabled } from "./slices/settingsSlice";
 
 export interface SeatStore extends AppState {
   shuffleManager: ShuffleManager;
@@ -57,6 +57,8 @@ export interface SeatStore extends AppState {
   checkConditionConflicts: () => ConditionValidationResult;
   setShuffleAnimation: (animationName: string) => void;
   getShuffleAnimation: () => import("../utils/shuffleAnimations").ShuffleAnimation;
+  bgmEnabled: boolean;
+  setBgmEnabled: (enabled: boolean) => void;
 }
 
 export const useSeatStore = create<SeatStore>((set, get) => ({
@@ -69,6 +71,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   showSettings: false,
   selectedSeatId: null,
   settingsPanelWidth: 600,
+  bgmEnabled: loadBgmEnabled(),
 
   ...createStudentSlice(set as (p: unknown) => void),
   ...createLayoutSlice(set as (p: unknown) => void, get as () => SeatStore),

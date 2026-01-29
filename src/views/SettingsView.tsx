@@ -6,6 +6,7 @@ import { StudentManager } from '../components/StudentManager';
 import { GroupManager } from '../components/GroupManager';
 import { RoleManager } from '../components/RoleManager';
 import { ConditionManager } from '../components/ConditionManager';
+import { ShuffleSettings } from '../components/ShuffleSettings';
 
 export const SettingsView: React.FC = () => {
   const { toggleSettings, settingsPanelWidth, setSettingsPanelWidth } = useSeatStore();
@@ -113,6 +114,7 @@ export const SettingsView: React.FC = () => {
         </header>
 
         <main>
+          <ShuffleSettings />
           <LayoutSettings />
           <StudentManager />
           <GroupManager />

@@ -51,6 +51,7 @@ export function createShuffleSlice(set: SetState, get: GetState) {
         students: Student[];
         conditions: Condition[];
         shuffleManager: ShuffleManager;
+        bgmEnabled: boolean;
       };
       const state = get() as ShuffleState;
       if (!state.currentLayout) return;
@@ -61,7 +62,7 @@ export function createShuffleSlice(set: SetState, get: GetState) {
       set({ isShuffling: true });
 
       let audio: HTMLAudioElement | null = null;
-      if (animation.audioUrl) {
+      if (animation.audioUrl && state.bgmEnabled) {
         try {
           const baseUrl = import.meta.env.BASE_URL || "/";
           const audioPath = baseUrl + animation.audioUrl.replace(/^\//, "");
