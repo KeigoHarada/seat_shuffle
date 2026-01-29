@@ -96,5 +96,24 @@ export function createStudentSlice(set: SetState) {
           return { currentLayout: updatedLayout };
         },
       ),
+
+    clearAllStudents: () =>
+      set(
+        (state: {
+          students: Student[];
+          currentLayout: { seats: { studentId?: string }[] } | null;
+        }) => ({
+          students: [],
+          currentLayout: state.currentLayout
+            ? {
+                ...state.currentLayout,
+                seats: state.currentLayout.seats.map((seat) => ({
+                  ...seat,
+                  studentId: undefined,
+                })),
+              }
+            : null,
+        }),
+      ),
   };
 }

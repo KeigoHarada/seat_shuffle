@@ -23,6 +23,7 @@ export interface SeatStore extends AppState {
   addStudent: (student: Student) => void;
   removeStudent: (studentId: string) => void;
   updateStudent: (studentId: string, updates: Partial<Student>) => void;
+  clearAllStudents: () => void;
   assignStudentToSeat: (studentId: string, seatId: string) => void;
   removeStudentFromSeat: (seatId: string) => void;
   createLayout: (rows: number, cols: number, name: string) => void;

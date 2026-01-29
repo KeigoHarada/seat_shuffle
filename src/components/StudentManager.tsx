@@ -4,13 +4,14 @@ import { Student } from '../types';
 import { 
   Upload,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Trash2
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { ROLE_ICONS } from '../constants/roleIcons';
 
 export const StudentManager: React.FC = () => {
-  const { students, addStudent, removeStudent, updateStudent, roles, assignRoleToStudent, removeRoleFromStudent, currentLayout, setSelectedSeatId } = useSeatStore();
+  const { students, addStudent, removeStudent, updateStudent, roles, assignRoleToStudent, removeRoleFromStudent, currentLayout, setSelectedSeatId, clearAllStudents } = useSeatStore();
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentFurigana, setNewStudentFurigana] = useState('');
   const [newStudentGender, setNewStudentGender] = useState<'male' | 'female' | 'other'>('male');
@@ -20,6 +21,7 @@ export const StudentManager: React.FC = () => {
   const [editingFurigana, setEditingFurigana] = useState('');
   const [editingGender, setEditingGender] = useState<'male' | 'female' | 'other'>('male');
   const [isExpanded, setIsExpanded] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // 出席番号順にソートされた生徒リストを取得
   const getSortedStudents = () => {
@@ -216,6 +218,28 @@ export const StudentManager: React.FC = () => {
         </div>
         {isExpanded && (
           <>
+            <button
+              className="btn btn-secondary"
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 'var(--spacing-xs)',
+                cursor: students.length === 0 ? 'not-allowed' : 'pointer',
+                padding: 'var(--spacing-xs) var(--spacing-sm)', 
+                fontSize: '0.75rem',
+                opacity: students.length === 0 ? 0.5 : 1
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (students.length > 0) {
+                  setShowDeleteConfirm(true);
+                }
+              }}
+              disabled={students.length === 0}
+            >
+              <Trash2 size={16} />
+              全員削除
+            </button>
             <label 
               htmlFor="file-upload"
               className="btn btn-secondary"
@@ -605,6 +629,85 @@ export const StudentManager: React.FC = () => {
         )}
       </div>
       </>
+      )}
+
+      {/* 全員削除確認ダイアログ */}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 5000
+        }}>
+          <div style={{
+            backgroundColor: 'var(--color-secondary-50)',
+            border: '2px solid var(--color-error-300)',
+            borderRadius: 'var(--radius-xl)',
+            padding: 'var(--spacing-xl)',
+            boxShadow: 'var(--shadow-2xl)',
+            maxWidth: '400px',
+            width: '90vw'
+          }}>
+            <h2 className="text-title2" style={{ 
+              marginBottom: 'var(--spacing-md)',
+              textAlign: 'center',
+              color: 'var(--color-error-800)'
+            }}>
+              全員削除の確認
+            </h2>
+
+            <p style={{
+              marginBottom: 'var(--spacing-lg)',
+              textAlign: 'center',
+              color: 'var(--color-secondary-900)',
+              fontSize: '0.9rem',
+              lineHeight: '1.6'
+            }}>
+              全員の生徒を削除しますか？<br />
+              この操作は取り消せません。
+            </p>
+
+            <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'center' }}>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowDeleteConfirm(false)}
+                style={{ padding: 'var(--spacing-md) var(--spacing-xl)' }}
+              >
+                キャンセル
+              </button>
+              
+              <button
+                className="btn"
+                onClick={() => {
+                  clearAllStudents();
+                  setShowDeleteConfirm(false);
+                }}
+                style={{ 
+                  padding: 'var(--spacing-md) var(--spacing-xl)',
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  borderColor: '#b91c1c',
+                  border: '1px solid #b91c1c',
+                  fontWeight: 'bold'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#b91c1c';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#dc2626';
+                }}
+              >
+                削除する
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
