@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Shuffle, Settings, Printer, HelpCircle, X } from 'lucide-react';
+import { Shuffle, Settings, Printer, HelpCircle, X, Undo2 } from 'lucide-react';
 import { useSeatStore } from '../stores/seatStore';
 import { SeatGrid } from '../components/SeatGrid';
 
 export const PublicView: React.FC = () => {
-  const { shuffleSeats, toggleSettings, isShuffling, currentLayout, students, showSettings, settingsPanelWidth } = useSeatStore();
+  const { shuffleSeats, undoShuffle, toggleSettings, isShuffling, currentLayout, students, previousLayout, showSettings, settingsPanelWidth } = useSeatStore();
   const [showHelp, setShowHelp] = useState(false);
 
   const handlePrint = () => {
@@ -12,6 +12,7 @@ export const PublicView: React.FC = () => {
   };
 
   const canShuffle = currentLayout && students.length > 0 && !isShuffling;
+  const canUndo = previousLayout && !isShuffling;
 
   return (
     <div 
@@ -96,6 +97,22 @@ export const PublicView: React.FC = () => {
           >
             <Shuffle size={24} style={{ marginRight: 'var(--spacing-sm)' }} />
             {isShuffling ? 'シャッフル中...' : 'シャッフル実行'}
+          </button>
+
+          <button
+            className="btn btn-secondary"
+            onClick={undoShuffle}
+            disabled={!canUndo}
+            style={{
+              fontSize: '1rem',
+              padding: 'var(--spacing-md) var(--spacing-xl)',
+              opacity: canUndo ? 1 : 0.5,
+              cursor: canUndo ? 'pointer' : 'not-allowed'
+            }}
+            title="直前に実行した席替えを取り消す"
+          >
+            <Undo2 size={20} style={{ marginRight: 'var(--spacing-sm)' }} />
+            元に戻す
           </button>
           
           <button

@@ -1,4 +1,4 @@
-import type { Student, Seat, Condition } from "../../types";
+import type { Student, Seat, Condition, SeatLayout } from "../../types";
 import { ShuffleManager } from "../../utils/ShuffleManager";
 import { ConditionalShuffleAlgorithm } from "../../algorithms/ConditionalShuffleAlgorithm";
 import { RandomShuffleAlgorithm } from "../../algorithms/RandomShuffleAlgorithm";
@@ -47,7 +47,7 @@ export function createShuffleSlice(set: SetState, get: GetState) {
 
     shuffleSeats: async () => {
       type ShuffleState = {
-        currentLayout: { seats: Seat[] } | null;
+        currentLayout: SeatLayout | null;
         students: Student[];
         conditions: Condition[];
         shuffleManager: ShuffleManager;
@@ -220,7 +220,12 @@ export function createShuffleSlice(set: SetState, get: GetState) {
           return rest;
         });
 
+        const previousLayout: SeatLayout = {
+          ...currentLayout,
+          seats: currentLayout.seats.map((s) => ({ ...s })),
+        };
         set({
+          previousLayout,
           currentLayout: { ...currentLayout, seats: newSeats },
         });
       } catch (error) {
@@ -232,6 +237,16 @@ export function createShuffleSlice(set: SetState, get: GetState) {
         }
         set({ isShuffling: false });
       }
+    },
+
+    undoShuffle: () => {
+      type UndoState = { previousLayout: SeatLayout | null };
+      const state = get() as UndoState;
+      if (!state.previousLayout) return;
+      set({
+        currentLayout: state.previousLayout,
+        previousLayout: null,
+      });
     },
   };
 }

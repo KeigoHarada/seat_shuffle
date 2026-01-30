@@ -60,6 +60,8 @@ export interface SeatStore extends AppState {
   getShuffleAnimation: () => import("../utils/shuffleAnimations").ShuffleAnimation;
   bgmEnabled: boolean;
   setBgmEnabled: (enabled: boolean) => void;
+  previousLayout: SeatLayout | null;
+  undoShuffle: () => void;
 }
 
 export const useSeatStore = create<SeatStore>((set, get) => ({
@@ -73,6 +75,7 @@ export const useSeatStore = create<SeatStore>((set, get) => ({
   selectedSeatId: null,
   settingsPanelWidth: 600,
   bgmEnabled: loadBgmEnabled(),
+  previousLayout: null,
 
   ...createStudentSlice(set as (p: unknown) => void),
   ...createLayoutSlice(set as (p: unknown) => void, get as () => SeatStore),
