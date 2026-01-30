@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { Shuffle, Settings, Printer, HelpCircle, X, Undo2 } from 'lucide-react';
+import { Shuffle, Settings, HelpCircle, X, Undo2 } from 'lucide-react';
 import { useSeatStore } from '../stores/seatStore';
 import { SeatGrid } from '../components/SeatGrid';
 
 export const PublicView: React.FC = () => {
   const { shuffleSeats, undoShuffle, toggleSettings, isShuffling, currentLayout, students, previousLayout, showSettings, settingsPanelWidth } = useSeatStore();
   const [showHelp, setShowHelp] = useState(false);
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   const canShuffle = currentLayout && students.length > 0 && !isShuffling;
   const canUndo = previousLayout && !isShuffling;
@@ -114,53 +110,9 @@ export const PublicView: React.FC = () => {
             <Undo2 size={20} style={{ marginRight: 'var(--spacing-sm)' }} />
             元に戻す
           </button>
-          
-          <button
-            className="btn btn-secondary"
-            onClick={handlePrint}
-            style={{
-              fontSize: '1rem',
-              padding: 'var(--spacing-md) var(--spacing-xl)'
-            }}
-          >
-            <Printer size={20} style={{ marginRight: 'var(--spacing-sm)' }} />
-            印刷
-          </button>
         </div>
 
       </main>
-
-      <style>{`
-        @media print {
-          .btn {
-            display: none !important;
-          }
-          
-          .container {
-            max-width: none !important;
-            padding: 0 !important;
-          }
-          
-          .seat {
-            background-color: white !important;
-            color: black !important;
-            border: 2px solid black !important;
-            box-shadow: none !important;
-          }
-          
-          .seat.occupied {
-            background-color: #f0f0f0 !important;
-            color: black !important;
-            border: 2px solid black !important;
-          }
-          
-          .seat.empty {
-            background-color: white !important;
-            color: #999 !important;
-            border: 2px solid #ccc !important;
-          }
-        }
-      `}</style>
 
       {/* 使い方モーダル */}
       {showHelp && (
