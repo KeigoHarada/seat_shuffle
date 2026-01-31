@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSeatStore } from '../stores/seatStore';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { DEFAULT_LAYOUT_ROWS, DEFAULT_LAYOUT_COLS, DEFAULT_LAYOUT_NAME } from '../constants/layout';
 
 export const LayoutSettings: React.FC = () => {
-  const { createLayout } = useSeatStore();
+  const currentLayout = useSeatStore((s) => s.currentLayout);
+  const { createLayout, updateLayoutSize } = useSeatStore();
   const [rows, setRows] = useState(DEFAULT_LAYOUT_ROWS);
   const [cols, setCols] = useState(DEFAULT_LAYOUT_COLS);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const handleCreateLayout = () => {
-    createLayout(rows, cols, DEFAULT_LAYOUT_NAME);
+  useEffect(() => {
+    if (currentLayout) {
+      setRows(currentLayout.rows);
+      setCols(currentLayout.cols);
+    }
+  }, [currentLayout?.rows, currentLayout?.cols]);
+
+  const handleApplyLayout = () => {
+    if (currentLayout) {
+      updateLayoutSize(rows, cols);
+    } else {
+      createLayout(rows, cols, DEFAULT_LAYOUT_NAME);
+    }
   };
 
   return (
@@ -76,9 +88,9 @@ export const LayoutSettings: React.FC = () => {
         <div style={{ alignSelf: 'end' }}>
           <button
             className="btn btn-primary"
-            onClick={handleCreateLayout}
+            onClick={handleApplyLayout}
           >
-            席配置を作成
+            {currentLayout ? '席配置を更新' : '席配置を作成'}
           </button>
         </div>
       </div>

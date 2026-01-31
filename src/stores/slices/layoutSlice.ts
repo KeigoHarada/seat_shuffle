@@ -13,6 +13,20 @@ type GetState = () => unknown;
 
 const GROUP_IDS = DEFAULT_GROUPS.map((g) => g.id);
 
+function getGroupIdsForPosition(row: number, col: number): string[] {
+  let assignedGroupId: string | null = null;
+  if (row <= 1) {
+    assignedGroupId = col <= 2 ? GROUP_IDS[0]! : GROUP_IDS[1]!;
+  } else if (row <= 3) {
+    assignedGroupId = col <= 2 ? GROUP_IDS[2]! : GROUP_IDS[3]!;
+  } else if (row <= 5) {
+    assignedGroupId = col <= 2 ? GROUP_IDS[4]! : GROUP_IDS[5]!;
+  } else {
+    assignedGroupId = GROUP_IDS[col % 6]!;
+  }
+  return assignedGroupId ? [assignedGroupId] : [];
+}
+
 export function createLayoutSlice(set: SetState, get: GetState) {
   return {
     setCurrentLayout: (layout: SeatLayout) => set({ currentLayout: layout }),
@@ -40,6 +54,62 @@ export function createLayoutSlice(set: SetState, get: GetState) {
         teacherDeskPosition: "top",
       };
       set({ currentLayout: layout });
+    },
+
+    updateLayoutSize: (newRows: number, newCols: number) => {
+      type LayoutState = {
+        currentLayout: SeatLayout | null;
+        students: { id: string; studentNumber: number }[];
+      };
+      const state = get() as LayoutState;
+      const layout = state.currentLayout;
+      if (!layout) return;
+
+      const oldRows = layout.rows;
+      const oldCols = layout.cols;
+      const seatById = new Map(layout.seats.map((s) => [s.id, s]));
+
+      const studentIdsToRemove = new Set<string>();
+      for (const seat of layout.seats) {
+        if (seat.row >= newRows || seat.col >= newCols) {
+          if (seat.studentId) studentIdsToRemove.add(seat.studentId);
+        }
+      }
+
+      const newSeats: Seat[] = [];
+      for (let row = 0; row < newRows; row++) {
+        for (let col = 0; col < newCols; col++) {
+          const id = `seat-${row}-${col}`;
+          const existing = seatById.get(id);
+          if (existing && row < oldRows && col < oldCols) {
+            newSeats.push({ ...existing });
+          } else {
+            newSeats.push({
+              id,
+              row,
+              col,
+              studentId: undefined,
+              isEmpty: false,
+              groupIds: getGroupIdsForPosition(row, col),
+            });
+          }
+        }
+      }
+
+      const updatedStudents = state.students
+        .filter((s) => !studentIdsToRemove.has(s.id))
+        .map((s, i) => ({ ...s, studentNumber: i + 1 }));
+
+      set({
+        currentLayout: {
+          ...layout,
+          rows: newRows,
+          cols: newCols,
+          seats: newSeats,
+        },
+        students: updatedStudents,
+        previousLayout: null,
+      });
     },
 
     toggleSeatEmpty: (seatId: string) =>

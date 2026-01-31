@@ -27,6 +27,7 @@ export interface SeatStore extends AppState {
   assignStudentToSeat: (studentId: string, seatId: string) => void;
   removeStudentFromSeat: (seatId: string) => void;
   createLayout: (rows: number, cols: number, name: string) => void;
+  updateLayoutSize: (rows: number, cols: number) => void;
   toggleSeatEmpty: (seatId: string) => void;
   shuffleSeats: () => Promise<void>;
   toggleSettings: () => void;
