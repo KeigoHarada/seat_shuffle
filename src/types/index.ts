@@ -1,100 +1,75 @@
-// グループの型定義
+export type Student = {
+  id: string;
+  attendanceNumber: number;
+  name: string;
+  furigana: string | null;
+  gender: "male" | "female" | "other";
+  roleIds: string[];
+  groupIds: string[];
+};
+
+export type Role = {
+  id: string;
+  name: string;
+  iconName: string;
+  description: string | null;
+};
+
 export type Group = {
   id: string;
   name: string;
   color: string;
-  description?: string;
+  description: string | null;
 };
 
-// ロールの型定義
-export type Role = {
-  id: string;
-  name: string;
-  icon: string;
-  description?: string;
-};
-
-// 条件の共通プロパティ
-interface BaseCondition {
-  id: string;
-  name: string;
-  enabled: boolean;
-  description?: string;
-}
-
-// 判別可能なユニオン型として条件を定義
-export type Condition =
-  | (BaseCondition & {
-      type: "student-group";
-      studentIds: string[];
-      groupIds: string[];
-      shouldPlace: boolean; // true: 配置する, false: 配置しない
-    })
-  | (BaseCondition & {
-      type: "role-group";
-      roleId?: string;
-      gender?: "male" | "female" | "other";
-      groupIds: string[];
-      count: number; // 配置する人数
-    })
-  | (BaseCondition & {
-      type: "student-distance";
-      studentId1: string;
-      studentId2: string;
-      shouldBeClose: boolean; // true: 近くに配置, false: 遠くに配置
-    });
-
-// 席の型定義
 export type Seat = {
   id: string;
-  row: number;
-  col: number;
-  studentId?: string;
-  isEmpty: boolean;
+  studentId: string | null;
   groupIds: string[];
+  x: number;
+  y: number;
+  isLocked: boolean;
 };
 
-// 生徒の型定義
-export type Student = {
+export type StudentGroupConstraint = {
   id: string;
-  name: string;
-  furigana: string;
+  constraintType: "studentGroup";
+  studentId: string;
+  groupId: string;
+  type: "include" | "exclude";
+  isEnabled: boolean;
+};
+
+export type StudentDistanceConstraint = {
+  id: string;
+  constraintType: "studentDistance";
+  studentId1: string;
+  studentId2: string;
+  type: "close" | "far";
+  isEnabled: boolean;
+};
+
+export type RoleDistributionConstraint = {
+  id: string;
+  constraintType: "roleDistribution";
+  roleId: string;
+  isEnabled: boolean;
+};
+
+export type GenderDistributionConstraint = {
+  id: string;
+  constraintType: "genderDistribution";
   gender: "male" | "female" | "other";
-  studentNumber: number;
-  roleIds: string[];
+  isEnabled: boolean;
 };
 
-// 席配置の型定義
-export type SeatLayout = {
-  id: string;
-  name: string;
-  rows: number;
-  cols: number;
-  seats: Seat[];
-  teacherDeskPosition: "top" | "bottom";
-};
+export type Constraint =
+  | StudentGroupConstraint
+  | StudentDistanceConstraint
+  | RoleDistributionConstraint
+  | GenderDistributionConstraint;
 
-// 条件チェック結果の詳細情報
-export type ConditionCheckResult = {
-  condition: Condition;
-  satisfied: boolean;
-  reason?: string;
+export type AppSettings = {
+  viewMode: "edit" | "student_readonly";
+  perspective: "teacher" | "student";
 };
-
-// 配置結果の詳細分析
-export type AssignmentAnalysis = {
-  totalConditions: number;
-  failedConditions: ConditionCheckResult[];
-  assignment: { [seatId: string]: string };
-};
-
-// アプリケーションの状態型定義
-export interface AppState {
-  currentLayout: SeatLayout | null;
-  students: Student[];
-  groups: Group[];
-  roles: Role[];
-  conditions: Condition[];
-  isShuffling: boolean;
-  showSettings: boolean;
-}

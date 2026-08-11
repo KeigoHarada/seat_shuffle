@@ -1,16 +1,11 @@
-import { useSeatStore } from './stores/seatStore';
-import { PublicView } from './views/PublicView';
-import { SettingsView } from './views/SettingsView';
+import React from "react";
 
-function App() {
-  const { showSettings } = useSeatStore();
-
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <PublicView />
-      {showSettings && <SettingsView />}
+    <div>
+      <h1>席替え先生 - 新アーキテクチャ移行中</h1>
     </div>
   );
-}
+};
 
 export default App;
