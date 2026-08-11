@@ -7,7 +7,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import StudentTab from "./settings/student/StudentTab";
-import RoleList from "./RoleList";
+import RoleTab from "./settings/role/RoleTab";
 import GroupList from "./GroupList";
 
 type Tab = "students" | "roles" | "groups" | "constraints" | "global";
@@ -73,35 +73,64 @@ const SettingsPanel: React.FC = () => {
         ))}
       </div>
 
-      {/* Content Area */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "var(--spacing-lg)" }}>
+      {/* Main Settings Content */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          padding: "var(--spacing-md)",
+          overflow: "hidden",
+        }}
+      >
         {activeTab === "students" && (
-          <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
             <h2
               className="text-title2"
-              style={{ marginBottom: "var(--spacing-md)" }}
+              style={{ marginBottom: "var(--spacing-md)", flexShrink: 0 }}
             >
-              生徒一覧
+              生徒設定
             </h2>
             <StudentTab />
           </div>
         )}
         {activeTab === "roles" && (
-          <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
             <h2
               className="text-title2"
-              style={{ marginBottom: "var(--spacing-md)" }}
+              style={{ marginBottom: "var(--spacing-md)", flexShrink: 0 }}
             >
               役割設定
             </h2>
-            <RoleList />
+            <RoleTab />
           </div>
         )}
         {activeTab === "groups" && (
-          <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
             <h2
               className="text-title2"
-              style={{ marginBottom: "var(--spacing-md)" }}
+              style={{ marginBottom: "var(--spacing-md)", flexShrink: 0 }}
             >
               グループ設定
             </h2>
@@ -109,30 +138,35 @@ const SettingsPanel: React.FC = () => {
           </div>
         )}
         {activeTab === "constraints" && (
-          <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
             <h2
               className="text-title2"
-              style={{ marginBottom: "var(--spacing-md)" }}
+              style={{ marginBottom: "var(--spacing-md)", flexShrink: 0 }}
             >
               条件設定
             </h2>
-            <div
-              className="card"
-              style={{
-                padding: "var(--spacing-lg)",
-                textAlign: "center",
-                color: "var(--c-text-sub)",
-              }}
-            >
-              開発中です
-            </div>
+            {/* Conditional logic will go here */}
           </div>
         )}
         {activeTab === "global" && (
-          <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
             <h2
               className="text-title2"
-              style={{ marginBottom: "var(--spacing-md)" }}
+              style={{ marginBottom: "var(--spacing-md)", flexShrink: 0 }}
             >
               全体設定
             </h2>

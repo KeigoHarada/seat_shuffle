@@ -1,8 +1,8 @@
 import React from "react";
-import StudentAddForm from "./StudentAddForm";
-import StudentListTable from "./StudentListTable";
+import RoleAddForm from "./RoleAddForm";
+import RoleListTable from "./RoleListTable";
 
-const StudentTab: React.FC = () => {
+const RoleTab: React.FC = () => {
   return (
     <div
       style={{
@@ -14,7 +14,7 @@ const StudentTab: React.FC = () => {
       }}
     >
       <div style={{ flexShrink: 0 }}>
-        <StudentAddForm />
+        <RoleAddForm />
       </div>
       <div
         style={{
@@ -24,10 +24,10 @@ const StudentTab: React.FC = () => {
           minHeight: 0,
         }}
       >
-        <StudentListTable />
+        <RoleListTable />
       </div>
     </div>
   );
 };
 
-export default StudentTab;
+export default RoleTab;

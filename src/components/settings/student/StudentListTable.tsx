@@ -14,29 +14,48 @@ const StudentListTable: React.FC = () => {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
       {/* Table Header */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "24px 1fr 76px 32px",
-          gap: "8px",
-          padding: "0 8px 8px 8px",
-          fontSize: "12px",
-          fontWeight: 700,
-          color: "var(--c-text-sub)",
-          borderBottom: "2px solid var(--c-surface-disabled)",
-          marginBottom: "8px",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>No.</div>
-        <div>ふりがな / 名前</div>
-        <div style={{ textAlign: "center" }}>性別</div>
-        <div></div>
+      <div style={{ flexShrink: 0 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "24px 1fr 76px 32px",
+            gap: "8px",
+            padding: "0 8px 8px 8px",
+            fontSize: "12px",
+            fontWeight: 700,
+            color: "var(--c-text-sub)",
+            borderBottom: "2px solid var(--c-surface-disabled)",
+            marginBottom: "8px",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>No.</div>
+          <div>ふりがな / 名前</div>
+          <div style={{ textAlign: "center" }}>性別</div>
+          <div></div>
+        </div>
       </div>
 
       {/* Table Rows */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+          flex: 1,
+          overflowY: "auto",
+          minHeight: 0,
+          paddingRight: "4px",
+        }}
+      >
         {students.map((student) => (
           <div
             key={student.id}
