@@ -104,3 +104,7 @@ temp/
 
 # Local development
 .local
+
+.agents/*
+AGENTS.md
+skills-lock.json
