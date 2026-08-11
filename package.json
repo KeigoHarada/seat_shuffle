@@ -19,19 +19,19 @@
   "type": "module",
   "devDependencies": {
     "jsdom": "^27.4.0",
+    "prettier": "^3.9.6",
     "vitest": "^2.1.0"
   },
   "dependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^5.0.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "glpk.js": "^5.0.0",
     "lucide-react": "^0.544.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.3",
-    "typescript": "^5.9.3",
-    "vite": "^7.1.9",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.8"
   }

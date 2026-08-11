@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>席替え先生 - Design Element Mocks</title>
+    <!-- Google Fonts: Zen Maru Gothic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        /* Colors */
+        --c-primary: #f59e0b;
+        --c-primary-hover: #d97706;
+        --c-primary-pale: #fef3c7;
+
+        --c-bg-main: #f8fafc;
+        --c-surface: #ffffff;
+        --c-surface-disabled: #e2e8f0;
+
+        --c-text-main: #334155;
+        --c-text-sub: #64748b;
+        --c-text-inverse: #ffffff;
+
+        --c-border: #cbd5e1;
+
+        /* Group Colors (Pastel) */
+        --c-group-pink: #fca5a5;
+        --c-group-blue: #93c5fd;
+        --c-group-green: #86efac;
+        --c-group-yellow: #fde047;
+        --c-group-purple: #d8b4fe;
+        --c-group-orange: #fdba74;
+
+        /* Typography */
+        --font-family: "Zen Maru Gothic", "Rounded Mplus 1c", sans-serif;
+
+        /* Radii */
+        --radius-sm: 4px;
+        --radius-md: 8px; /* Button, Seat */
+        --radius-lg: 12px; /* Card, Panel */
+
+        /* Shadows */
+        --shadow-1:
+          0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+        --shadow-2:
+          0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        --shadow-3:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      body {
+        font-family: var(--font-family);
+        margin: 0;
+        padding: 2rem;
+        background-color: var(--c-bg-main);
+        color: var(--c-text-main);
+        line-height: 1.6;
+        letter-spacing: 0.05em;
+      }
+
+      h1,
+      h2,
+      h3 {
+        color: var(--c-text-main);
+        margin-top: 0;
+      }
+      h1 {
+        font-size: 24px;
+        border-bottom: 2px solid var(--c-border);
+        padding-bottom: 0.5rem;
+        margin-bottom: 2rem;
+      }
+      h2 {
+        font-size: 20px;
+        margin-bottom: 1.5rem;
+      }
+
+      .section {
+        margin-bottom: 3rem;
+      }
+
+      .flex-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: inherit;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        box-shadow: var(--shadow-1);
+      }
+      .btn-primary {
+        background-color: var(--c-primary);
+        color: var(--c-text-inverse);
+      }
+      .btn-primary:hover {
+        background-color: var(--c-primary-hover);
+        box-shadow: var(--shadow-2);
+      }
+      .btn-secondary {
+        background-color: var(--c-surface);
+        color: var(--c-text-main);
+        border: 1px solid var(--c-border);
+      }
+      .btn-secondary:hover {
+        background-color: var(--c-bg-main);
+      }
+
+      /* Color Palette Swatches */
+      .color-swatch {
+        display: flex;
+        flex-direction: column;
+        width: 120px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-1);
+        background: var(--c-surface);
+        border: 1px solid var(--c-border);
+      }
+      .color-box {
+        height: 80px;
+        width: 100%;
+      }
+      .color-label {
+        padding: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        text-align: center;
+      }
+
+      /* Seat Mock */
+      .seat-mock {
+        width: 100px;
+        height: 60px;
+        background-color: var(--c-surface);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 8px;
+        box-sizing: border-box;
+      }
+      .seat-ruby {
+        font-size: 10px;
+        color: var(--c-text-sub);
+        line-height: 1;
+        margin-bottom: 2px;
+      }
+      .seat-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--c-text-main);
+        line-height: 1.2;
+      }
+      .seat-mock.group-pink {
+        background-color: var(--c-group-pink);
+        border-color: transparent;
+      }
+      .seat-mock.group-blue {
+        background-color: var(--c-group-blue);
+        border-color: transparent;
+      }
+
+      /* Panel Mock */
+      .panel-mock {
+        background-color: var(--c-surface);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-1);
+        max-width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>席替え先生 - デザイン仕様書 (Element Mocks)</h1>
+    <p>
+      ※本ファイルはアプリケーション自体の画面モックではなく、DESIGN.mdに則ったデザインシステム・UI各種要素のモック仕様書です。
+    </p>
+
+    <section class="section">
+      <h2>1. カラーパレット (Color Palette)</h2>
+
+      <h3>Primary</h3>
+      <div class="flex-row" style="margin-bottom: 1.5rem">
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-primary)"
+          ></div>
+          <div class="color-label">Primary Orange<br />#F59E0B</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-primary-pale)"
+          ></div>
+          <div class="color-label">Primary Pale<br />#FEF3C7</div>
+        </div>
+      </div>
+
+      <h3>Group Colors (Pastel)</h3>
+      <div class="flex-row">
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-pink)"
+          ></div>
+          <div class="color-label">Pink<br />#FCA5A5</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-blue)"
+          ></div>
+          <div class="color-label">Blue<br />#93C5FD</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-green)"
+          ></div>
+          <div class="color-label">Green<br />#86EFAC</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-yellow)"
+          ></div>
+          <div class="color-label">Yellow<br />#FDE047</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-purple)"
+          ></div>
+          <div class="color-label">Purple<br />#D8B4FE</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>2. タイポグラフィ (Typography)</h2>
+      <div class="panel-mock">
+        <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px">
+          H1: 席替え先生 (24px Bold)
+        </div>
+        <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px">
+          H2: 生徒一覧 (20px Bold)
+        </div>
+        <div style="font-size: 16px; font-weight: 700; margin-bottom: 8px">
+          H3: パネル見出し (16px Bold)
+        </div>
+        <div style="font-size: 14px; font-weight: 400; margin-bottom: 8px">
+          Body: 本文です。やわらかいゴシック体（Zen Maru
+          Gothic）により、温かみのある印象を与えます。
+        </div>
+        <div
+          style="font-size: 11px; font-weight: 400; color: var(--c-text-sub)"
+        >
+          Caption: 補足テキスト (11px Regular)
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. UIコンポーネント (UI Components)</h2>
+
+      <h3>Buttons</h3>
+      <div class="flex-row" style="margin-bottom: 1.5rem">
+        <button class="btn btn-primary">シャッフル実行</button>
+        <button class="btn btn-secondary">キャンセル</button>
+      </div>
+
+      <h3>Seat Nodes (座席オブジェクト)</h3>
+      <div class="flex-row">
+        <!-- 未割り当て・グループなし -->
+        <div class="seat-mock">
+          <div class="seat-ruby">やまだ たろう</div>
+          <div class="seat-name">山田 太郎</div>
+        </div>
+        <!-- グループ ピンク -->
+        <div class="seat-mock group-pink">
+          <div class="seat-ruby">さとう はなこ</div>
+          <div class="seat-name">佐藤 花子</div>
+        </div>
+        <!-- グループ ブルー -->
+        <div class="seat-mock group-blue">
+          <div class="seat-ruby">すずき いちろう</div>
+          <div class="seat-name">鈴木 一郎</div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
