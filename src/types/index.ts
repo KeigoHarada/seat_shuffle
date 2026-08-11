@@ -1,75 +1,61 @@
-export type Student = {
-  id: string;
-  attendanceNumber: number;
-  name: string;
-  furigana: string | null;
-  gender: "male" | "female" | "other";
-  roleIds: string[];
-  groupIds: string[];
-};
+import { GenderType } from "../constants";
 
-export type Role = {
+export interface Student {
+  id: string;
+  name: string;
+  furigana?: string;
+  gender: GenderType;
+  attendanceNumber: number;
+  roleIds: string[];
+}
+
+export interface Role {
   id: string;
   name: string;
   iconName: string;
-  description: string | null;
-};
+  description?: string;
+}
 
-export type Group = {
+export interface Group {
   id: string;
   name: string;
   color: string;
-  description: string | null;
-};
+  description?: string;
+}
 
-export type Seat = {
+export interface Seat {
   id: string;
   studentId: string | null;
   groupIds: string[];
   x: number;
   y: number;
   isLocked: boolean;
-};
+}
 
-export type StudentGroupConstraint = {
+export interface Constraint {
   id: string;
-  constraintType: "studentGroup";
-  studentId: string;
-  groupId: string;
-  type: "include" | "exclude";
+  constraintType:
+    | "studentGroup"
+    | "studentDistance"
+    | "roleDistribution"
+    | "genderDistribution";
   isEnabled: boolean;
-};
+  params: Record<string, any>;
+}
 
-export type StudentDistanceConstraint = {
-  id: string;
-  constraintType: "studentDistance";
-  studentId1: string;
-  studentId2: string;
-  type: "close" | "far";
-  isEnabled: boolean;
-};
+export interface AppSettings {
+  gridRows: number;
+  gridCols: number;
+  soundEnabled: boolean;
+  theme: "light" | "dark" | "system";
+}
 
-export type RoleDistributionConstraint = {
-  id: string;
-  constraintType: "roleDistribution";
-  roleId: string;
-  isEnabled: boolean;
-};
-
-export type GenderDistributionConstraint = {
-  id: string;
-  constraintType: "genderDistribution";
-  gender: "male" | "female" | "other";
-  isEnabled: boolean;
-};
-
-export type Constraint =
-  | StudentGroupConstraint
-  | StudentDistanceConstraint
-  | RoleDistributionConstraint
-  | GenderDistributionConstraint;
-
-export type AppSettings = {
-  viewMode: "edit" | "student_readonly";
-  perspective: "teacher" | "student";
-};
+export interface AppState {
+  students: Student[];
+  roles: Role[];
+  groups: Group[];
+  seats: Seat[];
+  constraints: Constraint[];
+  appSettings: AppSettings;
+  isViewMode: boolean;
+}

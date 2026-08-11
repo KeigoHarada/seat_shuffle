@@ -1,0 +1,75 @@
+import React from "react";
+import { Settings, Download, Upload } from "lucide-react";
+
+interface HeaderProps {
+  showSettings: boolean;
+  onToggleSettings: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
+  return (
+    <header
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 var(--spacing-lg)",
+        height: "60px",
+        backgroundColor: "var(--c-surface)",
+        borderBottom: "1px solid var(--c-border)",
+        boxShadow: "var(--shadow-1)",
+        zIndex: 10,
+        flexShrink: 0,
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "var(--spacing-sm)",
+        }}
+      >
+        <span style={{ fontSize: "1.5rem" }}>🪑</span>
+        <h1 className="text-title1" style={{ fontSize: "1.25rem", margin: 0 }}>
+          席替え先生
+        </h1>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "var(--spacing-md)",
+        }}
+      >
+        <button className="btn-secondary" style={{ gap: "4px" }}>
+          <Upload size={16} /> 読み込み
+        </button>
+        <button className="btn-secondary" style={{ gap: "4px" }}>
+          <Download size={16} /> 保存
+        </button>
+
+        <div
+          style={{
+            width: "1px",
+            height: "24px",
+            backgroundColor: "var(--c-border)",
+            margin: "0 var(--spacing-xs)",
+          }}
+        ></div>
+
+        <button
+          className={showSettings ? "btn-primary" : "btn-secondary"}
+          onClick={onToggleSettings}
+          style={{ gap: "4px" }}
+          title="設定パネルの表示/非表示"
+        >
+          <Settings size={16} /> 設定
+        </button>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

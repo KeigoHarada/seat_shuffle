@@ -1,70 +1,81 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Student, Role, Group, Seat, Constraint, AppSettings } from "../types";
+import {
+  AppState,
+  Student,
+  Role,
+  Group,
+  Seat,
+  Constraint,
+  AppSettings,
+} from "../types";
 
-interface State {
-  students: Student[];
-  roles: Role[];
-  groups: Group[];
-  seats: Seat[];
-  constraints: Constraint[];
-  appSettings: AppSettings;
-}
+export interface StateAndActions extends AppState {
+  // Global
+  clearState: () => void;
+  isViewMode: boolean;
+  setIsViewMode: (val: boolean) => void;
 
-interface Actions {
-  // Student
+  // Students
   addStudent: (student: Student) => void;
-  updateStudent: (id: string, data: Partial<Student>) => void;
+  updateStudent: (id: string, updates: Partial<Student>) => void;
   removeStudent: (id: string) => void;
 
-  // Role
+  // Roles
   addRole: (role: Role) => void;
-  updateRole: (id: string, data: Partial<Role>) => void;
+  updateRole: (id: string, updates: Partial<Role>) => void;
   removeRole: (id: string) => void;
 
-  // Group
+  // Groups
   addGroup: (group: Group) => void;
-  updateGroup: (id: string, data: Partial<Group>) => void;
+  updateGroup: (id: string, updates: Partial<Group>) => void;
   removeGroup: (id: string) => void;
 
-  // Seat
+  // Seats
   addSeat: (seat: Seat) => void;
-  updateSeat: (id: string, data: Partial<Seat>) => void;
+  updateSeat: (id: string, updates: Partial<Seat>) => void;
   removeSeat: (id: string) => void;
   setSeats: (seats: Seat[]) => void;
 
-  // Constraint
+  // Constraints
   addConstraint: (constraint: Constraint) => void;
-  updateConstraint: (id: string, data: Partial<Constraint>) => void;
+  updateConstraint: (id: string, updates: Partial<Constraint>) => void;
   removeConstraint: (id: string) => void;
 
   // AppSettings
-  updateAppSettings: (data: Partial<AppSettings>) => void;
+  updateAppSettings: (updates: Partial<AppSettings>) => void;
 }
 
-const initialState: State = {
+const initialState: AppState = {
   students: [],
   roles: [],
   groups: [],
   seats: [],
   constraints: [],
+  isViewMode: false,
   appSettings: {
-    viewMode: "edit",
-    perspective: "teacher",
+    gridRows: 6,
+    gridCols: 7,
+    soundEnabled: true,
+    theme: "system",
   },
 };
 
-export const useStore = create<State & Actions>()(
+export const useStore = create<StateAndActions>()(
   persist(
     (set) => ({
       ...initialState,
 
+      clearState: () => set(initialState),
+
+      setIsViewMode: (val) => set({ isViewMode: val }),
+
       addStudent: (student) =>
         set((state) => ({ students: [...state.students, student] })),
-      updateStudent: (id, data) =>
+      updateStudent: (id, updates) =>
         set((state) => ({
           students: state.students.map((s) =>
-            s.id === id ? { ...s, ...data } : s,
+            s.id === id ? { ...s, ...updates } : s,
           ),
         })),
       removeStudent: (id) =>
@@ -73,9 +84,11 @@ export const useStore = create<State & Actions>()(
         })),
 
       addRole: (role) => set((state) => ({ roles: [...state.roles, role] })),
-      updateRole: (id, data) =>
+      updateRole: (id, updates) =>
         set((state) => ({
-          roles: state.roles.map((r) => (r.id === id ? { ...r, ...data } : r)),
+          roles: state.roles.map((r) =>
+            r.id === id ? { ...r, ...updates } : r,
+          ),
         })),
       removeRole: (id) =>
         set((state) => ({
@@ -84,10 +97,10 @@ export const useStore = create<State & Actions>()(
 
       addGroup: (group) =>
         set((state) => ({ groups: [...state.groups, group] })),
-      updateGroup: (id, data) =>
+      updateGroup: (id, updates) =>
         set((state) => ({
           groups: state.groups.map((g) =>
-            g.id === id ? { ...g, ...data } : g,
+            g.id === id ? { ...g, ...updates } : g,
           ),
         })),
       removeGroup: (id) =>
@@ -96,9 +109,11 @@ export const useStore = create<State & Actions>()(
         })),
 
       addSeat: (seat) => set((state) => ({ seats: [...state.seats, seat] })),
-      updateSeat: (id, data) =>
+      updateSeat: (id, updates) =>
         set((state) => ({
-          seats: state.seats.map((s) => (s.id === id ? { ...s, ...data } : s)),
+          seats: state.seats.map((s) =>
+            s.id === id ? { ...s, ...updates } : s,
+          ),
         })),
       removeSeat: (id) =>
         set((state) => ({
@@ -108,19 +123,21 @@ export const useStore = create<State & Actions>()(
 
       addConstraint: (constraint) =>
         set((state) => ({ constraints: [...state.constraints, constraint] })),
-      updateConstraint: (id, data) =>
+      updateConstraint: (id, updates) =>
         set((state) => ({
           constraints: state.constraints.map((c) =>
-            c.id === id ? { ...c, ...data } : c,
-          ) as Constraint[],
+            c.id === id ? { ...c, ...updates } : c,
+          ),
         })),
       removeConstraint: (id) =>
         set((state) => ({
           constraints: state.constraints.filter((c) => c.id !== id),
         })),
 
-      updateAppSettings: (data) =>
-        set((state) => ({ appSettings: { ...state.appSettings, ...data } })),
+      updateAppSettings: (updates) =>
+        set((state) => ({
+          appSettings: { ...state.appSettings, ...updates },
+        })),
     }),
     {
       name: "seat-shuffle-storage",
