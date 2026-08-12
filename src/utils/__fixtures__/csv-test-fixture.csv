@@ -1,0 +1,17 @@
+# Students
+attendanceNumber,name,furigana,gender,roles
+1,山田 太郎,ヤマダ タロウ,male,班長
+2,鈴木 花子,スズキ ハナコ,female,副班長
+
+# Roles
+name,iconName,description
+班長,Crown,班のリーダー
+副班長,Star,班のサブリーダー
+
+# Groups
+name,color,description
+1班,#ff0000,第一グループ
+
+# Constraints
+type,isEnabled,json_data
+student-student,true,"{""matchType"":""close"",""studentName1"":""山田 太郎"",""studentName2"":""鈴木 花子""}"

@@ -3,6 +3,7 @@ import Canvas from "./components/Canvas";
 import SettingsPanel from "./components/SettingsPanel";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+import { ToastContainer } from "./components/ui/Toast";
 import { useStore } from "./stores";
 
 const App: React.FC = () => {
@@ -64,6 +65,7 @@ const App: React.FC = () => {
       </div>
 
       <Footer />
+      <ToastContainer />
     </div>
   );
 };

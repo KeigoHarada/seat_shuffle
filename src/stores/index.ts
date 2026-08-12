@@ -13,6 +13,7 @@ import {
 export interface StateAndActions extends AppState {
   // Global
   clearState: () => void;
+  loadState: (state: Partial<AppState>) => void;
   isViewMode: boolean;
   setIsViewMode: (val: boolean) => void;
 
@@ -20,6 +21,7 @@ export interface StateAndActions extends AppState {
   addStudent: (student: Student) => void;
   updateStudent: (id: string, updates: Partial<Student>) => void;
   removeStudent: (id: string) => void;
+  reorderStudents: (startIndex: number, endIndex: number) => void;
 
   // Roles
   addRole: (role: Role) => void;
@@ -67,6 +69,7 @@ export const useStore = create<StateAndActions>()(
       ...initialState,
 
       clearState: () => set(initialState),
+      loadState: (loaded) => set((state) => ({ ...state, ...loaded })),
 
       setIsViewMode: (val) => set({ isViewMode: val }),
 
@@ -79,9 +82,27 @@ export const useStore = create<StateAndActions>()(
           ),
         })),
       removeStudent: (id) =>
-        set((state) => ({
-          students: state.students.filter((s) => s.id !== id),
-        })),
+        set((state) => {
+          const filtered = state.students.filter((s) => s.id !== id);
+          return {
+            students: filtered.map((s, i) => ({
+              ...s,
+              attendanceNumber: i + 1,
+            })),
+          };
+        }),
+      reorderStudents: (startIndex, endIndex) =>
+        set((state) => {
+          const newStudents = Array.from(state.students);
+          const [removed] = newStudents.splice(startIndex, 1);
+          newStudents.splice(endIndex, 0, removed);
+          return {
+            students: newStudents.map((s, i) => ({
+              ...s,
+              attendanceNumber: i + 1,
+            })),
+          };
+        }),
 
       addRole: (role) => set((state) => ({ roles: [...state.roles, role] })),
       updateRole: (id, updates) =>

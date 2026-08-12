@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Settings, Download, Upload } from "lucide-react";
+import { useCsvSettings } from "../../hooks/useCsvSettings";
 
 interface HeaderProps {
   showSettings: boolean;
@@ -7,6 +8,10 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { handleSave, handleLoad } = useCsvSettings();
+
   return (
     <header
       style={{
@@ -43,10 +48,25 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
           gap: "var(--spacing-md)",
         }}
       >
-        <button className="btn-secondary" style={{ gap: "4px" }}>
+        <input
+          type="file"
+          accept=".csv"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleLoad}
+        />
+        <button
+          className="btn-secondary"
+          style={{ gap: "4px" }}
+          onClick={() => fileInputRef.current?.click()}
+        >
           <Upload size={16} /> 読み込み
         </button>
-        <button className="btn-secondary" style={{ gap: "4px" }}>
+        <button
+          className="btn-secondary"
+          style={{ gap: "4px" }}
+          onClick={handleSave}
+        >
           <Download size={16} /> 保存
         </button>
 

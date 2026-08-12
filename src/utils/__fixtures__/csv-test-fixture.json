@@ -1,0 +1,60 @@
+{
+  "students": [
+    {
+      "id": "s1",
+      "name": "山田 太郎",
+      "furigana": "ヤマダ タロウ",
+      "gender": "male",
+      "attendanceNumber": 1,
+      "roleIds": ["r1"]
+    },
+    {
+      "id": "s2",
+      "name": "鈴木 花子",
+      "furigana": "スズキ ハナコ",
+      "gender": "female",
+      "attendanceNumber": 2,
+      "roleIds": ["r2"]
+    }
+  ],
+  "roles": [
+    {
+      "id": "r1",
+      "name": "班長",
+      "iconName": "Crown",
+      "description": "班のリーダー"
+    },
+    {
+      "id": "r2",
+      "name": "副班長",
+      "iconName": "Star",
+      "description": "班のサブリーダー"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "name": "1班",
+      "color": "#ff0000",
+      "description": "第一グループ"
+    }
+  ],
+  "seats": [],
+  "constraints": [
+    {
+      "id": "c1",
+      "type": "student-student",
+      "isEnabled": true,
+      "studentId1": "s1",
+      "studentId2": "s2",
+      "matchType": "close"
+    }
+  ],
+  "appSettings": {
+    "gridRows": 6,
+    "gridCols": 7,
+    "soundEnabled": true,
+    "theme": "system"
+  },
+  "isViewMode": false
+}
