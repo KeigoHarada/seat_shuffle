@@ -169,6 +169,7 @@ const Canvas: React.FC = () => {
     handleAddRectangle,
     handleAddCircle,
     handleApplyTemplate,
+    handleToggleLockSelected,
   } = useCanvasActions(
     seats,
     objects,
@@ -341,6 +342,28 @@ const Canvas: React.FC = () => {
             setShowGroupPopover(true);
           }
         }}
+        isAllSelectedLocked={selectedIds
+          .map((id) => seats.find((s) => s.id === id))
+          .filter((seat) => seat && seat.studentId)
+          .every((seat) => seat?.isLocked)}
+        hasSelectedSeats={selectedIds.some((id) =>
+          seats.some((s) => s.id === id),
+        )}
+        hasOccupiedSeats={selectedIds.some((id) => {
+          const seat = seats.find((s) => s.id === id);
+          return seat && seat.studentId;
+        })}
+        hasSingleEmptySeat={
+          selectedIds.length === 1 &&
+          seats.some((s) => s.id === selectedIds[0] && !s.studentId)
+        }
+        onAssignStudentSelected={() => {
+          if (contextMenu && selectedIds.length === 1) {
+            setPopoverPos({ x: contextMenu.x, y: contextMenu.y });
+            setAssignPopoverSeatId(selectedIds[0]);
+          }
+        }}
+        onToggleLockSelected={handleToggleLockSelected}
       />
 
       <div

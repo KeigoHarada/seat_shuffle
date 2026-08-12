@@ -8,6 +8,7 @@ if (typeof window !== "undefined") {
 }
 
 import { DragNode, checkCollision, screenToWorld } from "../utils/canvas";
+import { showToast } from "../stores/toast";
 
 export const useCanvasDrag = (
   seats: Seat[],
@@ -53,7 +54,6 @@ export const useCanvasDrag = (
     isSwapMode: boolean;
   } | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [swapPointerId, setSwapPointerId] = useState<number | null>(null);
 
   const handleDragStart = useCallback(
     (id: string, e: React.DragEvent) => {
@@ -238,7 +238,6 @@ export const useCanvasDrag = (
       const node = nodes.find((n) => n.id === id);
       if (!node || !node.isSeat) return;
 
-      setSwapPointerId(e.pointerId);
       setDragState({
         baseId: id,
         draggedIds: [id],
@@ -263,8 +262,7 @@ export const useCanvasDrag = (
 
   const handleSwapPointerMove = useCallback(
     (e: React.PointerEvent) => {
-      if (!dragState || !dragState.isSwapMode || swapPointerId !== e.pointerId)
-        return;
+      if (!dragState || !dragState.isSwapMode) return;
       if (!viewportRef.current) return;
 
       const rect = viewportRef.current.getBoundingClientRect();
@@ -293,42 +291,37 @@ export const useCanvasDrag = (
         });
       }
     },
-    [dragState, dragOffset, pan, scale, swapPointerId, viewportRef],
+    [dragState, dragOffset, pan, scale, viewportRef],
   );
 
-  const handleSwapPointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragState || !dragState.isSwapMode || swapPointerId !== e.pointerId)
-        return;
+  const handleSwapPointerUp = useCallback(() => {
+    if (!dragState || !dragState.isSwapMode) return;
 
-      const draggingNode = nodes.find((n) => n.id === dragState.baseId);
-      if (!draggingNode || !draggingNode.isSeat) {
-        setDragState(null);
-        setSwapPointerId(null);
-        return;
-      }
+    const draggingNode = nodes.find((n) => n.id === dragState.baseId);
+    if (!draggingNode || !draggingNode.isSeat) {
+      setDragState(null);
+      return;
+    }
 
-      const cx = Math.floor(
-        draggingNode.x + dragState.visualDeltaX + draggingNode.width / 2,
-      );
-      const cy = Math.floor(
-        draggingNode.y + dragState.visualDeltaY + draggingNode.height / 2,
-      );
-      const targetNode = nodes.find(
-        (n) =>
-          cx >= n.x &&
-          cx < n.x + n.width &&
-          cy >= n.y &&
-          cy < n.y + n.height &&
-          n.id !== dragState.baseId,
-      );
+    const cx = Math.floor(
+      draggingNode.x + dragState.visualDeltaX + draggingNode.width / 2,
+    );
+    const cy = Math.floor(
+      draggingNode.y + dragState.visualDeltaY + draggingNode.height / 2,
+    );
+    const targetNode = nodes.find(
+      (n) =>
+        cx >= n.x &&
+        cx < n.x + n.width &&
+        cy >= n.y &&
+        cy < n.y + n.height &&
+        n.id !== dragState.baseId,
+    );
 
-      if (
-        targetNode &&
-        targetNode.isSeat &&
-        !draggingNode.isLocked &&
-        !targetNode.isLocked
-      ) {
+    if (targetNode && targetNode.isSeat) {
+      if (draggingNode.isLocked || targetNode.isLocked) {
+        showToast.error("ロックされた座席はスワップできません。");
+      } else {
         const s1 = seats.find((s) => s.id === draggingNode.id);
         const s2 = seats.find((s) => s.id === targetNode.id);
         if (s1 && s2) {
@@ -336,12 +329,10 @@ export const useCanvasDrag = (
           updateSeat(s2.id, { studentId: s1.studentId });
         }
       }
+    }
 
-      setDragState(null);
-      setSwapPointerId(null);
-    },
-    [dragState, nodes, seats, swapPointerId, updateSeat],
-  );
+    setDragState(null);
+  }, [dragState, nodes, seats, updateSeat]);
 
   return {
     dragState,

@@ -94,6 +94,7 @@ const CanvasNodes: React.FC<Props> = ({
             key={`ghost-${seat.id}`}
             seat={ghostSeat}
             isDragging={true}
+            isGhost={true}
             onDragStart={() => {}}
             onDragEnd={() => {}}
             onPointerDown={() => {}}

@@ -36,18 +36,31 @@ export const useCanvasActions = (
     selectedIds.forEach((id) => {
       const seat = seats.find((s) => s.id === id);
       if (seat && seat.studentId) {
-        updateSeat(id, { studentId: null });
+        updateSeat(id, { studentId: null, isLocked: false });
       }
     });
     clearSelection();
     setContextMenu(null);
   }, [selectedIds, seats, updateSeat, clearSelection, setContextMenu]);
 
+  const handleToggleLockSelected = useCallback(
+    (locked: boolean) => {
+      selectedIds.forEach((id) => {
+        const seat = seats.find((s) => s.id === id);
+        if (seat && seat.studentId) {
+          updateSeat(id, { isLocked: locked });
+        }
+      });
+      setContextMenu(null);
+    },
+    [selectedIds, seats, updateSeat, setContextMenu],
+  );
+
   const handleCopy = useCallback(() => {
     if (selectedIds.length === 0) return;
     const copiedSeats = seats
       .filter((s) => selectedIds.includes(s.id))
-      .map((s) => ({ ...s, studentId: null }));
+      .map((s) => ({ ...s, studentId: null, isLocked: false }));
     const copiedObjects = objects
       .filter((o) => selectedIds.includes(o.id))
       .map((o) => ({ ...o }));
@@ -324,5 +337,6 @@ export const useCanvasActions = (
     handleAddRectangle,
     handleAddCircle,
     handleApplyTemplate,
+    handleToggleLockSelected,
   };
 };

@@ -125,7 +125,7 @@ const CanvasObjectNode: React.FC<Props> = ({
       <div
         style={{
           position: "absolute",
-          inset: 0,
+          inset: 4,
           backgroundColor: "var(--c-surface)",
           border: isSelected
             ? "2px solid var(--c-primary)"
@@ -195,8 +195,8 @@ const CanvasObjectNode: React.FC<Props> = ({
           draggable={false} // Prevent triggering HTML5 drag on handle
           style={{
             position: "absolute",
-            right: 0,
-            bottom: 0,
+            right: 4,
+            bottom: 4,
             width: 16,
             height: 16,
             cursor: "nwse-resize",

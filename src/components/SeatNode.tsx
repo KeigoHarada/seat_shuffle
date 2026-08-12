@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Lock } from "lucide-react";
 import { useStore } from "../stores";
 import { AVAILABLE_ICONS, IconName } from "./ui/IconPicker";
 import { Seat } from "../types";
@@ -9,6 +10,7 @@ interface Props {
   isDragging?: boolean;
   isSwapTarget?: boolean;
   isSelected?: boolean;
+  isGhost?: boolean;
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: (e: React.DragEvent) => void;
   onPointerDown: (e: React.PointerEvent) => void;
@@ -22,6 +24,7 @@ const SeatNode: React.FC<Props> = ({
   isDragging,
   isSwapTarget,
   isSelected,
+  isGhost,
   onDragStart,
   onDragEnd,
   onPointerDown,
@@ -94,6 +97,7 @@ const SeatNode: React.FC<Props> = ({
     boxSizing: "border-box",
     userSelect: "none",
     transition: isDragging ? "none" : "all 0.1s ease",
+    pointerEvents: isGhost ? "none" : "auto",
   };
 
   return (
@@ -234,8 +238,17 @@ const SeatNode: React.FC<Props> = ({
       )}
 
       {seat.isLocked && (
-        <div style={{ position: "absolute", top: -5, right: -5, fontSize: 12 }}>
-          🔒
+        <div
+          style={{
+            position: "absolute",
+            bottom: 4,
+            left: 4,
+            color: "var(--c-text-sub)",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Lock size={12} />
         </div>
       )}
     </div>

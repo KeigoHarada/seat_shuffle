@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Lock, Unlock } from "lucide-react";
+
 interface CanvasContextMenuProps {
   contextMenu: { x: number; y: number; worldX: number; worldY: number } | null;
   onClose: () => void;
@@ -9,6 +11,12 @@ interface CanvasContextMenuProps {
   onDuplicateSelected?: () => void;
   onUnassignSelected?: () => void;
   onAssignGroupSelected?: () => void;
+  isAllSelectedLocked?: boolean;
+  hasSelectedSeats?: boolean;
+  hasOccupiedSeats?: boolean;
+  hasSingleEmptySeat?: boolean;
+  onToggleLockSelected?: (locked: boolean) => void;
+  onAssignStudentSelected?: () => void;
 }
 
 const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
@@ -20,6 +28,12 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   onDuplicateSelected,
   onUnassignSelected,
   onAssignGroupSelected,
+  isAllSelectedLocked,
+  hasSelectedSeats,
+  hasOccupiedSeats,
+  hasSingleEmptySeat,
+  onToggleLockSelected,
+  onAssignStudentSelected,
 }) => {
   if (!contextMenu) return null;
 
@@ -69,7 +83,7 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 
       {hasSelection && (
         <>
-          {onAssignGroupSelected && (
+          {hasSelectedSeats && onAssignGroupSelected && (
             <button
               onClick={() => {
                 onAssignGroupSelected();
@@ -98,7 +112,7 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             </button>
           )}
 
-          {onUnassignSelected && (
+          {hasOccupiedSeats && onUnassignSelected && (
             <button
               onClick={() => {
                 onUnassignSelected();
@@ -124,6 +138,76 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
               }
             >
               生徒の割り当て解除
+            </button>
+          )}
+
+          {hasSingleEmptySeat && onAssignStudentSelected && (
+            <button
+              onClick={() => {
+                onAssignStudentSelected();
+                onClose();
+              }}
+              style={{
+                padding: "8px 16px",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                color: "var(--c-text-main)",
+                fontSize: 14,
+                cursor: "pointer",
+                transition: "background-color 0.1s",
+                width: "100%",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  "var(--c-surface-hover)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "transparent")
+              }
+            >
+              生徒を割り当て
+            </button>
+          )}
+
+          {hasOccupiedSeats && onToggleLockSelected && (
+            <button
+              onClick={() => {
+                onToggleLockSelected(!isAllSelectedLocked);
+                onClose();
+              }}
+              style={{
+                padding: "8px 16px",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                color: "var(--c-text-main)",
+                fontSize: 14,
+                cursor: "pointer",
+                transition: "background-color 0.1s",
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  "var(--c-surface-hover)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "transparent")
+              }
+            >
+              <span>
+                {isAllSelectedLocked ? "ロックを解除" : "座席をロック"}
+              </span>
+              <span style={{ display: "flex", alignItems: "center" }}>
+                {isAllSelectedLocked ? (
+                  <Unlock size={14} />
+                ) : (
+                  <Lock size={14} />
+                )}
+              </span>
             </button>
           )}
 
