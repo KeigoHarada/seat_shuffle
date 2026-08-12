@@ -90,6 +90,7 @@ const initialState: AppState & {
     gridCols: 7,
     soundEnabled: true,
     theme: "system",
+    algorithm: "random",
   },
   isSettingsOpen: true,
   activeSettingsTab: "students",

@@ -10,6 +10,7 @@ import StudentTab from "./settings/student/StudentTab";
 import RoleTab from "./settings/role/RoleTab";
 import GroupTab from "./settings/group/GroupTab";
 import ConstraintTab from "./settings/constraint/ConstraintTab";
+import GlobalTab from "./settings/global/GlobalTab";
 import { useStore } from "../stores";
 
 type Tab = "students" | "roles" | "groups" | "constraints" | "global";
@@ -121,16 +122,7 @@ const SettingsContent: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
       )}
       {activeTab === "global" && (
         <TabContainer title="全体設定">
-          <div
-            className="card"
-            style={{
-              padding: "var(--spacing-lg)",
-              textAlign: "center",
-              color: "var(--c-text-sub)",
-            }}
-          >
-            開発中です
-          </div>
+          <GlobalTab />
         </TabContainer>
       )}
     </div>

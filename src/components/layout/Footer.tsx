@@ -6,6 +6,55 @@ const Footer: React.FC = () => {
   const isViewMode = useStore((state) => state.isViewMode);
   const setIsViewMode = useStore((state) => state.setIsViewMode);
 
+  const handleShuffle = () => {
+    const state = useStore.getState();
+    const { seats, students, appSettings, setSeats } = state;
+
+    const algorithm = appSettings.algorithm || "random";
+
+    if (algorithm === "random") {
+      const lockedSeats = seats.filter((s) => s.isLocked);
+      const lockedStudentIds = new Set(
+        lockedSeats.map((s) => s.studentId).filter(Boolean),
+      );
+
+      const availableStudents = students.filter(
+        (s) => !lockedStudentIds.has(s.id),
+      );
+
+      // We shuffle the available SEATS instead, so that if there are more seats
+      // than students, the empty seats are scattered randomly across the canvas.
+      const availableSeats = seats.filter((s) => !s.isLocked);
+      const shuffledSeats = [...availableSeats];
+      for (let i = shuffledSeats.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledSeats[i], shuffledSeats[j]] = [
+          shuffledSeats[j],
+          shuffledSeats[i],
+        ];
+      }
+
+      // Map each student to a random seat
+      const seatAssignments = new Map<string, string | null>();
+      availableStudents.forEach((student, index) => {
+        if (index < shuffledSeats.length) {
+          seatAssignments.set(shuffledSeats[index].id, student.id);
+        }
+      });
+      // The remaining shuffled seats will be empty
+      for (let i = availableStudents.length; i < shuffledSeats.length; i++) {
+        seatAssignments.set(shuffledSeats[i].id, null);
+      }
+
+      const newSeats = seats.map((seat) => {
+        if (seat.isLocked) return seat;
+        return { ...seat, studentId: seatAssignments.get(seat.id) || null };
+      });
+
+      setSeats(newSeats);
+    }
+  };
+
   return (
     <footer
       style={{
@@ -29,6 +78,7 @@ const Footer: React.FC = () => {
       <div style={{ display: "flex", justifyContent: "center", flex: 1 }}>
         <button
           className="btn-primary"
+          onClick={handleShuffle}
           style={{
             gap: "8px",
             padding: "12px 32px",

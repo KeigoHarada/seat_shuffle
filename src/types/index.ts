@@ -50,6 +50,7 @@ export interface AppSettings {
   gridCols: number;
   soundEnabled: boolean;
   theme: "light" | "dark" | "system";
+  algorithm: "random";
 }
 
 export interface AppState {
