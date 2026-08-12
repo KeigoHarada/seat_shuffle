@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import IconPicker, { IconName } from "../../ui/IconPicker";
 import Tooltip from "../../ui/Tooltip";
+import Input from "../../ui/Input";
 
 const RoleListTable: React.FC = () => {
   const roles = useStore((state) => state.roles);
@@ -83,7 +84,7 @@ const RoleListTable: React.FC = () => {
                 minWidth: 0,
               }}
             >
-              <input
+              <Input
                 type="text"
                 value={role.name}
                 onChange={(e) => updateRole(role.id, { name: e.target.value })}
@@ -101,7 +102,7 @@ const RoleListTable: React.FC = () => {
                 }}
               />
               <Tooltip content={role.description}>
-                <input
+                <Input
                   type="text"
                   value={role.description || ""}
                   onChange={(e) =>

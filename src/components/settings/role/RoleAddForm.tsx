@@ -3,6 +3,7 @@ import { useStore } from "../../../stores";
 import { Plus } from "lucide-react";
 import { Role } from "../../../types";
 import IconPicker, { IconName } from "../../ui/IconPicker";
+import Input from "../../ui/Input";
 
 const RoleAddForm: React.FC = () => {
   const addRole = useStore((state) => state.addRole);
@@ -60,7 +61,7 @@ const RoleAddForm: React.FC = () => {
             <IconPicker value={newIconName} onChange={setNewIconName} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <input
+            <Input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
@@ -79,7 +80,7 @@ const RoleAddForm: React.FC = () => {
             gap: "4px",
           }}
         >
-          <input
+          <Input
             type="text"
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}

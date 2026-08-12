@@ -5,7 +5,10 @@ import { GripVertical, Trash2 } from "lucide-react";
 import { Student } from "../../../types";
 import { useStore } from "../../../stores";
 import Select from "../../ui/Select";
+import MultiSelect from "../../ui/MultiSelect";
 import { GENDER_OPTIONS, GenderType } from "../../../constants";
+import Input from "../../ui/Input";
+import { AVAILABLE_ICONS, IconName } from "../../ui/IconPicker";
 
 interface Props {
   student: Student;
@@ -78,7 +81,7 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
           minWidth: 0,
         }}
       >
-        <input
+        <Input
           type="text"
           value={student.furigana || ""}
           onChange={(e) =>
@@ -96,7 +99,7 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
             textOverflow: "ellipsis",
           }}
         />
-        <input
+        <Input
           type="text"
           value={student.name}
           onChange={(e) => updateStudent(student.id, { name: e.target.value })}
@@ -113,36 +116,25 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
             textOverflow: "ellipsis",
           }}
         />
-        {/* Roles Tags */}
-        {student.roleIds.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              flexWrap: "wrap",
-              marginTop: "4px",
-            }}
-          >
-            {student.roleIds.map((rid) => {
-              const r = roles.find((role) => role.id === rid);
-              return r ? (
-                <span
-                  key={r.id}
-                  style={{
-                    fontSize: "10px",
-                    padding: "2px 4px",
-                    background: "var(--c-primary-pale)",
-                    color: "var(--c-primary-hover)",
-                    borderRadius: "var(--radius-sm)",
-                    fontWeight: 700,
-                  }}
-                >
-                  {r.name}
-                </span>
-              ) : null;
+        <div style={{ marginTop: "4px" }}>
+          <MultiSelect
+            options={roles.map((r) => {
+              const IconComp =
+                AVAILABLE_ICONS[r.iconName as IconName] || AVAILABLE_ICONS.Star;
+              return {
+                label: r.name,
+                value: r.id,
+                icon: <IconComp size={12} />,
+              };
             })}
-          </div>
-        )}
+            selectedValues={student.roleIds}
+            onChange={(values) =>
+              updateStudent(student.id, { roleIds: values })
+            }
+            placeholder="ロール追加..."
+            small
+          />
+        </div>
       </div>
 
       {/* 3. Gender */}

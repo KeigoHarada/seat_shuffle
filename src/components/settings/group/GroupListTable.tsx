@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import Tooltip from "../../ui/Tooltip";
 import ColorPicker from "../../ui/ColorPicker";
+import Input from "../../ui/Input";
 
 const GroupListTable: React.FC = () => {
   const groups = useStore((state) => state.groups);
@@ -85,7 +86,7 @@ const GroupListTable: React.FC = () => {
                 minWidth: 0,
               }}
             >
-              <input
+              <Input
                 type="text"
                 value={group.name}
                 onChange={(e) =>
@@ -105,7 +106,7 @@ const GroupListTable: React.FC = () => {
                 }}
               />
               <Tooltip content={group.description}>
-                <input
+                <Input
                   type="text"
                   value={group.description || ""}
                   onChange={(e) =>

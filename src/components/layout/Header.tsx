@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Settings, Download, Upload } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
+import Input from "../ui/Input";
 
 interface HeaderProps {
   showSettings: boolean;
@@ -48,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
           gap: "var(--spacing-md)",
         }}
       >
-        <input
+        <Input
           type="file"
           accept=".csv"
           ref={fileInputRef}

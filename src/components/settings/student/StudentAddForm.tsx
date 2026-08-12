@@ -5,6 +5,8 @@ import { Student } from "../../../types";
 import { GENDERS, GENDER_OPTIONS, GenderType } from "../../../constants";
 import MultiSelect from "../../ui/MultiSelect";
 import Select from "../../ui/Select";
+import Input from "../../ui/Input";
+import { AVAILABLE_ICONS, IconName } from "../../ui/IconPicker";
 
 const StudentAddForm: React.FC = () => {
   const students = useStore((state) => state.students);
@@ -34,7 +36,15 @@ const StudentAddForm: React.FC = () => {
     setNewRoleIds([]);
   };
 
-  const roleOptions = roles.map((r) => ({ label: r.name, value: r.id }));
+  const roleOptions = roles.map((r) => {
+    const IconComp =
+      AVAILABLE_ICONS[r.iconName as IconName] || AVAILABLE_ICONS.Star;
+    return {
+      label: r.name,
+      value: r.id,
+      icon: <IconComp size={14} />, // Slightly larger since the add form MultiSelect isn't small
+    };
+  });
 
   return (
     <div
@@ -66,14 +76,14 @@ const StudentAddForm: React.FC = () => {
             width: "100%",
           }}
         >
-          <input
+          <Input
             type="text"
             value={newFurigana}
             onChange={(e) => setNewFurigana(e.target.value)}
             placeholder="ふりがな"
             style={{ width: "100%", fontSize: "11px", padding: "6px 8px" }}
           />
-          <input
+          <Input
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}

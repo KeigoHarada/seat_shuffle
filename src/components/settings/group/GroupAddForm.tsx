@@ -3,6 +3,7 @@ import { useStore } from "../../../stores";
 import { Plus } from "lucide-react";
 import { Group } from "../../../types";
 import ColorPicker, { PREDEFINED_COLORS } from "../../ui/ColorPicker";
+import Input from "../../ui/Input";
 
 const GroupAddForm: React.FC = () => {
   const addGroup = useStore((state) => state.addGroup);
@@ -60,7 +61,7 @@ const GroupAddForm: React.FC = () => {
             <ColorPicker value={newColor} onChange={setNewColor} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <input
+            <Input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
@@ -79,7 +80,7 @@ const GroupAddForm: React.FC = () => {
             gap: "4px",
           }}
         >
-          <input
+          <Input
             type="text"
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}

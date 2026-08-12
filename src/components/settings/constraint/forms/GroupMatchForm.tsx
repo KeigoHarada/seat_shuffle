@@ -5,6 +5,7 @@ import { GroupMatchConstraint } from "../../../../types";
 import { GENDER_OPTIONS } from "../../../../constants";
 import Select from "../../../ui/Select";
 import MultiSelect from "../../../ui/MultiSelect";
+import Input from "../../../ui/Input";
 
 const GroupMatchForm: React.FC = () => {
   const addConstraint = useStore((state) => state.addConstraint);
@@ -106,7 +107,7 @@ const GroupMatchForm: React.FC = () => {
         </div>
 
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <input
+          <Input
             type="number"
             min={1}
             value={gmMinCount}

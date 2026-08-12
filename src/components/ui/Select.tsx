@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
 
 interface Option {
@@ -23,20 +24,52 @@ const Select: React.FC<SelectProps> = ({
   small = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const updatePosition = () => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updatePosition();
+      window.addEventListener("scroll", updatePosition, true);
+      window.addEventListener("resize", updatePosition);
+    }
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
       if (
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !containerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
       ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpen]);
 
   const handleSelect = (val: string) => {
     onChange(val);
@@ -79,79 +112,77 @@ const Select: React.FC<SelectProps> = ({
         <ChevronDown size={14} style={{ flexShrink: 0, marginLeft: "4px" }} />
       </button>
 
-      {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            marginTop: "4px",
-            backgroundColor: "var(--c-surface)",
-            border: "1px solid var(--c-border)",
-            borderRadius: "var(--radius-md)",
-            boxShadow: "var(--shadow-2)",
-            zIndex: 100,
-            maxHeight: "200px",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            padding: "4px 0",
-          }}
-        >
-          {options.length === 0 ? (
-            <div
-              style={{
-                padding: "8px 12px",
-                fontSize: "12px",
-                color: "var(--c-text-sub)",
-              }}
-            >
-              選択肢がありません
-            </div>
-          ) : (
-            options.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <div
-                  key={opt.value}
-                  onClick={() => handleSelect(opt.value)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: small ? "6px 8px" : "8px 12px",
-                    cursor: "pointer",
-                    fontSize: small ? "11px" : "13px",
-                    fontWeight: small ? 700 : 400,
-                    whiteSpace: "nowrap",
-                    backgroundColor: isSelected
-                      ? "var(--c-primary-pale)"
-                      : "transparent",
-                    color: isSelected
-                      ? "var(--c-primary-hover)"
-                      : "var(--c-text-main)",
-                  }}
-                >
+      {isOpen &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={{
+              ...dropdownStyle,
+              backgroundColor: "var(--c-surface)",
+              border: "1px solid var(--c-border)",
+              borderRadius: "var(--radius-md)",
+              boxShadow: "var(--shadow-2)",
+              maxHeight: "200px",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              padding: "4px 0",
+            }}
+          >
+            {options.length === 0 ? (
+              <div
+                style={{
+                  padding: "8px 12px",
+                  fontSize: "12px",
+                  color: "var(--c-text-sub)",
+                }}
+              >
+                選択肢がありません
+              </div>
+            ) : (
+              options.map((opt) => {
+                const isSelected = opt.value === value;
+                return (
                   <div
+                    key={opt.value}
+                    onClick={() => handleSelect(opt.value)}
                     style={{
-                      width: small ? "14px" : "16px",
-                      height: small ? "14px" : "16px",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: "6px",
-                      flexShrink: 0,
+                      padding: small ? "6px 8px" : "8px 12px",
+                      cursor: "pointer",
+                      fontSize: small ? "11px" : "13px",
+                      fontWeight: small ? 700 : 400,
+                      whiteSpace: "nowrap",
+                      backgroundColor: isSelected
+                        ? "var(--c-primary-pale)"
+                        : "transparent",
+                      color: isSelected
+                        ? "var(--c-primary-hover)"
+                        : "var(--c-text-main)",
                     }}
                   >
-                    {isSelected && <Check size={small ? 12 : 14} />}
+                    <div
+                      style={{
+                        width: small ? "14px" : "16px",
+                        height: small ? "14px" : "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginRight: "6px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isSelected && <Check size={small ? 12 : 14} />}
+                    </div>
+                    {opt.label}
                   </div>
-                  {opt.label}
-                </div>
-              );
-            })
-          )}
-        </div>
-      )}
+                );
+              })
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

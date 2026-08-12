@@ -9,6 +9,7 @@ import {
   Constraint,
   AppSettings,
 } from "../types";
+import { sortStudentsByNameLogic } from "../utils/student";
 
 export interface StateAndActions extends AppState {
   // Global
@@ -22,6 +23,7 @@ export interface StateAndActions extends AppState {
   updateStudent: (id: string, updates: Partial<Student>) => void;
   removeStudent: (id: string) => void;
   reorderStudents: (startIndex: number, endIndex: number) => void;
+  sortStudentsByName: () => void;
 
   // Roles
   addRole: (role: Role) => void;
@@ -103,6 +105,10 @@ export const useStore = create<StateAndActions>()(
             })),
           };
         }),
+      sortStudentsByName: () =>
+        set((state) => ({
+          students: sortStudentsByNameLogic(state.students),
+        })),
 
       addRole: (role) => set((state) => ({ roles: [...state.roles, role] })),
       updateRole: (id, updates) =>

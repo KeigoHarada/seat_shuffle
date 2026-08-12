@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStore } from "../../../stores";
-import { Trash2, GripVertical } from "lucide-react";
+import { Trash2, GripVertical, ArrowDownAZ } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import {
   DndContext,
@@ -23,6 +23,7 @@ const StudentListTable: React.FC = () => {
   const students = useStore((state) => state.students);
   const removeStudent = useStore((state) => state.removeStudent);
   const reorderStudents = useStore((state) => state.reorderStudents);
+  const sortStudentsByName = useStore((state) => state.sortStudentsByName);
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
@@ -72,7 +73,26 @@ const StudentListTable: React.FC = () => {
         >
           <div></div>
           <div style={{ textAlign: "center" }}>No.</div>
-          <div>ふりがな / 名前</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            ふりがな / 名前
+            <button
+              onClick={sortStudentsByName}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "2px",
+                background: "var(--c-surface-disabled)",
+                border: "none",
+                borderRadius: "var(--radius-sm)",
+                cursor: "pointer",
+                color: "var(--c-text-main)",
+              }}
+              title="名前（ふりがな）順で並び替え"
+            >
+              <ArrowDownAZ size={14} />
+            </button>
+          </div>
           <div style={{ textAlign: "center" }}>性別</div>
           <div></div>
         </div>

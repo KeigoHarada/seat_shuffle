@@ -4,6 +4,7 @@ import { Trash2, Users, Target } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import { Constraint } from "../../../types";
 import { GENDER_OPTIONS } from "../../../constants";
+import Input from "../../ui/Input";
 
 const ConstraintListTable: React.FC = () => {
   const constraints = useStore((state) => state.constraints);
@@ -222,7 +223,7 @@ const ConstraintListTable: React.FC = () => {
 
             {/* 3. Enable Toggle */}
             <div style={{ display: "flex", justifyContent: "center" }}>
-              <input
+              <Input
                 type="checkbox"
                 checked={c.isEnabled}
                 onChange={(e) =>
