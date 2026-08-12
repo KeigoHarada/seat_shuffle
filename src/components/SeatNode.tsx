@@ -1,24 +1,27 @@
 import React from "react";
 import { useStore } from "../stores";
 import { Seat } from "../types";
-import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "./Canvas";
+import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
 interface Props {
   seat: Seat;
   isDragging?: boolean;
   isSwapTarget?: boolean;
+  isSelected?: boolean;
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: (e: React.DragEvent) => void;
+  onPointerDown: (e: React.PointerEvent) => void;
 }
 
 const SeatNode: React.FC<Props> = ({
   seat,
   isDragging,
   isSwapTarget,
+  isSelected,
   onDragStart,
   onDragEnd,
+  onPointerDown,
 }) => {
-  const removeSeat = useStore((state) => state.removeSeat);
   const students = useStore((state) => state.students);
   const groups = useStore((state) => state.groups);
 
@@ -35,16 +38,22 @@ const SeatNode: React.FC<Props> = ({
     width: SEAT_COLS * GRID_SIZE - 8,
     height: SEAT_ROWS * GRID_SIZE - 8,
     backgroundColor: mainGroup ? mainGroup.color : "var(--c-surface)",
-    border: mainGroup ? "none" : "1px solid var(--c-border)",
+    border: isSelected
+      ? "2px solid var(--c-primary)"
+      : mainGroup
+        ? "none"
+        : "1px solid var(--c-border)",
     borderRadius: "var(--radius-md)",
     boxShadow: isDragging
       ? "var(--shadow-3)"
       : isSwapTarget
         ? "0 0 0 3px var(--c-primary)"
-        : "var(--shadow-1)",
+        : isSelected
+          ? "0 0 0 2px rgba(59, 130, 246, 0.5)"
+          : "var(--shadow-1)",
     transform: isSwapTarget ? "scale(1.02)" : "none",
     opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 10 : isSwapTarget ? 5 : 1,
+    zIndex: isDragging ? 10 : isSelected ? 6 : isSwapTarget ? 5 : 1,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -62,17 +71,11 @@ const SeatNode: React.FC<Props> = ({
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        // TODO: Context menu replace native confirm later
-        if (window.confirm("座席を削除しますか？")) {
-          removeSeat(seat.id);
-        }
-      }}
+      onPointerDown={onPointerDown}
       onDoubleClick={(e) => {
         e.stopPropagation();
       }}
-      title="右クリックで削除 / ドラッグで移動"
+      title="右クリックでメニュー / ドラッグで移動"
     >
       {student ? (
         <>

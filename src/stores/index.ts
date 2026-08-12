@@ -8,6 +8,7 @@ import {
   Seat,
   Constraint,
   AppSettings,
+  CanvasObject,
 } from "../types";
 import { sortStudentsByNameLogic } from "../utils/student";
 
@@ -41,6 +42,11 @@ export interface StateAndActions extends AppState {
   removeSeat: (id: string) => void;
   setSeats: (seats: Seat[]) => void;
 
+  // Objects
+  addObject: (obj: CanvasObject) => void;
+  updateObject: (id: string, updates: Partial<CanvasObject>) => void;
+  removeObject: (id: string) => void;
+
   // Constraints
   addConstraint: (constraint: Constraint) => void;
   updateConstraint: (id: string, updates: Partial<Constraint>) => void;
@@ -48,15 +54,19 @@ export interface StateAndActions extends AppState {
 
   // AppSettings
   updateAppSettings: (updates: Partial<AppSettings>) => void;
+  canvasTool: "select" | "hand";
+  setCanvasTool: (tool: "select" | "hand") => void;
 }
 
-const initialState: AppState = {
+const initialState: AppState & { canvasTool: "select" | "hand" } = {
   students: [],
   roles: [],
   groups: [],
   seats: [],
+  objects: [],
   constraints: [],
   isViewMode: false,
+  canvasTool: "select",
   appSettings: {
     gridRows: 6,
     gridCols: 7,
@@ -148,6 +158,19 @@ export const useStore = create<StateAndActions>()(
         })),
       setSeats: (seats) => set({ seats }),
 
+      addObject: (obj) =>
+        set((state) => ({ objects: [...state.objects, obj] })),
+      updateObject: (id, updates) =>
+        set((state) => ({
+          objects: state.objects.map((o) =>
+            o.id === id ? { ...o, ...updates } : o,
+          ),
+        })),
+      removeObject: (id) =>
+        set((state) => ({
+          objects: state.objects.filter((o) => o.id !== id),
+        })),
+
       addConstraint: (constraint) =>
         set((state) => ({ constraints: [...state.constraints, constraint] })),
       updateConstraint: (id, updates) =>
@@ -165,6 +188,8 @@ export const useStore = create<StateAndActions>()(
         set((state) => ({
           appSettings: { ...state.appSettings, ...updates },
         })),
+
+      setCanvasTool: (tool) => set({ canvasTool: tool }),
     }),
     {
       name: "seat-shuffle-storage",

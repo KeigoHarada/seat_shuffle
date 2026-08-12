@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Canvas from "./components/Canvas";
+import Canvas from "./components/canvas/Canvas";
 import SettingsPanel from "./components/SettingsPanel";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";

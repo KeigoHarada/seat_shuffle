@@ -34,6 +34,17 @@ export interface Seat {
   isLocked: boolean;
 }
 
+export interface CanvasObject {
+  id: string;
+  type: "rectangle" | "circle";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text?: string;
+  color?: string;
+}
+
 export interface AppSettings {
   gridRows: number;
   gridCols: number;
@@ -46,6 +57,7 @@ export interface AppState {
   roles: Role[];
   groups: Group[];
   seats: Seat[];
+  objects: CanvasObject[];
   constraints: Constraint[];
   appSettings: AppSettings;
   isViewMode: boolean;
