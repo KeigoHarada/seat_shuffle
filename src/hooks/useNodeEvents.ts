@@ -14,6 +14,7 @@ interface UseNodeEventsProps {
     tab: "students" | "roles" | "groups" | "constraints" | "global",
   ) => void;
   setHighlightedStudentId: (id: string | null) => void;
+  updatePointerDownPos: (x: number, y: number) => void;
 }
 
 export const useNodeEvents = ({
@@ -27,17 +28,19 @@ export const useNodeEvents = ({
   setIsSettingsOpen,
   setActiveSettingsTab,
   setHighlightedStudentId,
+  updatePointerDownPos,
 }: UseNodeEventsProps) => {
   const handleNodePointerDown = useCallback(
     (id: string, e: React.PointerEvent) => {
       e.stopPropagation();
+      updatePointerDownPos(e.clientX, e.clientY);
       if (e.ctrlKey || e.metaKey) {
         toggleSelection(id);
       } else if (!selectedIds.includes(id)) {
         selectOnly(id);
       }
     },
-    [selectedIds, toggleSelection, selectOnly],
+    [selectedIds, toggleSelection, selectOnly, updatePointerDownPos],
   );
 
   const handleSeatDoubleClick = useCallback(

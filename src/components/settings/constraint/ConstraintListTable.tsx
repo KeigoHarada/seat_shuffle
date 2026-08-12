@@ -5,12 +5,14 @@ import ConfirmDialog from "../../ui/ConfirmDialog";
 import { Constraint } from "../../../types";
 import { GENDER_OPTIONS } from "../../../constants";
 import Input from "../../ui/Input";
+import { evaluateConstraint } from "../../../utils/algorithm";
 
 const ConstraintListTable: React.FC = () => {
   const constraints = useStore((state) => state.constraints);
   const students = useStore((state) => state.students);
   const roles = useStore((state) => state.roles);
   const groups = useStore((state) => state.groups);
+  const seats = useStore((state) => state.seats);
   const removeConstraint = useStore((state) => state.removeConstraint);
   const updateConstraint = useStore((state) => state.updateConstraint);
 
@@ -192,60 +194,81 @@ const ConstraintListTable: React.FC = () => {
           paddingRight: "4px",
         }}
       >
-        {constraints.map((c) => (
-          <div
-            key={c.id}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "32px 1fr 40px 32px",
-              gap: "8px",
-              alignItems: "center",
-              padding: "8px",
-              borderBottom: "1px solid var(--c-surface-disabled)",
-              opacity: c.isEnabled ? 1 : 0.5,
-              transition: "opacity 0.2s",
-            }}
-          >
-            {/* 1. Type Icon */}
+        {constraints.map((c) => {
+          const isSatisfied = c.isEnabled
+            ? evaluateConstraint(c, seats, students)
+            : null;
+
+          let borderColor = "var(--c-surface-disabled)";
+          let bgColor = "transparent";
+
+          if (c.isEnabled) {
+            if (isSatisfied) {
+              borderColor = "var(--c-primary)";
+              bgColor = "var(--c-primary-pale)";
+            } else {
+              borderColor = "var(--c-error)";
+              bgColor = "var(--c-error-pale)";
+            }
+          }
+
+          return (
             <div
+              key={c.id}
               style={{
-                display: "flex",
-                justifySelf: "center",
+                display: "grid",
+                gridTemplateColumns: "32px 1fr 40px 32px",
+                gap: "8px",
                 alignItems: "center",
+                padding: "8px",
+                border: `1px solid ${borderColor}`,
+                borderRadius: "var(--radius-md)",
+                backgroundColor: bgColor,
+                opacity: c.isEnabled ? 1 : 0.5,
+                transition: "all 0.2s",
               }}
-              title={c.type}
             >
-              {getIcon(c.type)}
-            </div>
-
-            {/* 2. Content */}
-            {renderContent(c)}
-
-            {/* 3. Enable Toggle */}
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <Input
-                type="checkbox"
-                checked={c.isEnabled}
-                onChange={(e) =>
-                  updateConstraint(c.id, { isEnabled: e.target.checked })
-                }
-                style={{ cursor: "pointer", width: "16px", height: "16px" }}
-              />
-            </div>
-
-            {/* 4. Action */}
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <button
-                className="btn-danger"
-                style={{ padding: "6px" }}
-                title="削除"
-                onClick={() => setDeleteTargetId(c.id)}
+              {/* 1. Type Icon */}
+              <div
+                style={{
+                  display: "flex",
+                  justifySelf: "center",
+                  alignItems: "center",
+                }}
+                title={c.type}
               >
-                <Trash2 size={16} />
-              </button>
+                {getIcon(c.type)}
+              </div>
+
+              {/* 2. Content */}
+              {renderContent(c)}
+
+              {/* 3. Enable Toggle */}
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Input
+                  type="checkbox"
+                  checked={c.isEnabled}
+                  onChange={(e) =>
+                    updateConstraint(c.id, { isEnabled: e.target.checked })
+                  }
+                  style={{ cursor: "pointer", width: "16px", height: "16px" }}
+                />
+              </div>
+
+              {/* 4. Action */}
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <button
+                  className="btn-danger"
+                  style={{ padding: "6px" }}
+                  title="削除"
+                  onClick={() => setDeleteTargetId(c.id)}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {constraints.length === 0 && (
           <div
             style={{

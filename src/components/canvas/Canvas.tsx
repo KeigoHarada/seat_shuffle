@@ -120,6 +120,28 @@ const Canvas: React.FC = () => {
           : "default",
   };
 
+  const {
+    handleContextMenu,
+    onCanvasPointerDown,
+    onCanvasPointerMove,
+    onCanvasPointerUp,
+    updatePointerDownPos,
+  } = useCanvasPointerEvents({
+    canvasTool,
+    isSpaceMode,
+    pan,
+    scale,
+    viewportRef,
+    clearSelection,
+    startSelectionBox,
+    updateSelectionBox,
+    endSelectionBox,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    setContextMenu,
+  });
+
   const { handleNodePointerDown, handleSeatDoubleClick } = useNodeEvents({
     seats,
     selectedIds,
@@ -131,6 +153,7 @@ const Canvas: React.FC = () => {
     setIsSettingsOpen,
     setActiveSettingsTab,
     setHighlightedStudentId,
+    updatePointerDownPos,
   });
 
   const {
@@ -179,27 +202,6 @@ const Canvas: React.FC = () => {
 
     showToast.success(`${assignments.length}人の生徒を自動割り当てしました！`);
   }, [seats, students, updateSeat]);
-
-  const {
-    handleContextMenu,
-    onCanvasPointerDown,
-    onCanvasPointerMove,
-    onCanvasPointerUp,
-  } = useCanvasPointerEvents({
-    canvasTool,
-    isSpaceMode,
-    pan,
-    scale,
-    viewportRef,
-    clearSelection,
-    startSelectionBox,
-    updateSelectionBox,
-    endSelectionBox,
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
-    setContextMenu,
-  });
 
   const selectedSeats = selectedIds
     .map((id) => seats.find((s) => s.id === id))
