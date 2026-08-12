@@ -18,6 +18,9 @@
 
   --c-border: #cbd5e1;
   --c-error: #ef4444;
+  --c-error-pale: #fee2e2;
+  --c-success: #10b981;
+  --c-success-pale: #d1fae5;
 
   /* Group Colors (Pastel) */
   --c-group-pink: #fca5a5;

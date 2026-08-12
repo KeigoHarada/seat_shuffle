@@ -51,7 +51,7 @@ const ConstraintListTable: React.FC = () => {
           <div
             style={{
               fontSize: "11px",
-              color: isClose ? "var(--c-primary)" : "var(--c-error)",
+              color: "var(--c-text-sub)",
             }}
           >
             {isClose ? "同じ班にする" : "別の班にする"}
@@ -86,7 +86,7 @@ const ConstraintListTable: React.FC = () => {
           <div
             style={{
               fontSize: "11px",
-              color: isInclude ? "var(--c-primary)" : "var(--c-error)",
+              color: "var(--c-text-sub)",
             }}
           >
             {groupNames} に {isInclude ? "入れる" : "入れない"}
@@ -126,7 +126,7 @@ const ConstraintListTable: React.FC = () => {
           <div
             style={{
               fontSize: "11px",
-              color: "var(--c-primary)",
+              color: "var(--c-text-sub)",
             }}
           >
             {groupNames} にそれぞれ {c.minCount} 人以上
@@ -203,10 +203,10 @@ const ConstraintListTable: React.FC = () => {
           let bgColor = "transparent";
 
           if (c.isEnabled) {
-            if (isSatisfied) {
-              borderColor = "var(--c-primary)";
-              bgColor = "var(--c-primary-pale)";
-            } else {
+            if (isSatisfied === true) {
+              borderColor = "var(--c-success)";
+              bgColor = "var(--c-success-pale)";
+            } else if (isSatisfied === false) {
               borderColor = "var(--c-error)";
               bgColor = "var(--c-error-pale)";
             }

@@ -20,7 +20,10 @@ const GlobalTab: React.FC = () => {
           シャッフルアルゴリズム
         </h3>
         <Select
-          options={[{ label: "ランダム (単純配置)", value: "random" }]}
+          options={[
+            { label: "ランダム (単純配置)", value: "random" },
+            { label: "最適化 (制約条件を考慮)", value: "optimize" },
+          ]}
           value={appSettings.algorithm || "random"}
           onChange={(val) => updateAppSettings({ algorithm: val as any })}
         />
@@ -31,7 +34,7 @@ const GlobalTab: React.FC = () => {
             color: "var(--c-text-sub)",
           }}
         >
-          ※「ランダム」は条件設定を無視して完全にランダムで座席を決定します。
+          ※「ランダム」は条件を無視します。「最適化」は条件をなるべく満たすように約300ms計算を行います。
         </p>
       </div>
     </div>

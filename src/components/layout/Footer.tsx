@@ -1,6 +1,8 @@
 import React from "react";
 import { Shuffle, Eye, PenLine } from "lucide-react";
 import { useStore } from "../../stores";
+import { optimizeShuffle } from "../../utils/algorithm";
+import { showToast } from "../../stores/toast";
 
 const Footer: React.FC = () => {
   const isViewMode = useStore((state) => state.isViewMode);
@@ -8,7 +10,7 @@ const Footer: React.FC = () => {
 
   const handleShuffle = () => {
     const state = useStore.getState();
-    const { seats, students, appSettings, setSeats } = state;
+    const { seats, students, constraints, appSettings, setSeats } = state;
 
     const algorithm = appSettings.algorithm || "random";
 
@@ -16,10 +18,6 @@ const Footer: React.FC = () => {
       const lockedSeats = seats.filter((s) => s.isLocked);
       const lockedStudentIds = new Set(
         lockedSeats.map((s) => s.studentId).filter(Boolean),
-      );
-
-      const availableStudents = students.filter(
-        (s) => !lockedStudentIds.has(s.id),
       );
 
       // We shuffle the available SEATS instead, so that if there are more seats
@@ -36,6 +34,9 @@ const Footer: React.FC = () => {
 
       // Map each student to a random seat
       const seatAssignments = new Map<string, string | null>();
+      const availableStudents = students.filter(
+        (s) => !lockedStudentIds.has(s.id),
+      );
       availableStudents.forEach((student, index) => {
         if (index < shuffledSeats.length) {
           seatAssignments.set(shuffledSeats[index].id, student.id);
@@ -52,6 +53,22 @@ const Footer: React.FC = () => {
       });
 
       setSeats(newSeats);
+      showToast.success("ランダムシャッフルが完了しました");
+    } else if (algorithm === "optimize") {
+      // Execute constrained optimization
+      const { newSeats, unsatisfiedCount } = optimizeShuffle(
+        students,
+        seats,
+        constraints,
+      );
+      setSeats(newSeats);
+      if (unsatisfiedCount === 0) {
+        showToast.success("すべての条件を満たした座席配置が完了しました！");
+      } else {
+        showToast.error(
+          `最適化しましたが、${unsatisfiedCount}件の条件が満たせませんでした`,
+        );
+      }
     }
   };
 
