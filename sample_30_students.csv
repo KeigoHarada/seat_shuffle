@@ -1,0 +1,52 @@
+# Students
+attendanceNumber,name,furigana,gender,roles
+1,佐藤 蓮,サトウ レン,male,班長
+2,鈴木 陽葵,スズキ ヒマリ,female,副班長
+3,高橋 湊,タカハシ ミナト,male,
+4,田中 結愛,タナカ ユア,female,
+5,伊藤 蒼,イトウ アオイ,male,書記
+6,渡辺 結奈,ワタナベ ユイナ,female,班長
+7,山本 樹,ヤマモト イツキ,male,副班長
+8,中村 咲希,ナカムラ サキ,female,
+9,小林 大翔,コバヤシ ヒロト,male,
+10,加藤 莉子,カトウ リコ,female,書記
+11,吉田 悠真,ヨシダ ユウマ,male,班長
+12,山田 澪,ヤマダ ミオ,female,副班長
+13,佐々木 陽,ササキ ハル,male,
+14,山口 美桜,ヤマグチ ミオ,female,
+15,松本 朝陽,マツモト アサヒ,male,書記
+16,井上 結衣,イノウエ ユイ,female,班長
+17,木村 瑛太,キムラ エイタ,male,副班長
+18,林 陽菜,ハヤシ ヒナ,female,
+19,斎藤 陸,サイトウ リク,male,
+20,清水 琴音,シミズ コトネ,female,書記
+21,山崎 空,ヤマザキ ソラ,male,班長
+22,森 彩葉,モリ イロハ,female,副班長
+23,池田 翔,イケダ ショウ,male,
+24,橋本 栞,ハシモト シオリ,female,
+25,阿部 颯太,アベ ソウタ,male,書記
+26,石川 紬,イシカワ ツムギ,female,班長
+27,山下 涼,ヤマシタ リョウ,male,副班長
+28,中島 葵,ナカジマ アオイ,female,
+29,小川 優,オガワ ユウ,male,
+30,前田 結,マエダ ユイ,female,書記
+
+# Roles
+name,iconName,description
+班長,Crown,班のリーダー
+副班長,Star,班のサブリーダー
+書記,Pen,記録係
+
+# Groups
+name,color,description
+1班,#EF4444,第1グループ
+2班,#3B82F6,第2グループ
+3班,#10B981,第3グループ
+4班,#F59E0B,第4グループ
+5班,#8B5CF6,第5グループ
+6班,#EC4899,第6グループ
+
+# Constraints
+type,isEnabled,json_data
+student-student,true,"{""matchType"":""close"",""studentName1"":""佐藤 蓮"",""studentName2"":""鈴木 陽葵""}"
+group-match,true,"{""targetType"":""gender"",""targetName"":""male"",""minCount"":2,""groupNames"":[""1班"",""2班"",""3班"",""4班"",""5班"",""6班""]}"

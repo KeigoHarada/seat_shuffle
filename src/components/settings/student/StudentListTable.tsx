@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStore } from "../../../stores";
-import { Trash2, GripVertical, ArrowDownAZ } from "lucide-react";
+import { ArrowDownAZ } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import {
   DndContext,
@@ -12,7 +12,6 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
