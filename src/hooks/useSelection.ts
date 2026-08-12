@@ -87,6 +87,7 @@ export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
 
   return {
     selectedIds,
+    setSelectedIds,
     selectionBox,
     toggleSelection,
     selectOnly,

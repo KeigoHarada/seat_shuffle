@@ -43,6 +43,7 @@ const Canvas: React.FC = () => {
 
   const {
     selectedIds,
+    setSelectedIds,
     selectionBox,
     toggleSelection,
     selectOnly,
@@ -121,6 +122,8 @@ const Canvas: React.FC = () => {
 
   const {
     handleDeleteSelected,
+    handleCopy,
+    handleDuplicate,
     handleAddSeatFromMenu,
     handleAddSeatCentered,
     handleAddRectangle,
@@ -134,6 +137,7 @@ const Canvas: React.FC = () => {
     addObject,
     removeObject,
     selectedIds,
+    setSelectedIds,
     clearSelection,
     contextMenu,
     setContextMenu,
@@ -255,6 +259,7 @@ const Canvas: React.FC = () => {
         onAddSeat={handleAddSeatFromMenu}
         hasSelection={selectedIds.length > 0}
         onDeleteSelected={handleDeleteSelected}
+        onDuplicateSelected={handleDuplicate}
       />
 
       <div

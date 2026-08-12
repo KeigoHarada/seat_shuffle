@@ -4,6 +4,8 @@ import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 import { findEmptyPos, getCenterGridPos } from "../utils/canvas";
 import { generateTemplate } from "../utils/templates";
 
+let clipboard: { seats: Seat[]; objects: CanvasObject[] } | null = null;
+
 export const useCanvasActions = (
   seats: Seat[],
   objects: CanvasObject[],
@@ -12,6 +14,7 @@ export const useCanvasActions = (
   addObject: (obj: CanvasObject) => void,
   removeObject: (id: string) => void,
   selectedIds: string[],
+  setSelectedIds: (ids: string[]) => void,
   clearSelection: () => void,
   contextMenu: { x: number; y: number; worldX: number; worldY: number } | null,
   setContextMenu: (menu: null) => void,
@@ -28,20 +31,108 @@ export const useCanvasActions = (
     setContextMenu(null);
   }, [selectedIds, removeSeat, removeObject, clearSelection, setContextMenu]);
 
+  const handleCopy = useCallback(() => {
+    if (selectedIds.length === 0) return;
+    const copiedSeats = seats
+      .filter((s) => selectedIds.includes(s.id))
+      .map((s) => ({ ...s, studentId: null }));
+    const copiedObjects = objects
+      .filter((o) => selectedIds.includes(o.id))
+      .map((o) => ({ ...o }));
+
+    clipboard = { seats: copiedSeats, objects: copiedObjects };
+  }, [selectedIds, seats, objects]);
+
+  const handlePaste = useCallback(() => {
+    if (!clipboard) return;
+    if (clipboard.seats.length === 0 && clipboard.objects.length === 0) return;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    clipboard.seats.forEach((s) => {
+      minX = Math.min(minX, s.x);
+      minY = Math.min(minY, s.y);
+      maxX = Math.max(maxX, s.x + SEAT_COLS);
+      maxY = Math.max(maxY, s.y + SEAT_ROWS);
+    });
+
+    clipboard.objects.forEach((o) => {
+      minX = Math.min(minX, o.x);
+      minY = Math.min(minY, o.y);
+      maxX = Math.max(maxX, o.x + o.width);
+      maxY = Math.max(maxY, o.y + o.height);
+    });
+
+    const groupWidth = maxX - minX;
+    const groupHeight = maxY - minY;
+
+    const { x: newMinX, y: newMinY } = findEmptyPos(
+      minX + 2,
+      minY + 2,
+      groupWidth,
+      groupHeight,
+      seats,
+      objects,
+    );
+
+    const dx = newMinX - minX;
+    const dy = newMinY - minY;
+
+    const newSelectedIds: string[] = [];
+    const nextClipboardSeats: Seat[] = [];
+    const nextClipboardObjects: CanvasObject[] = [];
+
+    clipboard.seats.forEach((s) => {
+      const newId = crypto.randomUUID();
+      newSelectedIds.push(newId);
+      const newSeat = { ...s, id: newId, x: s.x + dx, y: s.y + dy };
+      addSeat(newSeat);
+      nextClipboardSeats.push(newSeat);
+    });
+
+    clipboard.objects.forEach((o) => {
+      const newId = crypto.randomUUID();
+      newSelectedIds.push(newId);
+      const newObj = { ...o, id: newId, x: o.x + dx, y: o.y + dy };
+      addObject(newObj);
+      nextClipboardObjects.push(newObj);
+    });
+
+    clipboard = {
+      seats: nextClipboardSeats,
+      objects: nextClipboardObjects,
+    };
+
+    setSelectedIds(newSelectedIds);
+  }, [addSeat, addObject, setSelectedIds, seats, objects]);
+
+  const handleDuplicate = useCallback(() => {
+    handleCopy();
+    handlePaste();
+  }, [handleCopy, handlePaste]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
+
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (
-          e.target instanceof HTMLInputElement ||
-          e.target instanceof HTMLTextAreaElement
-        )
-          return;
         handleDeleteSelected();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+        handleCopy();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
+        handlePaste();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleDeleteSelected]);
+  }, [handleDeleteSelected, handleCopy, handlePaste]);
 
   const handleAddSeatFromMenu = useCallback(() => {
     if (!contextMenu) return;
@@ -144,6 +235,8 @@ export const useCanvasActions = (
 
   return {
     handleDeleteSelected,
+    handleCopy,
+    handleDuplicate,
     handleAddSeatFromMenu,
     handleAddSeatCentered,
     handleAddRectangle,

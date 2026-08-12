@@ -6,6 +6,7 @@ interface CanvasContextMenuProps {
   onAddSeat: () => void;
   hasSelection: boolean;
   onDeleteSelected: () => void;
+  onDuplicateSelected?: () => void;
 }
 
 const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
@@ -14,6 +15,7 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   onAddSeat,
   hasSelection,
   onDeleteSelected,
+  onDuplicateSelected,
 }) => {
   if (!contextMenu) return null;
 
@@ -62,31 +64,59 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
       </button>
 
       {hasSelection && (
-        <button
-          onClick={() => {
-            onDeleteSelected();
-            onClose();
-          }}
-          style={{
-            padding: "8px 16px",
-            textAlign: "left",
-            background: "none",
-            border: "none",
-            color: "var(--c-danger)",
-            fontSize: 14,
-            cursor: "pointer",
-            transition: "background-color 0.1s",
-            width: "100%",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "transparent")
-          }
-        >
-          削除
-        </button>
+        <>
+          <button
+            onClick={() => {
+              if (onDuplicateSelected) onDuplicateSelected();
+              onClose();
+            }}
+            style={{
+              padding: "8px 16px",
+              textAlign: "left",
+              background: "none",
+              border: "none",
+              color: "var(--c-text-main)",
+              fontSize: 14,
+              cursor: "pointer",
+              transition: "background-color 0.1s",
+              width: "100%",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "transparent")
+            }
+          >
+            複製
+          </button>
+
+          <button
+            onClick={() => {
+              onDeleteSelected();
+              onClose();
+            }}
+            style={{
+              padding: "8px 16px",
+              textAlign: "left",
+              background: "none",
+              border: "none",
+              color: "var(--c-danger)",
+              fontSize: 14,
+              cursor: "pointer",
+              transition: "background-color 0.1s",
+              width: "100%",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "transparent")
+            }
+          >
+            削除
+          </button>
+        </>
       )}
     </div>
   );

@@ -43,7 +43,9 @@ const App: React.FC = () => {
                 pointerEvents: "none",
               }}
             >
-              <p className="text-title3">ダブルクリックで座席を追加</p>
+              <p className="text-title3">
+                右クリックまたはツールバーから座席を追加
+              </p>
             </div>
           )}
         </main>
