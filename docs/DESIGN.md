@@ -115,6 +115,17 @@ body {
 - Padding: 16px - 24px
 - Shadow: Level 1
 
+### Popover (吹き出しメニュー)
+
+座席への手動アサイン時などに座席の横に表示されるポップオーバー。
+
+- Background: `#FFFFFF`
+- Border: 1px solid `#E2E8F0`
+- Border Radius: **12px**
+- Shadow: Level 3 (画面上に浮いているため強い影)
+- Padding: 16px
+- Width: 約280px
+
 ### Seat Node (座席オブジェクト)
 
 キャンバス上に配置される座席。

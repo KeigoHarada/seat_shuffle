@@ -10,6 +10,7 @@ export const useCanvasActions = (
   seats: Seat[],
   objects: CanvasObject[],
   addSeat: (seat: Seat) => void,
+  updateSeat: (id: string, updates: Partial<Seat>) => void,
   removeSeat: (id: string) => void,
   addObject: (obj: CanvasObject) => void,
   removeObject: (id: string) => void,
@@ -30,6 +31,17 @@ export const useCanvasActions = (
     clearSelection();
     setContextMenu(null);
   }, [selectedIds, removeSeat, removeObject, clearSelection, setContextMenu]);
+
+  const handleUnassignSelected = useCallback(() => {
+    selectedIds.forEach((id) => {
+      const seat = seats.find((s) => s.id === id);
+      if (seat && seat.studentId) {
+        updateSeat(id, { studentId: null });
+      }
+    });
+    clearSelection();
+    setContextMenu(null);
+  }, [selectedIds, seats, updateSeat, clearSelection, setContextMenu]);
 
   const handleCopy = useCallback(() => {
     if (selectedIds.length === 0) return;
@@ -122,7 +134,9 @@ export const useCanvasActions = (
       )
         return;
 
-      if (e.key === "Delete" || e.key === "Backspace") {
+      if ((e.key === "Delete" || e.key === "Backspace") && e.altKey) {
+        handleUnassignSelected();
+      } else if (e.key === "Delete" || e.key === "Backspace") {
         handleDeleteSelected();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
         handleCopy();
@@ -132,7 +146,7 @@ export const useCanvasActions = (
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleDeleteSelected, handleCopy, handlePaste]);
+  }, [handleDeleteSelected, handleUnassignSelected, handleCopy, handlePaste]);
 
   const handleAddSeatFromMenu = useCallback(() => {
     if (!contextMenu) return;
@@ -235,6 +249,7 @@ export const useCanvasActions = (
 
   return {
     handleDeleteSelected,
+    handleUnassignSelected,
     handleCopy,
     handleDuplicate,
     handleAddSeatFromMenu,

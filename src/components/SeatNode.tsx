@@ -11,6 +11,7 @@ interface Props {
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: (e: React.DragEvent) => void;
   onPointerDown: (e: React.PointerEvent) => void;
+  onDoubleClick?: (e: React.MouseEvent) => void;
 }
 
 const SeatNode: React.FC<Props> = ({
@@ -21,6 +22,7 @@ const SeatNode: React.FC<Props> = ({
   onDragStart,
   onDragEnd,
   onPointerDown,
+  onDoubleClick,
 }) => {
   const students = useStore((state) => state.students);
   const groups = useStore((state) => state.groups);
@@ -72,6 +74,7 @@ const SeatNode: React.FC<Props> = ({
       onPointerDown={onPointerDown}
       onDoubleClick={(e) => {
         e.stopPropagation();
+        if (onDoubleClick) onDoubleClick(e);
       }}
       title="右クリックでメニュー / ドラッグで移動"
     >

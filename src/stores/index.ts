@@ -56,9 +56,24 @@ export interface StateAndActions extends AppState {
   updateAppSettings: (updates: Partial<AppSettings>) => void;
   canvasTool: "select" | "hand";
   setCanvasTool: (tool: "select" | "hand") => void;
+
+  // UI State
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (isOpen: boolean) => void;
+  activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
+  setActiveSettingsTab: (
+    tab: "students" | "roles" | "groups" | "constraints" | "global",
+  ) => void;
+  highlightedStudentId: string | null;
+  setHighlightedStudentId: (id: string | null) => void;
 }
 
-const initialState: AppState & { canvasTool: "select" | "hand" } = {
+const initialState: AppState & {
+  canvasTool: "select" | "hand";
+  isSettingsOpen: boolean;
+  activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
+  highlightedStudentId: string | null;
+} = {
   students: [],
   roles: [],
   groups: [],
@@ -73,6 +88,9 @@ const initialState: AppState & { canvasTool: "select" | "hand" } = {
     soundEnabled: true,
     theme: "system",
   },
+  isSettingsOpen: true,
+  activeSettingsTab: "students",
+  highlightedStudentId: null,
 };
 
 export const useStore = create<StateAndActions>()(
@@ -190,6 +208,10 @@ export const useStore = create<StateAndActions>()(
         })),
 
       setCanvasTool: (tool) => set({ canvasTool: tool }),
+
+      setIsSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
+      setActiveSettingsTab: (tab) => set({ activeSettingsTab: tab }),
+      setHighlightedStudentId: (id) => set({ highlightedStudentId: id }),
     }),
     {
       name: "seat-shuffle-storage",

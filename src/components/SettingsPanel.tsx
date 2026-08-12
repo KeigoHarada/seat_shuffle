@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Users,
   UserCircle,
@@ -10,6 +10,7 @@ import StudentTab from "./settings/student/StudentTab";
 import RoleTab from "./settings/role/RoleTab";
 import GroupTab from "./settings/group/GroupTab";
 import ConstraintTab from "./settings/constraint/ConstraintTab";
+import { useStore } from "../stores";
 
 type Tab = "students" | "roles" | "groups" | "constraints" | "global";
 
@@ -137,7 +138,8 @@ const SettingsContent: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
 };
 
 const SettingsPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<Tab>("students");
+  const activeTab = useStore((state) => state.activeSettingsTab);
+  const setActiveTab = useStore((state) => state.setActiveSettingsTab);
 
   return (
     <div

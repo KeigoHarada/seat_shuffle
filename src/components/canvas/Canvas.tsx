@@ -11,6 +11,7 @@ import CanvasToolbar from "./CanvasToolbar";
 import CanvasObjectNode from "./CanvasObjectNode";
 import { useCanvasActions } from "../../hooks/useCanvasActions";
 import CanvasContextMenu from "./CanvasContextMenu";
+import SeatAssignPopover from "./SeatAssignPopover";
 import {
   screenToWorld,
   getSeatDragDisplayProps,
@@ -27,6 +28,11 @@ const Canvas: React.FC = () => {
   const updateObject = useStore((state) => state.updateObject);
   const removeObject = useStore((state) => state.removeObject);
   const canvasTool = useStore((state) => state.canvasTool);
+  const setIsSettingsOpen = useStore((state) => state.setIsSettingsOpen);
+  const setActiveSettingsTab = useStore((state) => state.setActiveSettingsTab);
+  const setHighlightedStudentId = useStore(
+    (state) => state.setHighlightedStudentId,
+  );
 
   const {
     pan,
@@ -77,6 +83,14 @@ const Canvas: React.FC = () => {
     worldY: number;
   } | null>(null);
 
+  const [assignPopoverSeatId, setAssignPopoverSeatId] = useState<string | null>(
+    null,
+  );
+  const [popoverPos, setPopoverPos] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+
   const pointerDownPosRef = useRef({ x: 0, y: 0 });
 
   const viewportStyle: React.CSSProperties = {
@@ -120,9 +134,31 @@ const Canvas: React.FC = () => {
     [selectedIds, toggleSelection, selectOnly],
   );
 
+  const handleSeatDoubleClick = useCallback(
+    (id: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      const seat = seats.find((s) => s.id === id);
+      if (seat && !seat.studentId) {
+        const rect = viewportRef.current?.getBoundingClientRect();
+        if (rect) {
+          setPopoverPos({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          });
+        }
+        setAssignPopoverSeatId(id);
+      } else if (seat && seat.studentId) {
+        setIsSettingsOpen(true);
+        setActiveSettingsTab("students");
+        setHighlightedStudentId(seat.studentId);
+      }
+    },
+    [seats, setIsSettingsOpen, setActiveSettingsTab, setHighlightedStudentId],
+  );
+
   const {
     handleDeleteSelected,
-    handleCopy,
+    handleUnassignSelected,
     handleDuplicate,
     handleAddSeatFromMenu,
     handleAddSeatCentered,
@@ -133,6 +169,7 @@ const Canvas: React.FC = () => {
     seats,
     objects,
     addSeat,
+    updateSeat,
     removeSeat,
     addObject,
     removeObject,
@@ -260,6 +297,7 @@ const Canvas: React.FC = () => {
         hasSelection={selectedIds.length > 0}
         onDeleteSelected={handleDeleteSelected}
         onDuplicateSelected={handleDuplicate}
+        onUnassignSelected={handleUnassignSelected}
       />
 
       <div
@@ -308,6 +346,7 @@ const Canvas: React.FC = () => {
               onDragStart={(e) => handleDragStart(seat.id, e)}
               onDragEnd={handleDragEnd}
               onPointerDown={(e) => handleNodePointerDown(seat.id, e)}
+              onDoubleClick={(e) => handleSeatDoubleClick(seat.id, e)}
             />
           );
         })}
@@ -328,6 +367,14 @@ const Canvas: React.FC = () => {
           />
         )}
       </div>
+
+      <SeatAssignPopover
+        isOpen={assignPopoverSeatId !== null}
+        onClose={() => setAssignPopoverSeatId(null)}
+        targetSeatId={assignPopoverSeatId}
+        x={popoverPos.x}
+        y={popoverPos.y}
+      />
     </div>
   );
 };

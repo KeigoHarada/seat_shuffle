@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
@@ -27,17 +27,48 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
 
   const roles = useStore((state) => state.roles);
   const updateStudent = useStore((state) => state.updateStudent);
+  const highlightedStudentId = useStore((state) => state.highlightedStudentId);
+  const setHighlightedStudentId = useStore(
+    (state) => state.setHighlightedStudentId,
+  );
+
+  const isHighlighted = highlightedStudentId === student.id;
+  const innerRef = useRef<HTMLDivElement | null>(null);
+
+  const combinedRef = (node: HTMLDivElement | null) => {
+    setNodeRef(node);
+    innerRef.current = node;
+  };
+
+  useEffect(() => {
+    if (isHighlighted) {
+      if (innerRef.current) {
+        innerRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+      const timer = setTimeout(() => {
+        setHighlightedStudentId(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isHighlighted, setHighlightedStudentId]);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition
+      ? `${transition}, background-color 0.5s ease-out`
+      : "background-color 0.5s ease-out",
     display: "grid",
     gridTemplateColumns: "16px 24px 1fr 76px 32px",
     gap: "8px",
     alignItems: "center",
     padding: "8px",
     borderBottom: "1px solid var(--c-surface-disabled)",
-    backgroundColor: "var(--c-surface)",
+    backgroundColor: isHighlighted
+      ? "var(--c-primary-pale)"
+      : "var(--c-surface)",
     opacity: isDragging ? 0.5 : 1,
     boxShadow: isDragging ? "var(--shadow-2)" : "none",
     position: "relative",
@@ -45,7 +76,7 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={combinedRef} style={style}>
       {/* Drag Handle */}
       <div
         {...attributes}

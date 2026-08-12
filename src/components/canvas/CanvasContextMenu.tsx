@@ -7,6 +7,7 @@ interface CanvasContextMenuProps {
   hasSelection: boolean;
   onDeleteSelected: () => void;
   onDuplicateSelected?: () => void;
+  onUnassignSelected?: () => void;
 }
 
 const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
@@ -16,6 +17,7 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   hasSelection,
   onDeleteSelected,
   onDuplicateSelected,
+  onUnassignSelected,
 }) => {
   if (!contextMenu) return null;
 
@@ -65,6 +67,35 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 
       {hasSelection && (
         <>
+          {onUnassignSelected && (
+            <button
+              onClick={() => {
+                onUnassignSelected();
+                onClose();
+              }}
+              style={{
+                padding: "8px 16px",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                color: "var(--c-text-main)",
+                fontSize: 14,
+                cursor: "pointer",
+                transition: "background-color 0.1s",
+                width: "100%",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  "var(--c-surface-hover)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "transparent")
+              }
+            >
+              生徒の割り当て解除
+            </button>
+          )}
+
           <button
             onClick={() => {
               if (onDuplicateSelected) onDuplicateSelected();

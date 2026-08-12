@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Canvas from "./components/canvas/Canvas";
 import SettingsPanel from "./components/SettingsPanel";
 import Header from "./components/layout/Header";
@@ -7,7 +7,8 @@ import { ToastContainer } from "./components/ui/Toast";
 import { useStore } from "./stores";
 
 const App: React.FC = () => {
-  const [showSettings, setShowSettings] = useState(true);
+  const isSettingsOpen = useStore((state) => state.isSettingsOpen);
+  const setIsSettingsOpen = useStore((state) => state.setIsSettingsOpen);
   const seats = useStore((state) => state.seats);
 
   return (
@@ -21,8 +22,8 @@ const App: React.FC = () => {
       }}
     >
       <Header
-        showSettings={showSettings}
-        onToggleSettings={() => setShowSettings(!showSettings)}
+        showSettings={isSettingsOpen}
+        onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
 
       {/* Main Content Area */}
@@ -53,10 +54,10 @@ const App: React.FC = () => {
         {/* Settings Panel (Sidebar) */}
         <aside
           style={{
-            width: showSettings ? "clamp(320px, 30vw, 400px)" : "0px",
+            width: isSettingsOpen ? "clamp(320px, 30vw, 400px)" : "0px",
             transition: "width 0.3s cubic-bezier(0.2, 0, 0, 1)",
             overflow: "hidden",
-            borderLeft: showSettings ? "1px solid var(--c-border)" : "none",
+            borderLeft: isSettingsOpen ? "1px solid var(--c-border)" : "none",
             flexShrink: 0,
           }}
         >
