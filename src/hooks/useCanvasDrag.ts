@@ -53,6 +53,7 @@ export const useCanvasDrag = (
     isSwapMode: boolean;
   } | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [swapPointerId, setSwapPointerId] = useState<number | null>(null);
 
   const handleDragStart = useCallback(
     (id: string, e: React.DragEvent) => {
@@ -89,8 +90,7 @@ export const useCanvasDrag = (
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      let isSwapMode = e.ctrlKey || e.metaKey;
-      e.dataTransfer.dropEffect = isSwapMode ? "copy" : "move";
+      e.dataTransfer.dropEffect = "move";
 
       if (dragState && viewportRef.current) {
         const rect = viewportRef.current.getBoundingClientRect();
@@ -138,17 +138,8 @@ export const useCanvasDrag = (
           nextValidDeltaY = visualDeltaY;
         }
 
-        // If swap mode is enabled, only allow swap if dragging a single seat
-        if (isSwapMode) {
-          if (dragState.draggedIds.length > 1) {
-            isSwapMode = false;
-          } else {
-            const draggingNode = nodes.find((n) => n.id === dragState.baseId);
-            if (!draggingNode || !draggingNode.isSeat) {
-              isSwapMode = false;
-            }
-          }
-        }
+        // Swap mode is only triggered via right click (handleSwapPointerDown)
+        let isSwapMode = dragState.isSwapMode;
 
         if (
           visualDeltaX !== dragState.visualDeltaX ||
@@ -241,11 +232,125 @@ export const useCanvasDrag = (
     setDragState(null);
   }, []);
 
+  const handleSwapPointerDown = useCallback(
+    (id: string, e: React.PointerEvent) => {
+      if (e.button !== 2) return;
+      const node = nodes.find((n) => n.id === id);
+      if (!node || !node.isSeat) return;
+
+      setSwapPointerId(e.pointerId);
+      setDragState({
+        baseId: id,
+        draggedIds: [id],
+        startX: node.x,
+        startY: node.y,
+        visualDeltaX: 0,
+        visualDeltaY: 0,
+        validDeltaX: 0,
+        validDeltaY: 0,
+        isSwapMode: true,
+      });
+
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    [nodes],
+  );
+
+  const handleSwapPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragState || !dragState.isSwapMode || swapPointerId !== e.pointerId)
+        return;
+      if (!viewportRef.current) return;
+
+      const rect = viewportRef.current.getBoundingClientRect();
+      const { worldX: dropX, worldY: dropY } = screenToWorld(
+        e.clientX - dragOffset.x,
+        e.clientY - dragOffset.y,
+        rect,
+        pan,
+        scale,
+      );
+
+      const newBaseX = Math.round(dropX / GRID_SIZE);
+      const newBaseY = Math.round(dropY / GRID_SIZE);
+
+      const visualDeltaX = newBaseX - dragState.startX;
+      const visualDeltaY = newBaseY - dragState.startY;
+
+      if (
+        visualDeltaX !== dragState.visualDeltaX ||
+        visualDeltaY !== dragState.visualDeltaY
+      ) {
+        setDragState({
+          ...dragState,
+          visualDeltaX,
+          visualDeltaY,
+        });
+      }
+    },
+    [dragState, dragOffset, pan, scale, swapPointerId, viewportRef],
+  );
+
+  const handleSwapPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragState || !dragState.isSwapMode || swapPointerId !== e.pointerId)
+        return;
+
+      const draggingNode = nodes.find((n) => n.id === dragState.baseId);
+      if (!draggingNode || !draggingNode.isSeat) {
+        setDragState(null);
+        setSwapPointerId(null);
+        return;
+      }
+
+      const cx = Math.floor(
+        draggingNode.x + dragState.visualDeltaX + draggingNode.width / 2,
+      );
+      const cy = Math.floor(
+        draggingNode.y + dragState.visualDeltaY + draggingNode.height / 2,
+      );
+      const targetNode = nodes.find(
+        (n) =>
+          cx >= n.x &&
+          cx < n.x + n.width &&
+          cy >= n.y &&
+          cy < n.y + n.height &&
+          n.id !== dragState.baseId,
+      );
+
+      if (
+        targetNode &&
+        targetNode.isSeat &&
+        !draggingNode.isLocked &&
+        !targetNode.isLocked
+      ) {
+        const s1 = seats.find((s) => s.id === draggingNode.id);
+        const s2 = seats.find((s) => s.id === targetNode.id);
+        if (s1 && s2) {
+          updateSeat(s1.id, { studentId: s2.studentId });
+          updateSeat(s2.id, { studentId: s1.studentId });
+        }
+      }
+
+      setDragState(null);
+      setSwapPointerId(null);
+    },
+    [dragState, nodes, seats, swapPointerId, updateSeat],
+  );
+
   return {
     dragState,
     handleDragStart,
     handleDragOver,
     handleDrop,
     handleDragEnd,
+    handleSwapPointerDown,
+    handleSwapPointerMove,
+    handleSwapPointerUp,
   };
 };

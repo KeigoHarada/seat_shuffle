@@ -143,14 +143,22 @@ export const getSeatDragDisplayProps = (
   let isSwapTarget = false;
   const isDragging = !!dragState?.draggedIds.includes(seat.id);
 
+  let ghostSeat: Seat | undefined = undefined;
+
   if (isDragging && dragState) {
-    const renderX = dragState.isSwapMode
-      ? seat.x + dragState.visualDeltaX
-      : seat.x + dragState.validDeltaX;
-    const renderY = dragState.isSwapMode
-      ? seat.y + dragState.visualDeltaY
-      : seat.y + dragState.validDeltaY;
-    displaySeat = { ...seat, x: renderX, y: renderY };
+    if (dragState.isSwapMode) {
+      ghostSeat = {
+        ...seat,
+        x: seat.x + dragState.visualDeltaX,
+        y: seat.y + dragState.visualDeltaY,
+      };
+    } else {
+      displaySeat = {
+        ...seat,
+        x: seat.x + dragState.validDeltaX,
+        y: seat.y + dragState.validDeltaY,
+      };
+    }
   } else if (dragState?.isSwapMode && dragState.baseId) {
     const baseNode = seats.find((s) => s.id === dragState.baseId);
     if (baseNode) {
@@ -172,7 +180,7 @@ export const getSeatDragDisplayProps = (
     }
   }
 
-  return { displaySeat, isSwapTarget, isDragging };
+  return { displaySeat, ghostSeat, isSwapTarget, isDragging };
 };
 
 export const getObjectDragDisplayProps = (

@@ -5,6 +5,7 @@ import {
   LayoutTemplate,
   Hand,
   MousePointer2,
+  Wand2,
 } from "lucide-react";
 import { useStore } from "../../stores";
 
@@ -13,6 +14,7 @@ interface Props {
   onAddRectangle: () => void;
   onAddCircle: () => void;
   onApplyTemplate: (templateName: string) => void;
+  onAutoAssign: () => void;
 }
 
 const CanvasToolbar: React.FC<Props> = ({
@@ -20,6 +22,7 @@ const CanvasToolbar: React.FC<Props> = ({
   onAddRectangle,
   onAddCircle,
   onApplyTemplate,
+  onAutoAssign,
 }) => {
   const [openMenu, setOpenMenu] = useState<"shapes" | "templates" | null>(null);
 
@@ -306,6 +309,30 @@ const CanvasToolbar: React.FC<Props> = ({
           </div>
         )}
       </div>
+
+      <div
+        style={{
+          width: 1,
+          backgroundColor: "var(--c-border)",
+          margin: "4px 0",
+        }}
+      />
+      <button
+        onClick={onAutoAssign}
+        style={{
+          ...buttonStyle,
+          color: "var(--c-primary)",
+        }}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.backgroundColor = "transparent")
+        }
+        title="生徒を空席に自動割り当て"
+      >
+        <Wand2 size={16} /> 自動割り当て
+      </button>
     </div>
   );
 };

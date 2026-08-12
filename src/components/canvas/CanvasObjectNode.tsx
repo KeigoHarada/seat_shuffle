@@ -160,7 +160,7 @@ const CanvasObjectNode: React.FC<Props> = ({
             style={{
               width: "80%",
               textAlign: "center",
-              fontSize: 14,
+              fontSize: 24,
               fontWeight: "bold",
               border: "1px solid var(--c-primary)",
               borderRadius: "var(--radius-sm)",
@@ -174,7 +174,7 @@ const CanvasObjectNode: React.FC<Props> = ({
             <span
               style={{
                 color: "var(--c-text-main)",
-                fontSize: 14,
+                fontSize: 24,
                 fontWeight: "bold",
                 pointerEvents: "none",
               }}

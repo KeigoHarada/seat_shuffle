@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useStore } from "../../stores";
-import SeatNode from "../SeatNode";
 import { GRID_SIZE } from "../../constants/canvas";
 import { usePanZoom } from "../../hooks/usePanZoom";
 import { useCanvasDrag } from "../../hooks/useCanvasDrag";
@@ -8,16 +7,13 @@ import { useSelection } from "../../hooks/useSelection";
 import CanvasControls from "./CanvasControls";
 
 import CanvasToolbar from "./CanvasToolbar";
-import CanvasObjectNode from "./CanvasObjectNode";
+import CanvasNodes from "./CanvasNodes";
 import { useCanvasActions } from "../../hooks/useCanvasActions";
 import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
 import GroupAssignPopover from "./GroupAssignPopover";
-import {
-  screenToWorld,
-  getSeatDragDisplayProps,
-  getObjectDragDisplayProps,
-} from "../../utils/canvas";
+import { screenToWorld } from "../../utils/canvas";
+import { showToast } from "../../stores/toast";
 
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);
@@ -34,6 +30,7 @@ const Canvas: React.FC = () => {
   const setHighlightedStudentId = useStore(
     (state) => state.setHighlightedStudentId,
   );
+  const students = useStore((state) => state.students);
 
   const {
     pan,
@@ -66,6 +63,9 @@ const Canvas: React.FC = () => {
     handleDragOver,
     handleDrop,
     handleDragEnd,
+    handleSwapPointerDown,
+    handleSwapPointerMove,
+    handleSwapPointerUp,
   } = useCanvasDrag(
     seats,
     objects,
@@ -187,6 +187,38 @@ const Canvas: React.FC = () => {
     scale,
   );
 
+  const handleAutoAssign = useCallback(() => {
+    const assignedStudentIds = new Set(
+      seats.map((s) => s.studentId).filter(Boolean),
+    );
+    const unassignedStudents = students.filter(
+      (s) => !assignedStudentIds.has(s.id),
+    );
+
+    const availableSeats = seats.filter((s) => !s.studentId && !s.isLocked);
+
+    if (unassignedStudents.length === 0) {
+      showToast.info("割り当て待ちの生徒がいません。");
+      return;
+    }
+
+    if (availableSeats.length === 0) {
+      showToast.error("空席がありません。座席を追加してください。");
+      return;
+    }
+
+    const shuffledStudents = [...unassignedStudents].sort(
+      () => Math.random() - 0.5,
+    );
+    const shuffledSeats = [...availableSeats].sort(() => Math.random() - 0.5);
+
+    const assignCount = Math.min(shuffledStudents.length, shuffledSeats.length);
+    for (let i = 0; i < assignCount; i++) {
+      updateSeat(shuffledSeats[i].id, { studentId: shuffledStudents[i].id });
+    }
+    showToast.success(`${assignCount}人の生徒を自動割り当てしました！`);
+  }, [seats, students, updateSeat]);
+
   const isMarqueeRef = useRef(false);
   const initialCtrlPressedRef = useRef(false);
   const initialSelectedIdsRef = useRef<string[]>([]);
@@ -291,6 +323,7 @@ const Canvas: React.FC = () => {
         onAddRectangle={handleAddRectangle}
         onAddCircle={handleAddCircle}
         onApplyTemplate={handleApplyTemplate}
+        onAutoAssign={handleAutoAssign}
       />
       <CanvasControls scale={scale} onResetView={resetView} />
 
@@ -322,60 +355,22 @@ const Canvas: React.FC = () => {
           overflow: "visible",
         }}
       >
-        {objects.map((obj) => {
-          const { displayObj, isDragging } = getObjectDragDisplayProps(
-            obj,
-            dragState,
-          );
-
-          return (
-            <CanvasObjectNode
-              key={obj.id}
-              obj={displayObj}
-              isDragging={isDragging}
-              isSelected={selectedIds.includes(obj.id)}
-              scale={scale}
-              onDragStart={(e) => handleDragStart(obj.id, e)}
-              onDragEnd={handleDragEnd}
-              onPointerDown={(e) => handleNodePointerDown(obj.id, e)}
-              updateObject={updateObject}
-            />
-          );
-        })}
-        {seats.map((seat) => {
-          const { displaySeat, isSwapTarget, isDragging } =
-            getSeatDragDisplayProps(seat, dragState, seats);
-
-          return (
-            <SeatNode
-              key={seat.id}
-              seat={displaySeat}
-              isDragging={isDragging}
-              isSwapTarget={isSwapTarget}
-              isSelected={selectedIds.includes(seat.id)}
-              onDragStart={(e) => handleDragStart(seat.id, e)}
-              onDragEnd={handleDragEnd}
-              onPointerDown={(e) => handleNodePointerDown(seat.id, e)}
-              onDoubleClick={(e) => handleSeatDoubleClick(seat.id, e)}
-            />
-          );
-        })}
-
-        {selectionBox && (
-          <div
-            style={{
-              position: "absolute",
-              left: Math.min(selectionBox.startX, selectionBox.currentX),
-              top: Math.min(selectionBox.startY, selectionBox.currentY),
-              width: Math.abs(selectionBox.currentX - selectionBox.startX),
-              height: Math.abs(selectionBox.currentY - selectionBox.startY),
-              backgroundColor: "rgba(59, 130, 246, 0.1)",
-              border: "1px solid rgba(59, 130, 246, 0.5)",
-              pointerEvents: "none",
-              zIndex: 9999,
-            }}
-          />
-        )}
+        <CanvasNodes
+          seats={seats}
+          objects={objects}
+          dragState={dragState}
+          selectedIds={selectedIds}
+          scale={scale}
+          handleDragStart={handleDragStart}
+          handleDragEnd={handleDragEnd}
+          handleNodePointerDown={handleNodePointerDown}
+          handleSeatDoubleClick={handleSeatDoubleClick}
+          updateObject={updateObject}
+          selectionBox={selectionBox}
+          handleSwapPointerDown={handleSwapPointerDown}
+          handleSwapPointerMove={handleSwapPointerMove}
+          handleSwapPointerUp={handleSwapPointerUp}
+        />
       </div>
 
       <SeatAssignPopover

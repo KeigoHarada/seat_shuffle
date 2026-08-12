@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useStore } from "../stores";
 import { AVAILABLE_ICONS, IconName } from "./ui/IconPicker";
 import { Seat } from "../types";
@@ -12,6 +12,8 @@ interface Props {
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: (e: React.DragEvent) => void;
   onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove?: (e: React.PointerEvent) => void;
+  onPointerUp?: (e: React.PointerEvent) => void;
   onDoubleClick?: (e: React.MouseEvent) => void;
 }
 
@@ -23,6 +25,8 @@ const SeatNode: React.FC<Props> = ({
   onDragStart,
   onDragEnd,
   onPointerDown,
+  onPointerMove,
+  onPointerUp,
   onDoubleClick,
 }) => {
   const students = useStore((state) => state.students);
@@ -36,6 +40,18 @@ const SeatNode: React.FC<Props> = ({
   const studentRoles = student
     ? allRoles.filter((r) => student.roleIds?.includes(r.id))
     : [];
+
+  const prevStudentId = useRef(seat.studentId);
+  const [isSwapped, setIsSwapped] = useState(false);
+
+  useEffect(() => {
+    if (prevStudentId.current !== seat.studentId) {
+      setIsSwapped(true);
+      const timer = setTimeout(() => setIsSwapped(false), 300);
+      prevStudentId.current = seat.studentId;
+      return () => clearTimeout(timer);
+    }
+  }, [seat.studentId]);
 
   const getBackgroundColor = () => {
     if (!mainGroup) return "var(--c-surface)";
@@ -62,7 +78,11 @@ const SeatNode: React.FC<Props> = ({
       : isSwapTarget
         ? "0 0 0 3px var(--c-primary)"
         : "var(--shadow-1)",
-    transform: isSwapTarget ? "scale(1.02)" : "none",
+    transform: isSwapped
+      ? "scale(1.05)"
+      : isSwapTarget
+        ? "scale(1.02)"
+        : "none",
     opacity: isDragging ? 0.8 : 1,
     zIndex: isDragging ? 15 : isSelected ? 12 : isSwapTarget ? 11 : 10,
     display: "flex",
@@ -83,6 +103,13 @@ const SeatNode: React.FC<Props> = ({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={(e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+        if (onPointerUp) onPointerUp(e);
+      }}
       onDoubleClick={(e) => {
         e.stopPropagation();
         if (onDoubleClick) onDoubleClick(e);
@@ -96,7 +123,7 @@ const SeatNode: React.FC<Props> = ({
               position: "absolute",
               top: 4,
               left: 6,
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 700,
               color: "var(--c-text-sub)",
               lineHeight: 1,
@@ -106,7 +133,7 @@ const SeatNode: React.FC<Props> = ({
           </div>
           <div
             style={{
-              fontSize: 10,
+              fontSize: 11,
               color: "var(--c-text-sub)",
               lineHeight: 1,
               marginBottom: 2,
@@ -120,7 +147,7 @@ const SeatNode: React.FC<Props> = ({
           </div>
           <div
             style={{
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: 500,
               color: "var(--c-text-main)",
               lineHeight: 1.2,
@@ -154,7 +181,7 @@ const SeatNode: React.FC<Props> = ({
                     title={role.name}
                     style={{ display: "flex" }}
                   >
-                    <IconComp size={12} />
+                    <IconComp size={14} />
                   </div>
                 );
               })}
@@ -165,7 +192,7 @@ const SeatNode: React.FC<Props> = ({
           )}
         </>
       ) : (
-        <div style={{ fontSize: 12, color: "var(--c-text-sub)" }}>空席</div>
+        <div style={{ fontSize: 14, color: "var(--c-text-sub)" }}>空席</div>
       )}
 
       {seatGroups.length > 0 && (
