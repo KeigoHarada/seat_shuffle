@@ -35,6 +35,7 @@ const SeatNode: React.FC<Props> = ({
   const students = useStore((state) => state.students);
   const groups = useStore((state) => state.groups);
   const allRoles = useStore((state) => state.roles);
+  const editingStudentId = useStore((state) => state.editingStudentId);
 
   const student = students.find((s) => s.id === seat.studentId);
   const seatGroups = groups.filter((g) => seat.groupIds.includes(g.id));
@@ -63,6 +64,9 @@ const SeatNode: React.FC<Props> = ({
     return `color-mix(in srgb, ${c} 30%, white)`;
   };
 
+  const isEditing =
+    seat.studentId !== null && editingStudentId === seat.studentId;
+
   const style: React.CSSProperties = {
     position: "absolute",
     left: seat.x * GRID_SIZE + 4,
@@ -78,16 +82,22 @@ const SeatNode: React.FC<Props> = ({
     borderRadius: "var(--radius-md)",
     boxShadow: isDragging
       ? "var(--shadow-3)"
-      : isSwapTarget
-        ? "0 0 0 3px var(--c-primary)"
+      : isSwapTarget || isEditing
+        ? "0 0 0 3px var(--c-primary), var(--shadow-2)"
         : "var(--shadow-1)",
     transform: isSwapped
       ? "scale(1.05)"
-      : isSwapTarget
+      : isSwapTarget || isEditing
         ? "scale(1.02)"
         : "none",
     opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 15 : isSelected ? 12 : isSwapTarget ? 11 : 10,
+    zIndex: isDragging
+      ? 15
+      : isSelected
+        ? 12
+        : isSwapTarget || isEditing
+          ? 11
+          : 10,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

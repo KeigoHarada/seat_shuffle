@@ -66,6 +66,8 @@ export interface StateAndActions extends AppState {
   ) => void;
   highlightedStudentId: string | null;
   setHighlightedStudentId: (id: string | null) => void;
+  editingStudentId: string | null;
+  setEditingStudentId: (id: string | null) => void;
 }
 
 const initialState: AppState & {
@@ -73,6 +75,7 @@ const initialState: AppState & {
   isSettingsOpen: boolean;
   activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
   highlightedStudentId: string | null;
+  editingStudentId: string | null;
 } = {
   students: [],
   roles: [],
@@ -91,6 +94,7 @@ const initialState: AppState & {
   isSettingsOpen: true,
   activeSettingsTab: "students",
   highlightedStudentId: null,
+  editingStudentId: null,
 };
 
 export const useStore = create<StateAndActions>()(
@@ -212,6 +216,7 @@ export const useStore = create<StateAndActions>()(
       setIsSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
       setActiveSettingsTab: (tab) => set({ activeSettingsTab: tab }),
       setHighlightedStudentId: (id) => set({ highlightedStudentId: id }),
+      setEditingStudentId: (id) => set({ editingStudentId: id }),
     }),
     {
       name: "seat-shuffle-storage",

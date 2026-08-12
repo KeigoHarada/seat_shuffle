@@ -31,6 +31,7 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
   const setHighlightedStudentId = useStore(
     (state) => state.setHighlightedStudentId,
   );
+  const setEditingStudentId = useStore((state) => state.setEditingStudentId);
 
   const isHighlighted = highlightedStudentId === student.id;
   const innerRef = useRef<HTMLDivElement | null>(null);
@@ -75,8 +76,24 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
     zIndex: isDragging ? 10 : 1,
   };
 
+  const handleFocus = () => setEditingStudentId(student.id);
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!innerRef.current?.contains(e.relatedTarget as Node)) {
+      setEditingStudentId(null);
+    }
+  };
+  const handleMouseEnter = () => setEditingStudentId(student.id);
+  const handleMouseLeave = () => setEditingStudentId(null);
+
   return (
-    <div ref={combinedRef} style={style}>
+    <div
+      ref={combinedRef}
+      style={style}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Drag Handle */}
       <div
         {...attributes}
