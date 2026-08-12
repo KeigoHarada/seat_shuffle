@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import StudentTab from "./settings/student/StudentTab";
 import RoleTab from "./settings/role/RoleTab";
-import GroupList from "./GroupList";
+import GroupTab from "./settings/group/GroupTab";
+import ConstraintTab from "./settings/constraint/ConstraintTab";
 
 type Tab = "students" | "roles" | "groups" | "constraints" | "global";
 
@@ -134,7 +135,7 @@ const SettingsPanel: React.FC = () => {
             >
               グループ設定
             </h2>
-            <GroupList />
+            <GroupTab />
           </div>
         )}
         {activeTab === "constraints" && (
@@ -152,7 +153,7 @@ const SettingsPanel: React.FC = () => {
             >
               条件設定
             </h2>
-            {/* Conditional logic will go here */}
+            <ConstraintTab />
           </div>
         )}
         {activeTab === "global" && (

@@ -1,5 +1,7 @@
 import { GenderType } from "../constants";
 
+export type SeatId = string;
+
 export interface Student {
   id: string;
   name: string;
@@ -32,17 +34,6 @@ export interface Seat {
   isLocked: boolean;
 }
 
-export interface Constraint {
-  id: string;
-  constraintType:
-    | "studentGroup"
-    | "studentDistance"
-    | "roleDistribution"
-    | "genderDistribution";
-  isEnabled: boolean;
-  params: Record<string, any>;
-}
-
 export interface AppSettings {
   gridRows: number;
   gridCols: number;
@@ -59,3 +50,33 @@ export interface AppState {
   appSettings: AppSettings;
   isViewMode: boolean;
 }
+
+export type BaseConstraint = {
+  id: string;
+  isEnabled: boolean;
+};
+
+export type StudentStudentConstraint = BaseConstraint & {
+  type: "student-student";
+  studentId1: string;
+  studentId2: string;
+  matchType: "close" | "far";
+};
+
+export type StudentGroupConstraint = BaseConstraint & {
+  type: "student-group";
+  studentId: string;
+  groupIds: string[];
+  matchType: "include" | "exclude";
+};
+
+export type GroupMatchConstraint = BaseConstraint & {
+  type: "group-match";
+  targetType: "role" | "gender";
+  targetId: string; // roleId or GenderType
+  groupIds: string[];
+  minCount: number;
+};
+
+export type Constraint =
+  StudentStudentConstraint | StudentGroupConstraint | GroupMatchConstraint;

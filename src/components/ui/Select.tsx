@@ -60,7 +60,9 @@ const Select: React.FC<SelectProps> = ({
           borderRadius: "var(--radius-md)",
           fontSize: small ? "11px" : "13px",
           fontWeight: small ? 700 : 400,
-          color: selectedOption ? "var(--c-text-main)" : "var(--c-text-sub)",
+          color: selectedOption
+            ? "var(--c-text-main)"
+            : "var(--c-text-placeholder)",
           cursor: "pointer",
           outline: "none",
         }}
@@ -120,6 +122,7 @@ const Select: React.FC<SelectProps> = ({
                     padding: small ? "6px 8px" : "8px 12px",
                     cursor: "pointer",
                     fontSize: small ? "11px" : "13px",
+                    fontWeight: small ? 700 : 400,
                     whiteSpace: "nowrap",
                     backgroundColor: isSelected
                       ? "var(--c-primary-pale)"

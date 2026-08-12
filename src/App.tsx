@@ -50,14 +50,14 @@ const App: React.FC = () => {
         {/* Settings Panel (Sidebar) */}
         <aside
           style={{
-            width: showSettings ? "360px" : "0px",
+            width: showSettings ? "clamp(320px, 30vw, 400px)" : "0px",
             transition: "width 0.3s cubic-bezier(0.2, 0, 0, 1)",
             overflow: "hidden",
             borderLeft: showSettings ? "1px solid var(--c-border)" : "none",
             flexShrink: 0,
           }}
         >
-          <div style={{ width: "360px", height: "100%" }}>
+          <div style={{ width: "clamp(320px, 30vw, 400px)", height: "100%" }}>
             <SettingsPanel />
           </div>
         </aside>

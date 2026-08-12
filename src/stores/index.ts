@@ -126,7 +126,7 @@ export const useStore = create<StateAndActions>()(
       updateConstraint: (id, updates) =>
         set((state) => ({
           constraints: state.constraints.map((c) =>
-            c.id === id ? { ...c, ...updates } : c,
+            c.id === id ? ({ ...c, ...updates } as any) : c,
           ),
         })),
       removeConstraint: (id) =>

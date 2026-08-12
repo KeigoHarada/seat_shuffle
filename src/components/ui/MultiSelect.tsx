@@ -11,13 +11,16 @@ interface MultiSelectProps {
   selectedValues: string[];
   onChange: (values: string[]) => void;
   placeholder?: string;
+  className?: string;
+  small?: boolean;
 }
 
 const MultiSelect: React.FC<MultiSelectProps> = ({
   options,
   selectedValues,
   onChange,
-  placeholder = "選択してください",
+  placeholder = "選択してください（複数可）",
+  small = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -56,15 +59,16 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "8px 12px",
+          padding: small ? "4px 8px" : "8px 12px",
           backgroundColor: "var(--c-surface)",
           border: `1px solid ${isOpen ? "var(--c-primary)" : "var(--c-border)"}`,
           borderRadius: "var(--radius-md)",
-          fontSize: "13px",
+          fontSize: small ? "11px" : "13px",
+          fontWeight: small ? 700 : 400,
           color:
             selectedValues.length > 0
               ? "var(--c-text-main)"
-              : "var(--c-text-sub)",
+              : "var(--c-text-placeholder)",
           cursor: "pointer",
           outline: "none",
         }}
@@ -121,9 +125,10 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    padding: "8px 12px",
+                    padding: small ? "6px 8px" : "8px 12px",
                     cursor: "pointer",
-                    fontSize: "13px",
+                    fontSize: small ? "11px" : "13px",
+                    fontWeight: small ? 700 : 400,
                     backgroundColor: isSelected
                       ? "var(--c-primary-pale)"
                       : "transparent",
@@ -134,16 +139,26 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                 >
                   <div
                     style={{
-                      width: "16px",
-                      height: "16px",
+                      width: small ? "14px" : "16px",
+                      height: small ? "14px" : "16px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: "8px",
                       flexShrink: 0,
+                      border: "1px solid",
+                      borderRadius: "var(--radius-sm)",
+                      backgroundColor: isSelected
+                        ? "var(--c-primary-pale)"
+                        : "var(--c-surface)",
+                      borderColor: isSelected
+                        ? "var(--c-primary)"
+                        : "var(--c-border)",
                     }}
                   >
-                    {isSelected && <Check size={14} />}
+                    {isSelected && (
+                      <Check size={small ? 10 : 12} color="var(--c-primary)" />
+                    )}
                   </div>
                   {opt.label}
                 </div>

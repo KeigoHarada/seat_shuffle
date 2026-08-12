@@ -13,6 +13,7 @@
 
   --c-text-main: #334155;
   --c-text-sub: #64748b;
+  --c-text-placeholder: #94a3b8;
   --c-text-inverse: #ffffff;
 
   --c-border: #cbd5e1;
@@ -136,7 +137,8 @@ body {
 }
 
 /* Common Forms */
-input[type="text"] {
+input[type="text"],
+input[type="number"] {
   font-family: var(--font-family);
   font-size: 14px;
   padding: 8px 12px;
@@ -147,9 +149,24 @@ input[type="text"] {
   transition: border-color var(--transition-fast);
   outline: none;
 }
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="number"]:focus {
   border-color: var(--c-primary);
   box-shadow: 0 0 0 2px var(--c-primary-pale);
+}
+input::placeholder {
+  color: var(--c-text-placeholder);
+}
+
+/* Hide number input spin buttons */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 
 /* Cards */

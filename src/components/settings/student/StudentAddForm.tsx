@@ -13,7 +13,7 @@ const StudentAddForm: React.FC = () => {
 
   const [newName, setNewName] = useState("");
   const [newFurigana, setNewFurigana] = useState("");
-  const [newGender, setNewGender] = useState<GenderType>(GENDERS.OTHER);
+  const [newGender, setNewGender] = useState<GenderType | "">("");
   const [newRoleIds, setNewRoleIds] = useState<string[]>([]);
 
   const handleAdd = () => {
@@ -23,14 +23,14 @@ const StudentAddForm: React.FC = () => {
       name: newName.trim(),
       furigana: newFurigana.trim(),
       attendanceNumber: students.length + 1,
-      gender: newGender,
+      gender: newGender === "" ? GENDERS.OTHER : newGender,
       roleIds: newRoleIds,
     };
     addStudent(newStudent);
     // Reset form
     setNewName("");
     setNewFurigana("");
-    setNewGender(GENDERS.OTHER);
+    setNewGender("");
     setNewRoleIds([]);
   };
 
@@ -86,20 +86,21 @@ const StudentAddForm: React.FC = () => {
         <div
           style={{ display: "flex", gap: "var(--spacing-sm)", width: "100%" }}
         >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <Select
-              options={GENDER_OPTIONS}
-              value={newGender}
-              onChange={(val) => setNewGender(val as GenderType)}
-            />
-          </div>
-
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 3, minWidth: 0 }}>
             <MultiSelect
               options={roleOptions}
               selectedValues={newRoleIds}
               onChange={setNewRoleIds}
-              placeholder="役割を選択..."
+              placeholder="役割を選択（複数可）"
+            />
+          </div>
+
+          <div style={{ flex: 2, minWidth: 0 }}>
+            <Select
+              options={GENDER_OPTIONS}
+              value={newGender}
+              onChange={(val) => setNewGender(val as GenderType)}
+              placeholder="性別を選択"
             />
           </div>
         </div>
