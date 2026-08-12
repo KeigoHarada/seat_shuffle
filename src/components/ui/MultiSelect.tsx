@@ -110,21 +110,27 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         <div
           style={{
             overflow: "hidden",
-            display: "flex",
-            gap: "4px",
-            flexWrap: "wrap",
-            alignItems: "center",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            flex: 1,
+            textAlign: "left",
           }}
         >
           {selectedValues.length > 0
             ? selectedOptions.map((opt, i) => (
                 <span
                   key={opt.value}
-                  style={{ display: "flex", alignItems: "center", gap: "2px" }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "2px",
+                    verticalAlign: "middle",
+                    marginRight: i < selectedOptions.length - 1 ? "4px" : "0",
+                  }}
                 >
                   {opt.icon}
                   {opt.label}
-                  {i < selectedOptions.length - 1 ? ", " : ""}
+                  {i < selectedOptions.length - 1 ? "," : ""}
                 </span>
               ))
             : placeholder}

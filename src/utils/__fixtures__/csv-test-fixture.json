@@ -33,9 +33,9 @@
   ],
   "groups": [
     {
-      "id": "g1",
+      "id": "group1",
       "name": "1班",
-      "color": "#ff0000",
+      "color": "#FCA5A5",
       "description": "第一グループ"
     }
   ],

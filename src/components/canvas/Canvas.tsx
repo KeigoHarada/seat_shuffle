@@ -12,6 +12,7 @@ import CanvasObjectNode from "./CanvasObjectNode";
 import { useCanvasActions } from "../../hooks/useCanvasActions";
 import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
+import GroupAssignPopover from "./GroupAssignPopover";
 import {
   screenToWorld,
   getSeatDragDisplayProps,
@@ -90,6 +91,9 @@ const Canvas: React.FC = () => {
     x: 0,
     y: 0,
   });
+
+  const [showGroupPopover, setShowGroupPopover] = useState(false);
+  const [groupPopoverPos, setGroupPopoverPos] = useState({ x: 0, y: 0 });
 
   const pointerDownPosRef = useRef({ x: 0, y: 0 });
 
@@ -298,6 +302,12 @@ const Canvas: React.FC = () => {
         onDeleteSelected={handleDeleteSelected}
         onDuplicateSelected={handleDuplicate}
         onUnassignSelected={handleUnassignSelected}
+        onAssignGroupSelected={() => {
+          if (contextMenu) {
+            setGroupPopoverPos({ x: contextMenu.x, y: contextMenu.y });
+            setShowGroupPopover(true);
+          }
+        }}
       />
 
       <div
@@ -374,6 +384,14 @@ const Canvas: React.FC = () => {
         targetSeatId={assignPopoverSeatId}
         x={popoverPos.x}
         y={popoverPos.y}
+      />
+
+      <GroupAssignPopover
+        isOpen={showGroupPopover}
+        onClose={() => setShowGroupPopover(false)}
+        targetSeatIds={selectedIds}
+        x={groupPopoverPos.x}
+        y={groupPopoverPos.y}
       />
     </div>
   );

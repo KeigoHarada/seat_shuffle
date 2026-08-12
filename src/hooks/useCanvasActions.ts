@@ -172,7 +172,8 @@ export const useCanvasActions = (
       isLocked: false,
     };
     addSeat(newSeat);
-  }, [contextMenu, seats, objects, addSeat]);
+    setSelectedIds([newSeat.id]);
+  }, [contextMenu, seats, objects, addSeat, setSelectedIds]);
 
   const handleAddSeatCentered = useCallback(() => {
     const { x: targetX, y: targetY } = getCenterGridPos(
@@ -189,15 +190,17 @@ export const useCanvasActions = (
       objects,
     );
 
+    const newId = crypto.randomUUID();
     addSeat({
-      id: crypto.randomUUID(),
+      id: newId,
       studentId: null,
       groupIds: [],
       x,
       y,
       isLocked: false,
     });
-  }, [viewportRef, pan, scale, seats, objects, addSeat]);
+    setSelectedIds([newId]);
+  }, [viewportRef, pan, scale, seats, objects, addSeat, setSelectedIds]);
 
   const handleAddRectangle = useCallback(() => {
     const { x: targetX, y: targetY } = getCenterGridPos(
@@ -206,15 +209,17 @@ export const useCanvasActions = (
       scale,
     );
     const { x, y } = findEmptyPos(targetX, targetY, 12, 6, seats, objects);
+    const newId = crypto.randomUUID();
     addObject({
-      id: crypto.randomUUID(),
+      id: newId,
       type: "rectangle",
       x,
       y,
       width: 12,
       height: 6,
     });
-  }, [viewportRef, pan, scale, seats, objects, addObject]);
+    setSelectedIds([newId]);
+  }, [viewportRef, pan, scale, seats, objects, addObject, setSelectedIds]);
 
   const handleAddCircle = useCallback(() => {
     const { x: targetX, y: targetY } = getCenterGridPos(
@@ -223,28 +228,90 @@ export const useCanvasActions = (
       scale,
     );
     const { x, y } = findEmptyPos(targetX, targetY, 12, 12, seats, objects);
+    const newId = crypto.randomUUID();
     addObject({
-      id: crypto.randomUUID(),
+      id: newId,
       type: "circle",
       x,
       y,
       width: 12,
       height: 12,
     });
-  }, [viewportRef, pan, scale, seats, objects, addObject]);
+    setSelectedIds([newId]);
+  }, [viewportRef, pan, scale, seats, objects, addObject, setSelectedIds]);
 
   const handleApplyTemplate = useCallback(
     (templateId: string) => {
-      const { x, y } = getCenterGridPos(viewportRef, pan, scale);
-      const { seats: newSeats, objects: newObjects } = generateTemplate(
-        templateId,
-        x,
-        y,
+      const { x: targetX, y: targetY } = getCenterGridPos(
+        viewportRef,
+        pan,
+        scale,
       );
-      newSeats.forEach(addSeat);
-      newObjects.forEach(addObject);
+      const { seats: generatedSeats, objects: generatedObjects } =
+        generateTemplate(templateId, targetX, targetY);
+
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      generatedSeats.forEach((s) => {
+        minX = Math.min(minX, s.x);
+        minY = Math.min(minY, s.y);
+        maxX = Math.max(maxX, s.x + SEAT_COLS);
+        maxY = Math.max(maxY, s.y + SEAT_ROWS);
+      });
+
+      generatedObjects.forEach((o) => {
+        minX = Math.min(minX, o.x);
+        minY = Math.min(minY, o.y);
+        maxX = Math.max(maxX, o.x + o.width);
+        maxY = Math.max(maxY, o.y + o.height);
+      });
+
+      if (minX === Infinity) return;
+
+      const groupWidth = maxX - minX;
+      const groupHeight = maxY - minY;
+
+      const { x: newMinX, y: newMinY } = findEmptyPos(
+        minX,
+        minY,
+        groupWidth,
+        groupHeight,
+        seats,
+        objects,
+      );
+
+      const dx = newMinX - minX;
+      const dy = newMinY - minY;
+
+      const newSelectedIds: string[] = [];
+
+      generatedSeats.forEach((s) => {
+        const newSeat = { ...s, x: s.x + dx, y: s.y + dy };
+        addSeat(newSeat);
+        newSelectedIds.push(newSeat.id);
+      });
+
+      generatedObjects.forEach((o) => {
+        const newObj = { ...o, x: o.x + dx, y: o.y + dy };
+        addObject(newObj);
+        newSelectedIds.push(newObj.id);
+      });
+
+      setSelectedIds(newSelectedIds);
     },
-    [viewportRef, pan, scale, addSeat, addObject],
+    [
+      viewportRef,
+      pan,
+      scale,
+      addSeat,
+      addObject,
+      setSelectedIds,
+      seats,
+      objects,
+    ],
   );
 
   return {

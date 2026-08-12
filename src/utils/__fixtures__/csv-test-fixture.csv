@@ -10,7 +10,7 @@ name,iconName,description
 
 # Groups
 name,color,description
-1班,#ff0000,第一グループ
+1班,#FCA5A5,第一グループ
 
 # Constraints
 type,isEnabled,json_data

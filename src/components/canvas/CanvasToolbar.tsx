@@ -281,12 +281,10 @@ const CanvasToolbar: React.FC<Props> = ({
             }}
           >
             {[
-              { id: "classroom", label: "教室 (7x6)" },
-              { id: "multipurpose", label: "多目的室" },
-              { id: "schooltrip", label: "修学旅行 (バス)" },
+              { id: "classroom", label: "教室" },
               { id: "group4", label: "4人席" },
-              { id: "group6", label: "6人席" },
-              { id: "round", label: "円卓" },
+              { id: "group6_v", label: "6人席（縦）" },
+              { id: "group6_h", label: "6人席（横）" },
             ].map((tpl) => (
               <button
                 key={tpl.id}

@@ -1,16 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 
 export const PREDEFINED_COLORS = [
-  "#3b82f6", // Blue
-  "#ef4444", // Red
-  "#22c55e", // Green
-  "#eab308", // Yellow
-  "#a855f7", // Purple
-  "#ec4899", // Pink
-  "#f97316", // Orange
-  "#14b8a6", // Teal
-  "#6366f1", // Indigo
-  "#64748b", // Gray
+  "#FCA5A5", // Group Pink
+  "#93C5FD", // Group Blue
+  "#86EFAC", // Group Green
+  "#FDE047", // Group Yellow
+  "#D8B4FE", // Group Purple
+  "#FDBA74", // Group Orange
+  "#D1D5DB", // Gray (fallback)
 ];
 
 interface ColorPickerProps {

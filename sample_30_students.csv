@@ -39,12 +39,12 @@ name,iconName,description
 
 # Groups
 name,color,description
-1班,#EF4444,第1グループ
-2班,#3B82F6,第2グループ
-3班,#10B981,第3グループ
-4班,#F59E0B,第4グループ
-5班,#8B5CF6,第5グループ
-6班,#EC4899,第6グループ
+1班,#FCA5A5,第1グループ
+2班,#93C5FD,第2グループ
+3班,#86EFAC,第3グループ
+4班,#FDE047,第4グループ
+5班,#D8B4FE,第5グループ
+6班,#FDBA74,第6グループ
 
 # Constraints
 type,isEnabled,json_data

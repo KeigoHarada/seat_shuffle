@@ -29,7 +29,7 @@ describe("csv", () => {
     expect(csv).toContain("班長,Crown,班のリーダー");
     expect(csv).toContain("副班長,Star,班のサブリーダー");
     expect(csv).toContain("# Groups");
-    expect(csv).toContain("1班,#ff0000,第一グループ");
+    expect(csv).toContain("1班,#FCA5A5,第一グループ");
     expect(csv).toContain("# Constraints");
     expect(csv).toContain("student-student,true");
   });

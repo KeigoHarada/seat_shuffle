@@ -1,5 +1,6 @@
 import React from "react";
 import { useStore } from "../stores";
+import { AVAILABLE_ICONS, IconName } from "./ui/IconPicker";
 import { Seat } from "../types";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
@@ -26,12 +27,22 @@ const SeatNode: React.FC<Props> = ({
 }) => {
   const students = useStore((state) => state.students);
   const groups = useStore((state) => state.groups);
+  const allRoles = useStore((state) => state.roles);
 
   const student = students.find((s) => s.id === seat.studentId);
-  const mainGroup =
-    seat.groupIds.length > 0
-      ? groups.find((g) => g.id === seat.groupIds[0])
-      : null;
+  const seatGroups = groups.filter((g) => seat.groupIds.includes(g.id));
+  const mainGroup = seatGroups.length > 0 ? seatGroups[0] : null;
+
+  const studentRoles = student
+    ? allRoles.filter((r) => student.roleIds?.includes(r.id))
+    : [];
+
+  const getBackgroundColor = () => {
+    if (!mainGroup) return "var(--c-surface)";
+    const c = mainGroup.color;
+    // CSS color-mix to increase lightness by blending with 70% white
+    return `color-mix(in srgb, ${c} 30%, white)`;
+  };
 
   const style: React.CSSProperties = {
     position: "absolute",
@@ -39,11 +50,11 @@ const SeatNode: React.FC<Props> = ({
     top: seat.y * GRID_SIZE + 4,
     width: SEAT_COLS * GRID_SIZE - 8,
     height: SEAT_ROWS * GRID_SIZE - 8,
-    backgroundColor: mainGroup ? mainGroup.color : "var(--c-surface)",
+    backgroundColor: getBackgroundColor(),
     border: isSelected
       ? "2px solid var(--c-primary)"
       : mainGroup
-        ? "none"
+        ? "1px solid var(--c-border)"
         : "1px solid var(--c-border)",
     borderRadius: "var(--radius-md)",
     boxShadow: isDragging
@@ -82,10 +93,27 @@ const SeatNode: React.FC<Props> = ({
         <>
           <div
             style={{
+              position: "absolute",
+              top: 4,
+              left: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              color: "var(--c-text-sub)",
+              lineHeight: 1,
+            }}
+          >
+            {student.attendanceNumber}
+          </div>
+          <div
+            style={{
               fontSize: 10,
               color: "var(--c-text-sub)",
               lineHeight: 1,
               marginBottom: 2,
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {student.furigana || " "}
@@ -96,14 +124,88 @@ const SeatNode: React.FC<Props> = ({
               fontWeight: 500,
               color: "var(--c-text-main)",
               lineHeight: 1.2,
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {student.name}
           </div>
+          {studentRoles.length > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: 4,
+                right: 4,
+                display: "flex",
+                gap: 2,
+                color: "var(--c-text-sub)",
+                alignItems: "center",
+              }}
+            >
+              {studentRoles.slice(0, 3).map((role) => {
+                const IconComp =
+                  AVAILABLE_ICONS[role.iconName as IconName] ||
+                  AVAILABLE_ICONS.Star;
+                return (
+                  <div
+                    key={role.id}
+                    title={role.name}
+                    style={{ display: "flex" }}
+                  >
+                    <IconComp size={12} />
+                  </div>
+                );
+              })}
+              {studentRoles.length > 3 && (
+                <span style={{ fontSize: 10, lineHeight: 1 }}>...</span>
+              )}
+            </div>
+          )}
         </>
       ) : (
         <div style={{ fontSize: 12, color: "var(--c-text-sub)" }}>空席</div>
       )}
+
+      {seatGroups.length > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: 4,
+            right: 4,
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+          }}
+        >
+          {seatGroups.slice(0, 3).map((group) => (
+            <div
+              key={group.id}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                backgroundColor: group.color,
+                border: "1px solid rgba(0,0,0,0.1)",
+              }}
+              title={group.name}
+            />
+          ))}
+          {seatGroups.length > 3 && (
+            <span
+              style={{
+                fontSize: 10,
+                color: "var(--c-text-sub)",
+                lineHeight: 1,
+              }}
+            >
+              ...
+            </span>
+          )}
+        </div>
+      )}
+
       {seat.isLocked && (
         <div style={{ position: "absolute", top: -5, right: -5, fontSize: 12 }}>
           🔒
