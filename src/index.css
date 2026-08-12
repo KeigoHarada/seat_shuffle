@@ -108,12 +108,13 @@ body {
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
-  border: none;
+  border: 1px solid transparent;
   box-shadow: var(--shadow-1);
 }
 .btn-primary {
   background-color: var(--c-primary);
   color: var(--c-text-inverse);
+  border-color: var(--c-primary);
 }
 .btn-primary:hover {
   background-color: var(--c-primary-hover);
