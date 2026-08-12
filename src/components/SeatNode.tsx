@@ -48,12 +48,10 @@ const SeatNode: React.FC<Props> = ({
       ? "var(--shadow-3)"
       : isSwapTarget
         ? "0 0 0 3px var(--c-primary)"
-        : isSelected
-          ? "0 0 0 2px rgba(59, 130, 246, 0.5)"
-          : "var(--shadow-1)",
+        : "var(--shadow-1)",
     transform: isSwapTarget ? "scale(1.02)" : "none",
     opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 10 : isSelected ? 6 : isSwapTarget ? 5 : 1,
+    zIndex: isDragging ? 15 : isSelected ? 12 : isSwapTarget ? 11 : 10,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

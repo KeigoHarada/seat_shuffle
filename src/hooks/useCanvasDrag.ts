@@ -7,34 +7,7 @@ if (typeof window !== "undefined") {
   emptyImage.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 }
 
-export interface DragNode {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  isSeat: boolean;
-  isLocked?: boolean;
-}
-
-export const checkCollision = (
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  excludeId: string,
-  nodes: DragNode[],
-) => {
-  return nodes.find(
-    (n) =>
-      n.isSeat &&
-      n.id !== excludeId &&
-      x < n.x + n.width &&
-      x + width > n.x &&
-      y < n.y + n.height &&
-      y + height > n.y,
-  );
-};
+import { DragNode, checkCollision, screenToWorld } from "../utils/canvas";
 
 export const useCanvasDrag = (
   seats: Seat[],
@@ -44,6 +17,7 @@ export const useCanvasDrag = (
   pan: { x: number; y: number },
   scale: number,
   viewportRef: React.RefObject<HTMLDivElement | null>,
+  selectedIds: string[],
 ) => {
   const nodes: DragNode[] = useMemo(() => {
     return [
@@ -68,15 +42,15 @@ export const useCanvasDrag = (
   }, [seats, objects]);
 
   const [dragState, setDragState] = useState<{
-    id: string;
-    width: number;
-    height: number;
-    visualX: number;
-    visualY: number;
-    validX: number;
-    validY: number;
+    baseId: string;
+    draggedIds: string[];
+    startX: number;
+    startY: number;
+    visualDeltaX: number;
+    visualDeltaY: number;
+    validDeltaX: number;
+    validDeltaY: number;
     isSwapMode: boolean;
-    isSeat: boolean;
   } | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
@@ -85,16 +59,18 @@ export const useCanvasDrag = (
       const node = nodes.find((n) => n.id === id);
       if (!node) return;
 
+      const draggedIds = selectedIds.includes(id) ? selectedIds : [id];
+
       setDragState({
-        id,
-        width: node.width,
-        height: node.height,
-        visualX: node.x,
-        visualY: node.y,
-        validX: node.x,
-        validY: node.y,
+        baseId: id,
+        draggedIds,
+        startX: node.x,
+        startY: node.y,
+        visualDeltaX: 0,
+        visualDeltaY: 0,
+        validDeltaX: 0,
+        validDeltaY: 0,
         isSwapMode: false,
-        isSeat: node.isSeat,
       });
 
       e.dataTransfer.setData("text/plain", id);
@@ -107,60 +83,87 @@ export const useCanvasDrag = (
         y: e.clientY - rect.top,
       });
     },
-    [nodes],
+    [nodes, selectedIds],
   );
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      const isSwapMode = e.ctrlKey || e.metaKey;
+      let isSwapMode = e.ctrlKey || e.metaKey;
       e.dataTransfer.dropEffect = isSwapMode ? "copy" : "move";
 
       if (dragState && viewportRef.current) {
         const rect = viewportRef.current.getBoundingClientRect();
-        const dropX = (e.clientX - rect.left - pan.x - dragOffset.x) / scale;
-        const dropY = (e.clientY - rect.top - pan.y - dragOffset.y) / scale;
+        const { worldX: dropX, worldY: dropY } = screenToWorld(
+          e.clientX - dragOffset.x,
+          e.clientY - dragOffset.y,
+          rect,
+          pan,
+          scale,
+        );
 
-        const newX = Math.max(0, Math.round(dropX / GRID_SIZE));
-        const newY = Math.max(0, Math.round(dropY / GRID_SIZE));
+        const newBaseX = Math.round(dropX / GRID_SIZE);
+        const newBaseY = Math.round(dropY / GRID_SIZE);
 
-        const collision = dragState.isSeat
-          ? checkCollision(
-              newX,
-              newY,
-              dragState.width,
-              dragState.height,
-              dragState.id,
+        const visualDeltaX = newBaseX - dragState.startX;
+        const visualDeltaY = newBaseY - dragState.startY;
+
+        const checkGroupCollision = (dx: number, dy: number) => {
+          for (const dragId of dragState.draggedIds) {
+            const n = nodes.find((no) => no.id === dragId);
+            if (!n || !n.isSeat) continue;
+
+            const hit = checkCollision(
+              n.x + dx,
+              n.y + dy,
+              n.width,
+              n.height,
+              dragState.draggedIds,
               nodes,
-            )
-          : undefined;
+            );
+            if (hit) return true;
+          }
+          return false;
+        };
 
-        const nextValidX = collision ? dragState.validX : newX;
-        const nextValidY = collision ? dragState.validY : newY;
+        let nextValidDeltaX = dragState.validDeltaX;
+        let nextValidDeltaY = dragState.validDeltaY;
 
-        // If swap mode is enabled, only allow swap if both are seats
-        let actualSwapMode = isSwapMode;
+        if (!checkGroupCollision(visualDeltaX, visualDeltaY)) {
+          nextValidDeltaX = visualDeltaX;
+          nextValidDeltaY = visualDeltaY;
+        } else if (!checkGroupCollision(visualDeltaX, dragState.validDeltaY)) {
+          nextValidDeltaX = visualDeltaX;
+        } else if (!checkGroupCollision(dragState.validDeltaX, visualDeltaY)) {
+          nextValidDeltaY = visualDeltaY;
+        }
+
+        // If swap mode is enabled, only allow swap if dragging a single seat
         if (isSwapMode) {
-          const draggingNode = nodes.find((n) => n.id === dragState.id);
-          if (!draggingNode || !draggingNode.isSeat) {
-            actualSwapMode = false;
+          if (dragState.draggedIds.length > 1) {
+            isSwapMode = false;
+          } else {
+            const draggingNode = nodes.find((n) => n.id === dragState.baseId);
+            if (!draggingNode || !draggingNode.isSeat) {
+              isSwapMode = false;
+            }
           }
         }
 
         if (
-          newX !== dragState.visualX ||
-          newY !== dragState.visualY ||
-          nextValidX !== dragState.validX ||
-          nextValidY !== dragState.validY ||
-          actualSwapMode !== dragState.isSwapMode
+          visualDeltaX !== dragState.visualDeltaX ||
+          visualDeltaY !== dragState.visualDeltaY ||
+          nextValidDeltaX !== dragState.validDeltaX ||
+          nextValidDeltaY !== dragState.validDeltaY ||
+          isSwapMode !== dragState.isSwapMode
         ) {
           setDragState({
             ...dragState,
-            visualX: newX,
-            visualY: newY,
-            validX: nextValidX,
-            validY: nextValidY,
-            isSwapMode: actualSwapMode,
+            visualDeltaX,
+            visualDeltaY,
+            validDeltaX: nextValidDeltaX,
+            validDeltaY: nextValidDeltaY,
+            isSwapMode,
           });
         }
       }
@@ -173,22 +176,26 @@ export const useCanvasDrag = (
       e.preventDefault();
       if (!dragState) return;
 
-      const draggingNode = nodes.find((n) => n.id === dragState.id);
+      const draggingNode = nodes.find((n) => n.id === dragState.baseId);
       if (!draggingNode) {
         setDragState(null);
         return;
       }
 
       if (dragState.isSwapMode && draggingNode.isSeat) {
-        const cx = Math.floor(dragState.visualX + draggingNode.width / 2);
-        const cy = Math.floor(dragState.visualY + draggingNode.height / 2);
+        const cx = Math.floor(
+          draggingNode.x + dragState.visualDeltaX + draggingNode.width / 2,
+        );
+        const cy = Math.floor(
+          draggingNode.y + dragState.visualDeltaY + draggingNode.height / 2,
+        );
         const targetNode = nodes.find(
           (n) =>
             cx >= n.x &&
             cx < n.x + n.width &&
             cy >= n.y &&
             cy < n.y + n.height &&
-            n.id !== dragState.id,
+            n.id !== dragState.baseId,
         );
 
         if (
@@ -205,23 +212,24 @@ export const useCanvasDrag = (
           }
         } else {
           // Swap failed, fallback to valid position
-          updateSeat(dragState.id, {
-            x: dragState.validX,
-            y: dragState.validY,
+          updateSeat(dragState.baseId, {
+            x: draggingNode.x + dragState.validDeltaX,
+            y: draggingNode.y + dragState.validDeltaY,
           });
         }
       } else {
-        if (draggingNode.isSeat) {
-          updateSeat(dragState.id, {
-            x: dragState.validX,
-            y: dragState.validY,
-          });
-        } else {
-          updateObject(dragState.id, {
-            x: dragState.validX,
-            y: dragState.validY,
-          });
-        }
+        dragState.draggedIds.forEach((id) => {
+          const node = nodes.find((n) => n.id === id);
+          if (node) {
+            const finalX = node.x + dragState.validDeltaX;
+            const finalY = node.y + dragState.validDeltaY;
+            if (node.isSeat) {
+              updateSeat(id, { x: finalX, y: finalY });
+            } else {
+              updateObject(id, { x: finalX, y: finalY });
+            }
+          }
+        });
       }
 
       setDragState(null);

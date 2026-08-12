@@ -110,60 +110,80 @@ const CanvasObjectNode: React.FC<Props> = ({
         top: obj.y * GRID_SIZE,
         width: obj.width * GRID_SIZE,
         height: obj.height * GRID_SIZE,
-        backgroundColor: "var(--c-surface)",
-        border: isSelected
-          ? "2px solid var(--c-primary)"
-          : "2px solid var(--c-border)",
-        borderRadius: isCircle ? "50%" : "var(--radius-md)",
+        backgroundColor: "rgba(0, 0, 0, 0.001)", // Invisible hit-area for draggable
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         boxSizing: "border-box",
         userSelect: "none",
-        zIndex: isSelected ? 6 : 0,
-        boxShadow: isDragging
-          ? "var(--shadow-lg)"
-          : isSelected
-            ? "0 0 0 2px rgba(59, 130, 246, 0.5)"
-            : "var(--shadow-sm)",
+        zIndex: isDragging ? 2 : isSelected ? 1 : 0,
         opacity: isDragging ? 0.8 : 1,
         cursor: isEditing ? "text" : "grab",
-        transition: isDragging ? "none" : "box-shadow 0.2s, border-color 0.2s",
       }}
     >
-      {isEditing ? (
-        <input
-          autoFocus
-          value={textValue}
-          onChange={(e) => setTextValue(e.target.value)}
-          onBlur={handleTextBlur}
-          onKeyDown={handleTextKeyDown}
-          onPointerDown={(e) => e.stopPropagation()}
-          style={{
-            width: "80%",
-            textAlign: "center",
-            fontSize: 14,
-            fontWeight: "bold",
-            border: "1px solid var(--c-primary)",
-            borderRadius: "var(--radius-sm)",
-            outline: "none",
-            backgroundColor: "transparent",
-            color: "var(--c-text-main)",
-          }}
-        />
-      ) : (
-        obj.text && (
-          <span
+      {/* Visual Background Layer */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "var(--c-surface)",
+          border: isSelected
+            ? "2px solid var(--c-primary)"
+            : "1px solid var(--c-border)",
+          borderRadius: isCircle ? "50%" : "var(--radius-md)",
+          boxShadow: isDragging ? "var(--shadow-3)" : "var(--shadow-1)",
+          transition: isDragging
+            ? "none"
+            : "box-shadow 0.2s, border-color 0.2s",
+          pointerEvents: "none", // Let the outer div handle interactions
+        }}
+      />
+
+      {/* Text Content Layer */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        {isEditing ? (
+          <input
+            autoFocus
+            value={textValue}
+            onChange={(e) => setTextValue(e.target.value)}
+            onBlur={handleTextBlur}
+            onKeyDown={handleTextKeyDown}
+            onPointerDown={(e) => e.stopPropagation()}
             style={{
-              color: "var(--c-text-main)",
+              width: "80%",
+              textAlign: "center",
               fontSize: 14,
               fontWeight: "bold",
+              border: "1px solid var(--c-primary)",
+              borderRadius: "var(--radius-sm)",
+              outline: "none",
+              backgroundColor: "transparent",
+              color: "var(--c-text-main)",
             }}
-          >
-            {obj.text}
-          </span>
-        )
-      )}
+          />
+        ) : (
+          obj.text && (
+            <span
+              style={{
+                color: "var(--c-text-main)",
+                fontSize: 14,
+                fontWeight: "bold",
+                pointerEvents: "none",
+              }}
+            >
+              {obj.text}
+            </span>
+          )
+        )}
+      </div>
 
       {/* Resize Handle */}
       {!isEditing && (

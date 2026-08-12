@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useStore } from "../../stores";
 import SeatNode from "../SeatNode";
-import { Seat } from "../../types";
-import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../../constants/canvas";
+import { GRID_SIZE } from "../../constants/canvas";
 import { usePanZoom } from "../../hooks/usePanZoom";
 import { useCanvasDrag } from "../../hooks/useCanvasDrag";
 import { useSelection } from "../../hooks/useSelection";
@@ -10,7 +9,13 @@ import CanvasControls from "./CanvasControls";
 
 import CanvasToolbar from "./CanvasToolbar";
 import CanvasObjectNode from "./CanvasObjectNode";
-import { generateTemplate } from "../../utils/templates";
+import { useCanvasActions } from "../../hooks/useCanvasActions";
+import CanvasContextMenu from "./CanvasContextMenu";
+import {
+  screenToWorld,
+  getSeatDragDisplayProps,
+  getObjectDragDisplayProps,
+} from "../../utils/canvas";
 
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);
@@ -37,6 +42,17 @@ const Canvas: React.FC = () => {
   } = usePanZoom();
 
   const {
+    selectedIds,
+    selectionBox,
+    toggleSelection,
+    selectOnly,
+    clearSelection,
+    startSelectionBox,
+    updateSelectionBox,
+    endSelectionBox,
+  } = useSelection(seats, objects);
+
+  const {
     dragState,
     handleDragStart,
     handleDragOver,
@@ -50,18 +66,8 @@ const Canvas: React.FC = () => {
     pan,
     scale,
     viewportRef,
-  );
-
-  const {
     selectedIds,
-    selectionBox,
-    toggleSelection,
-    selectOnly,
-    clearSelection,
-    startSelectionBox,
-    updateSelectionBox,
-    endSelectionBox,
-  } = useSelection(seats, objects);
+  );
 
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -113,124 +119,28 @@ const Canvas: React.FC = () => {
     [selectedIds, toggleSelection, selectOnly],
   );
 
-  const handleDeleteSelected = useCallback(() => {
-    selectedIds.forEach((id) => {
-      removeSeat(id);
-      removeObject(id);
-    });
-    clearSelection();
-    setContextMenu(null);
-  }, [selectedIds, removeSeat, removeObject, clearSelection]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Delete" || e.key === "Backspace") {
-        if (
-          e.target instanceof HTMLInputElement ||
-          e.target instanceof HTMLTextAreaElement
-        )
-          return;
-        handleDeleteSelected();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleDeleteSelected]);
-
-  const handleAddSeatFromMenu = () => {
-    if (!contextMenu) return;
-
-    const x = Math.floor(contextMenu.worldX / GRID_SIZE);
-    const y = Math.floor(contextMenu.worldY / GRID_SIZE);
-
-    const collision = seats.find(
-      (s) =>
-        x < s.x + SEAT_COLS &&
-        x + SEAT_COLS > s.x &&
-        y < s.y + SEAT_ROWS &&
-        y + SEAT_ROWS > s.y,
-    );
-    if (!collision) {
-      const newSeat: Seat = {
-        id: crypto.randomUUID(),
-        studentId: null,
-        groupIds: [],
-        x,
-        y,
-        isLocked: false,
-      };
-      addSeat(newSeat);
-    }
-  };
-
-  const getCenterGridPos = () => {
-    if (!viewportRef.current) return { x: 0, y: 0 };
-    const rect = viewportRef.current.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const worldX = (centerX - pan.x) / scale;
-    const worldY = (centerY - pan.y) / scale;
-    return {
-      x: Math.max(0, Math.floor(worldX / GRID_SIZE)),
-      y: Math.max(0, Math.floor(worldY / GRID_SIZE)),
-    };
-  };
-
-  const handleAddSeatCentered = () => {
-    const { x, y } = getCenterGridPos();
-    const collision = seats.find(
-      (s) =>
-        x < s.x + SEAT_COLS &&
-        x + SEAT_COLS > s.x &&
-        y < s.y + SEAT_ROWS &&
-        y + SEAT_ROWS > s.y,
-    );
-    if (!collision) {
-      addSeat({
-        id: crypto.randomUUID(),
-        studentId: null,
-        groupIds: [],
-        x,
-        y,
-        isLocked: false,
-      });
-    }
-  };
-
-  const handleAddRectangle = () => {
-    const { x, y } = getCenterGridPos();
-    addObject({
-      id: crypto.randomUUID(),
-      type: "rectangle",
-      x,
-      y,
-      width: 12,
-      height: 6,
-    });
-  };
-
-  const handleAddCircle = () => {
-    const { x, y } = getCenterGridPos();
-    addObject({
-      id: crypto.randomUUID(),
-      type: "circle",
-      x,
-      y,
-      width: 12,
-      height: 12,
-    });
-  };
-
-  const handleApplyTemplate = (templateId: string) => {
-    const { x, y } = getCenterGridPos();
-    const { seats: newSeats, objects: newObjects } = generateTemplate(
-      templateId,
-      x,
-      y,
-    );
-    newSeats.forEach(addSeat);
-    newObjects.forEach(addObject);
-  };
+  const {
+    handleDeleteSelected,
+    handleAddSeatFromMenu,
+    handleAddSeatCentered,
+    handleAddRectangle,
+    handleAddCircle,
+    handleApplyTemplate,
+  } = useCanvasActions(
+    seats,
+    objects,
+    addSeat,
+    removeSeat,
+    addObject,
+    removeObject,
+    selectedIds,
+    clearSelection,
+    contextMenu,
+    setContextMenu,
+    viewportRef,
+    pan,
+    scale,
+  );
 
   const isMarqueeRef = useRef(false);
   const initialCtrlPressedRef = useRef(false);
@@ -256,8 +166,13 @@ const Canvas: React.FC = () => {
       initialSelectedIdsRef.current = [];
 
       const rect = viewportRef.current!.getBoundingClientRect();
-      const worldX = (e.clientX - rect.left - pan.x) / scale;
-      const worldY = (e.clientY - rect.top - pan.y) / scale;
+      const { worldX, worldY } = screenToWorld(
+        e.clientX,
+        e.clientY,
+        rect,
+        pan,
+        scale,
+      );
       startSelectionBox(worldX, worldY);
     }
   };
@@ -266,8 +181,13 @@ const Canvas: React.FC = () => {
     handlePointerMove(e);
     if (isMarqueeRef.current && viewportRef.current) {
       const rect = viewportRef.current.getBoundingClientRect();
-      const worldX = (e.clientX - rect.left - pan.x) / scale;
-      const worldY = (e.clientY - rect.top - pan.y) / scale;
+      const { worldX, worldY } = screenToWorld(
+        e.clientX,
+        e.clientY,
+        rect,
+        pan,
+        scale,
+      );
       updateSelectionBox(
         worldX,
         worldY,
@@ -291,11 +211,18 @@ const Canvas: React.FC = () => {
       if (dx * dx + dy * dy <= 25) {
         const rect = viewportRef.current?.getBoundingClientRect();
         if (rect) {
+          const { worldX, worldY } = screenToWorld(
+            e.clientX,
+            e.clientY,
+            rect,
+            pan,
+            scale,
+          );
           setContextMenu({
             x: e.clientX - rect.left,
             y: e.clientY - rect.top,
-            worldX: (e.clientX - rect.left - pan.x) / scale,
-            worldY: (e.clientY - rect.top - pan.y) / scale,
+            worldX,
+            worldY,
           });
         }
       }
@@ -322,80 +249,13 @@ const Canvas: React.FC = () => {
       />
       <CanvasControls scale={scale} onResetView={resetView} />
 
-      {contextMenu && (
-        <div
-          style={{
-            position: "absolute",
-            left: contextMenu.x,
-            top: contextMenu.y,
-            backgroundColor: "var(--c-surface)",
-            border: "1px solid var(--c-border)",
-            borderRadius: "var(--radius-md)",
-            boxShadow: "var(--shadow-lg)",
-            padding: "4px 0",
-            zIndex: 1000,
-            minWidth: 150,
-            display: "flex",
-            flexDirection: "column",
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => {
-              handleAddSeatFromMenu();
-              setContextMenu(null);
-            }}
-            style={{
-              padding: "8px 16px",
-              textAlign: "left",
-              background: "none",
-              border: "none",
-              color: "var(--c-text-main)",
-              fontSize: 14,
-              cursor: "pointer",
-              transition: "background-color 0.1s",
-              width: "100%",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "transparent")
-            }
-          >
-            座席を新規作成
-          </button>
-
-          {selectedIds.length > 0 && (
-            <button
-              onClick={() => {
-                handleDeleteSelected();
-                setContextMenu(null);
-              }}
-              style={{
-                padding: "8px 16px",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                color: "var(--c-danger)",
-                fontSize: 14,
-                cursor: "pointer",
-                transition: "background-color 0.1s",
-                width: "100%",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--c-surface-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
-            >
-              削除
-            </button>
-          )}
-        </div>
-      )}
+      <CanvasContextMenu
+        contextMenu={contextMenu}
+        onClose={() => setContextMenu(null)}
+        onAddSeat={handleAddSeatFromMenu}
+        hasSelection={selectedIds.length > 0}
+        onDeleteSelected={handleDeleteSelected}
+      />
 
       <div
         style={{
@@ -410,10 +270,10 @@ const Canvas: React.FC = () => {
         }}
       >
         {objects.map((obj) => {
-          const isDragging = dragState?.id === obj.id;
-          const displayObj = isDragging
-            ? { ...obj, x: dragState.visualX, y: dragState.visualY }
-            : obj;
+          const { displayObj, isDragging } = getObjectDragDisplayProps(
+            obj,
+            dragState,
+          );
 
           return (
             <CanvasObjectNode
@@ -430,30 +290,8 @@ const Canvas: React.FC = () => {
           );
         })}
         {seats.map((seat) => {
-          const isDragging = dragState?.id === seat.id;
-          let displaySeat = seat;
-          let isSwapTarget = false;
-
-          if (isDragging && dragState) {
-            const renderX = dragState.isSwapMode
-              ? dragState.visualX
-              : dragState.validX;
-            const renderY = dragState.isSwapMode
-              ? dragState.visualY
-              : dragState.validY;
-            displaySeat = { ...seat, x: renderX, y: renderY };
-          } else if (dragState?.isSwapMode) {
-            const cx = Math.floor(dragState.visualX + SEAT_COLS / 2);
-            const cy = Math.floor(dragState.visualY + SEAT_ROWS / 2);
-            if (
-              cx >= seat.x &&
-              cx < seat.x + SEAT_COLS &&
-              cy >= seat.y &&
-              cy < seat.y + SEAT_ROWS
-            ) {
-              isSwapTarget = true;
-            }
-          }
+          const { displaySeat, isSwapTarget, isDragging } =
+            getSeatDragDisplayProps(seat, dragState, seats);
 
           return (
             <SeatNode
