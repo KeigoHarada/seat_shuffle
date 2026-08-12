@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useStore } from "../../stores";
 import { GRID_SIZE } from "../../constants/canvas";
 import { usePanZoom } from "../../hooks/usePanZoom";
@@ -12,8 +12,10 @@ import { useCanvasActions } from "../../hooks/useCanvasActions";
 import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
 import GroupAssignPopover from "./GroupAssignPopover";
-import { screenToWorld } from "../../utils/canvas";
 import { showToast } from "../../stores/toast";
+import { assignStudentsRandomly } from "../../utils/algorithm";
+import { useCanvasPointerEvents } from "../../hooks/useCanvasPointerEvents";
+import { useNodeEvents } from "../../hooks/useNodeEvents";
 
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);
@@ -95,8 +97,6 @@ const Canvas: React.FC = () => {
   const [showGroupPopover, setShowGroupPopover] = useState(false);
   const [groupPopoverPos, setGroupPopoverPos] = useState({ x: 0, y: 0 });
 
-  const pointerDownPosRef = useRef({ x: 0, y: 0 });
-
   const viewportStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
@@ -120,45 +120,18 @@ const Canvas: React.FC = () => {
           : "default",
   };
 
-  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleNodePointerDown = useCallback(
-    (id: string, e: React.PointerEvent) => {
-      e.stopPropagation();
-      pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
-      if (e.ctrlKey || e.metaKey) {
-        toggleSelection(id);
-      } else if (!selectedIds.includes(id)) {
-        selectOnly(id);
-      }
-    },
-    [selectedIds, toggleSelection, selectOnly],
-  );
-
-  const handleSeatDoubleClick = useCallback(
-    (id: string, e: React.MouseEvent) => {
-      e.stopPropagation();
-      const seat = seats.find((s) => s.id === id);
-      if (seat && !seat.studentId) {
-        const rect = viewportRef.current?.getBoundingClientRect();
-        if (rect) {
-          setPopoverPos({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-          });
-        }
-        setAssignPopoverSeatId(id);
-      } else if (seat && seat.studentId) {
-        setIsSettingsOpen(true);
-        setActiveSettingsTab("students");
-        setHighlightedStudentId(seat.studentId);
-      }
-    },
-    [seats, setIsSettingsOpen, setActiveSettingsTab, setHighlightedStudentId],
-  );
+  const { handleNodePointerDown, handleSeatDoubleClick } = useNodeEvents({
+    seats,
+    selectedIds,
+    toggleSelection,
+    selectOnly,
+    viewportRef,
+    setPopoverPos,
+    setAssignPopoverSeatId,
+    setIsSettingsOpen,
+    setActiveSettingsTab,
+    setHighlightedStudentId,
+  });
 
   const {
     handleDeleteSelected,
@@ -189,123 +162,58 @@ const Canvas: React.FC = () => {
   );
 
   const handleAutoAssign = useCallback(() => {
-    const assignedStudentIds = new Set(
-      seats.map((s) => s.studentId).filter(Boolean),
-    );
-    const unassignedStudents = students.filter(
-      (s) => !assignedStudentIds.has(s.id),
-    );
+    const { assignments, error } = assignStudentsRandomly(seats, students);
 
-    const availableSeats = seats.filter((s) => !s.studentId && !s.isLocked);
-
-    if (unassignedStudents.length === 0) {
-      showToast.info("割り当て待ちの生徒がいません。");
+    if (error) {
+      if (error.includes("空席")) {
+        showToast.error(error);
+      } else {
+        showToast.info(error);
+      }
       return;
     }
 
-    if (availableSeats.length === 0) {
-      showToast.error("空席がありません。座席を追加してください。");
-      return;
-    }
+    assignments.forEach(({ seatId, studentId }) => {
+      updateSeat(seatId, { studentId });
+    });
 
-    const shuffledStudents = [...unassignedStudents].sort(
-      () => Math.random() - 0.5,
-    );
-    const shuffledSeats = [...availableSeats].sort(() => Math.random() - 0.5);
-
-    const assignCount = Math.min(shuffledStudents.length, shuffledSeats.length);
-    for (let i = 0; i < assignCount; i++) {
-      updateSeat(shuffledSeats[i].id, { studentId: shuffledStudents[i].id });
-    }
-    showToast.success(`${assignCount}人の生徒を自動割り当てしました！`);
+    showToast.success(`${assignments.length}人の生徒を自動割り当てしました！`);
   }, [seats, students, updateSeat]);
 
-  const isMarqueeRef = useRef(false);
-  const initialCtrlPressedRef = useRef(false);
-  const initialSelectedIdsRef = useRef<string[]>([]);
+  const {
+    handleContextMenu,
+    onCanvasPointerDown,
+    onCanvasPointerMove,
+    onCanvasPointerUp,
+  } = useCanvasPointerEvents({
+    canvasTool,
+    isSpaceMode,
+    pan,
+    scale,
+    viewportRef,
+    clearSelection,
+    startSelectionBox,
+    updateSelectionBox,
+    endSelectionBox,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    setContextMenu,
+  });
 
-  const onCanvasPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
-    setContextMenu(null);
-    if (e.target !== e.currentTarget) return;
+  const selectedSeats = selectedIds
+    .map((id) => seats.find((s) => s.id === id))
+    .filter((s): s is typeof s & {} => s !== undefined);
 
-    if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
-      clearSelection();
-    }
-
-    const forcePan = isSpaceMode || canvasTool === "hand";
-    const panStarted = handlePointerDown(e, forcePan);
-    if (panStarted) return;
-
-    if (e.button === 0 && canvasTool === "select" && !isSpaceMode) {
-      e.currentTarget.setPointerCapture(e.pointerId);
-      isMarqueeRef.current = true;
-      initialCtrlPressedRef.current = false;
-      initialSelectedIdsRef.current = [];
-
-      const rect = viewportRef.current!.getBoundingClientRect();
-      const { worldX, worldY } = screenToWorld(
-        e.clientX,
-        e.clientY,
-        rect,
-        pan,
-        scale,
-      );
-      startSelectionBox(worldX, worldY);
-    }
-  };
-
-  const onCanvasPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    handlePointerMove(e);
-    if (isMarqueeRef.current && viewportRef.current) {
-      const rect = viewportRef.current.getBoundingClientRect();
-      const { worldX, worldY } = screenToWorld(
-        e.clientX,
-        e.clientY,
-        rect,
-        pan,
-        scale,
-      );
-      updateSelectionBox(
-        worldX,
-        worldY,
-        initialCtrlPressedRef.current,
-        initialSelectedIdsRef.current,
-      );
-    }
-  };
-
-  const onCanvasPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    handlePointerUp(e);
-    if (isMarqueeRef.current) {
-      isMarqueeRef.current = false;
-      endSelectionBox();
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    }
-
-    if (e.button === 2) {
-      const dx = e.clientX - pointerDownPosRef.current.x;
-      const dy = e.clientY - pointerDownPosRef.current.y;
-      if (dx * dx + dy * dy <= 25) {
-        const rect = viewportRef.current?.getBoundingClientRect();
-        if (rect) {
-          const { worldX, worldY } = screenToWorld(
-            e.clientX,
-            e.clientY,
-            rect,
-            pan,
-            scale,
-          );
-          setContextMenu({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-            worldX,
-            worldY,
-          });
-        }
-      }
-    }
-  };
+  const hasSelectedSeats = selectedSeats.length > 0;
+  const occupiedSelectedSeats = selectedSeats.filter((s) => s.studentId);
+  const hasOccupiedSeats = occupiedSelectedSeats.length > 0;
+  const isAllSelectedLocked =
+    hasOccupiedSeats && occupiedSelectedSeats.every((s) => s.isLocked);
+  const hasSingleEmptySeat =
+    selectedIds.length === 1 &&
+    selectedSeats.length === 1 &&
+    !selectedSeats[0].studentId;
 
   return (
     <div
@@ -342,21 +250,10 @@ const Canvas: React.FC = () => {
             setShowGroupPopover(true);
           }
         }}
-        isAllSelectedLocked={selectedIds
-          .map((id) => seats.find((s) => s.id === id))
-          .filter((seat) => seat && seat.studentId)
-          .every((seat) => seat?.isLocked)}
-        hasSelectedSeats={selectedIds.some((id) =>
-          seats.some((s) => s.id === id),
-        )}
-        hasOccupiedSeats={selectedIds.some((id) => {
-          const seat = seats.find((s) => s.id === id);
-          return seat && seat.studentId;
-        })}
-        hasSingleEmptySeat={
-          selectedIds.length === 1 &&
-          seats.some((s) => s.id === selectedIds[0] && !s.studentId)
-        }
+        isAllSelectedLocked={isAllSelectedLocked}
+        hasSelectedSeats={hasSelectedSeats}
+        hasOccupiedSeats={hasOccupiedSeats}
+        hasSingleEmptySeat={hasSingleEmptySeat}
         onAssignStudentSelected={() => {
           if (contextMenu && selectedIds.length === 1) {
             setPopoverPos({ x: contextMenu.x, y: contextMenu.y });
