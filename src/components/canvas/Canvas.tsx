@@ -33,6 +33,7 @@ const Canvas: React.FC = () => {
     (state) => state.setHighlightedStudentId,
   );
   const students = useStore((state) => state.students);
+  const isViewMode = useStore((state) => state.isViewMode);
 
   const {
     pan,
@@ -61,13 +62,9 @@ const Canvas: React.FC = () => {
 
   const {
     dragState,
-    handleDragStart,
-    handleDragOver,
-    handleDrop,
-    handleDragEnd,
-    handleSwapPointerDown,
-    handleSwapPointerMove,
-    handleSwapPointerUp,
+    handleNodeDragPointerDown,
+    handleNodeDragPointerMove,
+    handleNodeDragPointerUp,
   } = useCanvasDrag(
     seats,
     objects,
@@ -115,7 +112,7 @@ const Canvas: React.FC = () => {
       ? "grabbing"
       : isZoomMode
         ? "zoom-in"
-        : isSpaceMode || canvasTool === "hand"
+        : isSpaceMode || canvasTool === "hand" || isViewMode
           ? "grab"
           : "default",
   };
@@ -129,6 +126,7 @@ const Canvas: React.FC = () => {
   } = useCanvasPointerEvents({
     canvasTool,
     isSpaceMode,
+    isViewMode,
     pan,
     scale,
     viewportRef,
@@ -221,21 +219,21 @@ const Canvas: React.FC = () => {
     <div
       ref={viewportRef}
       style={viewportStyle}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
       onPointerDown={onCanvasPointerDown}
       onPointerMove={onCanvasPointerMove}
       onPointerUp={onCanvasPointerUp}
       onPointerCancel={onCanvasPointerUp}
       onContextMenu={handleContextMenu}
     >
-      <CanvasToolbar
-        onAddSeat={handleAddSeatCentered}
-        onAddRectangle={handleAddRectangle}
-        onAddCircle={handleAddCircle}
-        onApplyTemplate={handleApplyTemplate}
-        onAutoAssign={handleAutoAssign}
-      />
+      {!isViewMode && (
+        <CanvasToolbar
+          onAddSeat={handleAddSeatCentered}
+          onAddRectangle={handleAddRectangle}
+          onAddCircle={handleAddCircle}
+          onApplyTemplate={handleApplyTemplate}
+          onAutoAssign={handleAutoAssign}
+        />
+      )}
       <CanvasControls scale={scale} onResetView={resetView} />
 
       <CanvasContextMenu
@@ -283,15 +281,19 @@ const Canvas: React.FC = () => {
           dragState={dragState}
           selectedIds={selectedIds}
           scale={scale}
-          handleDragStart={handleDragStart}
-          handleDragEnd={handleDragEnd}
-          handleNodePointerDown={handleNodePointerDown}
-          handleSeatDoubleClick={handleSeatDoubleClick}
+          handleNodePointerDown={isViewMode ? () => {} : handleNodePointerDown}
+          handleSeatDoubleClick={isViewMode ? () => {} : handleSeatDoubleClick}
           updateObject={updateObject}
           selectionBox={selectionBox}
-          handleSwapPointerDown={handleSwapPointerDown}
-          handleSwapPointerMove={handleSwapPointerMove}
-          handleSwapPointerUp={handleSwapPointerUp}
+          handleNodeDragPointerDown={
+            isViewMode ? () => {} : handleNodeDragPointerDown
+          }
+          handleNodeDragPointerMove={
+            isViewMode ? () => {} : handleNodeDragPointerMove
+          }
+          handleNodeDragPointerUp={
+            isViewMode ? () => {} : handleNodeDragPointerUp
+          }
         />
       </div>
 

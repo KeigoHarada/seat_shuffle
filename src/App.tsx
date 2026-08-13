@@ -3,6 +3,7 @@ import Canvas from "./components/canvas/Canvas";
 import SettingsPanel from "./components/SettingsPanel";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+import ShuffleAnimation from "./components/layout/ShuffleAnimation";
 import { ToastContainer } from "./components/ui/Toast";
 import { useStore } from "./stores";
 
@@ -10,6 +11,9 @@ const App: React.FC = () => {
   const isSettingsOpen = useStore((state) => state.isSettingsOpen);
   const setIsSettingsOpen = useStore((state) => state.setIsSettingsOpen);
   const seats = useStore((state) => state.seats);
+  const isViewMode = useStore((state) => state.isViewMode);
+
+  const effectiveSettingsOpen = isSettingsOpen && !isViewMode;
 
   return (
     <div
@@ -22,7 +26,7 @@ const App: React.FC = () => {
       }}
     >
       <Header
-        showSettings={isSettingsOpen}
+        showSettings={effectiveSettingsOpen}
         onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
 
@@ -54,10 +58,12 @@ const App: React.FC = () => {
         {/* Settings Panel (Sidebar) */}
         <aside
           style={{
-            width: isSettingsOpen ? "clamp(320px, 30vw, 400px)" : "0px",
+            width: effectiveSettingsOpen ? "clamp(320px, 30vw, 400px)" : "0px",
             transition: "width 0.3s cubic-bezier(0.2, 0, 0, 1)",
             overflow: "hidden",
-            borderLeft: isSettingsOpen ? "1px solid var(--c-border)" : "none",
+            borderLeft: effectiveSettingsOpen
+              ? "1px solid var(--c-border)"
+              : "none",
             flexShrink: 0,
           }}
         >
@@ -68,6 +74,7 @@ const App: React.FC = () => {
       </div>
 
       <Footer />
+      <ShuffleAnimation />
       <ToastContainer />
     </div>
   );

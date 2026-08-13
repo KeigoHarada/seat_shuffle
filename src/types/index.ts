@@ -51,6 +51,7 @@ export interface AppSettings {
   soundEnabled: boolean;
   theme: "light" | "dark" | "system";
   algorithm: "random" | "optimize";
+  shuffleAnimation: "none" | "confetti" | "slide" | "flash";
 }
 
 export interface AppState {

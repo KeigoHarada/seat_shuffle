@@ -4,6 +4,7 @@ import { screenToWorld } from "../utils/canvas";
 interface UseCanvasPointerEventsProps {
   canvasTool: "select" | "hand";
   isSpaceMode: boolean;
+  isViewMode: boolean;
   pan: { x: number; y: number };
   scale: number;
   viewportRef: React.RefObject<HTMLDivElement | null>;
@@ -27,6 +28,7 @@ interface UseCanvasPointerEventsProps {
 export const useCanvasPointerEvents = ({
   canvasTool,
   isSpaceMode,
+  isViewMode,
   pan,
   scale,
   viewportRef,
@@ -62,7 +64,7 @@ export const useCanvasPointerEvents = ({
         clearSelection();
       }
 
-      const forcePan = isSpaceMode || canvasTool === "hand";
+      const forcePan = isSpaceMode || canvasTool === "hand" || isViewMode;
       const panStarted = handlePointerDown(e, forcePan);
       if (panStarted) return;
 
@@ -86,6 +88,7 @@ export const useCanvasPointerEvents = ({
     [
       canvasTool,
       isSpaceMode,
+      isViewMode,
       pan,
       scale,
       viewportRef,
@@ -128,7 +131,7 @@ export const useCanvasPointerEvents = ({
         e.currentTarget.releasePointerCapture(e.pointerId);
       }
 
-      if (e.button === 2) {
+      if (e.button === 2 && !isViewMode) {
         const dx = e.clientX - pointerDownPosRef.current.x;
         const dy = e.clientY - pointerDownPosRef.current.y;
         if (dx * dx + dy * dy <= 25) {

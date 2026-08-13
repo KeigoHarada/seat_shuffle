@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Settings, Download, Upload } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
 import Input from "../ui/Input";
+import { useStore } from "../../stores";
 
 interface HeaderProps {
   showSettings: boolean;
@@ -10,6 +11,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isViewMode = useStore((state) => state.isViewMode);
 
   const { handleSave, handleLoad } = useCsvSettings();
 
@@ -80,14 +82,16 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
           }}
         ></div>
 
-        <button
-          className={showSettings ? "btn-primary" : "btn-secondary"}
-          onClick={onToggleSettings}
-          style={{ gap: "4px" }}
-          title="設定パネルの表示/非表示"
-        >
-          <Settings size={16} /> 設定
-        </button>
+        {!isViewMode && (
+          <button
+            className={showSettings ? "btn-primary" : "btn-secondary"}
+            onClick={onToggleSettings}
+            style={{ gap: "4px" }}
+            title="設定パネルの表示/非表示"
+          >
+            <Settings size={16} /> 設定
+          </button>
+        )}
       </div>
     </header>
   );

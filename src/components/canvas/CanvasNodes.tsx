@@ -13,15 +13,13 @@ interface Props {
   dragState: any;
   selectedIds: string[];
   scale: number;
-  handleDragStart: (id: string, e: React.DragEvent) => void;
-  handleDragEnd: () => void;
+  handleNodeDragPointerDown: (id: string, e: React.PointerEvent) => void;
+  handleNodeDragPointerMove: (e: React.PointerEvent) => void;
+  handleNodeDragPointerUp: (e: React.PointerEvent) => void;
   handleNodePointerDown: (id: string, e: React.PointerEvent) => void;
   handleSeatDoubleClick: (id: string, e: React.MouseEvent) => void;
   updateObject: (id: string, updates: Partial<CanvasObject>) => void;
   selectionBox: any;
-  handleSwapPointerDown: (id: string, e: React.PointerEvent) => void;
-  handleSwapPointerMove: (e: React.PointerEvent) => void;
-  handleSwapPointerUp: (e: React.PointerEvent) => void;
 }
 
 const CanvasNodes: React.FC<Props> = ({
@@ -30,15 +28,13 @@ const CanvasNodes: React.FC<Props> = ({
   dragState,
   selectedIds,
   scale,
-  handleDragStart,
-  handleDragEnd,
+  handleNodeDragPointerDown,
+  handleNodeDragPointerMove,
+  handleNodeDragPointerUp,
   handleNodePointerDown,
   handleSeatDoubleClick,
   updateObject,
   selectionBox,
-  handleSwapPointerDown,
-  handleSwapPointerMove,
-  handleSwapPointerUp,
 }) => {
   return (
     <>
@@ -55,9 +51,12 @@ const CanvasNodes: React.FC<Props> = ({
             isDragging={isDragging}
             isSelected={selectedIds.includes(obj.id)}
             scale={scale}
-            onDragStart={(e) => handleDragStart(obj.id, e)}
-            onDragEnd={handleDragEnd}
-            onPointerDown={(e) => handleNodePointerDown(obj.id, e)}
+            onPointerDown={(e) => {
+              handleNodePointerDown(obj.id, e);
+              handleNodeDragPointerDown(obj.id, e);
+            }}
+            onPointerMove={handleNodeDragPointerMove}
+            onPointerUp={handleNodeDragPointerUp}
             updateObject={updateObject}
           />
         );
@@ -73,14 +72,12 @@ const CanvasNodes: React.FC<Props> = ({
             isDragging={isDragging && !ghostSeat}
             isSwapTarget={isSwapTarget}
             isSelected={selectedIds.includes(seat.id)}
-            onDragStart={(e) => handleDragStart(seat.id, e)}
-            onDragEnd={handleDragEnd}
             onPointerDown={(e) => {
               handleNodePointerDown(seat.id, e);
-              handleSwapPointerDown(seat.id, e);
+              handleNodeDragPointerDown(seat.id, e);
             }}
-            onPointerMove={handleSwapPointerMove}
-            onPointerUp={handleSwapPointerUp}
+            onPointerMove={handleNodeDragPointerMove}
+            onPointerUp={handleNodeDragPointerUp}
             onDoubleClick={(e) => handleSeatDoubleClick(seat.id, e)}
           />
         );
@@ -95,8 +92,6 @@ const CanvasNodes: React.FC<Props> = ({
             seat={ghostSeat}
             isDragging={true}
             isGhost={true}
-            onDragStart={() => {}}
-            onDragEnd={() => {}}
             onPointerDown={() => {}}
           />
         );

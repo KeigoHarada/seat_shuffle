@@ -1,5 +1,5 @@
 import React from "react";
-import { Shuffle, Eye, PenLine } from "lucide-react";
+import { Shuffle, Eye, PenLine, Undo2 } from "lucide-react";
 import { useStore } from "../../stores";
 import { optimizeShuffle } from "../../utils/algorithm";
 import { showToast } from "../../stores/toast";
@@ -7,67 +7,114 @@ import { showToast } from "../../stores/toast";
 const Footer: React.FC = () => {
   const isViewMode = useStore((state) => state.isViewMode);
   const setIsViewMode = useStore((state) => state.setIsViewMode);
+  const isShuffling = useStore((state) => state.isShuffling);
+  const setIsShuffling = useStore((state) => state.setIsShuffling);
+  const pastSeats = useStore((state) => state.pastSeats);
+  const saveSeatHistory = useStore((state) => state.saveSeatHistory);
+  const undoShuffle = useStore((state) => state.undoShuffle);
 
   const handleShuffle = () => {
+    if (isShuffling) return;
+
+    saveSeatHistory();
+
     const state = useStore.getState();
     const { seats, students, constraints, appSettings, setSeats } = state;
 
     const algorithm = appSettings.algorithm || "random";
+    const animation = appSettings.shuffleAnimation || "none";
 
-    if (algorithm === "random") {
-      const lockedSeats = seats.filter((s) => s.isLocked);
-      const lockedStudentIds = new Set(
-        lockedSeats.map((s) => s.studentId).filter(Boolean),
-      );
+    const lockedSeats = seats.filter((s) => s.isLocked);
+    const lockedStudentIds = new Set(
+      lockedSeats.map((s) => s.studentId).filter(Boolean),
+    );
+    const availableSeats = seats.filter((s) => !s.isLocked);
+    const availableStudents = students.filter(
+      (s) => !lockedStudentIds.has(s.id),
+    );
 
-      // We shuffle the available SEATS instead, so that if there are more seats
-      // than students, the empty seats are scattered randomly across the canvas.
-      const availableSeats = seats.filter((s) => !s.isLocked);
-      const shuffledSeats = [...availableSeats];
-      for (let i = shuffledSeats.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledSeats[i], shuffledSeats[j]] = [
-          shuffledSeats[j],
-          shuffledSeats[i],
-        ];
-      }
-
-      // Map each student to a random seat
-      const seatAssignments = new Map<string, string | null>();
-      const availableStudents = students.filter(
-        (s) => !lockedStudentIds.has(s.id),
-      );
-      availableStudents.forEach((student, index) => {
-        if (index < shuffledSeats.length) {
-          seatAssignments.set(shuffledSeats[index].id, student.id);
+    const computeFinalShuffle = () => {
+      if (algorithm === "random") {
+        const shuffledSeats = [...availableSeats];
+        for (let i = shuffledSeats.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledSeats[i], shuffledSeats[j]] = [
+            shuffledSeats[j],
+            shuffledSeats[i],
+          ];
         }
-      });
-      // The remaining shuffled seats will be empty
-      for (let i = availableStudents.length; i < shuffledSeats.length; i++) {
-        seatAssignments.set(shuffledSeats[i].id, null);
-      }
 
-      const newSeats = seats.map((seat) => {
-        if (seat.isLocked) return seat;
-        return { ...seat, studentId: seatAssignments.get(seat.id) || null };
-      });
+        const seatAssignments = new Map<string, string | null>();
+        availableStudents.forEach((student, index) => {
+          if (index < shuffledSeats.length) {
+            seatAssignments.set(shuffledSeats[index].id, student.id);
+          }
+        });
+        for (let i = availableStudents.length; i < shuffledSeats.length; i++) {
+          seatAssignments.set(shuffledSeats[i].id, null);
+        }
 
-      setSeats(newSeats);
-      showToast.success("ランダムシャッフルが完了しました");
-    } else if (algorithm === "optimize") {
-      // Execute constrained optimization
-      const { newSeats, unsatisfiedCount } = optimizeShuffle(
-        students,
-        seats,
-        constraints,
-      );
-      setSeats(newSeats);
-      if (unsatisfiedCount === 0) {
-        showToast.success("すべての条件を満たした座席配置が完了しました！");
+        const newSeats = seats.map((seat) => {
+          if (seat.isLocked) return seat;
+          return { ...seat, studentId: seatAssignments.get(seat.id) || null };
+        });
+
+        return {
+          newSeats,
+          isSuccess: true,
+          message: "ランダムシャッフルが完了しました",
+        };
       } else {
-        showToast.error(
-          `最適化しましたが、${unsatisfiedCount}件の条件が満たせませんでした`,
+        const { newSeats, unsatisfiedCount } = optimizeShuffle(
+          students,
+          seats,
+          constraints,
         );
+        return {
+          newSeats,
+          isSuccess: unsatisfiedCount === 0,
+          message:
+            unsatisfiedCount === 0
+              ? "すべての条件を満たした座席配置が完了しました！"
+              : `最適化しましたが、${unsatisfiedCount}件の条件が満たせませんでした`,
+        };
+      }
+    };
+
+    // 先に最終結果を計算する（ここで約300msブロックされるが、ボタン押下直後なので違和感が少ない）
+    const finalResult = computeFinalShuffle();
+
+    if (isViewMode) {
+      setIsShuffling(true);
+      const duration = animation === "none" ? 5000 : 3000;
+
+      const interval = setInterval(() => {
+        // Scramble ALL students across ALL seats rapidly (ignore locks for visual effect)
+        const allStudentIds = students.map((s) => s.id);
+        const nullCount = Math.max(0, seats.length - allStudentIds.length);
+        const assignments = [
+          ...allStudentIds,
+          ...Array(nullCount).fill(null),
+        ].sort(() => Math.random() - 0.5);
+
+        const newSeats = seats.map((seat, idx) => {
+          return { ...seat, studentId: assignments[idx] };
+        });
+        setSeats(newSeats);
+      }, 100); // 10 FPS updates
+
+      setTimeout(() => {
+        clearInterval(interval);
+        // あらかじめ計算済みの結果を即座に適用する
+        setSeats(finalResult.newSeats);
+        setIsShuffling(false);
+      }, duration);
+    } else {
+      setSeats(finalResult.newSeats);
+      if (finalResult.isSuccess) {
+        showToast.success(finalResult.message);
+      } else {
+        showToast.error(finalResult.message);
       }
     }
   };
@@ -91,20 +138,54 @@ const Footer: React.FC = () => {
       {/* Left side (empty for balance) */}
       <div style={{ flex: 1 }}></div>
 
-      {/* Center - Shuffle Button */}
-      <div style={{ display: "flex", justifyContent: "center", flex: 1 }}>
+      {/* Center - Undo and Shuffle Buttons */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "16px",
+          flex: 1,
+        }}
+      >
+        <button
+          className="btn-secondary"
+          onClick={undoShuffle}
+          disabled={pastSeats.length === 0 || isShuffling}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "48px",
+            height: "48px",
+            borderRadius: "var(--radius-full)",
+            opacity: pastSeats.length === 0 || isShuffling ? 0.5 : 1,
+            cursor:
+              pastSeats.length === 0 || isShuffling ? "not-allowed" : "pointer",
+            border: "1px solid var(--c-border)",
+            backgroundColor: "var(--c-surface)",
+          }}
+          title="一つ前の配置に戻す"
+        >
+          <Undo2 size={20} />
+        </button>
+
         <button
           className="btn-primary"
           onClick={handleShuffle}
+          disabled={isShuffling}
           style={{
             gap: "8px",
             padding: "12px 32px",
             fontSize: "18px",
             borderRadius: "var(--radius-xl)",
             boxShadow: "var(--shadow-2)",
+            opacity: isShuffling ? 0.7 : 1,
+            cursor: isShuffling ? "not-allowed" : "pointer",
           }}
         >
-          <Shuffle size={20} /> シャッフル実行
+          <Shuffle size={20} />{" "}
+          {isShuffling ? "シャッフル中..." : "シャッフル実行"}
         </button>
       </div>
 

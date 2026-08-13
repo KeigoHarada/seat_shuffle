@@ -11,8 +11,6 @@ interface Props {
   isSwapTarget?: boolean;
   isSelected?: boolean;
   isGhost?: boolean;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnd: (e: React.DragEvent) => void;
   onPointerDown: (e: React.PointerEvent) => void;
   onPointerMove?: (e: React.PointerEvent) => void;
   onPointerUp?: (e: React.PointerEvent) => void;
@@ -25,8 +23,6 @@ const SeatNode: React.FC<Props> = ({
   isSwapTarget,
   isSelected,
   isGhost,
-  onDragStart,
-  onDragEnd,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -36,6 +32,7 @@ const SeatNode: React.FC<Props> = ({
   const groups = useStore((state) => state.groups);
   const allRoles = useStore((state) => state.roles);
   const editingStudentId = useStore((state) => state.editingStudentId);
+  const isViewMode = useStore((state) => state.isViewMode);
 
   const student = students.find((s) => s.id === seat.studentId);
   const seatGroups = groups.filter((g) => seat.groupIds.includes(g.id));
@@ -58,7 +55,7 @@ const SeatNode: React.FC<Props> = ({
   }, [seat.studentId]);
 
   const getBackgroundColor = () => {
-    if (!mainGroup) return "var(--c-surface)";
+    if (isViewMode || !mainGroup) return "var(--c-surface)";
     const c = mainGroup.color;
     // CSS color-mix to increase lightness by blending with 70% white
     return `color-mix(in srgb, ${c} 30%, white)`;
@@ -113,16 +110,14 @@ const SeatNode: React.FC<Props> = ({
   return (
     <div
       style={style}
-      draggable
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={(e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-          e.currentTarget.releasePointerCapture(e.pointerId);
-        }
         if (onPointerUp) onPointerUp(e);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
       }}
       onDoubleClick={(e) => {
         e.stopPropagation();
@@ -173,7 +168,7 @@ const SeatNode: React.FC<Props> = ({
           >
             {student.name}
           </div>
-          {studentRoles.length > 0 && (
+          {studentRoles.length > 0 && !isViewMode && (
             <div
               style={{
                 position: "absolute",
@@ -209,7 +204,7 @@ const SeatNode: React.FC<Props> = ({
         <div style={{ fontSize: 14, color: "var(--c-text-sub)" }}>空席</div>
       )}
 
-      {seatGroups.length > 0 && (
+      {seatGroups.length > 0 && !isViewMode && (
         <div
           style={{
             position: "absolute",
@@ -247,7 +242,7 @@ const SeatNode: React.FC<Props> = ({
         </div>
       )}
 
-      {seat.isLocked && (
+      {seat.isLocked && !isViewMode && (
         <div
           style={{
             position: "absolute",

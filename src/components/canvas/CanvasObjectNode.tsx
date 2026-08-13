@@ -7,9 +7,9 @@ interface Props {
   isDragging: boolean;
   isSelected?: boolean;
   scale: number;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnd: (e: React.DragEvent) => void;
   onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove?: (e: React.PointerEvent) => void;
+  onPointerUp?: (e: React.PointerEvent) => void;
   updateObject: (id: string, data: Partial<CanvasObject>) => void;
 }
 
@@ -18,9 +18,9 @@ const CanvasObjectNode: React.FC<Props> = ({
   isDragging,
   isSelected,
   scale,
-  onDragStart,
-  onDragEnd,
   onPointerDown,
+  onPointerMove,
+  onPointerUp,
   updateObject,
 }) => {
   const isCircle = obj.type === "circle";
@@ -99,10 +99,13 @@ const CanvasObjectNode: React.FC<Props> = ({
 
   return (
     <div
-      draggable={!isEditing && !isResizing}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
       onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
       onDoubleClick={handleDoubleClick}
       style={{
         position: "absolute",

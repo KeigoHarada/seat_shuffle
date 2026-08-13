@@ -41,6 +41,9 @@ export interface StateAndActions extends AppState {
   updateSeat: (id: string, updates: Partial<Seat>) => void;
   removeSeat: (id: string) => void;
   setSeats: (seats: Seat[]) => void;
+  pastSeats: Seat[][];
+  saveSeatHistory: () => void;
+  undoShuffle: () => void;
 
   // Objects
   addObject: (obj: CanvasObject) => void;
@@ -66,8 +69,9 @@ export interface StateAndActions extends AppState {
   ) => void;
   highlightedStudentId: string | null;
   setHighlightedStudentId: (id: string | null) => void;
-  editingStudentId: string | null;
   setEditingStudentId: (id: string | null) => void;
+  isShuffling: boolean;
+  setIsShuffling: (isShuffling: boolean) => void;
 }
 
 const initialState: AppState & {
@@ -76,11 +80,13 @@ const initialState: AppState & {
   activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
   highlightedStudentId: string | null;
   editingStudentId: string | null;
+  isShuffling: boolean;
 } = {
   students: [],
   roles: [],
   groups: [],
   seats: [],
+  pastSeats: [],
   objects: [],
   constraints: [],
   isViewMode: false,
@@ -91,11 +97,13 @@ const initialState: AppState & {
     soundEnabled: true,
     theme: "system",
     algorithm: "random",
+    shuffleAnimation: "none",
   },
   isSettingsOpen: true,
   activeSettingsTab: "students",
   highlightedStudentId: null,
   editingStudentId: null,
+  isShuffling: false,
 };
 
 export const useStore = create<StateAndActions>()(
@@ -180,6 +188,20 @@ export const useStore = create<StateAndActions>()(
           seats: state.seats.filter((s) => s.id !== id),
         })),
       setSeats: (seats) => set({ seats }),
+      saveSeatHistory: () =>
+        set((state) => ({
+          pastSeats: [...state.pastSeats, state.seats],
+        })),
+      undoShuffle: () =>
+        set((state) => {
+          if (state.pastSeats.length === 0) return {};
+          const newPastSeats = [...state.pastSeats];
+          const previousSeats = newPastSeats.pop()!;
+          return {
+            seats: previousSeats,
+            pastSeats: newPastSeats,
+          };
+        }),
 
       addObject: (obj) =>
         set((state) => ({ objects: [...state.objects, obj] })),
@@ -218,6 +240,7 @@ export const useStore = create<StateAndActions>()(
       setActiveSettingsTab: (tab) => set({ activeSettingsTab: tab }),
       setHighlightedStudentId: (id) => set({ highlightedStudentId: id }),
       setEditingStudentId: (id) => set({ editingStudentId: id }),
+      setIsShuffling: (isShuffling) => set({ isShuffling }),
     }),
     {
       name: "seat-shuffle-storage",
