@@ -57,6 +57,7 @@ const CanvasNodes: React.FC<Props> = ({
             }}
             onPointerMove={handleNodeDragPointerMove}
             onPointerUp={handleNodeDragPointerUp}
+            onPointerCancel={handleNodeDragPointerUp}
             updateObject={updateObject}
           />
         );
@@ -78,6 +79,7 @@ const CanvasNodes: React.FC<Props> = ({
             }}
             onPointerMove={handleNodeDragPointerMove}
             onPointerUp={handleNodeDragPointerUp}
+            onPointerCancel={handleNodeDragPointerUp}
             onDoubleClick={(e) => handleSeatDoubleClick(seat.id, e)}
           />
         );

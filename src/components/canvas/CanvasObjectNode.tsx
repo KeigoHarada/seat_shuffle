@@ -8,8 +8,8 @@ interface Props {
   isSelected?: boolean;
   scale: number;
   onPointerDown: (e: React.PointerEvent) => void;
-  onPointerMove?: (e: React.PointerEvent) => void;
   onPointerUp?: (e: React.PointerEvent) => void;
+  onPointerCancel?: (e: React.PointerEvent) => void;
   updateObject: (id: string, data: Partial<CanvasObject>) => void;
 }
 
@@ -21,6 +21,7 @@ const CanvasObjectNode: React.FC<Props> = ({
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  onPointerCancel,
   updateObject,
 }) => {
   const isCircle = obj.type === "circle";
@@ -102,6 +103,10 @@ const CanvasObjectNode: React.FC<Props> = ({
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onPointerCancel={(e) => {
+        if (onPointerCancel) onPointerCancel(e);
+        else if (onPointerUp) onPointerUp(e);
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();

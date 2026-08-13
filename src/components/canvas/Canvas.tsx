@@ -13,7 +13,7 @@ import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
 import GroupAssignPopover from "./GroupAssignPopover";
 import { showToast } from "../../stores/toast";
-import { assignStudentsRandomly } from "../../utils/algorithm";
+import { autoAssignStudents } from "../../utils/algorithm";
 import { useCanvasPointerEvents } from "../../hooks/useCanvasPointerEvents";
 import { useNodeEvents } from "../../hooks/useNodeEvents";
 
@@ -183,7 +183,12 @@ const Canvas: React.FC = () => {
   );
 
   const handleAutoAssign = useCallback(() => {
-    const { assignments, error } = assignStudentsRandomly(seats, students);
+    const algorithm = useStore.getState().appSettings.autoAssignAlgorithm;
+    const { assignments, error } = autoAssignStudents(
+      seats,
+      students,
+      algorithm,
+    );
 
     if (error) {
       if (error.includes("空席")) {

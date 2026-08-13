@@ -208,113 +208,15 @@ export const useCanvasDrag = (
 
       setDragState(null);
       if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-        e.currentTarget.releasePointerCapture(e.pointerId);
+        try {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        } catch (err) {
+          // Ignore DOMException if capture is already released
+        }
       }
     },
     [dragState, nodes, seats, updateSeat, updateObject],
   );
-
-  const handleSwapPointerDown = useCallback(
-    (id: string, e: React.PointerEvent) => {
-      if (e.button !== 2) return;
-      const node = nodes.find((n) => n.id === id);
-      if (!node || !node.isSeat) return;
-
-      setDragState({
-        baseId: id,
-        draggedIds: [id],
-        startX: node.x,
-        startY: node.y,
-        visualDeltaX: 0,
-        visualDeltaY: 0,
-        validDeltaX: 0,
-        validDeltaY: 0,
-        isSwapMode: true,
-      });
-
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    },
-    [nodes],
-  );
-
-  const handleSwapPointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragState || !dragState.isSwapMode) return;
-      if (!viewportRef.current) return;
-
-      const rect = viewportRef.current.getBoundingClientRect();
-      const { worldX: dropX, worldY: dropY } = screenToWorld(
-        e.clientX - dragOffset.x,
-        e.clientY - dragOffset.y,
-        rect,
-        pan,
-        scale,
-      );
-
-      const newBaseX = Math.round(dropX / GRID_SIZE);
-      const newBaseY = Math.round(dropY / GRID_SIZE);
-
-      const visualDeltaX = newBaseX - dragState.startX;
-      const visualDeltaY = newBaseY - dragState.startY;
-
-      if (
-        visualDeltaX !== dragState.visualDeltaX ||
-        visualDeltaY !== dragState.visualDeltaY
-      ) {
-        setDragState({
-          ...dragState,
-          visualDeltaX,
-          visualDeltaY,
-        });
-      }
-    },
-    [dragState, dragOffset, pan, scale, viewportRef],
-  );
-
-  const handleSwapPointerUp = useCallback(() => {
-    if (!dragState || !dragState.isSwapMode) return;
-
-    const draggingNode = nodes.find((n) => n.id === dragState.baseId);
-    if (!draggingNode || !draggingNode.isSeat) {
-      setDragState(null);
-      return;
-    }
-
-    const cx = Math.floor(
-      draggingNode.x + dragState.visualDeltaX + draggingNode.width / 2,
-    );
-    const cy = Math.floor(
-      draggingNode.y + dragState.visualDeltaY + draggingNode.height / 2,
-    );
-    const targetNode = nodes.find(
-      (n) =>
-        cx >= n.x &&
-        cx < n.x + n.width &&
-        cy >= n.y &&
-        cy < n.y + n.height &&
-        n.id !== dragState.baseId,
-    );
-
-    if (targetNode && targetNode.isSeat) {
-      if (draggingNode.isLocked || targetNode.isLocked) {
-        showToast.error("ロックされた座席はスワップできません。");
-      } else {
-        const s1 = seats.find((s) => s.id === draggingNode.id);
-        const s2 = seats.find((s) => s.id === targetNode.id);
-        if (s1 && s2) {
-          updateSeat(s1.id, { studentId: s2.studentId });
-          updateSeat(s2.id, { studentId: s1.studentId });
-        }
-      }
-    }
-
-    setDragState(null);
-  }, [dragState, nodes, seats, updateSeat]);
 
   return {
     dragState,

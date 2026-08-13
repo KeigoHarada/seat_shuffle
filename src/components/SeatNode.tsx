@@ -14,6 +14,7 @@ interface Props {
   onPointerDown: (e: React.PointerEvent) => void;
   onPointerMove?: (e: React.PointerEvent) => void;
   onPointerUp?: (e: React.PointerEvent) => void;
+  onPointerCancel?: (e: React.PointerEvent) => void;
   onDoubleClick?: (e: React.MouseEvent) => void;
 }
 
@@ -26,6 +27,7 @@ const SeatNode: React.FC<Props> = ({
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  onPointerCancel,
   onDoubleClick,
 }) => {
   const students = useStore((state) => state.students);
@@ -114,6 +116,10 @@ const SeatNode: React.FC<Props> = ({
       onPointerMove={onPointerMove}
       onPointerUp={(e) => {
         if (onPointerUp) onPointerUp(e);
+      }}
+      onPointerCancel={(e) => {
+        if (onPointerCancel) onPointerCancel(e);
+        else if (onPointerUp) onPointerUp(e);
       }}
       onContextMenu={(e) => {
         e.preventDefault();

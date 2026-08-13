@@ -103,6 +103,39 @@ const GlobalTab: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <div
+        style={{
+          padding: "var(--spacing-lg)",
+          backgroundColor: "var(--c-surface)",
+          border: "1px solid var(--c-border)",
+          borderRadius: "var(--radius-lg)",
+        }}
+      >
+        <h3 className="text-title3" style={{ marginBottom: "16px" }}>
+          自動割り当ての並び順
+        </h3>
+        <Select
+          options={[
+            { label: "N字（右上から下、次列へ）", value: "right-top-down" },
+            { label: "Z字（左上から右、次行へ）", value: "left-top-right" },
+            { label: "ランダム配置", value: "random" },
+          ]}
+          value={appSettings.autoAssignAlgorithm || "right-top-down"}
+          onChange={(val) =>
+            updateAppSettings({ autoAssignAlgorithm: val as any })
+          }
+        />
+        <p
+          style={{
+            marginTop: "8px",
+            fontSize: "12px",
+            color: "var(--c-text-sub)",
+          }}
+        >
+          ※ツールバーの「自動割り当て」実行時に、出席番号順で生徒をどの順番で空席に埋めていくかを指定します。
+        </p>
+      </div>
     </div>
   );
 };

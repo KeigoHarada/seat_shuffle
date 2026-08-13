@@ -80,9 +80,10 @@ export const evaluateConstraint = (
   }
 };
 
-export const assignStudentsRandomly = (
+export const autoAssignStudents = (
   seats: Seat[],
   students: Student[],
+  algorithm: "right-top-down" | "left-top-right" | "random" = "right-top-down",
 ): { assignments: { seatId: string; studentId: string }[]; error?: string } => {
   const assignedStudentIds = new Set(
     seats.map((s) => s.studentId).filter(Boolean),
@@ -104,18 +105,46 @@ export const assignStudentsRandomly = (
     };
   }
 
-  const shuffledStudents = [...unassignedStudents].sort(
-    () => Math.random() - 0.5,
-  );
-  const shuffledSeats = [...availableSeats].sort(() => Math.random() - 0.5);
+  // 生徒を出席番号順（昇順）でソート
+  let sortedStudents = [...unassignedStudents];
+  if (algorithm !== "random") {
+    sortedStudents.sort((a, b) => a.attendanceNumber - b.attendanceNumber);
+  } else {
+    sortedStudents.sort(() => Math.random() - 0.5);
+  }
 
-  const assignCount = Math.min(shuffledStudents.length, shuffledSeats.length);
+  // 座席をアルゴリズムに従ってソート
+  const sortedSeats = [...availableSeats].sort((a, b) => {
+    if (algorithm === "random") {
+      return Math.random() - 0.5;
+    }
+
+    if (algorithm === "left-top-right") {
+      // Z字（左上から右、次行へ）
+      // y座標が異なる場合は、上側（yが小さい方）を優先
+      if (Math.abs(a.y - b.y) > 0.1) {
+        return a.y - b.y;
+      }
+      // 同じy座標（行）の場合は、左側（xが小さい方）を優先
+      return a.x - b.x;
+    }
+
+    // デフォルト: N字（右上から下、次列へ） -> right-top-down
+    // 同じx座標（列）でない場合は、右側（xが大きい方）を優先
+    if (Math.abs(b.x - a.x) > 0.1) {
+      return b.x - a.x;
+    }
+    // 同じx座標（列）の場合は、上側（yが小さい方）を優先
+    return a.y - b.y;
+  });
+
+  const assignCount = Math.min(sortedStudents.length, sortedSeats.length);
   const assignments: { seatId: string; studentId: string }[] = [];
 
   for (let i = 0; i < assignCount; i++) {
     assignments.push({
-      seatId: shuffledSeats[i].id,
-      studentId: shuffledStudents[i].id,
+      seatId: sortedSeats[i].id,
+      studentId: sortedStudents[i].id,
     });
   }
 

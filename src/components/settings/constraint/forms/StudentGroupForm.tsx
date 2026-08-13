@@ -44,7 +44,7 @@ const StudentGroupForm: React.FC = () => {
           lineHeight: 1.4,
         }}
       >
-        特定の生徒を、選択したグループ（複数可）に「必ず所属させる」か「絶対に所属させない」か設定します。
+        特定の生徒を、選択したグループ（複数可）に「所属させる」か「所属させない」か設定します。
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>

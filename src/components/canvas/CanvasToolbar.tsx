@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Plus,
-  Shapes,
-  LayoutTemplate,
-  Hand,
-  MousePointer2,
-  Wand2,
-} from "lucide-react";
-import { useStore } from "../../stores";
+import { Plus, Shapes, LayoutTemplate, Wand2 } from "lucide-react";
 
 interface Props {
   onAddSeat: () => void;
@@ -25,9 +17,6 @@ const CanvasToolbar: React.FC<Props> = ({
   onAutoAssign,
 }) => {
   const [openMenu, setOpenMenu] = useState<"shapes" | "templates" | null>(null);
-
-  const canvasTool = useStore((state) => state.canvasTool);
-  const setCanvasTool = useStore((state) => state.setCanvasTool);
 
   useEffect(() => {
     const handleOutsideClick = () => setOpenMenu(null);
@@ -86,60 +75,6 @@ const CanvasToolbar: React.FC<Props> = ({
       onWheel={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.stopPropagation()}
     >
-      <button
-        onClick={() => setCanvasTool("select")}
-        style={{
-          ...buttonStyle,
-          padding: "6px 8px",
-          backgroundColor:
-            canvasTool === "select" ? "var(--c-primary-pale)" : "transparent",
-          color:
-            canvasTool === "select" ? "var(--c-primary)" : "var(--c-text-main)",
-        }}
-        onMouseEnter={(e) => {
-          if (canvasTool !== "select")
-            e.currentTarget.style.backgroundColor = "var(--c-surface-hover)";
-        }}
-        onMouseLeave={(e) => {
-          if (canvasTool !== "select")
-            e.currentTarget.style.backgroundColor = "transparent";
-        }}
-        title="選択ツール"
-      >
-        <MousePointer2 size={16} />
-      </button>
-
-      <button
-        onClick={() => setCanvasTool("hand")}
-        style={{
-          ...buttonStyle,
-          padding: "6px 8px",
-          backgroundColor:
-            canvasTool === "hand" ? "var(--c-primary-pale)" : "transparent",
-          color:
-            canvasTool === "hand" ? "var(--c-primary)" : "var(--c-text-main)",
-        }}
-        onMouseEnter={(e) => {
-          if (canvasTool !== "hand")
-            e.currentTarget.style.backgroundColor = "var(--c-surface-hover)";
-        }}
-        onMouseLeave={(e) => {
-          if (canvasTool !== "hand")
-            e.currentTarget.style.backgroundColor = "transparent";
-        }}
-        title="手のひらツール (Space+ドラッグでも可)"
-      >
-        <Hand size={16} />
-      </button>
-
-      <div
-        style={{
-          width: 1,
-          backgroundColor: "var(--c-border)",
-          margin: "4px 4px",
-        }}
-      />
-
       <button
         onClick={onAddSeat}
         style={buttonStyle}

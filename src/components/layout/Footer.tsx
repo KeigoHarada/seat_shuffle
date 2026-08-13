@@ -24,61 +24,24 @@ const Footer: React.FC = () => {
     const algorithm = appSettings.algorithm || "random";
     const animation = appSettings.shuffleAnimation || "none";
 
-    const lockedSeats = seats.filter((s) => s.isLocked);
-    const lockedStudentIds = new Set(
-      lockedSeats.map((s) => s.studentId).filter(Boolean),
-    );
-    const availableSeats = seats.filter((s) => !s.isLocked);
-    const availableStudents = students.filter(
-      (s) => !lockedStudentIds.has(s.id),
-    );
-
     const computeFinalShuffle = () => {
-      if (algorithm === "random") {
-        const shuffledSeats = [...availableSeats];
-        for (let i = shuffledSeats.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffledSeats[i], shuffledSeats[j]] = [
-            shuffledSeats[j],
-            shuffledSeats[i],
-          ];
-        }
+      const activeConstraints = algorithm === "random" ? [] : constraints;
+      const { newSeats, unsatisfiedCount } = optimizeShuffle(
+        students,
+        seats,
+        activeConstraints,
+      );
 
-        const seatAssignments = new Map<string, string | null>();
-        availableStudents.forEach((student, index) => {
-          if (index < shuffledSeats.length) {
-            seatAssignments.set(shuffledSeats[index].id, student.id);
-          }
-        });
-        for (let i = availableStudents.length; i < shuffledSeats.length; i++) {
-          seatAssignments.set(shuffledSeats[i].id, null);
-        }
-
-        const newSeats = seats.map((seat) => {
-          if (seat.isLocked) return seat;
-          return { ...seat, studentId: seatAssignments.get(seat.id) || null };
-        });
-
-        return {
-          newSeats,
-          isSuccess: true,
-          message: "ランダムシャッフルが完了しました",
-        };
-      } else {
-        const { newSeats, unsatisfiedCount } = optimizeShuffle(
-          students,
-          seats,
-          constraints,
-        );
-        return {
-          newSeats,
-          isSuccess: unsatisfiedCount === 0,
-          message:
-            unsatisfiedCount === 0
+      return {
+        newSeats,
+        isSuccess: unsatisfiedCount === 0,
+        message:
+          algorithm === "random"
+            ? "ランダムシャッフルが完了しました"
+            : unsatisfiedCount === 0
               ? "すべての条件を満たした座席配置が完了しました！"
               : `最適化しましたが、${unsatisfiedCount}件の条件が満たせませんでした`,
-        };
-      }
+      };
     };
 
     // 先に最終結果を計算する（ここで約300msブロックされるが、ボタン押下直後なので違和感が少ない）

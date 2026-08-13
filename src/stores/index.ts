@@ -98,6 +98,7 @@ const initialState: AppState & {
     theme: "system",
     algorithm: "random",
     shuffleAnimation: "none",
+    autoAssignAlgorithm: "right-top-down",
   },
   isSettingsOpen: true,
   activeSettingsTab: "students",
