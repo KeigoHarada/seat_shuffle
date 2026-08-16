@@ -21,21 +21,24 @@ export const generateTemplate = (
   };
 
   if (templateId === "classroom") {
-    // 7 cols x 6 rows of seats
-    for (let r = 0; r < 6; r++) {
-      for (let c = 0; c < 7; c++) {
-        // gap between pairs? no, let's just make a simple grid with some spacing
-        addSeat(startX + c * (SEAT_COLS + 2), startY + r * (SEAT_ROWS + 2));
+    // 2人ペア×3列（計6列）、5行（計30席）の標準的な教室配置
+    const colXOffsets = [0, 6, 14, 20, 28, 34];
+    const rowYOffsets = [0, 6, 12, 18, 24];
+
+    for (let c = 0; c < colXOffsets.length; c++) {
+      for (let r = 0; r < rowYOffsets.length; r++) {
+        addSeat(startX + colXOffsets[c], startY + rowYOffsets[r]);
       }
     }
-    // Add teacher's desk
+
+    // Add teacher's desk (教卓)
     newObjects.push({
       id: crypto.randomUUID(),
       type: "rectangle",
-      x: startX + 3 * (SEAT_COLS + 2) - Math.floor(SEAT_COLS / 2),
-      y: startY - (SEAT_ROWS + 4),
-      width: SEAT_COLS * 2,
-      height: SEAT_ROWS,
+      x: startX + 16,
+      y: startY - 6,
+      width: 8,
+      height: 4,
       text: "教卓",
       color: "var(--c-surface-disabled)",
     });

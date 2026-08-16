@@ -133,8 +133,7 @@ const GroupListTable: React.FC = () => {
             {/* 3. Action */}
             <div style={{ display: "flex", justifyContent: "center" }}>
               <button
-                className="btn-danger"
-                style={{ padding: "6px" }}
+                className="btn-icon-danger"
                 title="削除"
                 onClick={() => setDeleteTargetId(group.id)}
               >

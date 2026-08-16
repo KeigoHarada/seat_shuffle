@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, AlertTriangle, RotateCcw } from "lucide-react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface ConfirmDialogProps {
   onCancel: () => void;
   confirmText?: string;
   cancelText?: string;
+  variant?: "danger" | "primary" | "warning";
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -17,10 +18,40 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   message,
   onConfirm,
   onCancel,
-  confirmText = "削除する",
+  confirmText = "実行する",
   cancelText = "キャンセル",
+  variant = "danger",
 }) => {
   if (!isOpen) return null;
+
+  const isDanger = variant === "danger";
+
+  const getIcon = () => {
+    switch (variant) {
+      case "danger":
+        return (
+          <AlertCircle
+            size={22}
+            style={{ color: "var(--c-error)", flexShrink: 0 }}
+          />
+        );
+      case "warning":
+        return (
+          <AlertTriangle
+            size={22}
+            style={{ color: "var(--c-primary)", flexShrink: 0 }}
+          />
+        );
+      case "primary":
+      default:
+        return (
+          <RotateCcw
+            size={22}
+            style={{ color: "var(--c-primary)", flexShrink: 0 }}
+          />
+        );
+    }
+  };
 
   return (
     <div
@@ -30,25 +61,30 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         left: 0,
         width: "100vw",
         height: "100vh",
-        backgroundColor: "rgba(0, 0, 0, 0.4)",
+        backgroundColor: "rgba(15, 23, 42, 0.4)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1000,
-        backdropFilter: "blur(2px)",
+        backdropFilter: "blur(4px)",
+        padding: "var(--spacing-md)",
       }}
       onClick={onCancel}
     >
       <div
         className="card"
         style={{
-          width: "320px",
+          width: "100%",
+          maxWidth: "380px",
           padding: "var(--spacing-lg)",
           display: "flex",
           flexDirection: "column",
           gap: "var(--spacing-md)",
           boxShadow: "var(--shadow-3)",
           animation: "scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          backgroundColor: "var(--c-surface)",
+          borderRadius: "var(--radius-lg)",
+          border: "1px solid var(--c-border)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -57,10 +93,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             display: "flex",
             alignItems: "center",
             gap: "var(--spacing-sm)",
-            color: "var(--c-error)",
           }}
         >
-          <AlertCircle size={20} />
+          {getIcon()}
           <h3
             className="text-title3"
             style={{ margin: 0, color: "var(--c-text-main)" }}
@@ -69,7 +104,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </h3>
         </div>
 
-        <p className="text-body" style={{ color: "var(--c-text-sub)" }}>
+        <p
+          className="text-body"
+          style={{
+            color: "var(--c-text-sub)",
+            lineHeight: 1.6,
+            fontSize: "14px",
+          }}
+        >
           {message}
         </p>
 
@@ -78,23 +120,15 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             display: "flex",
             justifyContent: "flex-end",
             gap: "var(--spacing-sm)",
-            marginTop: "var(--spacing-sm)",
+            marginTop: "var(--spacing-xs)",
           }}
         >
-          <button className="btn-secondary" onClick={onCancel}>
+          <button type="button" className="btn-secondary" onClick={onCancel}>
             {cancelText}
           </button>
           <button
-            className="btn-danger"
-            style={{
-              backgroundColor: "var(--c-error)",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "var(--radius-md)",
-              border: "none",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
+            type="button"
+            className={isDanger ? "btn-danger" : "btn-primary"}
             onClick={() => {
               onConfirm();
               onCancel();
@@ -106,7 +140,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       </div>
       <style>{`
         @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.95); }
+          from { opacity: 0; transform: scale(0.96); }
           to { opacity: 1; transform: scale(1); }
         }
       `}</style>

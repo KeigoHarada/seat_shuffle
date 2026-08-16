@@ -83,7 +83,11 @@ export const evaluateConstraint = (
 export const autoAssignStudents = (
   seats: Seat[],
   students: Student[],
-  algorithm: "right-top-down" | "left-top-right" | "random" = "right-top-down",
+  algorithm:
+    | "right-top-down"
+    | "left-top-down"
+    | "left-top-right"
+    | "random" = "right-top-down",
 ): { assignments: { seatId: string; studentId: string }[]; error?: string } => {
   const assignedStudentIds = new Set(
     seats.map((s) => s.studentId).filter(Boolean),
@@ -117,6 +121,14 @@ export const autoAssignStudents = (
   const sortedSeats = [...availableSeats].sort((a, b) => {
     if (algorithm === "random") {
       return Math.random() - 0.5;
+    }
+
+    if (algorithm === "left-top-down") {
+      // 左上から下、右の次列へ（1列目上->下、2列目上->下...）
+      if (Math.abs(a.x - b.x) > 0.1) {
+        return a.x - b.x;
+      }
+      return a.y - b.y;
     }
 
     if (algorithm === "left-top-right") {

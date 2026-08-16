@@ -52,7 +52,8 @@ export interface AppSettings {
   theme: "light" | "dark" | "system";
   algorithm: "random" | "optimize";
   shuffleAnimation: "none" | "confetti" | "slide" | "flash";
-  autoAssignAlgorithm: "right-top-down" | "left-top-right" | "random";
+  autoAssignAlgorithm:
+    "right-top-down" | "left-top-down" | "left-top-right" | "random";
 }
 
 export interface AppState {

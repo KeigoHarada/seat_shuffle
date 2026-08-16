@@ -46,7 +46,7 @@ const Canvas: React.FC = () => {
     handlePointerMove,
     handlePointerUp,
     resetView,
-  } = usePanZoom();
+  } = usePanZoom(seats, objects);
 
   const {
     selectedIds,

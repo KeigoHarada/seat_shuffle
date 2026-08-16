@@ -11,10 +11,15 @@ import {
   CanvasObject,
 } from "../types";
 import { sortStudentsByNameLogic } from "../utils/student";
+import {
+  createDefaultClassroomState,
+  createEmptyState,
+} from "../constants/defaultData";
 
 export interface StateAndActions extends AppState {
   // Global
   clearState: () => void;
+  loadDefaultTemplate: () => void;
   loadState: (state: Partial<AppState>) => void;
   isViewMode: boolean;
   setIsViewMode: (val: boolean) => void;
@@ -69,12 +74,16 @@ export interface StateAndActions extends AppState {
   ) => void;
   highlightedStudentId: string | null;
   setHighlightedStudentId: (id: string | null) => void;
+  editingStudentId: string | null;
   setEditingStudentId: (id: string | null) => void;
   isShuffling: boolean;
   setIsShuffling: (isShuffling: boolean) => void;
 }
 
+const defaultClassroomData = createDefaultClassroomState();
+
 const initialState: AppState & {
+  pastSeats: Seat[][];
   canvasTool: "select" | "hand";
   isSettingsOpen: boolean;
   activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
@@ -82,13 +91,7 @@ const initialState: AppState & {
   editingStudentId: string | null;
   isShuffling: boolean;
 } = {
-  students: [],
-  roles: [],
-  groups: [],
-  seats: [],
-  pastSeats: [],
-  objects: [],
-  constraints: [],
+  ...defaultClassroomData,
   isViewMode: false,
   canvasTool: "select",
   appSettings: {
@@ -112,7 +115,20 @@ export const useStore = create<StateAndActions>()(
     (set) => ({
       ...initialState,
 
-      clearState: () => set(initialState),
+      clearState: () =>
+        set((state) => ({
+          ...state,
+          ...createEmptyState(),
+          highlightedStudentId: null,
+          editingStudentId: null,
+        })),
+      loadDefaultTemplate: () =>
+        set((state) => ({
+          ...state,
+          ...createDefaultClassroomState(),
+          highlightedStudentId: null,
+          editingStudentId: null,
+        })),
       loadState: (loaded) => set((state) => ({ ...state, ...loaded })),
 
       setIsViewMode: (val) => set({ isViewMode: val }),
@@ -133,6 +149,24 @@ export const useStore = create<StateAndActions>()(
               ...s,
               attendanceNumber: i + 1,
             })),
+            seats: state.seats.map((seat) =>
+              seat.studentId === id ? { ...seat, studentId: null } : seat,
+            ),
+            constraints: state.constraints.filter((c) => {
+              if (c.type === "student-student") {
+                return c.studentId1 !== id && c.studentId2 !== id;
+              }
+              if (c.type === "student-group") {
+                return c.studentId !== id;
+              }
+              return true;
+            }),
+            highlightedStudentId:
+              state.highlightedStudentId === id
+                ? null
+                : state.highlightedStudentId,
+            editingStudentId:
+              state.editingStudentId === id ? null : state.editingStudentId,
           };
         }),
       reorderStudents: (startIndex, endIndex) =>
@@ -162,6 +196,18 @@ export const useStore = create<StateAndActions>()(
       removeRole: (id) =>
         set((state) => ({
           roles: state.roles.filter((r) => r.id !== id),
+          students: state.students.map((s) => ({
+            ...s,
+            roleIds: s.roleIds.filter((rId) => rId !== id),
+          })),
+          constraints: state.constraints.filter(
+            (c) =>
+              !(
+                c.type === "group-match" &&
+                c.targetType === "role" &&
+                c.targetId === id
+              ),
+          ),
         })),
 
       addGroup: (group) =>
@@ -175,6 +221,26 @@ export const useStore = create<StateAndActions>()(
       removeGroup: (id) =>
         set((state) => ({
           groups: state.groups.filter((g) => g.id !== id),
+          seats: state.seats.map((seat) => ({
+            ...seat,
+            groupIds: seat.groupIds.filter((gId) => gId !== id),
+          })),
+          constraints: state.constraints
+            .map((c) => {
+              if (c.type === "student-group" || c.type === "group-match") {
+                return {
+                  ...c,
+                  groupIds: c.groupIds.filter((gId) => gId !== id),
+                };
+              }
+              return c;
+            })
+            .filter((c) => {
+              if (c.type === "student-group" || c.type === "group-match") {
+                return c.groupIds.length > 0;
+              }
+              return true;
+            }),
         })),
 
       addSeat: (seat) => set((state) => ({ seats: [...state.seats, seat] })),

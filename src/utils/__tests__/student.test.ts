@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { sortStudentsByNameLogic } from "../student";
 import { Student } from "../../types";
+import { createDefaultClassroomState } from "../../constants/defaultData";
 
 const mockStudent = (id: string, name: string, furigana?: string): Student => ({
   id,
@@ -68,6 +69,31 @@ describe("student utils", () => {
       const sorted = sortStudentsByNameLogic(students);
       expect(sorted[0].name).toBe(" A ");
       expect(sorted[1].name).toBe(" B");
+    });
+
+    it("should start with sample students intentionally not in attendance order, and sort them into 1..30 order", () => {
+      const defaultState = createDefaultClassroomState();
+      // Verify initial sample is intentionally not in 1..30 order
+      expect(
+        defaultState.students.some((s, idx) => s.attendanceNumber !== idx + 1),
+      ).toBe(true);
+
+      const sorted = sortStudentsByNameLogic(defaultState.students);
+
+      expect(sorted).toHaveLength(30);
+      expect(sorted[0].name).toBe("あ太郎");
+      expect(sorted[0].attendanceNumber).toBe(1);
+      expect(sorted[1].name).toBe("あ花子");
+      expect(sorted[1].attendanceNumber).toBe(2);
+      expect(sorted[28].name).toBe("そ太郎");
+      expect(sorted[28].attendanceNumber).toBe(29);
+      expect(sorted[29].name).toBe("そ花子");
+      expect(sorted[29].attendanceNumber).toBe(30);
+
+      // Verify each item matches index + 1
+      for (let i = 0; i < 30; i++) {
+        expect(sorted[i].attendanceNumber).toBe(i + 1);
+      }
     });
   });
 });

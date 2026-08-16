@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Seat, CanvasObject } from "../types";
+import { calculateCenterPanZoom } from "../utils/canvas";
 
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 2.0;
 
-export const usePanZoom = () => {
+export const usePanZoom = (
+  seats: Seat[] = [],
+  objects: CanvasObject[] = [],
+) => {
   const [transform, setTransform] = useState({
     pan: { x: 0, y: 0 },
     scale: 1,
@@ -12,6 +17,7 @@ export const usePanZoom = () => {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [isZoomMode, setIsZoomMode] = useState(false);
   const [isSpaceMode, setIsSpaceMode] = useState(false);
+  const hasAutoCenteredRef = useRef(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -124,8 +130,42 @@ export const usePanZoom = () => {
   );
 
   const resetView = useCallback(() => {
-    setTransform({ pan: { x: 0, y: 0 }, scale: 1 });
-  }, []);
+    const el = viewportRef.current;
+    if (!el) {
+      setTransform({ pan: { x: 0, y: 0 }, scale: 1 });
+      return;
+    }
+
+    const viewportWidth = el.clientWidth;
+    const viewportHeight = el.clientHeight;
+
+    const result = calculateCenterPanZoom(
+      seats,
+      objects,
+      viewportWidth,
+      viewportHeight,
+      60,
+      MIN_SCALE,
+      MAX_SCALE,
+    );
+
+    setTransform(result);
+  }, [seats, objects]);
+
+  // 初回マウント時、ビューポートのサイズが取得できたら自動で画面中央に配置
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+
+    if (
+      !hasAutoCenteredRef.current &&
+      el.clientWidth > 0 &&
+      el.clientHeight > 0
+    ) {
+      hasAutoCenteredRef.current = true;
+      resetView();
+    }
+  }, [resetView, seats.length, objects.length]);
 
   return {
     pan: transform.pan,

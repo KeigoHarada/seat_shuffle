@@ -13,18 +13,6 @@ export interface DragState {
   isSwapMode: boolean;
 }
 
-export interface DragState {
-  baseId: string;
-  draggedIds: string[];
-  startX: number;
-  startY: number;
-  visualDeltaX: number;
-  visualDeltaY: number;
-  validDeltaX: number;
-  validDeltaY: number;
-  isSwapMode: boolean;
-}
-
 export interface DragNode {
   id: string;
   x: number;
@@ -34,6 +22,105 @@ export interface DragNode {
   isSeat: boolean;
   isLocked?: boolean;
 }
+
+export interface CanvasBoundingBox {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  width: number;
+  height: number;
+  centerX: number;
+  centerY: number;
+}
+
+/**
+ * キャンバス上の全座席およびオブジェクトを囲むバウンディングボックス（ピクセル単位）を計算します。
+ */
+export const getCanvasBoundingBox = (
+  seats: Seat[],
+  objects: CanvasObject[],
+): CanvasBoundingBox | null => {
+  if (seats.length === 0 && objects.length === 0) {
+    return null;
+  }
+
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  seats.forEach((seat) => {
+    const sMinX = seat.x * GRID_SIZE;
+    const sMaxX = (seat.x + SEAT_COLS) * GRID_SIZE;
+    const sMinY = seat.y * GRID_SIZE;
+    const sMaxY = (seat.y + SEAT_ROWS) * GRID_SIZE;
+
+    if (sMinX < minX) minX = sMinX;
+    if (sMaxX > maxX) maxX = sMaxX;
+    if (sMinY < minY) minY = sMinY;
+    if (sMaxY > maxY) maxY = sMaxY;
+  });
+
+  objects.forEach((obj) => {
+    const oMinX = obj.x * GRID_SIZE;
+    const oMaxX = (obj.x + obj.width) * GRID_SIZE;
+    const oMinY = obj.y * GRID_SIZE;
+    const oMaxY = (obj.y + obj.height) * GRID_SIZE;
+
+    if (oMinX < minX) minX = oMinX;
+    if (oMaxX > maxX) maxX = oMaxX;
+    if (oMinY < minY) minY = oMinY;
+    if (oMaxY > maxY) maxY = oMaxY;
+  });
+
+  return {
+    minX,
+    maxX,
+    minY,
+    maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2,
+  };
+};
+
+/**
+ * ビューポートの中央に座席全体が収まるように、最適な pan と scale を計算します。
+ */
+export const calculateCenterPanZoom = (
+  seats: Seat[],
+  objects: CanvasObject[],
+  viewportWidth: number,
+  viewportHeight: number,
+  padding = 60,
+  minScale = 0.5,
+  maxScale = 2.0,
+): { pan: { x: number; y: number }; scale: number } => {
+  const bbox = getCanvasBoundingBox(seats, objects);
+  if (!bbox || viewportWidth <= 0 || viewportHeight <= 0) {
+    return { pan: { x: 0, y: 0 }, scale: 1 };
+  }
+
+  const availableWidth = Math.max(100, viewportWidth - padding * 2);
+  const availableHeight = Math.max(100, viewportHeight - padding * 2);
+
+  const fitScaleX = availableWidth / bbox.width;
+  const fitScaleY = availableHeight / bbox.height;
+
+  // 画面に収まる場合は基本 1.0、小さい画面（タブレット等）では適切に縮小
+  const targetScale = Math.min(1.0, fitScaleX, fitScaleY, maxScale);
+  const finalScale = Math.max(minScale, targetScale);
+
+  const panX = viewportWidth / 2 - bbox.centerX * finalScale;
+  const panY = viewportHeight / 2 - bbox.centerY * finalScale;
+
+  return {
+    pan: { x: Math.round(panX), y: Math.round(panY) },
+    scale: Number(finalScale.toFixed(2)),
+  };
+};
 
 export const screenToWorld = (
   clientX: number,

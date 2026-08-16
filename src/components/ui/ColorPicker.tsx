@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 
 export const PREDEFINED_COLORS = [
-  "#FCA5A5", // Group Pink
-  "#93C5FD", // Group Blue
-  "#86EFAC", // Group Green
-  "#FDE047", // Group Yellow
-  "#D8B4FE", // Group Purple
-  "#FDBA74", // Group Orange
-  "#D1D5DB", // Gray (fallback)
-];
+  "#FCA5A5", // 1. Group Pink (赤・ピンク)
+  "#93C5FD", // 2. Group Blue (水色・青)
+  "#86EFAC", // 3. Group Green (黄緑・緑)
+  "#FDE047", // 4. Group Yellow (黄色)
+  "#D8B4FE", // 5. Group Purple (紫・ラベンダー)
+  "#FDBA74", // 6. Group Orange (オレンジ)
+  "#5EEAD4", // 7. Group Teal/Mint (ミント・青緑 / 前方配慮等)
+  "#F472B6", // 8. Group Rose (ローズピンク)
+  "#A78BFA", // 9. Group Indigo (バイオレット・藍)
+  "#CBD5E1", // 10. Group Slate (スレートグレー)
+] as const;
 
 interface ColorPickerProps {
   value: string;
@@ -67,7 +70,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange }) => {
             borderRadius: "var(--radius-md)",
             boxShadow: "var(--shadow-2)",
             zIndex: 100,
-            width: "150px",
+            width: "160px",
             padding: "8px",
             display: "grid",
             gridTemplateColumns: "repeat(5, 1fr)",
@@ -93,6 +96,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange }) => {
                   borderRadius: "var(--radius-sm)",
                   cursor: "pointer",
                   padding: 0,
+                  transition: "transform var(--anim-fast)",
                 }}
                 title={color}
               />

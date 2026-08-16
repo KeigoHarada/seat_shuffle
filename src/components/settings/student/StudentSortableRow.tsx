@@ -200,8 +200,7 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
       {/* 4. Action */}
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button
-          className="btn-danger"
-          style={{ padding: "6px" }}
+          className="btn-icon-danger"
           title="削除"
           onClick={() => onDelete(student.id)}
         >

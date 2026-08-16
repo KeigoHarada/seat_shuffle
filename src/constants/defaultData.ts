@@ -1,0 +1,387 @@
+import { Student, Role, Group, Seat, CanvasObject, Constraint } from "../types";
+import { generateTemplate } from "../utils/templates";
+import { assignGroupsByBlocks } from "../utils/group";
+import { PREDEFINED_COLORS } from "../components/ui/ColorPicker";
+
+export const DEFAULT_ROLES: Role[] = [
+  {
+    id: "role-leader",
+    name: "班長",
+    iconName: "Crown",
+    description: "班のリーダー",
+  },
+  {
+    id: "role-subleader",
+    name: "副班長",
+    iconName: "Star",
+    description: "班のサブリーダー",
+  },
+];
+
+export const DEFAULT_GROUPS: Group[] = [
+  {
+    id: "group-1",
+    name: "1班",
+    color: PREDEFINED_COLORS[0],
+    description: "第1グループ",
+  },
+  {
+    id: "group-2",
+    name: "2班",
+    color: PREDEFINED_COLORS[1],
+    description: "第2グループ",
+  },
+  {
+    id: "group-3",
+    name: "3班",
+    color: PREDEFINED_COLORS[2],
+    description: "第3グループ",
+  },
+  {
+    id: "group-4",
+    name: "4班",
+    color: PREDEFINED_COLORS[3],
+    description: "第4グループ",
+  },
+  {
+    id: "group-5",
+    name: "5班",
+    color: PREDEFINED_COLORS[4],
+    description: "第5グループ",
+  },
+  {
+    id: "group-6",
+    name: "6班",
+    color: PREDEFINED_COLORS[5],
+    description: "第6グループ",
+  },
+  {
+    id: "group-vision",
+    name: "前方配慮（視力等）",
+    color: PREDEFINED_COLORS[6],
+    description: "黒板が見えやすい前方の座席を希望する生徒向けグループ",
+  },
+];
+
+export const RAW_STUDENTS = [
+  {
+    name: "あ太郎",
+    furigana: "アタロウ",
+    gender: "male" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "あ花子",
+    furigana: "アハナコ",
+    gender: "female" as const,
+    roleIds: ["role-subleader"],
+  },
+  {
+    name: "い太郎",
+    furigana: "イタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+  {
+    name: "い花子",
+    furigana: "イハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+  {
+    name: "う太郎",
+    furigana: "ウタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+
+  {
+    name: "う花子",
+    furigana: "ウハナコ",
+    gender: "female" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "え太郎",
+    furigana: "エタロウ",
+    gender: "male" as const,
+    roleIds: ["role-subleader"],
+  },
+  {
+    name: "え花子",
+    furigana: "エハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+  {
+    name: "お太郎",
+    furigana: "オタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+  {
+    name: "お花子",
+    furigana: "オハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+
+  {
+    name: "か太郎",
+    furigana: "カタロウ",
+    gender: "male" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "か花子",
+    furigana: "カハナコ",
+    gender: "female" as const,
+    roleIds: ["role-subleader"],
+  },
+  {
+    name: "き太郎",
+    furigana: "キタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+  {
+    name: "き花子",
+    furigana: "キハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+  {
+    name: "く太郎",
+    furigana: "クタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+
+  {
+    name: "く花子",
+    furigana: "クハナコ",
+    gender: "female" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "け太郎",
+    furigana: "ケタロウ",
+    gender: "male" as const,
+    roleIds: ["role-subleader"],
+  },
+  {
+    name: "け花子",
+    furigana: "ケハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+  {
+    name: "こ太郎",
+    furigana: "コタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+  {
+    name: "こ花子",
+    furigana: "コハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+
+  {
+    name: "さ太郎",
+    furigana: "サタロウ",
+    gender: "male" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "さ花子",
+    furigana: "サハナコ",
+    gender: "female" as const,
+    roleIds: ["role-subleader"],
+  },
+  {
+    name: "し太郎",
+    furigana: "シタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+  {
+    name: "し花子",
+    furigana: "シハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+  {
+    name: "す太郎",
+    furigana: "スタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+
+  {
+    name: "す花子",
+    furigana: "スハナコ",
+    gender: "female" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "せ太郎",
+    furigana: "セタロウ",
+    gender: "male" as const,
+    roleIds: ["role-subleader"],
+  },
+  {
+    name: "せ花子",
+    furigana: "セハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+  {
+    name: "そ太郎",
+    furigana: "ソタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+  {
+    name: "そ花子",
+    furigana: "ソハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+];
+
+// 並び替え機能（名前順・出席番号順）の体感や動作確認のため、初期生徒リストの順序をあえてバラバラに配置
+const INITIAL_STUDENT_ORDER_INDICES = [
+  14, 2, 27, 8, 19, 0, 11, 24, 5, 16, 29, 3, 21, 10, 17, 6, 23, 12, 1, 28, 15,
+  4, 25, 9, 20, 7, 26, 13, 22, 18,
+];
+
+export const createSampleStudents = (): Student[] => {
+  const all = RAW_STUDENTS.map((s, index) => ({
+    id: `student-${index + 1}`,
+    name: s.name,
+    furigana: s.furigana,
+    gender: s.gender,
+    attendanceNumber: index + 1,
+    roleIds: [...s.roleIds],
+  }));
+
+  return INITIAL_STUDENT_ORDER_INDICES.map((idx) => all[idx]);
+};
+
+export const createDefaultClassroomState = () => {
+  // 1. 教室テンプレートから座席（30席）と教卓オブジェクトを配置
+  const { seats: rawSeats, objects } = generateTemplate("classroom", 0, 0);
+
+  // 2. ロール・グループの定義
+  const roles: Role[] = DEFAULT_ROLES.map((r) => ({ ...r }));
+  const groups: Group[] = DEFAULT_GROUPS.map((g) => ({ ...g }));
+
+  // 3. 班グループ（1班〜6班）を島・ブロック配置で右上から順に割り当て
+  // 右前=1班, 右後=2班, 中前=3班, 中後=4班, 左前=5班, 左後=6班
+  const classGroups = groups.filter((g) => g.id !== "group-vision");
+  const seatsWithClassGroups = assignGroupsByBlocks(
+    rawSeats,
+    classGroups,
+    3,
+    2,
+    "right-to-left",
+  );
+
+  // 最前列（y === 0）の座席に「前方配慮（視力等）」グループも付与
+  const seatsWithAllGroups = seatsWithClassGroups.map((seat) => ({
+    ...seat,
+    groupIds:
+      seat.y === 0 ? [...seat.groupIds, "group-vision"] : [...seat.groupIds],
+  }));
+
+  // 4. サンプル生徒（30名）の生成（並び替え体験のため、あえてバラバラの出席番号順）
+  const students: Student[] = createSampleStudents();
+
+  // 5. 初期状態では生徒を座席にバラバラの順序で配置
+  // （ツールバーの「自動割り当て」を実行すると、出席番号順に右上から整列される動作を体験できます）
+  const sortedSeatsForPlacement = [...seatsWithAllGroups].sort((a, b) => {
+    if (Math.abs(b.x - a.x) > 0.1) return b.x - a.x;
+    return a.y - b.y;
+  });
+
+  const seatToStudentMap = new Map<string, string>();
+  sortedSeatsForPlacement.forEach((seat, idx) => {
+    if (students[idx]) {
+      seatToStudentMap.set(seat.id, students[idx].id);
+    }
+  });
+
+  const seats: Seat[] = seatsWithAllGroups.map((seat) => ({
+    ...seat,
+    studentId: seatToStudentMap.get(seat.id) || null,
+  }));
+
+  // 6. サンプル制約条件
+  const constraints: Constraint[] = [
+    {
+      id: "constraint-default-1",
+      type: "student-student",
+      studentId1: "student-1", // あ太郎
+      studentId2: "student-2", // あ花子
+      matchType: "far", // 離す
+      isEnabled: true,
+    },
+    {
+      id: "constraint-default-2",
+      type: "group-match",
+      targetType: "gender",
+      targetId: "male",
+      minCount: 2,
+      groupIds: classGroups.map((g) => g.id),
+      isEnabled: true,
+    },
+    {
+      id: "constraint-default-3",
+      type: "group-match",
+      targetType: "gender",
+      targetId: "female",
+      minCount: 2,
+      groupIds: classGroups.map((g) => g.id),
+      isEnabled: true,
+    },
+    {
+      id: "constraint-default-4",
+      type: "group-match",
+      targetType: "role",
+      targetId: "role-leader",
+      minCount: 1,
+      groupIds: classGroups.map((g) => g.id),
+      isEnabled: true,
+    },
+    {
+      id: "constraint-default-5",
+      type: "student-group",
+      studentId: "student-14", // き花子（視力配慮の希望サンプル）
+      groupIds: ["group-vision"],
+      matchType: "include",
+      isEnabled: true,
+    },
+  ];
+
+  return {
+    students,
+    roles,
+    groups,
+    seats,
+    objects,
+    constraints,
+    pastSeats: [],
+  };
+};
+
+export const createEmptyState = () => ({
+  students: [] as Student[],
+  roles: [] as Role[],
+  groups: [] as Group[],
+  seats: [] as Seat[],
+  objects: [] as CanvasObject[],
+  constraints: [] as Constraint[],
+  pastSeats: [] as Seat[][],
+});

@@ -24,16 +24,20 @@
 - **Primary Hover / `--c-primary-hover`** (`#D97706`): ボタンホバー時の色。
 - **Primary Pale / `--c-primary-pale`** (`#FEF3C7`): アクティブなタブや選択状態の背景色。
 
-### Category Theme Colors（班・グループのテーマ色）
+### Category Theme Colors（班・グループのテーマ色 - 全10色）
 
 座席表上で各班（グループ）を区別するための色。目に優しく温かみのあるパステル・マカロン調を採用。
 
-- **Group Pink** (`#FCA5A5`): 赤・ピンク系班
-- **Group Blue** (`#93C5FD`): 青系班
-- **Group Green** (`#86EFAC`): 緑系班
-- **Group Yellow** (`#FDE047`): 黄色系班
-- **Group Purple** (`#D8B4FE`): 紫系班
-- **Group Orange** (`#FDBA74`): オレンジ系班
+1. **Group Pink** (`#FCA5A5`): 赤・ピンク系班
+2. **Group Blue** (`#93C5FD`): 青系班
+3. **Group Green** (`#86EFAC`): 緑系班
+4. **Group Yellow** (`#FDE047`): 黄色系班
+5. **Group Purple** (`#D8B4FE`): 紫系班
+6. **Group Orange** (`#FDBA74`): オレンジ系班
+7. **Group Mint/Teal** (`#5EEAD4`): ミント・青緑系（前方配慮等）
+8. **Group Rose** (`#F472B6`): ローズピンク系
+9. **Group Indigo** (`#A78BFA`): 藍・バイオレット系
+10. **Group Slate** (`#CBD5E1`): スレートグレー系
 
 ### Surface（面色）
 
@@ -95,17 +99,36 @@ body {
 
 **Primary Button（メインアクション）**
 
-- Background: `#F59E0B`
+- Background: `#F59E0B` (`--c-primary`)
+- Hover: `#D97706` (`--c-primary-hover`)
 - Text: `#FFFFFF`
 - Border Radius: **8px**（やわらかい角丸）
 - Shadow: Level 1
 
-**Secondary Button（キャンセル等）**
+**Secondary Button（サブアクション・キャンセル等）**
 
-- Background: `#FFFFFF`
-- Border: 1px solid `#CBD5E1`
-- Text: `#334155`
+- Background: `#FFFFFF` (`--c-surface`)
+- Border: 1px solid `#CBD5E1` (`--c-border`)
+- Text: `#334155` (`--c-text-main`)
+- Hover: `#F1F5F9` (`--c-surface-hover`)
 - Border Radius: **8px**
+- Shadow: Level 1
+
+**Danger Button（破壊的アクション・削除・消去）**
+
+- Solid (`.btn-danger`): Background `#EF4444`, Hover `#DC2626`, Text `#FFFFFF`, Border Radius **8px**, Shadow: Level 1
+- Outline (`.btn-danger-outline`): Background `#FFFFFF`, Border `1px solid #FEE2E2`, Text `#EF4444`, Hover `#FEE2E2`, Border Radius **8px**, Shadow: Level 1
+- Icon (`.btn-icon-danger`): Background `transparent`, Text `#64748B`, Hover Background `#FEE2E2`, Hover Text `#EF4444`, Border Radius **8px**
+
+### Modals & Dialogs (確認ダイアログ)
+
+ユーザーの重要操作・破壊的変更の確認に用いるダイアログ。
+
+- Backdrop: `rgba(15, 23, 42, 0.4)`、`backdrop-filter: blur(4px)`
+- Container: Background `#FFFFFF`、Border `1px solid #CBD5E1`、Border Radius **12px**、Shadow Level 3
+- Padding: 24px
+- Width: 最大 380px（モバイル時は 90vw）
+- アニメーション: `scaleIn`（0.2s cubic-bezier(0.16, 1, 0.3, 1)）
 
 ### Cards & Panels
 

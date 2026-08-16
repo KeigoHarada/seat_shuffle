@@ -100,7 +100,8 @@ body {
 /* Buttons */
 .btn-primary,
 .btn-secondary,
-.btn-danger {
+.btn-danger,
+.btn-danger-outline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -121,6 +122,7 @@ body {
 }
 .btn-primary:hover {
   background-color: var(--c-primary-hover);
+  border-color: var(--c-primary-hover);
   box-shadow: var(--shadow-2);
 }
 .btn-secondary {
@@ -130,14 +132,42 @@ body {
 }
 .btn-secondary:hover {
   background-color: var(--c-surface-hover);
+  border-color: var(--c-text-sub);
 }
 .btn-danger {
-  background-color: transparent;
-  color: var(--c-error);
-  box-shadow: none;
+  background-color: var(--c-error);
+  color: var(--c-text-inverse);
+  border-color: var(--c-error);
 }
 .btn-danger:hover {
-  background-color: #fee2e2;
+  background-color: #dc2626;
+  border-color: #dc2626;
+  box-shadow: var(--shadow-2);
+}
+.btn-danger-outline {
+  background-color: var(--c-surface);
+  color: var(--c-error);
+  border: 1px solid var(--c-error-pale);
+}
+.btn-danger-outline:hover {
+  background-color: var(--c-error-pale);
+  border-color: var(--c-error);
+}
+.btn-icon-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  background-color: transparent;
+  color: var(--c-text-sub);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-icon-danger:hover {
+  background-color: var(--c-error-pale);
+  color: var(--c-error);
 }
 
 /* Common Forms */

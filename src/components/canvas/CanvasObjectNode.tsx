@@ -8,6 +8,7 @@ interface Props {
   isSelected?: boolean;
   scale: number;
   onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove?: (e: React.PointerEvent) => void;
   onPointerUp?: (e: React.PointerEvent) => void;
   onPointerCancel?: (e: React.PointerEvent) => void;
   updateObject: (id: string, data: Partial<CanvasObject>) => void;

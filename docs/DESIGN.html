@@ -29,13 +29,17 @@
 
         --c-border: #cbd5e1;
 
-        /* Group Colors (Pastel) */
+        /* Group Colors (Pastel - 10 Colors) */
         --c-group-pink: #fca5a5;
         --c-group-blue: #93c5fd;
         --c-group-green: #86efac;
         --c-group-yellow: #fde047;
         --c-group-purple: #d8b4fe;
         --c-group-orange: #fdba74;
+        --c-group-mint: #5eead4;
+        --c-group-rose: #f472b6;
+        --c-group-indigo: #a78bfa;
+        --c-group-slate: #cbd5e1;
 
         /* Typography */
         --font-family: "Zen Maru Gothic", "Rounded Mplus 1c", sans-serif;
@@ -104,16 +108,18 @@
         font-family: inherit;
         border-radius: var(--radius-md);
         cursor: pointer;
-        transition: all 0.2s ease;
-        border: none;
+        transition: all 0.15s ease;
+        border: 1px solid transparent;
         box-shadow: var(--shadow-1);
       }
       .btn-primary {
         background-color: var(--c-primary);
         color: var(--c-text-inverse);
+        border-color: var(--c-primary);
       }
       .btn-primary:hover {
         background-color: var(--c-primary-hover);
+        border-color: var(--c-primary-hover);
         box-shadow: var(--shadow-2);
       }
       .btn-secondary {
@@ -123,6 +129,26 @@
       }
       .btn-secondary:hover {
         background-color: var(--c-bg-main);
+        border-color: var(--c-text-sub);
+      }
+      .btn-danger {
+        background-color: #ef4444;
+        color: #ffffff;
+        border-color: #ef4444;
+      }
+      .btn-danger:hover {
+        background-color: #dc2626;
+        border-color: #dc2626;
+        box-shadow: var(--shadow-2);
+      }
+      .btn-danger-outline {
+        background-color: var(--c-surface);
+        color: #ef4444;
+        border: 1px solid #fee2e2;
+      }
+      .btn-danger-outline:hover {
+        background-color: #fee2e2;
+        border-color: #ef4444;
       }
 
       /* Color Palette Swatches */
@@ -236,8 +262,8 @@
         </div>
       </div>
 
-      <h3>Group Colors (Pastel)</h3>
-      <div class="flex-row">
+      <h3>Group Colors (Pastel - 10 Colors)</h3>
+      <div class="flex-row" style="flex-wrap: wrap; gap: 12px">
         <div class="color-swatch">
           <div
             class="color-box"
@@ -273,6 +299,41 @@
           ></div>
           <div class="color-label">Purple<br />#D8B4FE</div>
         </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-orange)"
+          ></div>
+          <div class="color-label">Orange<br />#FDBA74</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-mint)"
+          ></div>
+          <div class="color-label">Mint<br />#5EEAD4</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-rose)"
+          ></div>
+          <div class="color-label">Rose<br />#F472B6</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-indigo)"
+          ></div>
+          <div class="color-label">Indigo<br />#A78BFA</div>
+        </div>
+        <div class="color-swatch">
+          <div
+            class="color-box"
+            style="background-color: var(--c-group-slate)"
+          ></div>
+          <div class="color-label">Slate<br />#CBD5E1</div>
+        </div>
       </div>
     </section>
 
@@ -305,8 +366,48 @@
 
       <h3>Buttons</h3>
       <div class="flex-row" style="margin-bottom: 1.5rem">
-        <button class="btn btn-primary">シャッフル実行</button>
-        <button class="btn btn-secondary">キャンセル</button>
+        <button class="btn btn-primary">Primary (シャッフル実行)</button>
+        <button class="btn btn-secondary">Secondary (復元・キャンセル)</button>
+        <button class="btn btn-danger">Danger (削除する)</button>
+        <button class="btn btn-danger-outline">
+          Danger Outline (データを全消去)
+        </button>
+      </div>
+
+      <h3>Confirm Dialog Mock (確認ダイアログ)</h3>
+      <div
+        class="panel-mock"
+        style="
+          max-width: 380px;
+          margin-bottom: 1.5rem;
+          box-shadow: var(--shadow-3);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+          "
+        >
+          <span style="color: #ef4444; font-size: 20px">⚠️</span>
+          <h3 style="margin: 0; font-size: 16px">データの全消去</h3>
+        </div>
+        <p
+          style="
+            font-size: 14px;
+            color: var(--c-text-sub);
+            line-height: 1.6;
+            margin-bottom: 16px;
+          "
+        >
+          すべての座席、生徒、役割、グループ、制約データを完全に消去して空にしますか？この操作は取り消せません。
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 8px">
+          <button class="btn btn-secondary">キャンセル</button>
+          <button class="btn btn-danger">全消去する</button>
+        </div>
       </div>
 
       <h3>Seat Nodes (座席オブジェクト)</h3>

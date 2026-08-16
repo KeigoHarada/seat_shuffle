@@ -9,7 +9,7 @@ const GroupAddForm: React.FC = () => {
   const addGroup = useStore((state) => state.addGroup);
 
   const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState(PREDEFINED_COLORS[0]);
+  const [newColor, setNewColor] = useState<string>(PREDEFINED_COLORS[0]);
   const [newDescription, setNewDescription] = useState("");
 
   const handleAdd = () => {
