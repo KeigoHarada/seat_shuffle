@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
       };
     };
 
-    // 先に最終結果を計算する（ここで約300msブロックされるが、ボタン押下直後なので違和感が少ない）
+    // 先に最終結果を計算する
     const finalResult = computeFinalShuffle();
 
     if (isViewMode) {
@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
       const duration = animation === "none" ? 5000 : 3000;
 
       const interval = setInterval(() => {
-        // Scramble ALL students across ALL seats rapidly (ignore locks for visual effect)
+        // Scramble ALL students across ALL seats rapidly
         const allStudentIds = students.map((s) => s.id);
         const nullCount = Math.max(0, seats.length - allStudentIds.length);
         const assignments = [
@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
           return { ...seat, studentId: assignments[idx] };
         });
         setSeats(newSeats);
-      }, 100); // 10 FPS updates
+      }, 100);
 
       setTimeout(() => {
         clearInterval(interval);
@@ -98,7 +98,7 @@ const Footer: React.FC = () => {
         position: "relative",
       }}
     >
-      {/* Left side (empty for balance) */}
+      {/* Left side */}
       <div style={{ flex: 1 }}></div>
 
       {/* Center - Undo and Shuffle Buttons */}

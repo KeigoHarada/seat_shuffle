@@ -1,13 +1,13 @@
 import React from "react";
 import { useStore } from "../../stores";
 
-const ShuffleAnimation: React.FC = () => {
+const ShuffleAnimation: React.FC<{ forceShow?: boolean }> = ({ forceShow }) => {
   const isShuffling = useStore((state) => state.isShuffling);
   const animationType = useStore(
     (state) => state.appSettings.shuffleAnimation || "none",
   );
 
-  if (!isShuffling || animationType === "none") return null;
+  if ((!isShuffling && !forceShow) || animationType === "none") return null;
 
   return (
     <div

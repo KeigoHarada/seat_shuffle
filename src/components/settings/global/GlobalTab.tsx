@@ -1,23 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Play } from "lucide-react";
 import { useStore } from "../../../stores";
 import Select from "../../ui/Select";
+import ShuffleAnimation from "../../layout/ShuffleAnimation";
 
 const GlobalTab: React.FC = () => {
   const appSettings = useStore((state) => state.appSettings);
   const updateAppSettings = useStore((state) => state.updateAppSettings);
   const isShuffling = useStore((state) => state.isShuffling);
-  const setIsShuffling = useStore((state) => state.setIsShuffling);
   const [isTesting, setIsTesting] = useState(false);
+
+  const timerRef = useRef<number | null>(null);
+
+  const clearTestPlay = useCallback(() => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setIsTesting(false);
+  }, []);
+
+  // 設定が変更された瞬間、またはアンマウント時にテストをキャンセル
+  useEffect(() => {
+    if (isTesting) {
+      clearTestPlay();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appSettings]);
+
+  useEffect(() => {
+    if (!isTesting) return;
+
+    // 他の操作が入ったらテスト実行を中止する
+    // キャプチャフェーズでクリックやキー入力を検知してテスト状態をクリア
+    const abortTest = () => {
+      clearTestPlay();
+    };
+
+    window.addEventListener("pointerdown", abortTest, { capture: true });
+    window.addEventListener("keydown", abortTest, { capture: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", abortTest, { capture: true });
+      window.removeEventListener("keydown", abortTest, { capture: true });
+      clearTestPlay();
+    };
+  }, [isTesting, clearTestPlay]);
 
   const handleTestPlay = () => {
     if (isShuffling || isTesting) return;
     setIsTesting(true);
-    setIsShuffling(true);
 
     const duration = appSettings.shuffleAnimation === "none" ? 5000 : 3000;
-    setTimeout(() => {
-      setIsShuffling(false);
+    timerRef.current = window.setTimeout(() => {
       setIsTesting(false);
     }, duration);
   };
@@ -136,6 +171,7 @@ const GlobalTab: React.FC = () => {
           ※ツールバーの「自動割り当て」実行時に、出席番号順で生徒をどの順番で空席に埋めていくかを指定します。
         </p>
       </div>
+      <ShuffleAnimation forceShow={isTesting} />
     </div>
   );
 };
