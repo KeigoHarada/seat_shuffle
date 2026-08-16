@@ -134,6 +134,7 @@ const Footer: React.FC = () => {
         </button>
 
         <button
+          id="btn-footer-shuffle"
           className="btn-primary"
           onClick={handleShuffle}
           disabled={isShuffling}
@@ -155,6 +156,7 @@ const Footer: React.FC = () => {
       {/* Right side - Mode Toggle */}
       <div style={{ display: "flex", justifyContent: "flex-end", flex: 1 }}>
         <button
+          id="btn-footer-viewmode"
           onClick={() => setIsViewMode(!isViewMode)}
           style={{
             position: "relative",

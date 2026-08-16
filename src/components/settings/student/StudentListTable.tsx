@@ -75,6 +75,7 @@ const StudentListTable: React.FC = () => {
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             ふりがな / 名前
             <button
+              id="btn-sort-students"
               onClick={sortStudentsByName}
               style={{
                 display: "flex",

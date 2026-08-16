@@ -149,6 +149,28 @@ body {
 - Padding: 16px
 - Width: 約280px
 
+### Onboarding Spotlight & Tooltip (3分実践ツアー)
+
+アプリ初回体験や機能ガイド用のスポットライト演出と連動吹き出し。ユーザーが実際にUI操作を行って進める実践型。
+
+- **Spotlight Backdrop**: `rgba(15, 23, 42, 0.5)`、対象要素の周囲に4〜8pxのパディングと角丸（Radius 8-12px）のクリップ領域を確保。
+- **Spotlight Ring**: 対象要素の外周に `box-shadow: 0 0 0 4px #F59E0B, 0 0 16px rgba(245, 158, 11, 0.4)` のやさしいパルス付きハイライト枠。
+- **Tooltip Card**:
+  - Background: `#FFFFFF`、Border: `1px solid #CBD5E1`、Border Radius: **12px**、Shadow: Level 3
+  - Width: 340px〜380px
+  - 構成要素: ステップバッジ（`ステップ 1 / 7`）、見出しタイトル（H3・16px Bold）、説明文（Body・14px）、操作指示バッジ（「👉 [操作内容]」/「✨ 操作完了！」）、フッター操作群（「スキップ」「前へ」「次へ」ボタン）
+- **Transition**: ステップ遷移時のスポットライト位置移動は `transition: all 0.3s cubic-bezier(0.2, 0, 0, 1)` で滑らかに追従。
+
+### Guide Hub Modal (操作振り返り・ガイドハブ)
+
+ヘッダーからいつでも開ける機能別ガイド＆チュートリアルモーダル。
+
+- **Backdrop**: `rgba(15, 23, 42, 0.4)`、`backdrop-filter: blur(4px)`
+- **Modal Window**: Background `#FFFFFF`、Width `clamp(640px, 80vw, 840px)`、Height `clamp(480px, 75vh, 600px)`、Border Radius **12px**、Shadow Level 3
+- **2カラム構成**:
+  - **左カラム（メニュー一覧 / 240px）**: Background `#F8FAFC`、Border-right `1px solid #E2E8F0`。カテゴリ別メニューボタン（アイコン＋ラベル）。アクティブ時は `#FEF3C7` 背景に Primary Orange アクセント。
+  - **右カラム（コンテンツエリア）**: 選択中機能のタイトル・操作アニメーションデモ（SVG/CSSアニメーションまたは動画プレビュー枠）・手順箇条書き・キーボードショートカット・「このツアーを開始する」ボタン。
+
 ### Seat Node (座席オブジェクト)
 
 キャンバス上に配置される座席。

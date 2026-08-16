@@ -5,6 +5,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ShuffleAnimation from "./components/layout/ShuffleAnimation";
 import { ToastContainer } from "./components/ui/Toast";
+import OnboardingController from "./components/onboarding/OnboardingController";
 import { useStore } from "./stores";
 
 const App: React.FC = () => {
@@ -76,6 +77,7 @@ const App: React.FC = () => {
       <Footer />
       <ShuffleAnimation />
       <ToastContainer />
+      <OnboardingController />
     </div>
   );
 };

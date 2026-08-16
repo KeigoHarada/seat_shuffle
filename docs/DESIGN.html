@@ -285,6 +285,108 @@
         cursor: pointer;
         user-select: none;
       }
+
+      /* Onboarding Spotlight & Tooltip */
+      .spotlight-tour-mock {
+        position: relative;
+        background: rgba(15, 23, 42, 0.6);
+        padding: 40px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .spotlight-target-mock {
+        position: relative;
+        background: var(--c-surface);
+        padding: 12px 24px;
+        border-radius: var(--radius-md);
+        box-shadow:
+          0 0 0 4px var(--c-primary),
+          0 0 20px rgba(245, 158, 11, 0.5);
+        font-weight: 700;
+        z-index: 2;
+      }
+      .tooltip-card-mock {
+        background: var(--c-surface);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-3);
+        padding: 20px;
+        max-width: 340px;
+        z-index: 3;
+      }
+      .step-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        background: var(--c-primary-pale);
+        color: var(--c-primary-hover);
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: var(--radius-sm);
+        margin-bottom: 8px;
+      }
+
+      /* Guide Hub Mock */
+      .guide-hub-mock {
+        background: var(--c-surface);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-3);
+        display: flex;
+        width: 100%;
+        max-width: 760px;
+        min-height: 420px;
+        overflow: hidden;
+      }
+      .guide-nav {
+        width: 240px;
+        background: var(--c-bg-main);
+        border-right: 1px solid var(--c-border);
+        padding: 12px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .guide-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--c-text-main);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        text-align: left;
+      }
+      .guide-nav-item.active {
+        background: var(--c-primary-pale);
+        color: var(--c-primary-hover);
+      }
+      .guide-content {
+        flex: 1;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+      }
+      .guide-demo-video-box {
+        width: 100%;
+        height: 200px;
+        background: #1e293b;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 14px;
+        margin-bottom: 16px;
+        position: relative;
+        overflow: hidden;
+      }
     </style>
   </head>
   <body>
@@ -511,6 +613,141 @@
         <div class="seat-mock group-blue">
           <div class="seat-ruby">すずき いちろう</div>
           <div class="seat-name">鈴木 一郎</div>
+        </div>
+      </div>
+
+      <h3>Onboarding Spotlight & Tooltip (3分実践ツアー)</h3>
+      <div class="spotlight-tour-mock" style="margin-bottom: 2rem">
+        <div class="spotlight-target-mock">
+          🔀 シャッフル実行 (ハイライト対象要素)
+        </div>
+        <div class="tooltip-card-mock">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 8px;
+            "
+          >
+            <span class="step-badge" style="margin-bottom: 0"
+              >ステップ 6 / 7</span
+            >
+            <span
+              style="
+                font-size: 11px;
+                color: #16a34a;
+                font-weight: 700;
+                background: #dcfce7;
+                padding: 2px 6px;
+                border-radius: 4px;
+              "
+              >👉 操作を実行してください</span
+            >
+          </div>
+          <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700">
+            シャッフルを実行してみましょう
+          </h4>
+          <p
+            style="
+              margin: 0 0 16px 0;
+              font-size: 14px;
+              color: var(--c-text-sub);
+              line-height: 1.5;
+            "
+          >
+            条件設定に基づき、最適な座席配置を瞬時に自動計算してシャッフルします。
+          </p>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <button
+              class="btn btn-secondary"
+              style="padding: 6px 12px; font-size: 12px"
+            >
+              スキップ
+            </button>
+            <div style="display: flex; gap: 8px">
+              <button
+                class="btn btn-secondary"
+                style="padding: 6px 12px; font-size: 12px"
+              >
+                前へ
+              </button>
+              <button
+                class="btn btn-primary"
+                style="padding: 6px 12px; font-size: 12px"
+              >
+                次へ
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Guide Hub Modal (操作振り返り・ガイドハブ)</h3>
+      <div class="guide-hub-mock" style="margin-bottom: 2rem">
+        <div class="guide-nav">
+          <button class="guide-nav-item active">
+            <span>🔰</span> 1分体験ツアー
+          </button>
+          <button class="guide-nav-item">
+            <span>🪑</span> 座席の配置・移動
+          </button>
+          <button class="guide-nav-item">
+            <span>👥</span> 生徒・役割・グループ
+          </button>
+          <button class="guide-nav-item">
+            <span>🛡️</span> 条件（制約）の設定
+          </button>
+          <button class="guide-nav-item">
+            <span>🎲</span> シャッフルと演出
+          </button>
+          <button class="guide-nav-item">
+            <span>👁️</span> 閲覧モードと印刷
+          </button>
+        </div>
+        <div class="guide-content">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 12px;
+            "
+          >
+            <div>
+              <h3 style="margin: 0 0 4px 0; font-size: 18px">
+                🪑 座席の配置・移動・割り当て
+              </h3>
+              <p style="margin: 0; font-size: 13px; color: var(--c-text-sub)">
+                キャンバス上で座席を直感的に配置・移動する方法を案内します
+              </p>
+            </div>
+            <button
+              class="btn btn-primary"
+              style="padding: 6px 12px; font-size: 13px"
+            >
+              ツアーを開始
+            </button>
+          </div>
+          <div class="guide-demo-video-box">
+            <span>🎬 操作デモアニメーション・イラストプレビュー</span>
+          </div>
+          <div style="font-size: 13px; color: var(--c-text-main)">
+            <strong>主な操作方法:</strong>
+            <ul style="margin: 6px 0 0 0; padding-left: 20px; line-height: 1.6">
+              <li>座席を左ドラッグ: グリッド単位でスムーズに移動</li>
+              <li>
+                座席を右ドラッグ: 他の座席と生徒情報をスワップ（入れ替え）
+              </li>
+              <li>座席を右クリック: 生徒の割り当て解除、座席ロックなど</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>

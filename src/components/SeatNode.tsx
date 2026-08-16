@@ -111,6 +111,7 @@ const SeatNode: React.FC<Props> = ({
 
   return (
     <div
+      className="seat-node-item"
       style={style}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

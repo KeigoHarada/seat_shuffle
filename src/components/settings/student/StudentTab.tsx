@@ -17,6 +17,7 @@ const StudentTab: React.FC = () => {
         <StudentAddForm />
       </div>
       <div
+        id="student-list-area"
         style={{
           display: "flex",
           flexDirection: "column",

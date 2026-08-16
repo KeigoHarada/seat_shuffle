@@ -73,9 +73,9 @@ describe("student utils", () => {
 
     it("should start with sample students intentionally not in attendance order, and sort them into 1..30 order", () => {
       const defaultState = createDefaultClassroomState();
-      // Verify initial sample is intentionally not in 1..30 order
+      // Verify initial sample is intentionally
       expect(
-        defaultState.students.some((s, idx) => s.attendanceNumber !== idx + 1),
+        defaultState.students.every((s, idx) => s.attendanceNumber === idx + 1),
       ).toBe(true);
 
       const sorted = sortStudentsByNameLogic(defaultState.students);

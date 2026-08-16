@@ -13,6 +13,7 @@ import {
 import { sortStudentsByNameLogic } from "../utils/student";
 import {
   createDefaultClassroomState,
+  createTourInitialState,
   createEmptyState,
 } from "../constants/defaultData";
 
@@ -20,6 +21,7 @@ export interface StateAndActions extends AppState {
   // Global
   clearState: () => void;
   loadDefaultTemplate: () => void;
+  loadTourInitialState: () => void;
   loadState: (state: Partial<AppState>) => void;
   isViewMode: boolean;
   setIsViewMode: (val: boolean) => void;
@@ -99,7 +101,7 @@ const initialState: AppState & {
     gridCols: 7,
     soundEnabled: true,
     theme: "system",
-    algorithm: "random",
+    algorithm: "optimize",
     shuffleAnimation: "none",
     autoAssignAlgorithm: "right-top-down",
   },
@@ -128,6 +130,16 @@ export const useStore = create<StateAndActions>()(
           ...createDefaultClassroomState(),
           highlightedStudentId: null,
           editingStudentId: null,
+        })),
+      loadTourInitialState: () =>
+        set((state) => ({
+          ...state,
+          ...createTourInitialState(),
+          highlightedStudentId: null,
+          editingStudentId: null,
+          isViewMode: false,
+          isSettingsOpen: true,
+          activeSettingsTab: "students",
         })),
       loadState: (loaded) => set((state) => ({ ...state, ...loaded })),
 

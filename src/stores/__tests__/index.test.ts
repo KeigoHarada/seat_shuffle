@@ -149,8 +149,9 @@ describe("useStore", () => {
 
     const state = useStore.getState();
     expect(state.students).toHaveLength(30);
+    // 初期状態で、attendanceNumber は配列順（1〜30）になっている
     expect(
-      state.students.some((s, idx) => s.attendanceNumber !== idx + 1),
+      state.students.every((s, idx) => s.attendanceNumber === idx + 1),
     ).toBe(true);
     const studentNames = state.students.map((s) => s.name);
     expect(studentNames).toContain("あ太郎");
@@ -168,8 +169,9 @@ describe("useStore", () => {
     );
     expect(ssConstraint).toBeDefined();
     if (ssConstraint && ssConstraint.type === "student-student") {
-      expect(ssConstraint.studentId1).toBe("student-1");
-      expect(ssConstraint.studentId2).toBe("student-2");
+      expect(ssConstraint.studentId1).toBe("student-6");
+      expect(ssConstraint.studentId2).toBe("student-19");
+
       expect(ssConstraint.matchType).toBe("far");
     }
 
@@ -190,7 +192,7 @@ describe("useStore", () => {
     );
     expect(visionConstraint).toBeDefined();
     if (visionConstraint && visionConstraint.type === "student-group") {
-      expect(visionConstraint.studentId).toBe("student-14");
+      expect(visionConstraint.studentId).toBe("student-28");
       expect(visionConstraint.groupIds).toEqual(["group-vision"]);
     }
 

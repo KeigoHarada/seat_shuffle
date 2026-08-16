@@ -48,6 +48,7 @@ const StudentAddForm: React.FC = () => {
 
   return (
     <div
+      id="student-add-form"
       className="card"
       style={{
         display: "flex",

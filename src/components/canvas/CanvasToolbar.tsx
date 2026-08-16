@@ -177,7 +177,7 @@ const CanvasToolbar: React.FC<Props> = ({
         }}
       />
 
-      <div style={{ position: "relative" }}>
+      <div id="btn-toolbar-template" style={{ position: "relative" }}>
         <button
           onClick={() =>
             setOpenMenu(openMenu === "templates" ? null : "templates")
@@ -226,6 +226,7 @@ const CanvasToolbar: React.FC<Props> = ({
             ].map((tpl) => (
               <button
                 key={tpl.id}
+                id={`btn-template-${tpl.id}`}
                 onClick={() => {
                   onApplyTemplate(tpl.id);
                   setOpenMenu(null);

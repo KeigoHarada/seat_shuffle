@@ -15,6 +15,7 @@ const ConstraintAddForm: React.FC = () => {
 
   return (
     <div
+      id="constraint-add-form"
       className="card"
       style={{
         display: "flex",

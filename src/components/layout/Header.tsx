@@ -1,8 +1,9 @@
 import React, { useRef } from "react";
-import { Settings, Download, Upload } from "lucide-react";
+import { Settings, Download, Upload, Sprout } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
 import Input from "../ui/Input";
 import { useStore } from "../../stores";
+import { useOnboardingStore } from "../../stores/onboarding";
 
 interface HeaderProps {
   showSettings: boolean;
@@ -12,6 +13,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isViewMode = useStore((state) => state.isViewMode);
+  const openGuideHub = useOnboardingStore((state) => state.openGuideHub);
 
   const { handleSave, handleLoad } = useCsvSettings();
 
@@ -51,6 +53,22 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
           gap: "var(--spacing-md)",
         }}
       >
+        <button
+          id="header-guide-btn"
+          className="btn-secondary"
+          style={{
+            gap: "6px",
+            backgroundColor: "var(--c-primary-pale)",
+            borderColor: "var(--c-primary)",
+            color: "var(--c-primary-hover)",
+            fontWeight: 700,
+          }}
+          onClick={() => openGuideHub("tour")}
+          title="操作ガイド・ツアーを見る"
+        >
+          <Sprout size={16} style={{ marginTop: "-1px" }} /> はじめてガイド
+        </button>
+
         <Input
           type="file"
           accept=".csv"
@@ -84,6 +102,7 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
 
         {!isViewMode && (
           <button
+            id="btn-header-settings"
             className={showSettings ? "btn-primary" : "btn-secondary"}
             onClick={onToggleSettings}
             style={{ gap: "4px" }}

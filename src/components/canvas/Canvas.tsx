@@ -222,6 +222,7 @@ const Canvas: React.FC = () => {
 
   return (
     <div
+      id="canvas-main-area"
       ref={viewportRef}
       style={viewportStyle}
       onPointerDown={onCanvasPointerDown}

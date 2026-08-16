@@ -17,6 +17,7 @@ const ConstraintTab: React.FC = () => {
         <ConstraintAddForm />
       </div>
       <div
+        id="constraint-list-area"
         style={{
           display: "flex",
           flexDirection: "column",

@@ -38,6 +38,7 @@ const SettingsTabs: React.FC<{
     {TABS.map((tab) => (
       <button
         key={tab.id}
+        id={`tab-btn-${tab.id}`}
         onClick={() => onChange(tab.id)}
         style={{
           flex: 1,
@@ -92,6 +93,7 @@ const TabContainer: React.FC<{ title: string; children: React.ReactNode }> = ({
 const SettingsContent: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
   return (
     <div
+      id="settings-content-area"
       style={{
         flex: 1,
         display: "flex",
@@ -135,6 +137,7 @@ const SettingsPanel: React.FC = () => {
 
   return (
     <div
+      id="settings-main-area"
       style={{
         width: "100%",
         height: "100%",

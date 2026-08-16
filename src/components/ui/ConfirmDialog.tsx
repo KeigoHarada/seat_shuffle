@@ -54,37 +54,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(15, 23, 42, 0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        backdropFilter: "blur(4px)",
-        padding: "var(--spacing-md)",
-      }}
-      onClick={onCancel}
-    >
+    <div className="modal-overlay" onClick={onCancel}>
       <div
-        className="card"
+        className="modal-content"
         style={{
           width: "100%",
           maxWidth: "380px",
           padding: "var(--spacing-lg)",
-          display: "flex",
-          flexDirection: "column",
           gap: "var(--spacing-md)",
-          boxShadow: "var(--shadow-3)",
-          animation: "scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-          backgroundColor: "var(--c-surface)",
-          borderRadius: "var(--radius-lg)",
-          border: "1px solid var(--c-border)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -138,12 +115,6 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </button>
         </div>
       </div>
-      <style>{`
-        @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.96); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
     </div>
   );
 };

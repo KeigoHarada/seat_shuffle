@@ -287,9 +287,12 @@ export const useCanvasActions = (
       const groupWidth = maxX - minX;
       const groupHeight = maxY - minY;
 
+      const desiredStartX = targetX - Math.floor(groupWidth / 2);
+      const desiredStartY = targetY - Math.floor(groupHeight / 2);
+
       const { x: newMinX, y: newMinY } = findEmptyPos(
-        minX,
-        minY,
+        desiredStartX,
+        desiredStartY,
         groupWidth,
         groupHeight,
         seats,
@@ -299,12 +302,17 @@ export const useCanvasActions = (
       const dx = newMinX - minX;
       const dy = newMinY - minY;
 
+      let finalSeats = generatedSeats.map((s) => ({
+        ...s,
+        x: s.x + dx,
+        y: s.y + dy,
+      }));
+
       const newSelectedIds: string[] = [];
 
-      generatedSeats.forEach((s) => {
-        const newSeat = { ...s, x: s.x + dx, y: s.y + dy };
-        addSeat(newSeat);
-        newSelectedIds.push(newSeat.id);
+      finalSeats.forEach((s) => {
+        addSeat(s);
+        newSelectedIds.push(s.id);
       });
 
       generatedObjects.forEach((o) => {

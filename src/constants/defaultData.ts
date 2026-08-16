@@ -65,16 +65,10 @@ export const DEFAULT_GROUPS: Group[] = [
 
 export const RAW_STUDENTS = [
   {
-    name: "あ太郎",
-    furigana: "アタロウ",
+    name: "く太郎",
+    furigana: "クタロウ",
     gender: "male" as const,
-    roleIds: ["role-leader"],
-  },
-  {
-    name: "あ花子",
-    furigana: "アハナコ",
-    gender: "female" as const,
-    roleIds: ["role-subleader"],
+    roleIds: [],
   },
   {
     name: "い太郎",
@@ -83,33 +77,8 @@ export const RAW_STUDENTS = [
     roleIds: [],
   },
   {
-    name: "い花子",
-    furigana: "イハナコ",
-    gender: "female" as const,
-    roleIds: [],
-  },
-  {
-    name: "う太郎",
-    furigana: "ウタロウ",
-    gender: "male" as const,
-    roleIds: [],
-  },
-
-  {
-    name: "う花子",
-    furigana: "ウハナコ",
-    gender: "female" as const,
-    roleIds: ["role-leader"],
-  },
-  {
-    name: "え太郎",
-    furigana: "エタロウ",
-    gender: "male" as const,
-    roleIds: ["role-subleader"],
-  },
-  {
-    name: "え花子",
-    furigana: "エハナコ",
+    name: "せ花子",
+    furigana: "セハナコ",
     gender: "female" as const,
     roleIds: [],
   },
@@ -120,15 +89,14 @@ export const RAW_STUDENTS = [
     roleIds: [],
   },
   {
-    name: "お花子",
-    furigana: "オハナコ",
+    name: "こ花子",
+    furigana: "コハナコ",
     gender: "female" as const,
     roleIds: [],
   },
-
   {
-    name: "か太郎",
-    furigana: "カタロウ",
+    name: "あ太郎",
+    furigana: "アタロウ",
     gender: "male" as const,
     roleIds: ["role-leader"],
   },
@@ -139,27 +107,14 @@ export const RAW_STUDENTS = [
     roleIds: ["role-subleader"],
   },
   {
-    name: "き太郎",
-    furigana: "キタロウ",
+    name: "す太郎",
+    furigana: "スタロウ",
     gender: "male" as const,
     roleIds: [],
   },
   {
-    name: "き花子",
-    furigana: "キハナコ",
-    gender: "female" as const,
-    roleIds: [],
-  },
-  {
-    name: "く太郎",
-    furigana: "クタロウ",
-    gender: "male" as const,
-    roleIds: [],
-  },
-
-  {
-    name: "く花子",
-    furigana: "クハナコ",
+    name: "う花子",
+    furigana: "ウハナコ",
     gender: "female" as const,
     roleIds: ["role-leader"],
   },
@@ -170,29 +125,16 @@ export const RAW_STUDENTS = [
     roleIds: ["role-subleader"],
   },
   {
-    name: "け花子",
-    furigana: "ケハナコ",
-    gender: "female" as const,
-    roleIds: [],
-  },
-  {
     name: "こ太郎",
     furigana: "コタロウ",
     gender: "male" as const,
     roleIds: [],
   },
   {
-    name: "こ花子",
-    furigana: "コハナコ",
+    name: "い花子",
+    furigana: "イハナコ",
     gender: "female" as const,
     roleIds: [],
-  },
-
-  {
-    name: "さ太郎",
-    furigana: "サタロウ",
-    gender: "male" as const,
-    roleIds: ["role-leader"],
   },
   {
     name: "さ花子",
@@ -201,10 +143,22 @@ export const RAW_STUDENTS = [
     roleIds: ["role-subleader"],
   },
   {
-    name: "し太郎",
-    furigana: "シタロウ",
+    name: "か太郎",
+    furigana: "カタロウ",
     gender: "male" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "け花子",
+    furigana: "ケハナコ",
+    gender: "female" as const,
     roleIds: [],
+  },
+  {
+    name: "え太郎",
+    furigana: "エタロウ",
+    gender: "male" as const,
+    roleIds: ["role-subleader"],
   },
   {
     name: "し花子",
@@ -213,17 +167,58 @@ export const RAW_STUDENTS = [
     roleIds: [],
   },
   {
-    name: "す太郎",
-    furigana: "スタロウ",
+    name: "き太郎",
+    furigana: "キタロウ",
     gender: "male" as const,
     roleIds: [],
   },
-
+  {
+    name: "あ花子",
+    furigana: "アハナコ",
+    gender: "female" as const,
+    roleIds: ["role-subleader"],
+  },
+  {
+    name: "そ太郎",
+    furigana: "ソタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
+  {
+    name: "く花子",
+    furigana: "クハナコ",
+    gender: "female" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "う太郎",
+    furigana: "ウタロウ",
+    gender: "male" as const,
+    roleIds: [],
+  },
   {
     name: "す花子",
     furigana: "スハナコ",
     gender: "female" as const,
     roleIds: ["role-leader"],
+  },
+  {
+    name: "お花子",
+    furigana: "オハナコ",
+    gender: "female" as const,
+    roleIds: [],
+  },
+  {
+    name: "さ太郎",
+    furigana: "サタロウ",
+    gender: "male" as const,
+    roleIds: ["role-leader"],
+  },
+  {
+    name: "え花子",
+    furigana: "エハナコ",
+    gender: "female" as const,
+    roleIds: [],
   },
   {
     name: "せ太郎",
@@ -232,14 +227,14 @@ export const RAW_STUDENTS = [
     roleIds: ["role-subleader"],
   },
   {
-    name: "せ花子",
-    furigana: "セハナコ",
+    name: "き花子",
+    furigana: "キハナコ",
     gender: "female" as const,
     roleIds: [],
   },
   {
-    name: "そ太郎",
-    furigana: "ソタロウ",
+    name: "し太郎",
+    furigana: "シタロウ",
     gender: "male" as const,
     roleIds: [],
   },
@@ -251,14 +246,8 @@ export const RAW_STUDENTS = [
   },
 ];
 
-// 並び替え機能（名前順・出席番号順）の体感や動作確認のため、初期生徒リストの順序をあえてバラバラに配置
-const INITIAL_STUDENT_ORDER_INDICES = [
-  14, 2, 27, 8, 19, 0, 11, 24, 5, 16, 29, 3, 21, 10, 17, 6, 23, 12, 1, 28, 15,
-  4, 25, 9, 20, 7, 26, 13, 22, 18,
-];
-
 export const createSampleStudents = (): Student[] => {
-  const all = RAW_STUDENTS.map((s, index) => ({
+  return RAW_STUDENTS.map((s, index) => ({
     id: `student-${index + 1}`,
     name: s.name,
     furigana: s.furigana,
@@ -266,8 +255,6 @@ export const createSampleStudents = (): Student[] => {
     attendanceNumber: index + 1,
     roleIds: [...s.roleIds],
   }));
-
-  return INITIAL_STUDENT_ORDER_INDICES.map((idx) => all[idx]);
 };
 
 export const createDefaultClassroomState = () => {
@@ -323,8 +310,8 @@ export const createDefaultClassroomState = () => {
     {
       id: "constraint-default-1",
       type: "student-student",
-      studentId1: "student-1", // あ太郎
-      studentId2: "student-2", // あ花子
+      studentId1: "student-6", // あ太郎
+      studentId2: "student-19", // あ花子
       matchType: "far", // 離す
       isEnabled: true,
     },
@@ -358,9 +345,64 @@ export const createDefaultClassroomState = () => {
     {
       id: "constraint-default-5",
       type: "student-group",
-      studentId: "student-14", // き花子（視力配慮の希望サンプル）
+      studentId: "student-28", // き花子（視力配慮の希望サンプル）
       groupIds: ["group-vision"],
       matchType: "include",
+      isEnabled: true,
+    },
+  ];
+
+  return {
+    students,
+    roles,
+    groups,
+    seats,
+    objects,
+    constraints,
+    pastSeats: [],
+  };
+};
+
+export const createTourInitialState = () => {
+  // 1. ツアー開始時はキャンバスは空（ユーザーにテンプレート選択を体験してもらう）
+  const seats: Seat[] = [];
+  const objects: CanvasObject[] = [];
+
+  // 2. ロール・グループの定義
+  const roles: Role[] = DEFAULT_ROLES.map((r) => ({ ...r }));
+  const groups: Group[] = DEFAULT_GROUPS.map((g) => ({ ...g }));
+
+  // 3. 生徒データは29人分（最後の1人「そ花子」を除外してユーザーに追加してもらう）
+  const allStudents = createSampleStudents();
+  const students: Student[] = allStudents.slice(0, 29);
+
+  // 4. サンプル制約条件（前方配慮の制約は除外してユーザーに追加・設定してもらう）
+  const classGroups = groups.filter((g) => g.id !== "group-vision");
+  const constraints: Constraint[] = [
+    {
+      id: "constraint-default-1",
+      type: "student-student",
+      studentId1: "student-6", // あ太郎
+      studentId2: "student-19", // あ花子
+      matchType: "far", // 離す
+      isEnabled: true,
+    },
+    {
+      id: "constraint-default-2",
+      type: "group-match",
+      targetType: "gender",
+      targetId: "male",
+      minCount: 2,
+      groupIds: classGroups.map((g) => g.id),
+      isEnabled: true,
+    },
+    {
+      id: "constraint-default-3",
+      type: "group-match",
+      targetType: "gender",
+      targetId: "female",
+      minCount: 2,
+      groupIds: classGroups.map((g) => g.id),
       isEnabled: true,
     },
   ];

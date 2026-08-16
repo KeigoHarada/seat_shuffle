@@ -17,6 +17,7 @@ const GroupTab: React.FC = () => {
         <GroupAddForm />
       </div>
       <div
+        id="group-list-area"
         style={{
           display: "flex",
           flexDirection: "column",

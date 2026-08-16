@@ -29,6 +29,7 @@ const GroupAddForm: React.FC = () => {
 
   return (
     <div
+      id="group-add-form"
       className="card"
       style={{
         display: "flex",
