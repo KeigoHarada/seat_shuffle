@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import Popover from "../ui/Popover";
+import Checkbox from "../ui/Checkbox";
 import { useStore } from "../../stores";
 
 interface GroupAssignPopoverProps {
@@ -99,13 +100,10 @@ const GroupAssignPopover: React.FC<GroupAssignPopoverProps> = ({
                   e.currentTarget.style.backgroundColor = "var(--c-surface)";
                 }}
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={allHaveIt || someHaveIt}
+                  indeterminate={someHaveIt}
                   readOnly
-                  ref={(el) => {
-                    if (el) el.indeterminate = someHaveIt;
-                  }}
                   style={{
                     cursor: "pointer",
                   }}

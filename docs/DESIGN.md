@@ -160,6 +160,31 @@ body {
 - Shadow: Level 1（キャンバスから少し浮いている表現）
 - Size: Width: 約100px, Height: 約60px（表示内容により調整）
 
+### Form Controls (Inputs & Checkboxes)
+
+**Text & Number Input**
+
+- Background: `#FFFFFF` (`--c-surface`)
+- Border: `1px solid #CBD5E1` (`--c-border`)
+- Focus: Border `#F59E0B` (`--c-primary`), Focus Ring `0 0 0 2px #FEF3C7` (`--c-primary-pale`)
+- Border Radius: **8px** (`--radius-md`)
+- Font: `Zen Maru Gothic`
+
+**Checkbox**
+
+やわらかい丸みを帯びた角と、ブランドカラー（Primary Orange）を基調とした親しみやすいデザイン。
+
+- Size: **18px × 18px** (タッチ・クリックしやすい適切なサイズ感)
+- Border Radius: **5px** (角丸)
+- Unchecked: Background `#FFFFFF` (`--c-surface`), Border `1.5px solid #CBD5E1` (`--c-border`)
+- Unchecked Hover: Border `1.5px solid #F59E0B` (`--c-primary`), Background `#FEF3C7` (`--c-primary-pale`)
+- Checked: Background `#F59E0B` (`--c-primary`), Border `1.5px solid #F59E0B`, Icon (白いチェックマーク)
+- Checked Hover: Background `#D97706` (`--c-primary-hover`), Border `1.5px solid #D97706` (濃いオレンジで白アイコンのコントラスト維持)
+- Indeterminate: Background `#F59E0B` (`--c-primary`), Border `1.5px solid #F59E0B`, Icon (白いマイナスバー)
+- Indeterminate Hover: Background `#D97706` (`--c-primary-hover`), Border `1.5px solid #D97706`
+- Focus Visible: `box-shadow: 0 0 0 2px #FEF3C7`
+- Disabled: Background `#E2E8F0` (`--c-surface-disabled`), Border `1.5px solid #CBD5E1`, Cursor `not-allowed`
+
 ---
 
 ## 5. Layout Principles

@@ -9,3 +9,5 @@ if (typeof Worker === "undefined") {
     onerror = null;
   };
 }
+
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
