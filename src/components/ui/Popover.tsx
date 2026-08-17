@@ -29,31 +29,23 @@ const Popover: React.FC<PopoverProps> = ({
     startY: 0,
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      setPosition({ x, y });
-    }
-  }, [isOpen, x, y]);
-
   useLayoutEffect(() => {
-    if (!isOpen || !popoverRef.current) return;
+    if (!isOpen || !popoverRef.current || !containerRef.current) return;
     const el = popoverRef.current;
-    const parent = el.offsetParent as HTMLElement | null;
+    const parent = containerRef.current.offsetParent as HTMLElement | null;
     if (!parent) return;
 
     const parentRect = parent.getBoundingClientRect();
     const clamped = clampMenuPosition(
-      position.x,
-      position.y,
+      x,
+      y,
       el.offsetWidth,
       el.offsetHeight,
       parentRect.width,
       parentRect.height,
     );
 
-    if (clamped.left !== position.x || clamped.top !== position.y) {
-      setPosition({ x: clamped.left, y: clamped.top });
-    }
+    setPosition({ x: clamped.left, y: clamped.top });
   }, [isOpen, x, y]);
 
   useEffect(() => {
