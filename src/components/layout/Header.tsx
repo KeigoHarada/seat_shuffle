@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
       >
         <span style={{ fontSize: "1.5rem" }}>🪑</span>
         <h1 className="text-title1" style={{ fontSize: "1.25rem", margin: 0 }}>
-          席替え先生
+          ラクガエ
         </h1>
       </div>
 

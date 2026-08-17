@@ -50,7 +50,7 @@ describe("Onboarding Components", () => {
       if (root) root.render(<WelcomeModal />);
     });
 
-    expect(container.textContent).toContain("席替え先生へようこそ！");
+    expect(container.textContent).toContain("ラクガエへようこそ！");
     expect(container.textContent).toContain("3分ガイドを始める");
   });
 
@@ -63,7 +63,7 @@ describe("Onboarding Components", () => {
       if (root) root.render(<GuideHubModal />);
     });
 
-    expect(container.textContent).toContain("席替え先生 操作ガイド");
+    expect(container.textContent).toContain("ラクガエ 操作ガイド");
     expect(container.textContent).toContain("座席の配置・移動・割り当て");
   });
 

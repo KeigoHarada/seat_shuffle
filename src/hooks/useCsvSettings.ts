@@ -15,7 +15,7 @@ export const useCsvSettings = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `seat_shuffle_settings_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `rakugae_settings_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };

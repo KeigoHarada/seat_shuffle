@@ -77,7 +77,7 @@ export const WelcomeModal: React.FC = () => {
               color: "var(--c-text-main)",
             }}
           >
-            席替え先生へようこそ！
+            ラクガエへようこそ！
           </h2>
           <p
             style={{

@@ -1,5 +1,5 @@
 {
-  "name": "seat_shuffle",
+  "name": "rakugae",
   "version": "1.0.0",
   "description": "教師向けの席替え支援Webアプリケーション。条件付きのランダム配置を高速に行い、設定画面と公開画面を分離した直感的なUIを提供します。",
   "main": "index.js",

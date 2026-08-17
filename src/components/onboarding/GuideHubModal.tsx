@@ -42,7 +42,7 @@ export const GuideHubModal: React.FC = () => {
                 color: "var(--c-text-main)",
               }}
             >
-              席替え先生 操作ガイド
+              ラクガエ 操作ガイド
             </h2>
           </div>
 
