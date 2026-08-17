@@ -286,3 +286,30 @@ export const getObjectDragDisplayProps = (
 
   return { displayObj, isDragging };
 };
+
+/**
+ * メニューやポップオーバーの位置を親コンテナ内に収まるようにクランプします。
+ */
+export const clampMenuPosition = (
+  x: number,
+  y: number,
+  menuWidth: number,
+  menuHeight: number,
+  containerWidth: number,
+  containerHeight: number,
+  margin = 8,
+): { left: number; top: number } => {
+  let left = x;
+  let top = y;
+
+  if (left + menuWidth + margin > containerWidth) {
+    left = containerWidth - menuWidth - margin;
+  }
+  if (top + menuHeight + margin > containerHeight) {
+    top = containerHeight - menuHeight - margin;
+  }
+  if (left < margin) left = margin;
+  if (top < margin) top = margin;
+
+  return { left, top };
+};

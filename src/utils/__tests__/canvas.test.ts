@@ -4,6 +4,7 @@ import {
   calculateCenterPanZoom,
   worldToGrid,
   screenToWorld,
+  clampMenuPosition,
 } from "../canvas";
 import { generateTemplate } from "../templates";
 
@@ -69,6 +70,44 @@ describe("canvas utils", () => {
       // worldY = (200 - 50 - 20) / 1.5 = 130 / 1.5 = 86.666...
       expect(worldX).toBe(100);
       expect(Math.round(worldY)).toBe(87);
+    });
+  });
+
+  describe("clampMenuPosition", () => {
+    it("should not adjust position when menu fits within container", () => {
+      const result = clampMenuPosition(100, 100, 150, 200, 800, 600);
+
+      expect(result).toEqual({ left: 100, top: 100 });
+    });
+
+    it("should clamp when overflowing right edge", () => {
+      const result = clampMenuPosition(700, 100, 150, 200, 800, 600);
+
+      expect(result).toEqual({ left: 800 - 150 - 8, top: 100 });
+    });
+
+    it("should clamp when overflowing bottom edge", () => {
+      const result = clampMenuPosition(100, 450, 150, 200, 800, 600);
+
+      expect(result).toEqual({ left: 100, top: 600 - 200 - 8 });
+    });
+
+    it("should clamp both axes when overflowing bottom-right corner", () => {
+      const result = clampMenuPosition(700, 450, 150, 200, 800, 600);
+
+      expect(result).toEqual({ left: 800 - 150 - 8, top: 600 - 200 - 8 });
+    });
+
+    it("should clamp to margin when position is negative", () => {
+      const result = clampMenuPosition(-10, -20, 150, 200, 800, 600);
+
+      expect(result).toEqual({ left: 8, top: 8 });
+    });
+
+    it("should use custom margin", () => {
+      const result = clampMenuPosition(780, 100, 150, 200, 800, 600, 16);
+
+      expect(result).toEqual({ left: 800 - 150 - 16, top: 100 });
     });
   });
 });

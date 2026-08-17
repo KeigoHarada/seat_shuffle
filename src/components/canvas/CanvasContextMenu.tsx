@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useRef, useLayoutEffect, useState } from "react";
 
 import { Lock, Unlock } from "lucide-react";
+import { clampMenuPosition } from "../../utils/canvas";
 
 interface CanvasContextMenuProps {
   contextMenu: { x: number; y: number; worldX: number; worldY: number } | null;
@@ -35,14 +36,51 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   onToggleLockSelected,
   onAssignStudentSelected,
 }) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [adjustedPos, setAdjustedPos] = useState<{
+    left: number;
+    top: number;
+  } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!contextMenu || !menuRef.current) {
+      setAdjustedPos(null);
+      return;
+    }
+    const menu = menuRef.current;
+    const parent = menu.offsetParent as HTMLElement | null;
+    if (!parent) return;
+
+    const parentRect = parent.getBoundingClientRect();
+    setAdjustedPos(
+      clampMenuPosition(
+        contextMenu.x,
+        contextMenu.y,
+        menu.offsetWidth,
+        menu.offsetHeight,
+        parentRect.width,
+        parentRect.height,
+      ),
+    );
+  }, [
+    contextMenu,
+    hasSelection,
+    hasSelectedSeats,
+    hasOccupiedSeats,
+    hasSingleEmptySeat,
+  ]);
+
   if (!contextMenu) return null;
+
+  const pos = adjustedPos ?? { left: contextMenu.x, top: contextMenu.y };
 
   return (
     <div
+      ref={menuRef}
       style={{
         position: "absolute",
-        left: contextMenu.x,
-        top: contextMenu.y,
+        left: pos.left,
+        top: pos.top,
         backgroundColor: "var(--c-surface)",
         border: "1px solid var(--c-border)",
         borderRadius: "var(--radius-md)",
@@ -52,6 +90,7 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
         minWidth: 150,
         display: "flex",
         flexDirection: "column",
+        visibility: adjustedPos ? "visible" : "hidden",
       }}
       onPointerDown={(e) => e.stopPropagation()}
     >

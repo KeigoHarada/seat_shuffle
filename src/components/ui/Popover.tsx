@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
+import { clampMenuPosition } from "../../utils/canvas";
 
 interface PopoverProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const Popover: React.FC<PopoverProps> = ({
   children,
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const popoverRef = React.useRef<HTMLDivElement>(null);
   const [position, setPosition] = React.useState({ x, y });
   const [isDragging, setIsDragging] = React.useState(false);
   const dragStartRef = React.useRef({
@@ -30,6 +32,27 @@ const Popover: React.FC<PopoverProps> = ({
   useEffect(() => {
     if (isOpen) {
       setPosition({ x, y });
+    }
+  }, [isOpen, x, y]);
+
+  useLayoutEffect(() => {
+    if (!isOpen || !popoverRef.current) return;
+    const el = popoverRef.current;
+    const parent = el.offsetParent as HTMLElement | null;
+    if (!parent) return;
+
+    const parentRect = parent.getBoundingClientRect();
+    const clamped = clampMenuPosition(
+      position.x,
+      position.y,
+      el.offsetWidth,
+      el.offsetHeight,
+      parentRect.width,
+      parentRect.height,
+    );
+
+    if (clamped.left !== position.x || clamped.top !== position.y) {
+      setPosition({ x: clamped.left, y: clamped.top });
     }
   }, [isOpen, x, y]);
 
@@ -75,6 +98,7 @@ const Popover: React.FC<PopoverProps> = ({
         }}
       />
       <div
+        ref={popoverRef}
         style={{
           position: "absolute",
           left: position.x,
