@@ -691,62 +691,194 @@
 
       <h3>Guide Hub Modal (操作振り返り・ガイドハブ)</h3>
       <div class="guide-hub-mock" style="margin-bottom: 2rem">
-        <div class="guide-nav">
-          <button class="guide-nav-item active">
-            <span>🔰</span> 1分体験ツアー
-          </button>
-          <button class="guide-nav-item">
-            <span>🪑</span> 座席の配置・移動
-          </button>
-          <button class="guide-nav-item">
-            <span>👥</span> 生徒・役割・グループ
-          </button>
-          <button class="guide-nav-item">
-            <span>🛡️</span> 条件（制約）の設定
-          </button>
-          <button class="guide-nav-item">
-            <span>🎲</span> シャッフルと演出
-          </button>
-          <button class="guide-nav-item">
-            <span>👁️</span> 閲覧モードと印刷
-          </button>
+        <div
+          class="guide-nav"
+          style="
+            width: 260px;
+            border-right: 1px solid var(--c-border);
+            background-color: var(--c-bg-sub);
+            padding: 8px;
+          "
+        >
+          <!-- 実践ツアー -->
+          <div style="margin-bottom: 8px">
+            <button
+              class="guide-nav-item"
+              style="
+                width: 100%;
+                text-align: left;
+                background: var(--c-bg-main);
+                border: 1px solid var(--c-border);
+                border-radius: 6px;
+                padding: 10px;
+                font-weight: bold;
+                color: var(--c-primary);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              3分実践ツアーを始める
+            </button>
+          </div>
+
+          <!-- アコーディオンカテゴリ例 -->
+          <div style="margin-bottom: 4px">
+            <div
+              style="
+                padding: 6px 10px;
+                font-size: 12px;
+                font-weight: bold;
+                color: var(--c-text-sub);
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+              "
+            >
+              <span style="margin-right: 6px">▼</span> 1. 座席のレイアウト
+            </div>
+            <div style="padding-left: 20px">
+              <button
+                class="guide-nav-item active"
+                style="
+                  width: 100%;
+                  text-align: left;
+                  padding: 8px;
+                  border-radius: 6px;
+                  font-size: 13px;
+                  margin-bottom: 2px;
+                "
+              >
+                座席をまとめて移動させたい
+              </button>
+              <button
+                class="guide-nav-item"
+                style="
+                  width: 100%;
+                  text-align: left;
+                  padding: 8px;
+                  border-radius: 6px;
+                  font-size: 13px;
+                  margin-bottom: 2px;
+                "
+              >
+                特定の生徒の席を固定したい
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 4px">
+            <div
+              style="
+                padding: 6px 10px;
+                font-size: 12px;
+                font-weight: bold;
+                color: var(--c-text-sub);
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+              "
+            >
+              <span style="margin-right: 6px">▶</span> 3. 条件・制約の指定
+            </div>
+          </div>
         </div>
-        <div class="guide-content">
+
+        <div
+          class="guide-content"
+          style="
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          "
+        >
           <div
             style="
               display: flex;
               justify-content: space-between;
               align-items: flex-start;
-              margin-bottom: 12px;
             "
           >
             <div>
-              <h3 style="margin: 0 0 4px 0; font-size: 18px">
-                🪑 座席の配置・移動・割り当て
+              <h3 style="margin: 0 0 4px 0; font-size: 20px">
+                座席をまとめて移動させたい
               </h3>
-              <p style="margin: 0; font-size: 13px; color: var(--c-text-sub)">
-                キャンバス上で座席を直感的に配置・移動する方法を案内します
+              <p style="margin: 0; font-size: 14px; color: var(--c-text-sub)">
+                複数の座席をまとめて動かしたり、きれいに整列させる方法です。
               </p>
             </div>
-            <button
-              class="btn btn-primary"
-              style="padding: 6px 12px; font-size: 13px"
+          </div>
+
+          <!-- 上部：動画プレビューエリア（空枠） -->
+          <div
+            class="guide-demo-video-box"
+            style="
+              height: 200px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              border-radius: 8px;
+              border: 1px solid var(--c-border);
+              background: var(--c-bg-sub);
+            "
+          >
+            <span style="color: var(--c-text-sub)"
+              >[ 動画プレビュー用エリア ]</span
             >
-              ツアーを開始
-            </button>
           </div>
-          <div class="guide-demo-video-box">
-            <span>🎬 操作デモアニメーション・イラストプレビュー</span>
-          </div>
-          <div style="font-size: 13px; color: var(--c-text-main)">
-            <strong>主な操作方法:</strong>
-            <ul style="margin: 6px 0 0 0; padding-left: 20px; line-height: 1.6">
-              <li>座席を左ドラッグ: グリッド単位でスムーズに移動</li>
+
+          <!-- 下部：ステップ解説エリア -->
+          <div
+            style="
+              font-size: 14px;
+              color: var(--c-text-main);
+              background: var(--c-bg-main);
+              padding: 16px;
+              border-radius: 8px;
+              border: 1px solid var(--c-border);
+            "
+          >
+            <strong
+              style="
+                display: block;
+                margin-bottom: 8px;
+                color: var(--c-primary);
+              "
+              >📝 操作ステップ</strong
+            >
+            <ol style="margin: 0; padding-left: 20px; line-height: 1.8">
+              <li>画面左上の「選択ツール」をクリックします。</li>
               <li>
-                座席を右ドラッグ: 他の座席と生徒情報をスワップ（入れ替え）
+                キャンバス上でドラッグし、移動したい複数の座席を枠で囲んで選択します。
               </li>
-              <li>座席を右クリック: 生徒の割り当て解除、座席ロックなど</li>
-            </ul>
+              <li>
+                選択された座席のどれか一つを掴んでドラッグすると、まとめて移動できます。
+              </li>
+            </ol>
+
+            <div
+              style="
+                margin-top: 12px;
+                padding-top: 12px;
+                border-top: 1px dashed var(--c-border);
+                font-size: 13px;
+                color: var(--c-text-sub);
+              "
+            >
+              💡 <strong>ヒント:</strong>
+              <kbd
+                style="
+                  background: #eee;
+                  padding: 2px 4px;
+                  border-radius: 4px;
+                  font-size: 11px;
+                "
+                >Shift</kbd
+              >
+              キーを押しながら座席をクリックすると、1つずつ追加で選択できます。
+            </div>
           </div>
         </div>
       </div>

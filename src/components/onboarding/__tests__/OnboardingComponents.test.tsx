@@ -58,13 +58,13 @@ describe("Onboarding Components", () => {
     await act(async () => {
       useOnboardingStore.setState({
         isGuideHubOpen: true,
-        selectedGuideTab: "seats",
+        selectedGuideTab: "move_seats",
       });
       if (root) root.render(<GuideHubModal />);
     });
 
-    expect(container.textContent).toContain("ラクガエ 操作ガイド");
-    expect(container.textContent).toContain("座席の配置・移動・割り当て");
+    expect(container.textContent).toContain("ラクガエ はじめてガイド");
+    expect(container.textContent).toContain("座席をまとめて移動させたい");
   });
 
   it("renders ResetConfirmModal when open", async () => {

@@ -13,7 +13,7 @@ export const TourCompletionModal: React.FC = () => {
 
   const handleOpenGuide = () => {
     closeCompletionModal();
-    openGuideHub("seats");
+    openGuideHub("move_seats");
   };
 
   return (

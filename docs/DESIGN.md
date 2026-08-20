@@ -166,10 +166,13 @@ body {
 ヘッダーからいつでも開ける機能別ガイド＆チュートリアルモーダル。
 
 - **Backdrop**: `rgba(15, 23, 42, 0.4)`、`backdrop-filter: blur(4px)`
-- **Modal Window**: Background `#FFFFFF`、Width `clamp(640px, 80vw, 840px)`、Height `clamp(480px, 75vh, 600px)`、Border Radius **12px**、Shadow Level 3
+- **Modal Window**: Background `#FFFFFF`、Width `840px` (Max `90vw`)、Height `clamp(480px, 75vh, 600px)`、Border Radius **12px**、Shadow Level 3
 - **2カラム構成**:
-  - **左カラム（メニュー一覧 / 240px）**: Background `#F8FAFC`、Border-right `1px solid #E2E8F0`。カテゴリ別メニューボタン（アイコン＋ラベル）。アクティブ時は `#FEF3C7` 背景に Primary Orange アクセント。
-  - **右カラム（コンテンツエリア）**: 選択中機能のタイトル・操作アニメーションデモ（SVG/CSSアニメーションまたは動画プレビュー枠）・手順箇条書き・キーボードショートカット・「このツアーを開始する」ボタン。
+  - **左カラム（逆引きメニュー / 260px）**: Background `#F8FAFC`、Border-right `1px solid #E2E8F0`。「やりたいこと」ベースのアコーディオン型メニュー（全てのカテゴリはデフォルトで開いた状態）。カテゴリを展開して個別アクションを選択。アクティブ時は `#FEF3C7` 背景に Primary Orange アクセント。一番上には目立つスタイルで「3分実践ツアーを始める」を配置。
+  - **右カラム（コンテンツエリア）**: 上下に分割された縦積みレイアウト。
+    - **上部（ビジュアルエリア）**: 選択中の操作を示す動画用プレビュー枠（動画は後で挿入するため空の枠として用意、角丸8px、Shadow Level 1）。
+    - **下部（テキスト解説エリア）**: ステップバイステップの手順（箇条書き）、キーボードショートカット、ヒント。
+    - （※「3分実践ツアーを始める」選択時のみ、大きく「ツアーを開始」ボタンを中央に配置）
 
 ### Seat Node (座席オブジェクト)
 

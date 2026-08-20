@@ -33,11 +33,11 @@ describe("useOnboardingStore", () => {
 
   it("should open, change tab, and close guide hub", () => {
     // Arrange & Act
-    useOnboardingStore.getState().openGuideHub("seats");
+    useOnboardingStore.getState().openGuideHub("move_seats");
 
     // Assert
     expect(useOnboardingStore.getState().isGuideHubOpen).toBe(true);
-    expect(useOnboardingStore.getState().selectedGuideTab).toBe("seats");
+    expect(useOnboardingStore.getState().selectedGuideTab).toBe("move_seats");
 
     // Act
     useOnboardingStore.getState().setSelectedGuideTab("constraints");

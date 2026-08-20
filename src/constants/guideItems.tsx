@@ -1,212 +1,216 @@
 import React from "react";
-import {
-  Sparkles,
-  LayoutGrid,
-  Users,
-  Shield,
-  Shuffle,
-  Eye,
-} from "lucide-react";
+import { LayoutGrid, Users, Shield, Shuffle } from "lucide-react";
 
 export interface GuideItem {
   id: string;
-  icon: React.ReactNode;
   label: string;
-  title: React.ReactNode;
+  title: string;
   description: string;
-  points: { title: string; desc: string }[];
+  points: string[];
+  hint?: React.ReactNode;
   shortcuts?: { key: string; desc: string }[];
+  videos?: {
+    url: string;
+    title: string;
+    description?: string;
+    steps?: string[];
+  }[];
 }
 
-export const GUIDE_ITEMS: GuideItem[] = [
+export interface GuideCategory {
+  id: string;
+  label: string;
+  iconNode?: React.ReactNode;
+  items: GuideItem[];
+}
+
+// 独立したツアー項目
+export const TOUR_ITEM: GuideItem = {
+  id: "tour",
+  label: "3分実践ツアーを始める",
+  title: "3分実践ツアー",
+  description:
+    "実際の画面を操作しながら、ラクガエの基本的な使い方を一通り体験できるツアーです。",
+  points: [
+    "右上の「3分ツアーを開始」ボタンをクリックすると、画面上にスポットライトと指示が表示されます。",
+    "指示パネルの右上の「✕（閉じる）」ボタンを押すと、いつでもツアーをスキップ・中断できます。",
+  ],
+};
+
+// アコーディオンカテゴリ
+export const GUIDE_CATEGORIES: GuideCategory[] = [
   {
-    id: "tour",
-    icon: <Sparkles size={16} />,
-    label: "3分実践ツアー",
-    title: (
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <Sparkles size={18} /> 3分実践ツアー
-      </div>
-    ),
-    description:
-      "初めての方向けに、実際に操作しながら7つのステップで基本機能を一通りマスターできます。",
-    points: [
+    id: "layout",
+    label: "1. 座席のレイアウト",
+    iconNode: <LayoutGrid size={16} />,
+    items: [
       {
-        title: "ステップ 1: テンプレートから座席を配置",
-        desc: "ツールバーの「テンプレート」から教室（7×6）レイアウトを配置します。",
+        id: "place_seats",
+        label: "座席を配置したい",
+        title: "座席を配置したい",
+        description: "キャンバス上に新しく座席を追加して配置する方法です。",
+        points: [],
+        videos: [
+          {
+            url: "rakugae-001.mp4",
+            title: "方法1：テンプレートから作成する",
+            steps: [
+              "キャンバス上部のメニューから「テンプレート」ボタンをクリックします。",
+              "お好みのレイアウトを選択します。",
+              "キャンバスに選択したレイアウトに応じた座席が配置されます。",
+            ],
+          },
+          {
+            url: "rakugae-002.mp4",
+            title: "方法2：キャンバス上から直接作成する",
+            steps: [
+              "キャンバス上で右クリックします。",
+              "「座席を新規作成」をクリックすると、座席が追加されます。"
+            ],
+          },
+        ],
       },
       {
-        title: "ステップ 2: 生徒を1名追加登録",
-        desc: "生徒設定パネルで30人目の生徒を入力し、名簿に追加登録します。",
+        id: "move_seats",
+        label: "座席をまとめて移動させたい",
+        title: "座席をまとめて移動させたい",
+        description:
+          "複数の座席をまとめて動かしたり、きれいに整列させる方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "ステップ 3: 名簿を名前順に整列",
-        desc: "「名前順ソート」ボタンをクリックして出席番号を五十音順に並べ替えます。",
+        id: "assign_student",
+        label: "生徒を席に割り当てたい",
+        title: "生徒を席に割り当てたい",
+        description: "空席に特定の生徒を手動で割り当てる方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "ステップ 4: 6班の登録と割り当て",
-        desc: "グループ設定で「6班」を追加し、座席グループを設定します。",
+        id: "swap_students",
+        label: "生徒を入れ替えたい",
+        title: "生徒を入れ替えたい",
+        description: "配置済みの生徒同士の座席を入れ替える方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "ステップ 5: 前方配慮の条件を設定",
-        desc: "条件設定で視力配慮が必要な生徒を前方配慮グループに配置する条件を設定します。",
+        id: "lock_seat",
+        label: "特定の生徒の席を固定したい",
+        title: "特定の生徒の席を固定したい",
+        description:
+          "シャッフルしても動かないように、特定の生徒の座席を固定化させます。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "ステップ 6: シャッフルを実行",
-        desc: "「シャッフル実行」をクリックし、条件を満たした自動座席配置を体験します。",
+        id: "assign_group",
+        label: "座席にグループを割り当てたい",
+        title: "座席にグループを割り当てたい",
+        description: "特定の座席に班などのグループ属性を割り当てる方法です。",
+        points: ["（動画準備中）"],
       },
-      {
-        title: "ステップ 7: 生徒閲覧モードで確認",
-        desc: "「閲覧」スイッチに切り替えて、生徒発表用の表示を確認して完了です。",
-      },
-    ],
-  },
-  {
-    id: "seats",
-    icon: <LayoutGrid size={16} />,
-    label: "座席の配置・移動",
-    title: (
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <LayoutGrid size={18} /> 座席の配置・移動・割り当て
-      </div>
-    ),
-    description:
-      "キャンバス上で座席カードを直感的に配置・移動・編集できます。グリッドスナップにより綺麗な整列が簡単に行えます。",
-    points: [
-      {
-        title: "座席のドラッグ移動",
-        desc: "座席カードを左ボタンドラッグすると、グリッド単位でスムーズに移動できます。",
-      },
-      {
-        title: "生徒のスワップ（入れ替え）",
-        desc: "座席の上から右ボタンドラッグして他の座席に重ねてドロップすると、生徒同士が入れ替わります。",
-      },
-      {
-        title: "生徒の割り当て・解除",
-        desc: "空席をダブルクリックするか、座席を右クリックして生徒の割り当て・解除を行えます。",
-      },
-      {
-        title: "座席のロック（固定）",
-        desc: "座席を右クリックして「座席をロック」にすると、シャッフル時もその座席に固定されます。",
-      },
-    ],
-    shortcuts: [
-      { key: "Space + ドラッグ", desc: "キャンバスのスクロール移動" },
-      { key: "Ctrl + ホイール", desc: "キャンバスのズームイン / ズームアウト" },
-      { key: "Ctrl + C / V", desc: "選択した座席・図形のコピー＆ペースト" },
-      { key: "Delete", desc: "選択した座席・図形の削除" },
     ],
   },
   {
     id: "students",
-    icon: <Users size={16} />,
-    label: "生徒・役割・グループ",
-    title: (
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <Users size={18} /> 生徒・役割・グループの管理
-      </div>
-    ),
-    description:
-      "右側の設定パネルから名簿の登録・編集、役割（班長など）の付与、グループ（班分け）の管理を行えます。",
-    points: [
+    label: "2. 生徒・名簿の管理",
+    iconNode: <Users size={16} />,
+    items: [
       {
-        title: "生徒名簿の管理",
-        desc: "氏名・ふりがな・性別を登録可能。カードをドラッグして出席番号の並び替えも行えます。",
+        id: "manage_student",
+        label: "生徒を登録/変更/削除したい",
+        title: "生徒を登録/変更/削除したい",
+        description: "名簿に生徒を追加したり、情報を修正・削除する方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "役割（ロール）設定",
-        desc: "班長・副班長などの役職を可愛いアイコン付きで設定し、生徒に付与できます。",
+        id: "import_export",
+        label: "名簿のインポート/エクスポートがしたい",
+        title: "名簿のインポート/エクスポートがしたい",
+        description:
+          "CSVファイルを使って名簿データを一括で読み込み・書き出しする方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "グループ（班）設定",
-        desc: "1班〜6班や「前方配慮（視力等）」などのグループをカラー別に作成・管理できます。",
-      },
-      {
-        title: "CSVデータの入出力",
-        desc: "ヘッダーの「保存」「読み込み」から名簿・グループデータをCSV形式で手軽にバックアップ・復元できます。",
+        id: "sort_students",
+        label: "生徒を名前順に整列させたい",
+        title: "生徒を名前順に整列させたい",
+        description:
+          "名簿リストの生徒を名前順（または出席番号順）に並び替える方法です。",
+        points: ["（動画準備中）"],
       },
     ],
   },
   {
     id: "constraints",
-    icon: <Shield size={16} />,
-    label: "条件（制約）の設定",
-    title: (
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <Shield size={18} /> 条件（制約）の設定とコツ
-      </div>
-    ),
-    description:
-      "「仲の悪い生徒を離す」「各班に班長を1人ずつ配置する」などの条件を設定し、自動で最適配置を計算します。",
-    points: [
+    label: "3. 条件・制約の指定",
+    iconNode: <Shield size={16} />,
+    items: [
       {
-        title: "生徒-生徒条件",
-        desc: "特定の2人の生徒を指定し、「離す（違う班）」または「一緒にする（同じ班）」を設定できます。",
+        id: "register_role",
+        label: "役割を登録したい",
+        title: "役割を登録したい",
+        description:
+          "班長や日直などの役割（ロール）を作成して生徒に付与する方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "生徒-グループ条件",
-        desc: "特定の生徒を特定のグループに「入れる」または「入れない」を設定できます（例: 前方配慮グループ）。",
+        id: "register_group",
+        label: "グループを登録したい",
+        title: "グループを登録したい",
+        description: "班や属性などのグループを作成する方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "グループ-役割/性別バランス",
-        desc: "各班に「男子2名以上」「班長1名以上」などの条件を設定し、偏りのない班分けを実現します。",
+        id: "leader_constraint",
+        label: "班ごとに班長を必ず1人割り当てたい",
+        title: "班ごとに班長を必ず1人割り当てたい",
+        description:
+          "シャッフル時に各班に班長が均等に配置されるようにする条件設定です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "競合に強い最適化計算",
-        desc: "条件同士が競合してもエラーにならず、最もペナルティの少ない最良の配置を自動で導き出します。",
+        id: "front_row",
+        label: "目が悪い人を前の座席に置きたい",
+        title: "目が悪い人を前の座席に置きたい",
+        description:
+          "視力への配慮が必要な生徒を、前方の座席に優先配置する設定です。",
+        points: ["（動画準備中）"],
+      },
+      {
+        id: "separate_students",
+        label: "特定の生徒を離したい",
+        title: "特定の生徒を離したい",
+        description: "相性の悪い生徒同士が近くならないように条件を設定します。",
+        points: ["（動画準備中）"],
       },
     ],
   },
   {
     id: "shuffle",
-    icon: <Shuffle size={16} />,
-    label: "シャッフルと演出",
-    title: (
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <Shuffle size={18} /> シャッフルの実行とアニメーション
-      </div>
-    ),
-    description:
-      "下部の「シャッフル実行」ボタンをクリックすると、設定した条件を満たす最適な座席配置を瞬時に算出します。",
-    points: [
+    label: "4. シャッフルと共有",
+    iconNode: <Shuffle size={16} />,
+    items: [
       {
-        title: "ワンタップで自動最適化",
-        desc: "フッター中央のオレンジボタンを押すだけで、複雑な条件を満たす座席配置を瞬時に計算します。",
+        id: "presentation_mode",
+        label: "生徒に設定を見られずに、席替え用のシャッフルを見せたい",
+        title: "生徒に設定を見られずに、席替え用のシャッフルを見せたい",
+        description:
+          "配慮メモなどの設定を隠して、生徒向けの発表用画面（閲覧モード）にする方法です。",
+        points: ["（動画準備中）"],
       },
       {
-        title: "元に戻す（Undo機能）",
-        desc: "シャッフルボタン左隣の「元に戻す」ボタンで、シャッフル前の座席配置にいつでも戻せます。",
-      },
-      {
-        title: "演出プレビュー",
-        desc: "全体設定タブからシャッフル時のアニメーション演出やサウンド効果のON/OFFを設定できます。",
+        id: "change_animation",
+        label: "シャッフルアニメーションを変更したい",
+        title: "シャッフルアニメーションを変更したい",
+        description:
+          "席替え結果を発表する際のアニメーション演出を切り替える方法です。",
+        points: ["（動画準備中）"],
       },
     ],
   },
-  {
-    id: "viewmode",
-    icon: <Eye size={16} />,
-    label: "閲覧モードと印刷",
-    title: (
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <Eye size={18} /> 閲覧モードと印刷・エクスポート
-      </div>
-    ),
-    description:
-      "席替えの結果を発表・共有する際、生徒に見せる専用モードや印刷機能を利用できます。",
-    points: [
-      {
-        title: "生徒閲覧モード",
-        desc: "フッター右下のスイッチで切り替えます。配慮メモや役割アイコンを隠してプロジェクター等で投影できます。",
-      },
-      {
-        title: "表示視点の切り替え",
-        desc: "「教卓視点（画面上が前方）」と「生徒視点（上下左右反転）」をワンタップで切り替え可能です。",
-      },
-      {
-        title: "A4印刷（PDF出力）",
-        desc: "ブラウザの印刷機能（Ctrl+P / Cmd+P）で、A4用紙に最適化された綺麗な座席表をそのまま印刷・PDF保存できます。",
-      },
-    ],
-  },
+];
+
+// 後方互換性（既存のGUIDE_ITEMS参照箇所が壊れないように、全itemをフラットな配列としてexportしておく）
+export const GUIDE_ITEMS: GuideItem[] = [
+  TOUR_ITEM,
+  ...GUIDE_CATEGORIES.flatMap((c) => c.items),
 ];
