@@ -1,9 +1,10 @@
 import React, { useRef } from "react";
-import { Settings, Download, Upload, Sprout } from "lucide-react";
+import { Settings, Download, Upload, Sprout, Heart } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
 import Input from "../ui/Input";
 import { useStore } from "../../stores";
 import { useOnboardingStore } from "../../stores/onboarding";
+import { useDonationStore } from "../../stores/donation";
 
 interface HeaderProps {
   showSettings: boolean;
@@ -14,6 +15,10 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isViewMode = useStore((state) => state.isViewMode);
   const openGuideHub = useOnboardingStore((state) => state.openGuideHub);
+  const openDonationModal = useDonationStore(
+    (state) => state.openDonationModal,
+  );
+  const hasDonated = useDonationStore((state) => state.hasDonated());
 
   const { handleSave, handleLoad } = useCsvSettings();
 
@@ -53,6 +58,28 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
           gap: "var(--spacing-md)",
         }}
       >
+        <button
+          id="header-donation-btn"
+          className="btn-secondary"
+          style={{
+            gap: "6px",
+            backgroundColor: "#fff1f2",
+            borderColor: "#fecdd3",
+            color: "#e11d48",
+            fontWeight: 700,
+          }}
+          onClick={() => openDonationModal()}
+          title="開発者を応援・寄付する"
+        >
+          <Heart
+            size={16}
+            fill="#fda4af"
+            color="#e11d48"
+            style={{ marginTop: "-1px" }}
+          />
+          {hasDonated ? "応援・寄付 ✨" : "寄付で応援"}
+        </button>
+
         <button
           id="header-guide-btn"
           className="btn-secondary"

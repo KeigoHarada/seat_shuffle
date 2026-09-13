@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Play, RotateCcw, Trash2 } from "lucide-react";
+import { Play, RotateCcw, Trash2, Heart, Award } from "lucide-react";
 import { useStore } from "../../../stores";
 import Select from "../../ui/Select";
 import ShuffleAnimation from "../../layout/ShuffleAnimation";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import { showToast } from "../../../stores/toast";
+import { useDonationStore } from "../../../stores/donation";
 
 const GlobalTab: React.FC = () => {
   const appSettings = useStore((state) => state.appSettings);
@@ -12,6 +13,13 @@ const GlobalTab: React.FC = () => {
   const isShuffling = useStore((state) => state.isShuffling);
   const clearState = useStore((state) => state.clearState);
   const loadDefaultTemplate = useStore((state) => state.loadDefaultTemplate);
+  const openDonationModal = useDonationStore(
+    (state) => state.openDonationModal,
+  );
+  const hasDonated = useDonationStore((state) => state.hasDonated());
+  const totalDonationAmount = useDonationStore((state) =>
+    state.totalDonationAmount(),
+  );
   const [isTesting, setIsTesting] = useState(false);
   const [confirmAction, setConfirmAction] = useState<
     "restore" | "clear" | null
@@ -188,6 +196,103 @@ const GlobalTab: React.FC = () => {
         >
           ※ツールバーの「自動割り当て」実行時に、出席番号順で生徒をどの順番で空席に埋めていくかを指定します。
         </p>
+      </div>
+
+      <div
+        style={{
+          padding: "var(--spacing-md)",
+          backgroundColor: "var(--c-surface)",
+          border: "1px solid #fecdd3",
+          borderRadius: "var(--radius-lg)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          background:
+            "linear-gradient(135deg, #ffffff 0%, #fff1f2 100%)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <h3
+            className="text-title3"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              color: "#be123c",
+              margin: 0,
+            }}
+          >
+            <Heart size={18} color="#e11d48" fill="#fda4af" />
+            開発者を支援・寄付
+          </h3>
+
+          {hasDonated && (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "11px",
+                fontWeight: 700,
+                backgroundColor: "#fef3c7",
+                color: "#b45309",
+                padding: "2px 8px",
+                borderRadius: "var(--radius-full)",
+              }}
+            >
+              <Award size={12} /> サポーター ✨ (¥
+              {totalDonationAmount.toLocaleString()})
+            </span>
+          )}
+        </div>
+
+        <p
+          style={{
+            fontSize: "12px",
+            color: "var(--c-text-sub)",
+            lineHeight: 1.5,
+            margin: 0,
+          }}
+        >
+          ラクガエは教育現場の先生方を応援するため、完全無料で開発・運営されています。
+          継続的なサーバー維持や新機能開発の支援として、寄付を受け付けています。
+        </p>
+
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => openDonationModal("plans")}
+            style={{
+              flex: 1,
+              backgroundColor: "#e11d48",
+              borderColor: "#be123c",
+              gap: "6px",
+              fontSize: "13px",
+              padding: "8px 14px",
+            }}
+          >
+            <Heart size={14} fill="#ffffff" /> 寄付・応援する
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => openDonationModal("settings")}
+            style={{
+              fontSize: "12px",
+              padding: "8px 12px",
+              color: "var(--c-text-sub)",
+            }}
+          >
+            寄付先URL設定
+          </button>
+        </div>
       </div>
 
       <div
