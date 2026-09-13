@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Settings, Download, Upload, Sprout } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
 import Input from "../ui/Input";
+import Logo from "../ui/Logo";
 import { useStore } from "../../stores";
 import { useOnboardingStore } from "../../stores/onboarding";
 
@@ -33,18 +34,7 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
         position: "relative",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--spacing-sm)",
-        }}
-      >
-        <span style={{ fontSize: "1.5rem" }}>🪑</span>
-        <h1 className="text-title1" style={{ fontSize: "1.25rem", margin: 0 }}>
-          ラクガエ
-        </h1>
-      </div>
+      <Logo size="md" />
 
       <div
         style={{

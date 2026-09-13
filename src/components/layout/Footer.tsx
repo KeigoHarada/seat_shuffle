@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Shuffle, Eye, PenLine, Undo2 } from "lucide-react";
 import { useStore } from "../../stores";
 import { optimizeShuffle } from "../../utils/algorithm";
 import { showToast } from "../../stores/toast";
+import LegalModal from "../ui/LegalModal";
 
 const Footer: React.FC = () => {
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const isViewMode = useStore((state) => state.isViewMode);
   const setIsViewMode = useStore((state) => state.setIsViewMode);
   const isShuffling = useStore((state) => state.isShuffling);
@@ -99,7 +101,27 @@ const Footer: React.FC = () => {
       }}
     >
       {/* Left side */}
-      <div style={{ flex: 1 }}></div>
+      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+        <button
+          onClick={() => setIsLegalModalOpen(true)}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--c-text-sub)",
+            fontSize: "12px",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: "8px",
+          }}
+        >
+          利用規約・免責事項
+        </button>
+      </div>
+
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
+      />
 
       {/* Center - Undo and Shuffle Buttons */}
       <div
