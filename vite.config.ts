@@ -4,14 +4,14 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/seat-shuffle/',
+  base: process.env.GITHUB_PAGES ? '/seat-shuffle/' : (process.env.BASE_PATH || '/'),
   server: {
     host: true,
     allowedHosts: true,
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
   },
   test: {
     globals: true,
