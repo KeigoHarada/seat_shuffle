@@ -50,10 +50,11 @@ describe("GlobalTab Support Section", () => {
     expect(container.textContent).toContain("開発者を応援・寄付する");
     expect(container.textContent).toContain("応援メッセージ・寄付を送る");
 
-    // Must not contain "その他" wrapper or explicit "OFUSE" label
+    // Must not contain "その他" wrapper or explicit "OFUSE" label or emojis
     expect(container.textContent).not.toContain("その他");
     expect(container.textContent).not.toContain("OFUSE");
     expect(container.textContent).not.toContain("URLコピー");
+    expect(container.textContent).not.toContain("💌");
 
     const supportLink = container.querySelector(
       "#btn-support-donate",
@@ -64,6 +65,10 @@ describe("GlobalTab Support Section", () => {
     expect(supportLink.getAttribute("data-ofuse-size")).toBe("large");
     expect(supportLink.getAttribute("data-ofuse-color")).toBe("dark-invert");
     expect(supportLink.target).toBe("_blank");
+
+    // Parent container should be centered
+    const buttonParent = supportLink.parentElement;
+    expect(buttonParent?.style.justifyContent).toBe("center");
   });
 
   it("loads widget script on mount", async () => {

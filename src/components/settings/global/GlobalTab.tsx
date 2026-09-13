@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Play, RotateCcw, Trash2, ExternalLink } from "lucide-react";
+import { Play, RotateCcw, Trash2, ExternalLink, Heart } from "lucide-react";
 import { useStore } from "../../../stores";
 import Select from "../../ui/Select";
 import ShuffleAnimation from "../../layout/ShuffleAnimation";
@@ -263,33 +263,26 @@ const GlobalTab: React.FC = () => {
       <div
         style={{
           padding: "var(--spacing-md)",
-          backgroundColor: "var(--c-primary-pale)",
-          border: "1px solid var(--c-primary)",
+          backgroundColor: "var(--c-surface)",
+          border: "1px solid var(--c-border)",
           borderRadius: "var(--radius-lg)",
           display: "flex",
           flexDirection: "column",
-          gap: "10px",
+          gap: "12px",
         }}
       >
-        <div
+        <h3
+          className="text-title3"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
+            margin: 0,
           }}
         >
-          <span style={{ fontSize: "20px" }}>💌</span>
-          <h4
-            className="text-title3"
-            style={{
-              fontSize: "14px",
-              margin: 0,
-              color: "var(--c-text-main)",
-            }}
-          >
-            開発者を応援・寄付する
-          </h4>
-        </div>
+          <Heart size={18} style={{ color: "var(--c-primary)" }} />
+          <span>開発者を応援・寄付する</span>
+        </h3>
 
         <p
           style={{
@@ -303,7 +296,13 @@ const GlobalTab: React.FC = () => {
           もし役立ちましたら、温かい応援メッセージやご支援をいただけると励みになります！
         </p>
 
-        <div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            paddingTop: "4px",
+          }}
+        >
           <a
             id="btn-support-donate"
             data-ofuse-widget-button
@@ -318,19 +317,14 @@ const GlobalTab: React.FC = () => {
             style={{
               display: "inline-flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: "8px",
-              padding: "10px 20px",
+              padding: "10px 24px",
               fontSize: "13px",
-              fontWeight: 700,
-              borderRadius: "var(--radius-full)",
               textDecoration: "none",
-              backgroundColor: "var(--c-primary)",
-              borderColor: "var(--c-primary-hover)",
-              color: "#ffffff",
-              boxShadow: "var(--shadow-1)",
             }}
           >
-            <span>💌</span>
+            <Heart size={16} />
             <span>応援メッセージ・寄付を送る</span>
             <ExternalLink size={14} />
           </a>
