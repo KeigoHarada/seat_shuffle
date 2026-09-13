@@ -7,9 +7,8 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Header from "../Header";
 import Footer from "../Footer";
 import { useStore } from "../../../stores";
-import { useDonationStore } from "../../../stores/donation";
 
-describe("Donation Buttons in Header and Footer", () => {
+describe("Main screen (Header and Footer) without donation buttons", () => {
   let container: HTMLDivElement;
   let root: ReturnType<typeof createRoot> | null = null;
 
@@ -20,11 +19,6 @@ describe("Donation Buttons in Header and Footer", () => {
 
     useStore.setState({
       isViewMode: false,
-    });
-
-    useDonationStore.setState({
-      isDonationModalOpen: false,
-      donationRecords: [],
     });
   });
 
@@ -41,7 +35,7 @@ describe("Donation Buttons in Header and Footer", () => {
     }
   });
 
-  it("renders donation button in Header and opens modal on click", async () => {
+  it("ensures Header does not render donation buttons on the main screen", async () => {
     await act(async () => {
       if (root) {
         root.render(
@@ -50,68 +44,20 @@ describe("Donation Buttons in Header and Footer", () => {
       }
     });
 
-    const donationBtn = container.querySelector(
-      "#header-donation-btn",
-    ) as HTMLButtonElement;
-    expect(donationBtn).not.toBeNull();
-    expect(donationBtn.textContent).toContain("寄付で応援");
-
-    await act(async () => {
-      donationBtn.click();
-    });
-
-    expect(useDonationStore.getState().isDonationModalOpen).toBe(true);
+    const donationBtn = container.querySelector("#header-donation-btn");
+    expect(donationBtn).toBeNull();
+    expect(container.textContent).not.toContain("寄付で応援");
   });
 
-  it("renders donation button in Footer and opens modal on click", async () => {
+  it("ensures Footer does not render donation buttons on the main screen", async () => {
     await act(async () => {
       if (root) {
         root.render(<Footer />);
       }
     });
 
-    const donationBtn = container.querySelector(
-      "#footer-donation-btn",
-    ) as HTMLButtonElement;
-    expect(donationBtn).not.toBeNull();
-    expect(donationBtn.textContent).toContain("開発者を応援・寄付する");
-
-    await act(async () => {
-      donationBtn.click();
-    });
-
-    expect(useDonationStore.getState().isDonationModalOpen).toBe(true);
-  });
-
-  it("shows supporter badge in Header and Footer when donation exists", async () => {
-    useDonationStore.setState({
-      donationRecords: [
-        {
-          id: "1",
-          timestamp: new Date().toISOString(),
-          amount: 1000,
-          name: "先生",
-          message: "応援！",
-          method: "OFUSE",
-        },
-      ],
-    });
-
-    await act(async () => {
-      if (root) {
-        root.render(
-          <div>
-            <Header showSettings={false} onToggleSettings={() => {}} />
-            <Footer />
-          </div>,
-        );
-      }
-    });
-
-    const headerBtn = container.querySelector("#header-donation-btn");
-    expect(headerBtn?.textContent).toContain("応援・寄付 ✨");
-
-    const footerBtn = container.querySelector("#footer-donation-btn");
-    expect(footerBtn?.textContent).toContain("サポーター ✨");
+    const donationBtn = container.querySelector("#footer-donation-btn");
+    expect(donationBtn).toBeNull();
+    expect(container.textContent).not.toContain("開発者を応援・寄付する");
   });
 });

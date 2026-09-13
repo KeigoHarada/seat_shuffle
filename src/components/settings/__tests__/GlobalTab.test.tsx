@@ -3,12 +3,11 @@
  */
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import GlobalTab from "../global/GlobalTab";
 import { useStore } from "../../../stores";
-import { useDonationStore } from "../../../stores/donation";
 
-describe("GlobalTab Donation Section", () => {
+describe("GlobalTab その他（OFUSE支援）Section", () => {
   let container: HTMLDivElement;
   let root: ReturnType<typeof createRoot> | null = null;
 
@@ -28,12 +27,6 @@ describe("GlobalTab Donation Section", () => {
         autoAssignAlgorithm: "right-top-down",
       },
     });
-
-    useDonationStore.setState({
-      isDonationModalOpen: false,
-      activeTab: "plans",
-      donationRecords: [],
-    });
   });
 
   afterEach(async () => {
@@ -49,67 +42,61 @@ describe("GlobalTab Donation Section", () => {
     }
   });
 
-  it("renders donation section in GlobalTab and opens donation modal", async () => {
+  it("renders その他 section with OFUSE support card in GlobalTab", async () => {
     await act(async () => {
       if (root) root.render(<GlobalTab />);
     });
 
-    expect(container.textContent).toContain("開発者を支援・寄付");
-    expect(container.textContent).toContain("寄付・応援する");
-    expect(container.textContent).toContain("寄付先URL設定");
+    expect(container.textContent).toContain("その他");
+    expect(container.textContent).toContain("開発者を応援・寄付（OFUSE）");
+    expect(container.textContent).toContain("OFUSEで応援メッセージを送る");
+    expect(container.textContent).toContain("URLコピー");
 
-    const donateBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("寄付・応援する"),
-    );
-    expect(donateBtn).toBeDefined();
-
-    await act(async () => {
-      donateBtn?.click();
-    });
-
-    const donationState = useDonationStore.getState();
-    expect(donationState.isDonationModalOpen).toBe(true);
-    expect(donationState.activeTab).toBe("plans");
+    const ofuseLink = container.querySelector(
+      "#btn-ofuse-donate",
+    ) as HTMLAnchorElement;
+    expect(ofuseLink).not.toBeNull();
+    expect(ofuseLink.href).toBe("https://ofuse.me/o?uid=218335");
+    expect(ofuseLink.getAttribute("data-ofuse-id")).toBe("218335");
+    expect(ofuseLink.getAttribute("data-ofuse-size")).toBe("large");
+    expect(ofuseLink.getAttribute("data-ofuse-color")).toBe("dark-invert");
+    expect(ofuseLink.target).toBe("_blank");
   });
 
-  it("opens settings tab in donation modal from GlobalTab", async () => {
+  it("copies OFUSE URL when clicking URLコピー button", async () => {
+    const originalClipboard = navigator.clipboard;
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: writeTextMock,
+      },
+    });
+
     await act(async () => {
       if (root) root.render(<GlobalTab />);
     });
 
-    const settingsBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("寄付先URL設定"),
+    const copyBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("URLコピー"),
     );
-    expect(settingsBtn).toBeDefined();
+    expect(copyBtn).toBeDefined();
 
     await act(async () => {
-      settingsBtn?.click();
+      copyBtn?.click();
     });
 
-    const donationState = useDonationStore.getState();
-    expect(donationState.isDonationModalOpen).toBe(true);
-    expect(donationState.activeTab).toBe("settings");
+    expect(writeTextMock).toHaveBeenCalledWith("https://ofuse.me/o?uid=218335");
+
+    Object.assign(navigator, { clipboard: originalClipboard });
   });
 
-  it("displays supporter badge when donation records exist", async () => {
-    useDonationStore.setState({
-      donationRecords: [
-        {
-          id: "d1",
-          timestamp: new Date().toISOString(),
-          amount: 3000,
-          name: "田中先生",
-          message: "応援してます！",
-          method: "OFUSE",
-        },
-      ],
-    });
-
+  it("loads OFUSE widget script on mount", async () => {
     await act(async () => {
       if (root) root.render(<GlobalTab />);
     });
 
-    expect(container.textContent).toContain("サポーター ✨");
-    expect(container.textContent).toContain("¥3,000");
+    const script = document.getElementById("ofuse-widget-script") as HTMLScriptElement;
+    expect(script).not.toBeNull();
+    expect(script.src).toContain("https://ofuse.me/assets/platform/widget.js");
   });
 });

@@ -1,9 +1,8 @@
 import React from "react";
-import { Shuffle, Eye, PenLine, Undo2, Heart } from "lucide-react";
+import { Shuffle, Eye, PenLine, Undo2 } from "lucide-react";
 import { useStore } from "../../stores";
 import { optimizeShuffle } from "../../utils/algorithm";
 import { showToast } from "../../stores/toast";
-import { useDonationStore } from "../../stores/donation";
 
 const Footer: React.FC = () => {
   const isViewMode = useStore((state) => state.isViewMode);
@@ -13,10 +12,6 @@ const Footer: React.FC = () => {
   const pastSeats = useStore((state) => state.pastSeats);
   const saveSeatHistory = useStore((state) => state.saveSeatHistory);
   const undoShuffle = useStore((state) => state.undoShuffle);
-  const openDonationModal = useDonationStore(
-    (state) => state.openDonationModal,
-  );
-  const hasDonated = useDonationStore((state) => state.hasDonated());
 
   const handleShuffle = () => {
     if (isShuffling) return;
@@ -104,52 +99,7 @@ const Footer: React.FC = () => {
       }}
     >
       {/* Left side */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-        <button
-          id="footer-donation-btn"
-          onClick={() => openDonationModal()}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "var(--c-text-sub)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "6px 10px",
-            borderRadius: "var(--radius-md)",
-            transition: "all var(--transition-fast)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#e11d48";
-            e.currentTarget.style.backgroundColor = "#fff1f2";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "var(--c-text-sub)";
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          title="ラクガエの開発者を応援・寄付する"
-        >
-          <Heart size={15} color="#e11d48" fill="#fda4af" />
-          <span>開発者を応援・寄付する</span>
-          {hasDonated && (
-            <span
-              style={{
-                fontSize: "11px",
-                backgroundColor: "#fef3c7",
-                color: "#b45309",
-                padding: "1px 6px",
-                borderRadius: "var(--radius-full)",
-                fontWeight: 700,
-              }}
-            >
-              サポーター ✨
-            </span>
-          )}
-        </button>
-      </div>
+      <div style={{ flex: 1 }}></div>
 
       {/* Center - Undo and Shuffle Buttons */}
       <div
