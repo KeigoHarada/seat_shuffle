@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Play, RotateCcw, Trash2, ExternalLink, Copy } from "lucide-react";
+import { Play, RotateCcw, Trash2, ExternalLink } from "lucide-react";
 import { useStore } from "../../../stores";
 import Select from "../../ui/Select";
 import ShuffleAnimation from "../../layout/ShuffleAnimation";
@@ -259,147 +259,81 @@ const GlobalTab: React.FC = () => {
         </div>
       </div>
 
-      {/* その他 */}
+      {/* 開発者を応援・寄付 */}
       <div
         style={{
           padding: "var(--spacing-md)",
-          backgroundColor: "var(--c-surface)",
-          border: "1px solid var(--c-border)",
+          backgroundColor: "var(--c-primary-pale)",
+          border: "1px solid var(--c-primary)",
           borderRadius: "var(--radius-lg)",
           display: "flex",
           flexDirection: "column",
-          gap: "12px",
+          gap: "10px",
         }}
       >
-        <h3 className="text-title3">その他</h3>
-
-        {/* 開発者を応援・寄付（OFUSE） */}
         <div
           style={{
-            padding: "16px",
-            backgroundColor: "var(--c-primary-pale)",
-            border: "1px solid var(--c-primary)",
-            borderRadius: "var(--radius-lg)",
             display: "flex",
-            flexDirection: "column",
-            gap: "12px",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
-          <div
+          <span style={{ fontSize: "20px" }}>💌</span>
+          <h4
+            className="text-title3"
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <span style={{ fontSize: "22px" }}>💌</span>
-            <div>
-              <h4
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  margin: 0,
-                  color: "var(--c-text-main)",
-                }}
-              >
-                開発者を応援・寄付（OFUSE）
-              </h4>
-              <p
-                style={{
-                  fontSize: "11px",
-                  color: "var(--c-text-sub)",
-                  margin: "2px 0 0 0",
-                }}
-              >
-                ファンレターや応援メッセージを添えて100円から支援できます
-              </p>
-            </div>
-          </div>
-
-          <p
-            style={{
-              fontSize: "12px",
+              fontSize: "14px",
+              margin: 0,
               color: "var(--c-text-main)",
-              lineHeight: 1.5,
-              margin: 0,
             }}
           >
-            ラクガエは教育現場の先生方を応援するため、完全無料・広告なしで開発・運営されています。
-            もし役立ちましたら、OFUSEを通じて温かい応援メッセージやご支援をいただけると、今後の継続開発の大きな励みになります！
-          </p>
+            開発者を応援・寄付する
+          </h4>
+        </div>
 
-          <div
+        <p
+          style={{
+            fontSize: "12px",
+            color: "var(--c-text-sub)",
+            lineHeight: 1.5,
+            margin: 0,
+          }}
+        >
+          ラクガエは教育現場を応援するため、完全無料・広告なしで個人開発・運営されています。
+          もし役立ちましたら、温かい応援メッセージやご支援をいただけると励みになります！
+        </p>
+
+        <div>
+          <a
+            id="btn-support-donate"
+            data-ofuse-widget-button
+            data-ofuse-id="218335"
+            data-ofuse-size="large"
+            data-ofuse-color="dark-invert"
+            data-ofuse-text=""
+            href="https://ofuse.me/o?uid=218335"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
             style={{
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              flexWrap: "wrap",
-              marginTop: "2px",
+              padding: "10px 20px",
+              fontSize: "13px",
+              fontWeight: 700,
+              borderRadius: "var(--radius-full)",
+              textDecoration: "none",
+              backgroundColor: "var(--c-primary)",
+              borderColor: "var(--c-primary-hover)",
+              color: "#ffffff",
+              boxShadow: "var(--shadow-1)",
             }}
           >
-            {/* ラクガエのブランドデザインに合わせたOFUSE埋め込みリンク */}
-            <a
-              id="btn-ofuse-donate"
-              data-ofuse-widget-button
-              data-ofuse-id="218335"
-              data-ofuse-size="large"
-              data-ofuse-color="dark-invert"
-              data-ofuse-text=""
-              href="https://ofuse.me/o?uid=218335"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 20px",
-                fontSize: "13px",
-                fontWeight: 700,
-                borderRadius: "var(--radius-full)",
-                textDecoration: "none",
-                backgroundColor: "var(--c-primary)",
-                borderColor: "var(--c-primary-hover)",
-                color: "#ffffff",
-                boxShadow: "var(--shadow-1)",
-              }}
-            >
-              <span>💌</span>
-              <span>OFUSEで応援メッセージを送る</span>
-              <ExternalLink size={14} />
-            </a>
-
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                navigator.clipboard.writeText("https://ofuse.me/o?uid=218335");
-                showToast.success("OFUSEのリンクをコピーしました！");
-              }}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                fontSize: "12px",
-                padding: "8px 12px",
-                borderRadius: "var(--radius-full)",
-              }}
-              title="リンクをコピー"
-            >
-              <Copy size={13} />
-              URLコピー
-            </button>
-          </div>
-
-          <p
-            style={{
-              fontSize: "11px",
-              color: "var(--c-text-sub)",
-              margin: 0,
-            }}
-          >
-            ※ PayPay・クレジットカード対応、会員登録不要で直接送れます（外部サイトが開きます）。
-          </p>
+            <span>💌</span>
+            <span>応援メッセージ・寄付を送る</span>
+            <ExternalLink size={14} />
+          </a>
         </div>
       </div>
 

@@ -3,11 +3,11 @@
  */
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import GlobalTab from "../global/GlobalTab";
 import { useStore } from "../../../stores";
 
-describe("GlobalTab その他（OFUSE支援）Section", () => {
+describe("GlobalTab Support Section", () => {
   let container: HTMLDivElement;
   let root: ReturnType<typeof createRoot> | null = null;
 
@@ -42,60 +42,38 @@ describe("GlobalTab その他（OFUSE支援）Section", () => {
     }
   });
 
-  it("renders その他 section with OFUSE support card in GlobalTab", async () => {
+  it("renders support card at the bottom of GlobalTab", async () => {
     await act(async () => {
       if (root) root.render(<GlobalTab />);
     });
 
-    expect(container.textContent).toContain("その他");
-    expect(container.textContent).toContain("開発者を応援・寄付（OFUSE）");
-    expect(container.textContent).toContain("OFUSEで応援メッセージを送る");
-    expect(container.textContent).toContain("URLコピー");
+    expect(container.textContent).toContain("開発者を応援・寄付する");
+    expect(container.textContent).toContain("応援メッセージ・寄付を送る");
 
-    const ofuseLink = container.querySelector(
-      "#btn-ofuse-donate",
+    // Must not contain "その他" wrapper or explicit "OFUSE" label
+    expect(container.textContent).not.toContain("その他");
+    expect(container.textContent).not.toContain("OFUSE");
+    expect(container.textContent).not.toContain("URLコピー");
+
+    const supportLink = container.querySelector(
+      "#btn-support-donate",
     ) as HTMLAnchorElement;
-    expect(ofuseLink).not.toBeNull();
-    expect(ofuseLink.href).toBe("https://ofuse.me/o?uid=218335");
-    expect(ofuseLink.getAttribute("data-ofuse-id")).toBe("218335");
-    expect(ofuseLink.getAttribute("data-ofuse-size")).toBe("large");
-    expect(ofuseLink.getAttribute("data-ofuse-color")).toBe("dark-invert");
-    expect(ofuseLink.target).toBe("_blank");
+    expect(supportLink).not.toBeNull();
+    expect(supportLink.href).toBe("https://ofuse.me/o?uid=218335");
+    expect(supportLink.getAttribute("data-ofuse-id")).toBe("218335");
+    expect(supportLink.getAttribute("data-ofuse-size")).toBe("large");
+    expect(supportLink.getAttribute("data-ofuse-color")).toBe("dark-invert");
+    expect(supportLink.target).toBe("_blank");
   });
 
-  it("copies OFUSE URL when clicking URLコピー button", async () => {
-    const originalClipboard = navigator.clipboard;
-    const writeTextMock = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: writeTextMock,
-      },
-    });
-
+  it("loads widget script on mount", async () => {
     await act(async () => {
       if (root) root.render(<GlobalTab />);
     });
 
-    const copyBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("URLコピー"),
-    );
-    expect(copyBtn).toBeDefined();
-
-    await act(async () => {
-      copyBtn?.click();
-    });
-
-    expect(writeTextMock).toHaveBeenCalledWith("https://ofuse.me/o?uid=218335");
-
-    Object.assign(navigator, { clipboard: originalClipboard });
-  });
-
-  it("loads OFUSE widget script on mount", async () => {
-    await act(async () => {
-      if (root) root.render(<GlobalTab />);
-    });
-
-    const script = document.getElementById("ofuse-widget-script") as HTMLScriptElement;
+    const script = document.getElementById(
+      "ofuse-widget-script",
+    ) as HTMLScriptElement;
     expect(script).not.toBeNull();
     expect(script.src).toContain("https://ofuse.me/assets/platform/widget.js");
   });
