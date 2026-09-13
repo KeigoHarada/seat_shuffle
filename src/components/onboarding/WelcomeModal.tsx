@@ -1,5 +1,6 @@
 import React from "react";
-import { Sparkles, X, Shield, Zap, Lock } from "lucide-react";
+import { X, Shield, Zap, Lock, Sparkles } from "lucide-react";
+import { BrandSymbol } from "../ui/Logo";
 import { useOnboardingStore } from "../../stores/onboarding";
 
 export const WelcomeModal: React.FC = () => {
@@ -58,15 +59,16 @@ export const WelcomeModal: React.FC = () => {
 
           <div
             style={{
-              fontSize: "36px",
-              marginBottom: "8px",
-              lineHeight: 1,
+              marginBottom: "12px",
+              display: "flex",
+              justifyContent: "center",
             }}
           >
-            <Sparkles
-              size={36}
-              color="var(--c-primary)"
-              style={{ margin: "0 auto" }}
+            <BrandSymbol
+              size={52}
+              style={{
+                boxShadow: "var(--shadow-2)",
+              }}
             />
           </div>
           <h2

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" width="220" height="48" fill="none">
+  <defs>
+    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.2" stdDeviation="1.2" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Symbol Mark (40x40 at x=4, y=4) -->
+  <g transform="translate(4, 4)">
+    <!-- Base Squircle -->
+    <rect width="40" height="40" rx="10" fill="url(#logo-grad)" />
+    <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9.25" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1" />
+
+    <!-- Upper Arc Arrow (Left -> Right) -->
+    <path d="M 20 10 C 27 10 30 13 30 17.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" fill="none" />
+    <path d="M 27.5 15.5 L 30 18 L 32.5 15.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+    <!-- Lower Arc Arrow (Right -> Left) -->
+    <path d="M 20 30 C 13 30 10 27 10 22.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" fill="none" />
+    <path d="M 12.5 24.5 L 10 22 L 7.5 24.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+    <!-- Top-Left Seat Card -->
+    <g filter="url(#shadow)">
+      <rect x="8" y="9" width="11.5" height="9" rx="2.5" fill="#FFFFFF" />
+      <rect x="9.5" y="10.5" width="8.5" height="2" rx="1" fill="#93C5FD" />
+      <circle cx="11" cy="15" r="0.9" fill="#CBD5E1" />
+      <circle cx="13.7" cy="15" r="0.9" fill="#CBD5E1" />
+      <circle cx="16.5" cy="15" r="0.9" fill="#CBD5E1" />
+    </g>
+
+    <!-- Bottom-Right Seat Card -->
+    <g filter="url(#shadow)">
+      <rect x="20.5" y="22" width="11.5" height="9" rx="2.5" fill="#FFFFFF" />
+      <rect x="22" y="23.5" width="8.5" height="2" rx="1" fill="#FCA5A5" />
+      <circle cx="23.5" cy="28" r="0.9" fill="#CBD5E1" />
+      <circle cx="26.2" cy="28" r="0.9" fill="#CBD5E1" />
+      <circle cx="29" cy="28" r="0.9" fill="#CBD5E1" />
+    </g>
+
+    <!-- Center Sparkle -->
+    <path d="M 20 18 Q 20 20 22 20 Q 20 20 20 22 Q 20 20 18 20 Q 20 20 20 18 Z" fill="#FEF3C7" />
+  </g>
+
+  <!-- Typography: ラクガエ -->
+  <text x="54" y="28" font-family="'Zen Maru Gothic', 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', sans-serif" font-size="22" font-weight="700" fill="#334155" letter-spacing="0.04em">ラクガエ</text>
+
+  <!-- Subtitle: 席替え支援Webアプリ -->
+  <text x="55" y="42" font-family="'Zen Maru Gothic', 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', sans-serif" font-size="9.5" font-weight="500" fill="#64748B" letter-spacing="0.03em">席替え支援Webアプリ</text>
+</svg>
