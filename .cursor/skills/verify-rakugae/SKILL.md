@@ -1,0 +1,177 @@
+---
+name: verify-rakugae
+description: Drive ラクガエ (Rakugae), the local Vite+React seating-shuffle SPA, through a dedicated Chrome CDP session. Use when proving canvas, settings, shuffle, view-mode, or onboarding behavior the way a teacher would use the UI.
+---
+
+# Verify Rakugae
+
+Agent-facing control skill for the **ラクガエ** seating-shuffle web app in this repo (`package.json` name `rakugae`). Primary surface is a single-page browser UI at a local Vite URL. There is no CLI, no backend, and no auth. All student/seat state lives in the browser (`localStorage` keys `seat-shuffle-storage` and `seat-shuffle-onboarding`).
+
+Read `features/README.md` before driving. Drive the real UI. Do not call Zustand setters from `page.evaluate` to fake a user action; eval is for read-only proof (counts, persisted JSON) after the click path.
+
+Helper path below is relative to the repo root. Prefix every command with the same `RAKUGAE_VERIFY_RUN_ID` (and port) so you never attach to someone else's session.
+
+```bash
+export RAKUGAE_VERIFY_RUN_ID="${RAKUGAE_VERIFY_RUN_ID:-run-$(date -u +%Y%m%dT%H%M%SZ)}"
+H="node .cursor/skills/verify-rakugae/helpers/control-rakugae.mjs"
+```
+
+## Launch
+
+Preconditions: Node 22+ (repo `.nvmrc` is 24; 22 works). From repo root:
+
+```bash
+npm install
+npm install --prefix .cursor/skills/verify-rakugae/helpers
+```
+
+The app's documented start is `npm run dev` (`vite`, `server.host: true`, default port **5173**). Verification launches a **strict** dedicated port and a **separate Chrome user-data-dir** so localStorage is not the developer's profile.
+
+```bash
+$H launch --port 5173
+```
+
+Ready when:
+
+- stdout JSON has `"ok": true` and a `url` like `http://127.0.0.1:5173/`
+- `$H doctor` reports `viteUp`, `chromeUp`, HTTP 200 with `<title>ラクガエ`, and CDP answering
+- The page contains `svg[aria-label*="ラクガエ"]` (header logo)
+
+Vite log: `/tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/instance/vite.log`  
+Chrome log: `/tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/instance/chrome.log`
+
+First paint opens the welcome modal after ~500ms when `seat-shuffle-onboarding.hasCompletedOnboarding` is false (fresh profile). Dismiss it before canvas/settings work:
+
+```bash
+$H dismiss-welcome
+```
+
+That clicks the button named `スキップ`. Overlay heading `ラクガエへようこそ！` must disappear. Do not start the 3-minute tour unless the feature file is `onboarding.md`.
+
+Teardown is **Cleanup**, not Ctrl-C by process name.
+
+Isolation:
+
+- One run owns one HTTP port (`--port` / `RAKUGAE_VERIFY_PORT`, default 5173) with `--strictPort`.
+- Chrome CDP is `port + 4000` unless `--cdp-port` is set.
+- Profile is `/tmp/rakugae-verify/<run-id>/instance/chrome-profile`.
+- Two runs can coexist if ports and run ids differ. **Do not** drive `localhost:5173` unless doctor shows it is this run's `vitePid`. A shared developer tab will share or overwrite `seat-shuffle-storage`.
+
+## Doctor
+
+Run before driving, and again if anything looks off:
+
+```bash
+$H doctor
+```
+
+Require all of:
+
+- `viteUp: true` for `vitePid` in `instance/run.json`
+- `chromeUp: true` for `chromePid`
+- `http.ok: true` (status 200, HTML title starts with `ラクガエ`)
+- `cdp.ok: true` on `http://127.0.0.1:<cdpPort>/json/version`
+
+If doctor fails, cleanup this run and relaunch. Do not click around a foreign Vite.
+
+## Drive
+
+Harness: Playwright Core over CDP to the Chrome this run launched. All interaction goes through `$H`. Prefer **button accessible names** (Japanese UI strings), **ids** that exist in source, and **placeholders**. Coordinates are last resort.
+
+Stable handles (from `src/`):
+
+| Handle | Kind | Where |
+|---|---|---|
+| `svg[aria-label*="ラクガエ"]` | logo | header identity |
+| `はじめてガイド` | button | `#header-guide-btn` |
+| `読み込み` / `保存` | buttons | header CSV import/export |
+| `設定` | button | `#btn-header-settings` (hidden in view mode) |
+| `座席を追加` | button | canvas toolbar |
+| `図形` then `四角形` / `円形` | buttons | canvas toolbar |
+| `テンプレート` then `教室` / `4人席` / `6人席（縦）` / `6人席（横）` | buttons | `#btn-toolbar-template`, `#btn-template-classroom` etc. |
+| `自動割り当て` | button | canvas toolbar |
+| `.seat-node-item` | seats | canvas; empty seats show text `空席` |
+| `#tab-btn-students` `生徒` | tab | settings; default tab on launch |
+| `#tab-btn-roles` `役割` | tab | settings |
+| `#tab-btn-groups` `グループ` | tab | settings |
+| `#tab-btn-constraints` `条件` | tab | settings |
+| `#tab-btn-global` `設定` | tab | settings global (same visible label as header settings) |
+| `#student-add-form` | region | `名前 (必須)` placeholder, button `追加` |
+| `#btn-sort-students` | button | furigana/name sort |
+| `シャッフル実行` | button | `#btn-footer-shuffle` |
+| `編集` / `閲覧` | toggle | `#btn-footer-viewmode` |
+| `スキップ` | button | welcome modal |
+
+Examples:
+
+```bash
+$H click --name "座席を追加"
+$H click --id btn-footer-shuffle
+$H click --id tab-btn-students
+$H fill --placeholder "名前 (必須)" --value "検証太郎"
+$H click --name "追加"
+$H count --selector ".seat-node-item"
+$H wait-text --text "すべての条件を満たした座席配置が完了しました！" --timeout 8000
+$H screenshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.png
+$H snapshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.aria.txt
+```
+
+`click --name` is `getByRole(button, { name })`. For non-buttons use `--role` + `--name` or `--text`.
+
+Default persisted classroom (fresh profile, after skipping welcome): **30 seats**, **30 sample students**, settings drawer **open**, students tab active, algorithm **optimize**. Header `設定` uses class `btn-primary` when the drawer is open.
+
+Recipes live in `features/`. Start from that baseline unless a feature file says otherwise.
+
+## Evidence
+
+Root: `/tmp/rakugae-verify/<run-id>/evidence/` (also printed as `evidenceDir` on launch). Cleanup **must not** delete this directory.
+
+Every proof:
+
+1. Exercise the user path (button/placeholder), not store mutation.
+2. Capture **before** and **after** (screenshot + ARIA snapshot).
+3. Record a second observable: seat count, toast text, `localStorage['seat-shuffle-storage']` via `$H eval`, list row text.
+4. Screenshots must show the header logo (`aria-label` contains `ラクガエ`) so the surface is identifiable.
+5. Note `runId`, URL, feature id, and entry point next to the files (write `evidence/proof.json` if you do not already have a log).
+
+Read-only eval example after a UI mutation:
+
+```bash
+$H eval --js "JSON.parse(localStorage.getItem('seat-shuffle-storage')||'{}').state.seats.length"
+```
+
+Mocks: none for core seating. The Ofuse donation widget (`#btn-support-donate`, loads `ofuse.me`) is an external boundary; do not treat network success there as app proof.
+
+## Cleanup
+
+```bash
+$H cleanup
+```
+
+Sends SIGTERM (then SIGKILL if needed) only to `vitePid` and `chromePid` from this run's `instance/run.json`, then deletes `instance/` (Chrome profile, pid file, logs). Leaves `evidence/` in place.
+
+Do not `pkill vite` / `pkill chrome`. Do not wipe `/tmp/rakugae-verify/<run-id>/evidence`.
+
+After cleanup, confirm evidence files still exist before reporting success.
+
+## Helpers
+
+Install once per checkout:
+
+```bash
+npm install --prefix .cursor/skills/verify-rakugae/helpers
+```
+
+Executable:
+
+```bash
+node .cursor/skills/verify-rakugae/helpers/control-rakugae.mjs <command>
+```
+
+Commands: `launch`, `doctor`, `dismiss-welcome`, `click`, `fill`, `count`, `wait-text`, `screenshot`, `snapshot`, `eval`, `cleanup`.
+
+Optional flags: `--run-id`, `--port`, `--cdp-port`. Env: `RAKUGAE_VERIFY_RUN_ID`, `RAKUGAE_VERIFY_PORT`, `RAKUGAE_VERIFY_CDP_PORT`, `RAKUGAE_VERIFY_ROOT` (default `/tmp/rakugae-verify`), `RAKUGAE_CHROME` (default `/usr/local/bin/google-chrome`).
+
+If `playwright-core` is missing, the helper tells you to run the `npm install --prefix` line above. Chrome is launched from the environment binary; this skill does not download Playwright browsers.
+
+Keep the feature map honest with `/maintain-verification-skill` when UI strings, ids, or startup change.

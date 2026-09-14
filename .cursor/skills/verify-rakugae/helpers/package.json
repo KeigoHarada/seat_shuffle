@@ -1,0 +1,9 @@
+{
+  "name": "control-rakugae",
+  "private": true,
+  "type": "module",
+  "description": "Verification-only Playwright Core helper for driving the Rakugae SPA. Not an app runtime dependency.",
+  "dependencies": {
+    "playwright-core": "^1.55.0"
+  }
+}
