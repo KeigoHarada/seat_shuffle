@@ -351,7 +351,7 @@ async function cmdLaunch(args) {
   writeFileSync(currentPointerPath(), `${runId}\n`);
 
   const { browser } = await openAppPage(meta);
-  browser.disconnect();
+  await browser.close();
 
   process.stdout.write(
     `${JSON.stringify(
@@ -399,7 +399,7 @@ async function cmdDoctor(args) {
       const logoCount = await page.locator('svg[aria-label*="ラクガエ"]').count();
       const title = await page.title();
       identity = { ok: logoCount > 0 && title.includes("ラクガエ"), title, logoCount };
-      browser.disconnect();
+      await browser.close();
     } catch (err) {
       identity = { ok: false, error: err.message };
     }
@@ -432,11 +432,8 @@ async function withPage(args, fn) {
   try {
     return await fn(page, meta);
   } finally {
-    try {
-      browser.disconnect();
-    } catch {
-      /* already gone */
-    }
+    // CDP close drops this Node client; the run's Chrome process stays up.
+    await browser.close();
   }
 }
 

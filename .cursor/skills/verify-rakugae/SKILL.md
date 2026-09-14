@@ -25,7 +25,7 @@ npm install
 npm install --prefix .cursor/skills/verify-rakugae/helpers
 ```
 
-The app's documented start is `npm run dev` (`vite`, `server.host: true`, default port **5173**). Verification launches a **strict** dedicated port, a **separate Chrome user-data-dir**, and a **run-scoped Chrome session** (CDP). Commands attach and `disconnect`; they do not close Chrome. In-page React state (forms, menus, toasts, guide hub, welcome overlay) survives across `$H` calls. Zustand persist in that profile is extra shared state. `launch` refuses the port if anything already answers HTTP there, and fails if this run's `vitePid` dies while the URL still looks like ラクガエ.
+The app's documented start is `npm run dev` (`vite`, `server.host: true`, default port **5173**). Verification launches a **strict** dedicated port, a **separate Chrome user-data-dir**, and a **run-scoped Chrome session** (CDP). Commands attach, then `browser.close()` only the Playwright client — Chrome stays up. In-page React state (forms, menus, toasts, guide hub, welcome overlay) survives across `$H` calls. Zustand persist in that profile is extra shared state. `launch` refuses the port if anything already answers HTTP there, and fails if this run's `vitePid` dies while the URL still looks like ラクガエ.
 
 ```bash
 $H launch --port 5173
@@ -74,7 +74,7 @@ If doctor fails, cleanup this run and relaunch. Do not click around a foreign Vi
 
 ## Drive
 
-Harness: Playwright Core `connectOverCDP` to this run's Chrome (`/usr/bin/google-chrome-stable`, `--user-data-dir` under the run instance). Each `$H` command attaches, drives the existing page, then disconnects without closing the browser. All interaction goes through `$H`. Prefer **button accessible names** (Japanese UI strings), **ids** that exist in source, and **placeholders**. Coordinates are last resort.
+Harness: Playwright Core `connectOverCDP` to this run's Chrome (`/usr/bin/google-chrome-stable`, `--user-data-dir` under the run instance). Each `$H` command attaches, drives the existing page, then closes the Playwright client without killing Chrome. All interaction goes through `$H`. Prefer **button accessible names** (Japanese UI strings), **ids** that exist in source, and **placeholders**. Coordinates are last resort.
 
 Stable handles (from `src/`):
 
