@@ -47,14 +47,7 @@ const StudentListTable: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        overflow: "hidden",
-      }}
-    >
+    <div className="app-settings-list">
       {/* Table Header */}
       <div style={{ flexShrink: 0 }}>
         <div
@@ -104,17 +97,7 @@ const StudentListTable: React.FC = () => {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-            flex: 1,
-            overflowY: "auto",
-            minHeight: 0,
-            paddingRight: "4px",
-          }}
-        >
+        <div className="app-settings-list-body">
           <SortableContext
             items={students.map((s) => s.id)}
             strategy={verticalListSortingStrategy}

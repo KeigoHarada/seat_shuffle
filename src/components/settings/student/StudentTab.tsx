@@ -4,27 +4,11 @@ import StudentListTable from "./StudentListTable";
 
 const StudentTab: React.FC = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--spacing-md)",
-        flex: 1,
-        minHeight: 0,
-      }}
-    >
+    <div className="app-settings-fill" style={{ gap: "var(--spacing-md)" }}>
       <div style={{ flexShrink: 0 }}>
         <StudentAddForm />
       </div>
-      <div
-        id="student-list-area"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
+      <div id="student-list-area" className="app-settings-fill">
         <StudentListTable />
       </div>
     </div>

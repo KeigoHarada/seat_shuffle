@@ -4,27 +4,11 @@ import GroupListTable from "./GroupListTable";
 
 const GroupTab: React.FC = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--spacing-md)",
-        flex: 1,
-        minHeight: 0,
-      }}
-    >
+    <div className="app-settings-fill" style={{ gap: "var(--spacing-md)" }}>
       <div style={{ flexShrink: 0 }}>
         <GroupAddForm />
       </div>
-      <div
-        id="group-list-area"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
+      <div id="group-list-area" className="app-settings-fill">
         <GroupListTable />
       </div>
     </div>

@@ -14,14 +14,7 @@ const GroupListTable: React.FC = () => {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        overflow: "hidden",
-      }}
-    >
+    <div className="app-settings-list">
       {/* Table Header */}
       <div style={{ flexShrink: 0 }}>
         <div
@@ -44,17 +37,7 @@ const GroupListTable: React.FC = () => {
       </div>
 
       {/* Table Rows */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-          flex: 1,
-          overflowY: "auto",
-          minHeight: 0,
-          paddingRight: "4px",
-        }}
-      >
+      <div className="app-settings-list-body">
         {groups.map((group) => (
           <div
             key={group.id}

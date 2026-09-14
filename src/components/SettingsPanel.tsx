@@ -65,14 +65,7 @@ const TabContainer: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children,
 }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      flex: 1,
-      minHeight: 0,
-    }}
-  >
+  <div className="app-settings-tab-body">
     <h2
       className="text-title2"
       style={{ marginBottom: "var(--spacing-md)", flexShrink: 0 }}

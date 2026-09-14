@@ -507,9 +507,29 @@ input[type="number"] {
   flex: 1;
 }
 
-.app-settings-content {
-  overflow: hidden;
+.app-settings-tab-body,
+.app-settings-fill {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   min-height: 0;
+}
+
+.app-settings-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-settings-list-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 4px;
 }
 
 #settings-main-area {
@@ -579,8 +599,21 @@ input[type="number"] {
     overflow-y: auto;
   }
 
-  .app-settings-content > * {
+  .app-settings-tab-body,
+  .app-settings-fill {
     flex: none;
+    min-height: auto;
+  }
+
+  .app-settings-list {
+    height: auto;
+    overflow: visible;
+  }
+
+  .app-settings-list-body {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
   }
 
   .app-canvas-toolbar {
