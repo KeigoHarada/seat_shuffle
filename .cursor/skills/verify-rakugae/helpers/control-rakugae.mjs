@@ -6,7 +6,7 @@
  * Never kill by process name. Cleanup only SIGTERMs pids recorded for this run.
  */
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { setTimeout as sleep } from "node:timers/promises";
@@ -17,7 +17,7 @@ const VERIFY_ROOT = process.env.RAKUGAE_VERIFY_ROOT || "/tmp/rakugae-verify";
 const CHROME_BIN =
   process.env.RAKUGAE_CHROME ||
   process.env.CHROME_PATH ||
-  "/usr/local/bin/google-chrome";
+  "/usr/bin/google-chrome-stable";
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -109,23 +109,6 @@ async function waitForHttp(url, timeoutMs) {
   throw new Error(`App did not become ready at ${url}: ${lastError}`);
 }
 
-async function waitForCdp(cdpPort, timeoutMs) {
-  const deadline = Date.now() + timeoutMs;
-  const url = `http://127.0.0.1:${cdpPort}/json/version`;
-  let lastError = "";
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) return res.json();
-      lastError = `HTTP ${res.status}`;
-    } catch (err) {
-      lastError = err.message;
-    }
-    await sleep(250);
-  }
-  throw new Error(`Chrome CDP did not answer on ${url}: ${lastError}`);
-}
-
 async function loadPlaywright() {
   try {
     return await import("playwright-core");
@@ -136,52 +119,60 @@ async function loadPlaywright() {
   }
 }
 
-async function connectBrowser(meta) {
-  const { chromium } = await loadPlaywright();
-  return chromium.connectOverCDP(`http://127.0.0.1:${meta.cdpPort}`);
+function chromeLaunchArgs() {
+  return [
+    "--disable-gpu",
+    "--use-gl=angle",
+    "--use-angle=swiftshader-webgl",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--disable-dev-shm-usage",
+    "--no-sandbox",
+  ];
 }
 
-async function appPage(browser, meta) {
-  const pages = browser.contexts().flatMap((ctx) => ctx.pages());
+async function openAppPage(meta) {
+  const { chromium } = await loadPlaywright();
+  const context = await chromium.launchPersistentContext(meta.profileDir, {
+    executablePath: meta.chromeBin || CHROME_BIN,
+    headless: true,
+    viewport: { width: 1440, height: 900 },
+    args: chromeLaunchArgs(),
+  });
+  const page = context.pages()[0] || (await context.newPage());
+  page.setDefaultTimeout(15000);
   const wanted = meta.url.replace(/\/$/, "");
-  for (const page of pages) {
-    const url = page.url().replace(/\/$/, "");
-    if (url.startsWith(wanted) || url === "about:blank") {
-      if (url === "about:blank") {
-        await page.goto(meta.url, { waitUntil: "domcontentloaded" });
-      }
-      return page;
-    }
+  if (page.url().replace(/\/$/, "") !== wanted) {
+    await page.goto(meta.url, { waitUntil: "domcontentloaded" });
   }
-  const page = await browser.contexts()[0].newPage();
-  await page.goto(meta.url, { waitUntil: "domcontentloaded" });
-  return page;
+  await page.waitForSelector("#root", { timeout: 15000 });
+  await page.waitForSelector('svg[aria-label*="ラクガエ"]', { timeout: 15000 });
+  return { context, page };
 }
 
 function spawnLogged(command, spawnArgs, logPath, extraEnv = {}) {
+  const logFd = openSync(logPath, "a");
   const child = spawn(command, spawnArgs, {
     cwd: REPO_ROOT,
     env: { ...process.env, ...extraEnv },
-    stdio: ["ignore", "pipe", "pipe"],
+    stdio: ["ignore", logFd, logFd],
     detached: true,
   });
-  const stream = [];
-  const append = (chunk) => {
-    stream.push(chunk);
-    writeFileSync(logPath, Buffer.concat(stream));
-  };
-  child.stdout.on("data", append);
-  child.stderr.on("data", append);
   child.unref();
   return child;
 }
 
 function stopPid(pid) {
-  if (!pidAlive(pid)) return;
+  if (!pid) return;
+  // Spawned with detached:true so pid is a process-group leader (npx -> vite).
   try {
-    process.kill(pid, "SIGTERM");
+    process.kill(-pid, "SIGTERM");
   } catch {
-    return;
+    try {
+      if (pidAlive(pid)) process.kill(pid, "SIGTERM");
+    } catch {
+      /* already gone */
+    }
   }
 }
 
@@ -193,9 +184,13 @@ async function waitPidExit(pid, timeoutMs) {
   }
   if (pidAlive(pid)) {
     try {
-      process.kill(pid, "SIGKILL");
+      process.kill(-pid, "SIGKILL");
     } catch {
-      /* already gone */
+      try {
+        process.kill(pid, "SIGKILL");
+      } catch {
+        /* already gone */
+      }
     }
   }
   return !pidAlive(pid);
@@ -207,16 +202,13 @@ async function cmdLaunch(args) {
     process.env.RAKUGAE_VERIFY_RUN_ID ||
     `run-${new Date().toISOString().replace(/[:.]/g, "-")}`;
   const port = Number(args.port || process.env.RAKUGAE_VERIFY_PORT || 5173);
-  const cdpPort = Number(
-    args["cdp-port"] || process.env.RAKUGAE_VERIFY_CDP_PORT || port + 4000,
-  );
   const paths = pathsFor(runId);
 
   if (existsSync(paths.metaPath)) {
     const existing = readMeta(runId);
-    if (pidAlive(existing.vitePid) || pidAlive(existing.chromePid)) {
+    if (pidAlive(existing.vitePid)) {
       throw new Error(
-        `Run ${runId} is already live (vitePid=${existing.vitePid}, chromePid=${existing.chromePid}). Cleanup first or pick another --run-id / port.`,
+        `Run ${runId} is already live (vitePid=${existing.vitePid}). Cleanup first or pick another --run-id / port.`,
       );
     }
   }
@@ -243,38 +235,11 @@ async function cmdLaunch(args) {
     throw err;
   }
 
-  const chrome = spawnLogged(
-    CHROME_BIN,
-    [
-      `--remote-debugging-port=${cdpPort}`,
-      `--user-data-dir=${paths.profileDir}`,
-      "--headless=new",
-      "--disable-gpu",
-      "--no-first-run",
-      "--no-default-browser-check",
-      "--disable-dev-shm-usage",
-      "--no-sandbox",
-      `--window-size=1440,900`,
-      "about:blank",
-    ],
-    paths.chromeLogPath,
-  );
-
-  try {
-    await waitForCdp(cdpPort, 20000);
-  } catch (err) {
-    stopPid(chrome.pid);
-    stopPid(vite.pid);
-    throw err;
-  }
-
   const meta = {
     runId,
     url,
     port,
-    cdpPort,
     vitePid: vite.pid,
-    chromePid: chrome.pid,
     chromeBin: CHROME_BIN,
     profileDir: paths.profileDir,
     evidenceDir: paths.evidenceDir,
@@ -286,12 +251,8 @@ async function cmdLaunch(args) {
   mkdirSync(VERIFY_ROOT, { recursive: true });
   writeFileSync(currentPointerPath(), `${runId}\n`);
 
-  const browser = await connectBrowser(meta);
-  const page = await appPage(browser, meta);
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.waitForSelector("#root", { timeout: 15000 });
-  await page.waitForSelector('svg[aria-label*="ラクガエ"]', { timeout: 15000 });
-  // Do not browser.close(): this CDP session owns the long-lived Chrome used by later commands.
+  const { context } = await openAppPage(meta);
+  await context.close();
 
   process.stdout.write(
     `${JSON.stringify(
@@ -303,8 +264,8 @@ async function cmdLaunch(args) {
         evidenceDir: paths.evidenceDir,
         instanceDir: paths.instanceDir,
         vitePid: vite.pid,
-        chromePid: chrome.pid,
-        cdpPort,
+        chromeBin: CHROME_BIN,
+        profileDir: paths.profileDir,
       },
       null,
       2,
@@ -317,7 +278,6 @@ async function cmdDoctor(args) {
   if (!runId) throw new Error("No run id. Pass --run-id or RAKUGAE_VERIFY_RUN_ID.");
   const meta = readMeta(runId);
   const viteUp = pidAlive(meta.vitePid);
-  const chromeUp = pidAlive(meta.chromePid);
   let http = { ok: false };
   try {
     const res = await fetch(meta.url);
@@ -330,15 +290,19 @@ async function cmdDoctor(args) {
   } catch (err) {
     http = { ok: false, error: err.message };
   }
-  let cdp = { ok: false };
-  try {
-    const version = await waitForCdp(meta.cdpPort, 2000);
-    cdp = { ok: true, browser: version.Browser || version.browser };
-  } catch (err) {
-    cdp = { ok: false, error: err.message };
+  let identity = { ok: false };
+  if (viteUp && http.ok) {
+    try {
+      const { context, page } = await openAppPage(meta);
+      const logoCount = await page.locator('svg[aria-label*="ラクガエ"]').count();
+      const title = await page.title();
+      identity = { ok: logoCount > 0 && title.includes("ラクガエ"), title, logoCount };
+      await context.close();
+    } catch (err) {
+      identity = { ok: false, error: err.message };
+    }
   }
-
-  const ok = viteUp && chromeUp && http.ok && cdp.ok;
+  const ok = viteUp && http.ok && identity.ok;
   const report = {
     ok,
     command: "doctor",
@@ -346,12 +310,10 @@ async function cmdDoctor(args) {
     url: meta.url,
     vitePid: meta.vitePid,
     viteUp,
-    chromePid: meta.chromePid,
-    chromeUp,
     http,
-    cdp,
+    identity,
     evidenceDir: meta.evidenceDir,
-    identity: "ラクガエ SPA at dedicated 127.0.0.1 port with isolated Chrome profile",
+    profileDir: meta.profileDir,
   };
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   if (!ok) process.exitCode = 2;
@@ -361,14 +323,21 @@ async function withPage(args, fn) {
   const runId = runIdFromArgs(args);
   if (!runId) throw new Error("No run id. Pass --run-id or RAKUGAE_VERIFY_RUN_ID.");
   const meta = readMeta(runId);
-  const browser = await connectBrowser(meta);
-  const page = await appPage(browser, meta);
-  return fn(page, meta);
+  const { context, page } = await openAppPage(meta);
+  try {
+    return await fn(page, meta);
+  } finally {
+    await context.close();
+  }
 }
 
 async function dismissWelcomeIfPresent(page) {
   const heading = page.getByRole("heading", { name: "ラクガエへようこそ！" });
-  if ((await heading.count()) === 0) return { dismissed: false };
+  try {
+    await heading.waitFor({ state: "visible", timeout: 2500 });
+  } catch {
+    return { dismissed: false };
+  }
   await page.getByRole("button", { name: "スキップ" }).click();
   await heading.waitFor({ state: "hidden", timeout: 5000 });
   return { dismissed: true };
@@ -468,11 +437,9 @@ async function cmdCleanup(args) {
   const paths = pathsFor(runId);
   let meta = null;
   if (existsSync(paths.metaPath)) meta = readMeta(runId);
-  const stopped = { vite: false, chrome: false };
+  const stopped = { vite: false };
   if (meta) {
-    stopPid(meta.chromePid);
     stopPid(meta.vitePid);
-    stopped.chrome = await waitPidExit(meta.chromePid, 5000);
     stopped.vite = await waitPidExit(meta.vitePid, 5000);
   }
   if (existsSync(paths.instanceDir)) {
