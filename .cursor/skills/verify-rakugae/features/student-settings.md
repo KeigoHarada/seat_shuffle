@@ -28,7 +28,7 @@ Preconditions:
 
 - **Open drawer if needed.** If `#student-add-form` is missing, `click --id btn-header-settings`. Form heading `新規生徒の追加` appears.
 - **Baseline.** `eval --js "JSON.parse(localStorage.getItem('seat-shuffle-storage')||'{}').state.students.length"` is 30. Screenshot `$EVIDENCE/students-before.png`.
-- **Add student.** `fill --placeholder "名前 (必須)" --value "検証太郎"` then `click --name "追加"`. Button `追加` stays disabled until the name field is non-empty.
+- **Add student.** `fill --placeholder "名前 (必須)" --value "検証太郎"` then `click --name "追加"` on the same run session (Chrome stays open; the form value is still in React state). Button `追加` stays disabled until the name field is non-empty.
 - **See the row.** `wait-text --text "検証太郎"`. Eval students.length is 31. Screenshot `$EVIDENCE/students-after-add.png` and snapshot `$EVIDENCE/students-after-add.aria.txt`.
 - **Switch tab (smoke).** `click --id tab-btn-global` then `wait-text --text "シャッフルアルゴリズム"`. This is not student-add proof; it only shows the tab strip works.
 
@@ -37,5 +37,6 @@ Preconditions:
 - Header `設定` and tab `設定` (`#tab-btn-global`) share the visible label `設定`. Use ids when both are on screen.
 - Gender defaults to その他 if left unset (`StudentAddForm`). Do not assert a specific gender unless you chose `性別を選択`.
 - Roster rows are not links; proof is the name text plus storage length.
+- Roster names live in list textboxes. `wait-text --text "検証太郎"` may miss them; prove with eval `students.length` and a snapshot that includes `textbox "名前": 検証太郎`.
 - CSV `読み込み` / `保存` are header file actions (`<input type="file" accept=".csv">`). Helper `fill` does not attach files unless you extend it; report skip rather than fake import.
 - `データを全消去（空にする）` wipes the classroom. Do not use it as setup for other features unless you restore afterward.

@@ -25,7 +25,7 @@ npm install
 npm install --prefix .cursor/skills/verify-rakugae/helpers
 ```
 
-The app's documented start is `npm run dev` (`vite`, `server.host: true`, default port **5173**). Verification launches a **strict** dedicated port and a **separate Chrome user-data-dir** so localStorage is not the developer's profile. Chrome is not left running: each helper command opens Playwright persistent context on that profile, then closes it.
+The app's documented start is `npm run dev` (`vite`, `server.host: true`, default port **5173**). Verification launches a **strict** dedicated port, a **separate Chrome user-data-dir**, and a **run-scoped Chrome session** (CDP). Commands attach, then `browser.close()` only the Playwright client — Chrome stays up. In-page React state (forms, menus, toasts, guide hub, welcome overlay) survives across `$H` calls. Zustand persist in that profile is extra shared state. `launch` refuses the port if anything already answers HTTP there, and fails if this run's `vitePid` dies while the URL still looks like ラクガエ.
 
 ```bash
 $H launch --port 5173
@@ -34,7 +34,7 @@ $H launch --port 5173
 Ready when:
 
 - stdout JSON has `"ok": true` and a `url` like `http://127.0.0.1:5173/`
-- `$H doctor` reports `viteUp`, `http.ok` (200, `<title>ラクガエ`), and `identity.ok` (page title plus `svg[aria-label*="ラクガエ"]`)
+- `$H doctor` reports `viteUp`, `chromeUp`, `http.ok` (200, `<title>ラクガエ`), and `identity.ok` (page title plus `svg[aria-label*="ラクガエ"]`)
 
 Vite log: `/tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/instance/vite.log`
 
@@ -44,7 +44,7 @@ First paint opens the welcome modal after ~500ms when `seat-shuffle-onboarding.h
 $H dismiss-welcome
 ```
 
-That clicks the button named `スキップ`. Overlay heading `ラクガエへようこそ！` must disappear. Do not start the 3-minute tour unless the feature file is `onboarding.md`.
+That clicks the button named `スキップ`. Overlay heading `ラクガエへようこそ！` must disappear. Do not start the 3-minute tour unless the feature file is `onboarding.md`. `click` / `fill` / `count` auto-skip welcome only when the target is **not** a welcome control (`スキップ`, `3分ガイドを始める`, `ラクガエへようこそ！`). Launch waits for the delayed overlay (~500ms) before returning, so a following screenshot can prove `welcome-open`.
 
 Teardown is **Cleanup**, not Ctrl-C by process name.
 
@@ -52,7 +52,8 @@ Isolation:
 
 - One run owns one HTTP port (`--port` / `RAKUGAE_VERIFY_PORT`, default 5173) with `--strictPort`.
 - Profile is `/tmp/rakugae-verify/<run-id>/instance/chrome-profile`.
-- Two runs can coexist if ports and run ids differ. **Do not** drive `localhost:5173` unless doctor shows it is this run's `vitePid`. A shared developer tab will share or overwrite `seat-shuffle-storage`.
+- Chrome CDP stays up for the run (`chromePid` + `cdpPort` in `instance/run.json`).
+- Two runs can coexist if ports and run ids differ. **Do not** drive `localhost:5173` unless doctor shows it is this run's `vitePid` **and** `chromePid`. A shared developer tab will share or overwrite `seat-shuffle-storage`.
 
 ## Doctor
 
@@ -65,14 +66,15 @@ $H doctor
 Require all of:
 
 - `viteUp: true` for `vitePid` in `instance/run.json`
+- `chromeUp: true` for `chromePid` (same Chrome the commands attach to)
 - `http.ok: true` (status 200, HTML title starts with `ラクガエ`)
-- `identity.ok: true` (Playwright load of this run's URL shows the ラクガエ logo)
+- `identity.ok: true` (this run's URL shows the ラクガエ logo)
 
 If doctor fails, cleanup this run and relaunch. Do not click around a foreign Vite.
 
 ## Drive
 
-Harness: Playwright Core `launchPersistentContext` on this run's Chrome profile (`/usr/bin/google-chrome-stable`). Each `$H` command opens Chrome, drives the page, then closes Chrome. Zustand persist in that profile is the shared state. All interaction goes through `$H`. Prefer **button accessible names** (Japanese UI strings), **ids** that exist in source, and **placeholders**. Coordinates are last resort.
+Harness: Playwright Core `connectOverCDP` to this run's Chrome (`/usr/bin/google-chrome-stable`, `--user-data-dir` under the run instance). Each `$H` command attaches, drives the existing page, then closes the Playwright client without killing Chrome. All interaction goes through `$H`. Prefer **button accessible names** (Japanese UI strings), **ids** that exist in source, and **placeholders**. Coordinates are last resort.
 
 Stable handles (from `src/`):
 
@@ -112,7 +114,7 @@ $H screenshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.p
 $H snapshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.aria.txt
 ```
 
-`click --name` is `getByRole(button, { name })`. For non-buttons use `--role` + `--name` or `--text`.
+`click --name` is `getByRole(button, { name, exact: true })` so `追加` does not match `座席を追加`. For non-buttons use `--role` + `--name` or `--text`. Pass `--exact false` only if you need substring names.
 
 Default persisted classroom (fresh profile, after skipping welcome): **30 seats**, **30 sample students**, settings drawer **open**, students tab active, algorithm **optimize**. Header `設定` uses class `btn-primary` when the drawer is open.
 
@@ -144,7 +146,7 @@ Mocks: none for core seating. The Ofuse donation widget (`#btn-support-donate`, 
 $H cleanup
 ```
 
-Sends SIGTERM (then SIGKILL if needed) only to `vitePid` from this run's `instance/run.json` (process group of the `npx vite` leader), then deletes `instance/` (Chrome profile, pid file, logs). Leaves `evidence/` in place.
+Sends SIGTERM (then SIGKILL if needed) only to `chromePid` and `vitePid` from this run's `instance/run.json` (process groups of this run's Chrome and `npx vite` leader), then deletes `instance/` (Chrome profile, pid file, logs). Leaves `evidence/` in place.
 
 Do not `pkill vite` / `pkill chrome`. Do not wipe `/tmp/rakugae-verify/<run-id>/evidence`.
 
