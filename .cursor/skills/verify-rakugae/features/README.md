@@ -4,7 +4,7 @@ This directory is the maintained source for verifying ラクガエ user-facing b
 
 ## Baseline preconditions
 
-- Launch with `node .cursor/skills/verify-rakugae/helpers/control-rakugae.mjs launch` so HTTP and Chrome belong to this `RAKUGAE_VERIFY_RUN_ID`.
+- Launch with `node .cursor/skills/verify-rakugae/helpers/control-rakugae.mjs launch` so HTTP and Chrome belong to this `RAKUGAE_VERIFY_RUN_ID`. Commands reuse that Chrome; they do not start a new browser per click.
 - Run `doctor` and require Vite up, Chrome up, title `ラクガエ`, CDP up.
 - Fresh Chrome profile: default classroom (30 seats, 30 students), settings drawer open, students tab selected, welcome modal after ~500ms.
 - Dismiss welcome with `dismiss-welcome` (`スキップ`) unless the recipe is onboarding.

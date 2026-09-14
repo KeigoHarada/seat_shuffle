@@ -28,7 +28,7 @@ Preconditions:
 
 - **Open drawer if needed.** If `#student-add-form` is missing, `click --id btn-header-settings`. Form heading `新規生徒の追加` appears.
 - **Baseline.** `eval --js "JSON.parse(localStorage.getItem('seat-shuffle-storage')||'{}').state.students.length"` is 30. Screenshot `$EVIDENCE/students-before.png`.
-- **Add student.** `fill --placeholder "名前 (必須)" --value "検証太郎"` then `click --name "追加"`. Button `追加` stays disabled until the name field is non-empty.
+- **Add student.** `fill --placeholder "名前 (必須)" --value "検証太郎"` then `click --name "追加"` on the same run session (Chrome stays open; the form value is still in React state). Button `追加` stays disabled until the name field is non-empty.
 - **See the row.** `wait-text --text "検証太郎"`. Eval students.length is 31. Screenshot `$EVIDENCE/students-after-add.png` and snapshot `$EVIDENCE/students-after-add.aria.txt`.
 - **Switch tab (smoke).** `click --id tab-btn-global` then `wait-text --text "シャッフルアルゴリズム"`. This is not student-add proof; it only shows the tab strip works.
 

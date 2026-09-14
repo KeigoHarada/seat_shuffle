@@ -24,15 +24,17 @@ Preconditions:
 - Do **not** call `dismiss-welcome` before capturing `welcome-open`.
 - `doctor` is green.
 
-- **See welcome.** Wait until the overlay heading exists. Run `node .cursor/skills/verify-rakugae/helpers/control-rakugae.mjs wait-text --text "ラクガエへようこそ！" --timeout 5000` then `screenshot --path $EVIDENCE/onboarding-welcome.png` and `snapshot --path $EVIDENCE/onboarding-welcome.aria.txt`. The heading and buttons `スキップ` and `3分ガイドを始める` are visible; the ラクガエ logo remains in the header behind the overlay.
+- **See welcome.** After `launch`, run `screenshot --path $EVIDENCE/onboarding-welcome.png` and `snapshot --path $EVIDENCE/onboarding-welcome.aria.txt` (optional `wait-text --text "ラクガエへようこそ！" --timeout 5000` first). Launch waits past the 500ms delay; the heading and buttons `スキップ` and `3分ガイドを始める` are visible; the ラクガエ logo remains in the header behind the overlay.
+- **Start tour (optional).** `click --name "3分ガイドを始める"` does **not** auto-click `スキップ` first. Do not mix that mutated classroom into canvas proofs. For skip-path proof, use a fresh launch instead.
 - **Skip.** Run `dismiss-welcome` (clicks `スキップ`). Re-run `count --selector ".seat-node-item"`. Overlay heading is gone; seat count is 30; settings heading `生徒設定` is visible.
 - **Confirm persistence.** Reload via `eval` is not enough; run `eval --js "JSON.parse(localStorage.getItem('seat-shuffle-onboarding')||'{}').state.hasCompletedOnboarding"`. Value is `true`. A second `wait-text` for `ラクガエへようこそ！` must fail or the heading count is 0.
-- **Guide hub.** Run `click --id header-guide-btn`. Hub UI opens from the header entry. Screenshot `$EVIDENCE/onboarding-guide-hub.png`.
+- **Guide hub.** Run `click --id header-guide-btn`. Hub UI opens from the header entry (`isGuideHubOpen` is in-memory; screenshot on the same session). Screenshot `$EVIDENCE/onboarding-guide-hub.png`.
 - **Proof.** Artifacts show welcome then skipped editor with 30 `.seat-node-item` nodes. Do not claim tour completion unless you actually advanced tour steps.
 
 ## Gotchas
 
-- Welcome is delayed 500ms (`OnboardingController`). Screenshotting immediately after `launch` can miss it.
+- Welcome is delayed 500ms (`OnboardingController`). `launch` and first navigation wait for the overlay; the run's Chrome session keeps it open so a later screenshot is not a false "no overlay" capture.
+- `click`/`fill`/`count` skip auto-dismiss when the target is `スキップ`, `3分ガイドを始める`, or `ラクガエへようこそ！`.
 - Overlay click-on-backdrop also skips; prefer the named `スキップ` button.
 - `3分ガイドを始める` rewrites classroom state via tour `setupPreState`. Do not mix tour state into canvas-layout proofs.
 - If a previous Chrome profile is reused, welcome will not appear. Isolation requires this run's `user-data-dir`.

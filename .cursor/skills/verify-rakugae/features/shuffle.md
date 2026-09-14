@@ -26,7 +26,7 @@ Preconditions:
 
 - **Baseline seating.** `eval --js "JSON.parse(localStorage.getItem('seat-shuffle-storage')||'{}').state.seats.map(s=>s.studentId).join(',')"` write stdout to `$EVIDENCE/shuffle-before-ids.txt`. Screenshot `$EVIDENCE/shuffle-before.png`.
 - **Shuffle.** `click --id btn-footer-shuffle`.
-- **Toast.** `wait-text --text "すべての条件を満たした座席配置が完了しました！" --timeout 8000` **or** wait for `件の条件が満たせませんでした` if optimize cannot satisfy. Either toast is a valid completion; record which one.
+- **Toast.** `wait-text --text "すべての条件を満たした座席配置が完了しました！" --timeout 8000` **or** wait for `件の条件が満たせませんでした` if optimize cannot satisfy. Either toast is a valid completion; record which one. The run's Chrome session keeps the in-memory toast; do not expect it to survive a Chrome restart.
 - **Result changed.** Re-eval the studentId join string. It must differ from the baseline (same 30 students, different seats). Screenshot `$EVIDENCE/shuffle-after.png` and snapshot `$EVIDENCE/shuffle-after.aria.txt`.
 - **Undo (optional).** Click the enabled undo control (`button[title="一つ前の配置に戻す"]` via `--selector`). Eval studentId string matches the baseline file.
 
