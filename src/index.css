@@ -485,6 +485,10 @@ input[type="number"] {
   gap: 16px;
 }
 
+.app-footer-cluster-center .btn-primary {
+  white-space: nowrap;
+}
+
 .app-footer-cluster-end {
   flex: 1;
   justify-content: flex-end;
@@ -547,10 +551,12 @@ input[type="number"] {
     flex-wrap: wrap;
     row-gap: var(--spacing-sm);
     overflow-x: auto;
+    padding: var(--spacing-sm) var(--spacing-lg);
   }
 
   .app-footer-cluster {
-    flex: 1 1 160px;
+    flex: 1 1 100%;
+    justify-content: center;
   }
 
   #settings-content-area {
