@@ -87,12 +87,12 @@ const SettingsContent: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
   return (
     <div
       id="settings-content-area"
+      className="app-settings-content"
       style={{
         flex: 1,
         display: "flex",
         flexDirection: "column",
         padding: "var(--spacing-md)",
-        overflow: "hidden",
       }}
     >
       {activeTab === "students" && (

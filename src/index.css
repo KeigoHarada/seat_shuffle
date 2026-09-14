@@ -64,6 +64,7 @@
   --app-settings-width: clamp(320px, 30vw, 400px);
   --app-compact-max: 720px;
   --app-settings-stack-height: min(45vh, 360px);
+  --app-canvas-min-height: 7.5rem;
 }
 
 * {
@@ -452,6 +453,7 @@ input[type="number"] {
 .app-settings-inner {
   width: 100%;
   height: 100%;
+  min-height: 0;
 }
 
 .app-footer {
@@ -505,21 +507,35 @@ input[type="number"] {
   flex: 1;
 }
 
+.app-settings-content {
+  overflow: hidden;
+  min-height: 0;
+}
+
+#settings-main-area {
+  min-height: 0;
+}
+
 @media (max-width: 720px) {
   .app-main {
     flex-direction: column;
   }
 
   .app-canvas {
-    flex: 1;
-    min-height: 0;
+    flex: 1 1 auto;
+    min-height: var(--app-canvas-min-height);
+    min-height: min(7.5rem, 30dvh);
     min-width: 0;
   }
 
   .app-settings[data-open="true"] {
     width: 100%;
-    height: var(--app-settings-stack-height);
-    flex-shrink: 0;
+    height: auto;
+    max-height: var(--app-settings-stack-height);
+    max-height: min(45dvh, 360px);
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
     border-left: none;
     border-top: 1px solid var(--c-border);
   }
@@ -555,12 +571,16 @@ input[type="number"] {
   }
 
   .app-footer-cluster {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
     justify-content: center;
   }
 
-  #settings-content-area {
+  .app-settings-content {
     overflow-y: auto;
+  }
+
+  .app-settings-content > * {
+    flex: none;
   }
 
   .app-canvas-toolbar {
