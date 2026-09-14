@@ -299,8 +299,7 @@ UI上のキャンバス（描画エリア）を用いて、直感的に座席表
 - **デザイン仕様**:
   - ラクガエのブランドトーン＆マナー（温かみのあるパステルイエロー系、角丸、Zen Maru Gothicフォント）に最適化した専用カードおよびボタンを配置
   - プラットフォーム名の明記や不要な注釈・コピーボタンを省き、先生方が気兼ねなく応援・寄付できるすっきりとしたUI
-  - ウィジェット属性（`data-ofuse-widget-button`, `data-ofuse-id="218335"`, `data-ofuse-size="large"`, `data-ofuse-color="dark-invert"`）を備えた埋め込みリンク
-  - 公式ウィジェットスクリプト（`widget.js`）の非同期読み込み対応
+  - ボタンはアプリ内の `.btn-primary` リンク（Heart / ExternalLink アイコン、文言「応援メッセージ・寄付を送る」）。Ofuse 公式 `widget.js` は読み込まない
 
 ---
 
