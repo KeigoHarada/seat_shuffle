@@ -54,18 +54,6 @@ const GlobalTab: React.FC = () => {
     };
   }, [isTesting, clearTestPlay]);
 
-  useEffect(() => {
-    const scriptId = "ofuse-widget-script";
-    if (!document.getElementById(scriptId)) {
-      const script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://ofuse.me/assets/platform/widget.js";
-      script.async = true;
-      script.charset = "utf-8";
-      document.body.appendChild(script);
-    }
-  }, []);
-
   const handleTestPlay = () => {
     if (isShuffling || isTesting) return;
     setIsTesting(true);
@@ -305,11 +293,6 @@ const GlobalTab: React.FC = () => {
         >
           <a
             id="btn-support-donate"
-            data-ofuse-widget-button
-            data-ofuse-id="218335"
-            data-ofuse-size="large"
-            data-ofuse-color="dark-invert"
-            data-ofuse-text=""
             href="https://ofuse.me/o?uid=218335"
             target="_blank"
             rel="noopener noreferrer"
