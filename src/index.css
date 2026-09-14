@@ -507,6 +507,11 @@ input[type="number"] {
   flex: 1;
 }
 
+.app-settings-content {
+  overflow: hidden;
+  min-height: 0;
+}
+
 .app-settings-tab-body,
 .app-settings-fill {
   display: flex;
