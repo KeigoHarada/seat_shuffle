@@ -8,6 +8,7 @@ interface Props {
 const CanvasControls: React.FC<Props> = ({ scale, onResetView }) => {
   return (
     <div
+      className="app-canvas-controls"
       style={{
         position: "absolute",
         bottom: 24,

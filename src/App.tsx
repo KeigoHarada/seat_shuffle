@@ -17,24 +17,14 @@ const App: React.FC = () => {
   const effectiveSettingsOpen = isSettingsOpen && !isViewMode;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        width: "100vw",
-        overflow: "hidden",
-      }}
-    >
+    <div className="app-shell">
       <Header
         showSettings={effectiveSettingsOpen}
         onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
 
-      {/* Main Content Area */}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        {/* Editor (Canvas) Area */}
-        <main style={{ flex: 1, position: "relative" }}>
+      <div className="app-main">
+        <main className="app-canvas">
           <Canvas />
 
           {seats.length === 0 && (
@@ -56,19 +46,11 @@ const App: React.FC = () => {
           )}
         </main>
 
-        {/* Settings Panel (Sidebar) */}
         <aside
-          style={{
-            width: effectiveSettingsOpen ? "clamp(320px, 30vw, 400px)" : "0px",
-            transition: "width 0.3s cubic-bezier(0.2, 0, 0, 1)",
-            overflow: "hidden",
-            borderLeft: effectiveSettingsOpen
-              ? "1px solid var(--c-border)"
-              : "none",
-            flexShrink: 0,
-          }}
+          className="app-settings"
+          data-open={effectiveSettingsOpen ? "true" : "false"}
         >
-          <div style={{ width: "clamp(320px, 30vw, 400px)", height: "100%" }}>
+          <div className="app-settings-inner">
             <SettingsPanel />
           </div>
         </aside>

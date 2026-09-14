@@ -27,21 +27,14 @@ const SettingsTabs: React.FC<{
   activeTab: Tab;
   onChange: (tab: Tab) => void;
 }> = ({ activeTab, onChange }) => (
-  <div
-    style={{
-      display: "flex",
-      borderBottom: "1px solid var(--c-border)",
-      paddingTop: "var(--spacing-xs)",
-      position: "relative",
-    }}
-  >
+  <div className="app-settings-tabs">
     {TABS.map((tab) => (
       <button
         key={tab.id}
         id={`tab-btn-${tab.id}`}
+        className="app-settings-tab"
         onClick={() => onChange(tab.id)}
         style={{
-          flex: 1,
           padding: "var(--spacing-sm)",
           border: "none",
           background: "none",

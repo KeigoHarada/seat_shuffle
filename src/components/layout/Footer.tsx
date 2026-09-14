@@ -85,23 +85,8 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer
-      style={{
-        height: "80px",
-        backgroundColor: "var(--c-surface)",
-        borderTop: "1px solid var(--c-border)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 var(--spacing-lg)",
-        flexShrink: 0,
-        boxShadow: "0 -1px 3px rgba(0, 0, 0, 0.05)",
-        zIndex: 10,
-        position: "relative",
-      }}
-    >
-      {/* Left side */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+    <footer className="app-footer">
+      <div className="app-footer-cluster app-footer-cluster-start">
         <button
           onClick={() => setIsLegalModalOpen(true)}
           style={{
@@ -123,16 +108,7 @@ const Footer: React.FC = () => {
         onClose={() => setIsLegalModalOpen(false)}
       />
 
-      {/* Center - Undo and Shuffle Buttons */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "16px",
-          flex: 1,
-        }}
-      >
+      <div className="app-footer-cluster app-footer-cluster-center">
         <button
           className="btn-secondary"
           onClick={undoShuffle}
@@ -175,8 +151,7 @@ const Footer: React.FC = () => {
         </button>
       </div>
 
-      {/* Right side - Mode Toggle */}
-      <div style={{ display: "flex", justifyContent: "flex-end", flex: 1 }}>
+      <div className="app-footer-cluster app-footer-cluster-end">
         <button
           id="btn-footer-viewmode"
           onClick={() => setIsViewMode(!isViewMode)}
