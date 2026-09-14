@@ -23,6 +23,7 @@ const CHROME_BIN =
 
 const WELCOME_HEADING = "ラクガエへようこそ！";
 const WELCOME_TARGET_RE = /3分ガイドを始める|スキップ|ラクガエへようこそ/;
+const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -181,6 +182,7 @@ function chromeSpawnArgs(profileDir, cdpPort) {
     `--remote-debugging-port=${cdpPort}`,
     "--remote-debugging-address=127.0.0.1",
     "--headless=new",
+    `--window-size=${DEFAULT_VIEWPORT.width},${DEFAULT_VIEWPORT.height}`,
     ...chromeLaunchArgs(),
     "about:blank",
   ];
@@ -206,6 +208,7 @@ async function openAppPage(meta) {
   const context = browser.contexts()[0] || (await browser.newContext());
   const page = context.pages()[0] || (await context.newPage());
   page.setDefaultTimeout(15000);
+  await page.setViewportSize(DEFAULT_VIEWPORT);
   const wanted = meta.url.replace(/\/$/, "");
   const alreadyOnApp = page.url().replace(/\/$/, "") === wanted;
   if (!alreadyOnApp) {
