@@ -465,9 +465,10 @@ function locatorFromArgs(page, args) {
   if (args.id) return page.locator(`#${args.id}`);
   if (args.selector) return page.locator(args.selector);
   if (args.placeholder) return page.getByPlaceholder(args.placeholder);
-  if (args.role && args.name) return page.getByRole(args.role, { name: args.name });
-  if (args.name) return page.getByRole("button", { name: args.name });
-  if (args.text) return page.getByText(args.text, { exact: args.exact !== "false" });
+  const exact = args.exact !== "false";
+  if (args.role && args.name) return page.getByRole(args.role, { name: args.name, exact });
+  if (args.name) return page.getByRole("button", { name: args.name, exact });
+  if (args.text) return page.getByText(args.text, { exact });
   throw new Error("Need --id, --selector, --placeholder, --role/--name, --name, or --text");
 }
 

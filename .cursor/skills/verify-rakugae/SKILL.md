@@ -114,7 +114,7 @@ $H screenshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.p
 $H snapshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.aria.txt
 ```
 
-`click --name` is `getByRole(button, { name })`. For non-buttons use `--role` + `--name` or `--text`.
+`click --name` is `getByRole(button, { name, exact: true })` so `追加` does not match `座席を追加`. For non-buttons use `--role` + `--name` or `--text`. Pass `--exact false` only if you need substring names.
 
 Default persisted classroom (fresh profile, after skipping welcome): **30 seats**, **30 sample students**, settings drawer **open**, students tab active, algorithm **optimize**. Header `設定` uses class `btn-primary` when the drawer is open.
 
