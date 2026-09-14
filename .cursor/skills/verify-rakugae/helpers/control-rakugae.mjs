@@ -175,12 +175,13 @@ function chromeLaunchArgs() {
   ];
 }
 
-function chromeSpawnArgs(profileDir, cdpPort) {
+function chromeSpawnArgs(profileDir, cdpPort, viewport = { width: 1440, height: 900 }) {
   return [
     `--user-data-dir=${profileDir}`,
     `--remote-debugging-port=${cdpPort}`,
     "--remote-debugging-address=127.0.0.1",
     "--headless=new",
+    `--window-size=${viewport.width},${viewport.height}`,
     ...chromeLaunchArgs(),
     "about:blank",
   ];
@@ -331,7 +332,12 @@ async function cmdLaunch(args) {
   }
 
   const cdpPort = await freePort();
-  const chrome = spawnLogged(CHROME_BIN, chromeSpawnArgs(paths.profileDir, cdpPort), paths.chromeLogPath);
+  const viewport = viewportFromArgs(args);
+  const chrome = spawnLogged(
+    CHROME_BIN,
+    chromeSpawnArgs(paths.profileDir, cdpPort, viewport),
+    paths.chromeLogPath,
+  );
 
   try {
     await waitForCdp(cdpPort, 20000);
@@ -362,7 +368,7 @@ async function cmdLaunch(args) {
   mkdirSync(VERIFY_ROOT, { recursive: true });
   writeFileSync(currentPointerPath(), `${runId}\n`);
 
-  const { browser } = await openAppPage(meta, viewportFromArgs(args));
+  const { browser } = await openAppPage(meta, viewport);
   await browser.close();
 
   process.stdout.write(
