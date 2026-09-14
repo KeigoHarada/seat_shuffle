@@ -61,25 +61,26 @@ describe("GlobalTab Support Section", () => {
     ) as HTMLAnchorElement;
     expect(supportLink).not.toBeNull();
     expect(supportLink.href).toBe("https://ofuse.me/o?uid=218335");
-    expect(supportLink.getAttribute("data-ofuse-id")).toBe("218335");
-    expect(supportLink.getAttribute("data-ofuse-size")).toBe("large");
-    expect(supportLink.getAttribute("data-ofuse-color")).toBe("dark-invert");
+    expect(supportLink.className).toBe("btn-primary");
     expect(supportLink.target).toBe("_blank");
+    expect(supportLink.getAttribute("data-ofuse-widget-button")).toBeNull();
+    expect(supportLink.getAttribute("data-ofuse-id")).toBeNull();
+    expect(supportLink.getAttribute("data-ofuse-size")).toBeNull();
+    expect(supportLink.getAttribute("data-ofuse-color")).toBeNull();
+    expect(supportLink.getAttribute("data-ofuse-text")).toBeNull();
 
-    // Parent container should be centered
     const buttonParent = supportLink.parentElement;
     expect(buttonParent?.style.justifyContent).toBe("center");
   });
 
-  it("loads widget script on mount", async () => {
+  it("does not load the Ofuse widget script", async () => {
     await act(async () => {
       if (root) root.render(<GlobalTab />);
     });
 
-    const script = document.getElementById(
-      "ofuse-widget-script",
-    ) as HTMLScriptElement;
-    expect(script).not.toBeNull();
-    expect(script.src).toContain("https://ofuse.me/assets/platform/widget.js");
+    expect(document.getElementById("ofuse-widget-script")).toBeNull();
+    expect(
+      document.querySelector('script[src*="ofuse.me/assets/platform/widget.js"]'),
+    ).toBeNull();
   });
 });
