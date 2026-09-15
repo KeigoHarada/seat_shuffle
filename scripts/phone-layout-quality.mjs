@@ -99,6 +99,30 @@ async function box(page, selector) {
   return handle.boundingBox();
 }
 
+async function hitAtBoxCenter(page, selector) {
+  return page.evaluate((selector) => {
+    const el = document.querySelector(selector);
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    const hit = document.elementFromPoint(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2,
+    );
+    const closest =
+      hit instanceof Element
+        ? hit.closest(
+            ".app-canvas-toolbar-menu, .app-settings, .app-settings-scrim, .app-canvas-toolbar, .app-canvas-controls",
+          )
+        : null;
+    return {
+      tag: hit?.tagName ?? null,
+      className: hit instanceof Element ? String(hit.className) : null,
+      closest: closest instanceof Element ? closest.className : null,
+      text: hit?.textContent?.trim().slice(0, 40) ?? null,
+    };
+  }, selector);
+}
+
 async function metrics(page, selector) {
   const handle = page.locator(selector).first();
   if ((await handle.count()) === 0) return null;
@@ -378,6 +402,71 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       `before=${seatsBefore} after=${seatsAfter}`,
     );
 
+    const shapesBtn = page.getByRole("button", { name: "図形", exact: true });
+    if (expectCompact) {
+      await shapesBtn.tap();
+    } else {
+      await shapesBtn.click();
+    }
+    const shapesHit = await hitAtBoxCenter(page, ".app-canvas-toolbar-menu");
+    record(
+      failures,
+      `${label} shapes menu hittable`,
+      !!shapesHit &&
+        /四角形|toolbar-menu/.test(`${shapesHit.text} ${shapesHit.closest}`),
+      `hit=${JSON.stringify(shapesHit)}`,
+    );
+    const objectsBefore = await page.locator(".canvas-object-node").count();
+    const rectBtn = page.getByRole("button", { name: "四角形", exact: true });
+    try {
+      if (expectCompact) {
+        await rectBtn.tap({ timeout: 2000 });
+      } else {
+        await rectBtn.click({ timeout: 2000 });
+      }
+    } catch (error) {
+      record(
+        failures,
+        `${label} shapes place a rectangle`,
+        false,
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+    const objectsAfter = await page.locator(".canvas-object-node").count();
+    record(
+      failures,
+      `${label} shapes place a rectangle`,
+      objectsAfter === objectsBefore + 1,
+      `before=${objectsBefore} after=${objectsAfter}`,
+    );
+
+    const templatesBtn = page.getByRole("button", {
+      name: "テンプレート",
+      exact: true,
+    });
+    if (expectCompact) {
+      await templatesBtn.tap();
+    } else {
+      await templatesBtn.click();
+    }
+    await page.locator(".app-canvas-toolbar-menu").first().waitFor({
+      state: "attached",
+      timeout: 2000,
+    });
+    const templatesHit = await hitAtBoxCenter(page, ".app-canvas-toolbar-menu");
+    record(
+      failures,
+      `${label} templates menu hittable`,
+      !!templatesHit &&
+        /教室|toolbar-menu/.test(`${templatesHit.text} ${templatesHit.closest}`),
+      `hit=${JSON.stringify(templatesHit)}`,
+    );
+    await page.evaluate(() => {
+      document.body.dispatchEvent(
+        new PointerEvent("pointerdown", { bubbles: true, clientX: 1, clientY: 1 }),
+      );
+    });
+
     const shuffleBox = await box(page, "#btn-footer-shuffle");
     if (shuffleBox) {
       const center = shuffleBox.x + shuffleBox.width / 2;
@@ -419,6 +508,64 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       path: path.join(screenshotDir, `${shotName}-settings.png`),
       fullPage: false,
     });
+    const stack = await page.evaluate(() => {
+      const toolbar = document.querySelector(".app-canvas-toolbar");
+      const controls = document.querySelector(".app-canvas-controls");
+      const settings = document.querySelector(".app-settings");
+      const boxes = (el) => {
+        const rect = el.getBoundingClientRect();
+        return {
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom,
+        };
+      };
+      const overlap = (a, b) =>
+        a.right > b.left &&
+        a.left < b.right &&
+        a.bottom > b.top &&
+        a.top < b.bottom;
+      return {
+        toolbarZ: toolbar ? getComputedStyle(toolbar).zIndex : null,
+        controlsZ: controls ? getComputedStyle(controls).zIndex : null,
+        settingsZ: settings ? getComputedStyle(settings).zIndex : null,
+        overlapToolbar:
+          toolbar && settings && overlap(boxes(toolbar), boxes(settings)),
+        overlapControls:
+          controls && settings && overlap(boxes(controls), boxes(settings)),
+      };
+    });
+    record(
+      failures,
+      `${label} settings above toolbar z-index`,
+      Number(stack.settingsZ) > Number(stack.toolbarZ),
+      `settings=${stack.settingsZ} toolbar=${stack.toolbarZ}`,
+    );
+    record(
+      failures,
+      `${label} settings above controls z-index`,
+      Number(stack.settingsZ) > Number(stack.controlsZ),
+      `settings=${stack.settingsZ} controls=${stack.controlsZ}`,
+    );
+    if (stack.overlapToolbar) {
+      const toolbarHit = await hitAtBoxCenter(page, ".app-canvas-toolbar");
+      record(
+        failures,
+        `${label} settings covers toolbar`,
+        !!toolbarHit && /app-settings/.test(`${toolbarHit.closest}`),
+        `hit=${JSON.stringify(toolbarHit)}`,
+      );
+    }
+    if (stack.overlapControls) {
+      const controlsHit = await hitAtBoxCenter(page, ".app-canvas-controls");
+      record(
+        failures,
+        `${label} settings covers controls`,
+        !!controlsHit && /app-settings/.test(`${controlsHit.closest}`),
+        `hit=${JSON.stringify(controlsHit)}`,
+      );
+    }
     const canvasAfter = await box(page, ".app-canvas");
     record(
       failures,
