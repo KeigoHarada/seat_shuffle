@@ -33,3 +33,4 @@ Geometry proof for overflow and toolbar wrap is `npm run test:phone-layout`, not
 - Desktop recipes that click `#btn-header-settings` or `#btn-footer-shuffle` do not apply on phone.
 - Toolbar labels are visually hidden; accessible names remain `座席を追加`, `図形`, `テンプレート`, `自動割り当て`.
 - iPad portrait 768px stays on the desktop tree.
+- 全体設定 is a `menuitem` under `#phone-more-btn`. Helper commands reconnect between clicks, so open the menu and choose the item in one Playwright session (`npm run test:phone-layout`) rather than two `$H click` calls.

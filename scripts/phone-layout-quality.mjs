@@ -294,6 +294,27 @@ async function assertPhone(page, url, viewport, failures) {
     "desktop settings heading leaked",
   );
 
+  await page.locator("#phone-more-btn").click();
+  await page.getByRole("menuitem", { name: "全体設定" }).click();
+  await page.locator(".phone-overlay").waitFor();
+  await page.screenshot({
+    path: path.join(screenshotDir, `phone-global-${viewport.width}.png`),
+  });
+  record(
+    failures,
+    `${label} global overlay`,
+    (await page.locator(".phone-overlay-title", { hasText: "全体設定" }).count()) ===
+      1,
+    "missing 全体設定 overlay",
+  );
+  await page.getByRole("button", { name: "戻る" }).click();
+  record(
+    failures,
+    `${label} global close`,
+    (await page.locator(".phone-overlay").count()) === 0,
+    "overlay stayed open",
+  );
+
   await page.locator("#tab-phone-constraints").click();
   await page.waitForSelector('[data-phone-destination="constraints"]');
   await page.screenshot({
