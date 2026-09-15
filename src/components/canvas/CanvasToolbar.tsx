@@ -214,13 +214,14 @@ const CanvasToolbar: React.FC<Props> = ({
               borderRadius: "var(--radius-md)",
               boxShadow: "var(--shadow-1)",
               padding: "4px 0",
-              minWidth: 160,
+              minWidth: 184,
               display: "flex",
               flexDirection: "column",
             }}
           >
             {[
               { id: "classroom", label: "教室" },
+              { id: "bus", label: "修学旅行（バス）" },
               { id: "group4", label: "4人席" },
               { id: "group6_v", label: "6人席（縦）" },
               { id: "group6_h", label: "6人席（横）" },

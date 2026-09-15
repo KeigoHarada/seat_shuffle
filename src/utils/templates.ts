@@ -60,6 +60,28 @@ export const generateTemplate = (
       addSeat(startX + c * SEAT_COLS, startY);
       addSeat(startX + c * SEAT_COLS, startY + SEAT_ROWS);
     }
+  } else if (templateId === "bus") {
+    // 修学旅行バス: 2列・通路・2列 × 10行（計40席）
+    const colXOffsets = [0, 6, 20, 26];
+    const rowYOffsets = [0, 6, 12, 18, 24, 30, 36, 42, 48, 54];
+
+    for (let c = 0; c < colXOffsets.length; c++) {
+      for (let r = 0; r < rowYOffsets.length; r++) {
+        addSeat(startX + colXOffsets[c], startY + rowYOffsets[r]);
+      }
+    }
+
+    // 前方右側に運転席（日本は右ハンドル）
+    newObjects.push({
+      id: crypto.randomUUID(),
+      type: "rectangle",
+      x: startX + 26,
+      y: startY - 6,
+      width: 6,
+      height: 4,
+      text: "運転席",
+      color: "var(--c-surface-disabled)",
+    });
   }
 
   return { seats: newSeats, objects: newObjects };

@@ -6,7 +6,7 @@ Teachers build the seating chart on an infinite canvas: add seats, decorative sh
 
 - `add-seat` adds one seat from toolbar `座席を追加`.
 - `add-shapes` adds `四角形` or `円形` from `図形`.
-- `apply-template` inserts `教室`, `4人席`, `6人席（縦）`, or `6人席（横）` from `テンプレート`.
+- `apply-template` inserts `教室`, `修学旅行（バス）`, `4人席`, `6人席（縦）`, or `6人席（横）` from `テンプレート`.
 - `auto-assign` runs toolbar `自動割り当て` and fills empty seats using 全体設定 `自動割り当ての並び順`.
 
 ## How to get to it (user POV)

@@ -40,4 +40,35 @@ describe("templates utils", () => {
       expect(seats).toHaveLength(6);
     });
   });
+
+  describe("generateTemplate - bus", () => {
+    it("should generate a 2-aisle-2 school-trip bus with empty seats and a driver's seat", () => {
+      const { seats, objects } = generateTemplate("bus", 10, 20);
+
+      expect(seats).toHaveLength(40);
+      expect(objects).toHaveLength(1);
+      expect(objects[0].text).toBe("運転席");
+      expect(objects[0].x).toBe(36);
+      expect(objects[0].y).toBe(14);
+
+      expect(seats.every((s) => s.studentId === null)).toBe(true);
+      expect(seats.every((s) => s.groupIds.length === 0)).toBe(true);
+      expect(seats.every((s) => s.isLocked === false)).toBe(true);
+
+      const distinctX = Array.from(new Set(seats.map((s) => s.x))).sort(
+        (a, b) => a - b,
+      );
+      expect(distinctX).toEqual([10, 16, 30, 36]);
+
+      const distinctY = Array.from(new Set(seats.map((s) => s.y))).sort(
+        (a, b) => a - b,
+      );
+      expect(distinctY).toEqual([20, 26, 32, 38, 44, 50, 56, 62, 68, 74]);
+
+      // Inner gap (aisle) is wider than the gap inside each 2-seat pair
+      expect(distinctX[2] - distinctX[1]).toBeGreaterThan(
+        distinctX[1] - distinctX[0],
+      );
+    });
+  });
 });

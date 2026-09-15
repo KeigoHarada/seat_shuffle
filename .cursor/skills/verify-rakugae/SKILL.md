@@ -86,7 +86,7 @@ Stable handles (from `src/`):
 | `設定` | button | `#btn-header-settings` (hidden in view mode) |
 | `座席を追加` | button | canvas toolbar |
 | `図形` then `四角形` / `円形` | buttons | canvas toolbar |
-| `テンプレート` then `教室` / `4人席` / `6人席（縦）` / `6人席（横）` | buttons | `#btn-toolbar-template`, `#btn-template-classroom` etc. |
+| `テンプレート` then `教室` / `修学旅行（バス）` / `4人席` / `6人席（縦）` / `6人席（横）` | buttons | `#btn-toolbar-template`, `#btn-template-classroom` / `#btn-template-bus` etc. |
 | `自動割り当て` | button | canvas toolbar |
 | `.seat-node-item` | seats | canvas; empty seats show text `空席` |
 | `#tab-btn-students` `生徒` | tab | settings; default tab on launch |

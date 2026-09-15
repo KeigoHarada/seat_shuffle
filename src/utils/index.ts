@@ -12,7 +12,7 @@ export * from "./group";
 // 生徒操作・ソートロジック
 export * from "./student";
 
-// 教室・グループテンプレート生成
+// 教室・バス・グループテンプレート生成
 export * from "./templates";
 
 // キャンバス座標計算・バウンディングボックス・センタリング
