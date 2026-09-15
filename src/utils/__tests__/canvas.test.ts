@@ -51,6 +51,14 @@ describe("canvas utils", () => {
       expect(result.scale).toBeLessThan(1.0);
       expect(result.scale).toBeGreaterThanOrEqual(0.5);
     });
+
+    it("can scale below 50% so a classroom fits a phone canvas", () => {
+      const { seats, objects } = generateTemplate("classroom", 0, 0);
+      const result = calculateCenterPanZoom(seats, objects, 375, 495, 24, 0.25);
+
+      expect(result.scale).toBeLessThan(0.5);
+      expect(result.scale).toBeGreaterThanOrEqual(0.25);
+    });
   });
 
   describe("coordinate conversions", () => {

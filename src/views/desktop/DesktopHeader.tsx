@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
 import { Settings, Download, Upload, Sprout } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
-import Input from "../ui/Input";
-import Logo from "../ui/Logo";
+import Input from "../../components/ui/Input";
+import Logo from "../../components/ui/Logo";
 import { useStore } from "../../stores";
 import { useOnboardingStore } from "../../stores/onboarding";
 
@@ -11,7 +11,10 @@ interface HeaderProps {
   onToggleSettings: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
+const DesktopHeader: React.FC<HeaderProps> = ({
+  showSettings,
+  onToggleSettings,
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isViewMode = useStore((state) => state.isViewMode);
   const openGuideHub = useOnboardingStore((state) => state.openGuideHub);
@@ -86,4 +89,4 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
   );
 };
 
-export default Header;
+export default DesktopHeader;

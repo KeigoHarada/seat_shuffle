@@ -35,6 +35,7 @@ Preconditions:
 ## Gotchas
 
 - Header `設定` and tab `設定` (`#tab-btn-global`) share the visible label `設定`. Use ids when both are on screen.
+- Phone shell has no settings drawer. Roster is `#tab-phone-roster` then `#tab-phone-roster-students`. There is no heading `生徒設定` on phone; that title stays on the desktop sidebar.
 - Gender defaults to その他 if left unset (`StudentAddForm`). Do not assert a specific gender unless you chose `性別を選択`.
 - Roster rows are not links; proof is the name text plus storage length.
 - Roster names live in list textboxes. `wait-text --text "検証太郎"` may miss them; prove with eval `students.length` and a snapshot that includes `textbox "名前": 検証太郎`.

@@ -4,10 +4,10 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import PhoneShell from "../PhoneShell";
+import PhoneApp from "../PhoneApp";
 import { useStore } from "../../../stores";
 
-describe("PhoneShell C1 destinations", () => {
+describe("PhoneApp C1 destinations", () => {
   let container: HTMLDivElement;
   let root: ReturnType<typeof createRoot> | null = null;
 
@@ -33,9 +33,9 @@ describe("PhoneShell C1 destinations", () => {
     }
   });
 
-  it("starts on seats with a shuffle action and no settings sidebar", async () => {
+  it("starts on seats with a phone shuffle action and no desktop chrome", async () => {
     await act(async () => {
-      root?.render(<PhoneShell />);
+      root?.render(<PhoneApp />);
     });
 
     const shell = container.querySelector('[data-kind="phone"]');
@@ -45,14 +45,16 @@ describe("PhoneShell C1 destinations", () => {
         .querySelector("[data-phone-destination]")
         ?.getAttribute("data-phone-destination"),
     ).toBe("seats");
-    expect(container.querySelector("#btn-footer-shuffle")).not.toBeNull();
+    expect(container.querySelector("#btn-phone-shuffle")).not.toBeNull();
+    expect(container.querySelector("#btn-phone-viewmode")).not.toBeNull();
+    expect(container.querySelector("#btn-footer-shuffle")).toBeNull();
     expect(container.querySelector("#btn-header-settings")).toBeNull();
     expect(container.querySelector("#tab-btn-students")).toBeNull();
   });
 
   it("moves roster and constraints to full screens instead of a sidebar", async () => {
     await act(async () => {
-      root?.render(<PhoneShell />);
+      root?.render(<PhoneApp />);
     });
 
     await act(async () => {
@@ -63,7 +65,8 @@ describe("PhoneShell C1 destinations", () => {
         .querySelector("[data-phone-destination]")
         ?.getAttribute("data-phone-destination"),
     ).toBe("roster");
-    expect(container.querySelector("#btn-footer-shuffle")).toBeNull();
+    expect(container.querySelector("#btn-phone-shuffle")).toBeNull();
+    expect(container.querySelector("#btn-phone-viewmode")).toBeNull();
     expect(container.textContent).toContain("生徒");
 
     await act(async () => {
@@ -76,15 +79,16 @@ describe("PhoneShell C1 destinations", () => {
         .querySelector("[data-phone-destination]")
         ?.getAttribute("data-phone-destination"),
     ).toBe("constraints");
-    expect(container.textContent).toContain("条件設定");
+    expect(container.textContent).toContain("条件");
+    expect(container.textContent).not.toContain("生徒設定");
   });
 
   it("keeps shuffle on the seats screen in view mode", async () => {
     useStore.setState({ isViewMode: true });
     await act(async () => {
-      root?.render(<PhoneShell />);
+      root?.render(<PhoneApp />);
     });
 
-    expect(container.querySelector("#btn-footer-shuffle")).not.toBeNull();
+    expect(container.querySelector("#btn-phone-shuffle")).not.toBeNull();
   });
 });

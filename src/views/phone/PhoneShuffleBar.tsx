@@ -1,43 +1,36 @@
 import React from "react";
 import { Shuffle, Undo2 } from "lucide-react";
 import { useShuffle } from "../../hooks/useShuffle";
+import PhoneViewModeToggle from "./PhoneViewModeToggle";
 
-interface ShuffleControlsProps {
-  layout: "footer" | "phone";
-}
-
-const ShuffleControls: React.FC<ShuffleControlsProps> = ({ layout }) => {
+const PhoneShuffleBar: React.FC = () => {
   const { handleShuffle, undoShuffle, isShuffling, canUndo } = useShuffle();
 
   return (
-    <div
-      className={
-        layout === "phone"
-          ? "shuffle-controls shuffle-controls-phone"
-          : "shuffle-controls"
-      }
-    >
+    <div className="phone-shuffle-bar">
       <button
-        className="btn-secondary shuffle-undo"
+        className="phone-shuffle-undo"
         onClick={undoShuffle}
         disabled={!canUndo}
         type="button"
+        aria-label="一つ前の配置に戻す"
         title="一つ前の配置に戻す"
       >
         <Undo2 size={20} />
       </button>
       <button
-        id="btn-footer-shuffle"
-        className="btn-primary shuffle-run"
+        id="btn-phone-shuffle"
+        className="phone-shuffle-run"
         onClick={handleShuffle}
         disabled={isShuffling}
         type="button"
       >
-        <Shuffle size={20} />{" "}
+        <Shuffle size={18} />
         {isShuffling ? "シャッフル中..." : "シャッフル実行"}
       </button>
+      <PhoneViewModeToggle />
     </div>
   );
 };
 
-export default ShuffleControls;
+export default PhoneShuffleBar;

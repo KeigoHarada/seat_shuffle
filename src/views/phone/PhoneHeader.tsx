@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Download, MoreHorizontal, Sprout, Upload } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
-import Input from "../ui/Input";
-import Logo from "../ui/Logo";
+import Input from "../../components/ui/Input";
+import Logo from "../../components/ui/Logo";
 import { useOnboardingStore } from "../../stores/onboarding";
-import ViewModeToggle from "./ViewModeToggle";
 
 interface PhoneHeaderProps {
   onOpenGlobal: () => void;
@@ -33,21 +32,20 @@ const PhoneHeader: React.FC<PhoneHeaderProps> = ({
   }, [menuOpen]);
 
   return (
-    <header className="app-header phone-header">
-      <Logo size="sm" />
-      <div className="app-header-actions">
-        <ViewModeToggle compact />
+    <header className="phone-header">
+      <Logo size={24} />
+      <div className="phone-header-actions">
         <div className="phone-more" ref={menuRef}>
           <button
             id="phone-more-btn"
-            className="btn-secondary"
+            className="phone-icon-btn"
             type="button"
             aria-expanded={menuOpen}
             aria-haspopup="menu"
-            title="メニュー"
+            aria-label="メニュー"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            <MoreHorizontal size={18} />
+            <MoreHorizontal size={20} />
           </button>
           {menuOpen && (
             <div className="phone-more-menu" role="menu">

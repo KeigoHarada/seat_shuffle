@@ -4,8 +4,8 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import Header from "../Header";
-import Footer from "../Footer";
+import DesktopHeader from "../../../views/desktop/DesktopHeader";
+import DesktopFooter from "../../../views/desktop/DesktopFooter";
 import { useStore } from "../../../stores";
 
 describe("Main screen (Header and Footer) without donation buttons", () => {
@@ -39,7 +39,7 @@ describe("Main screen (Header and Footer) without donation buttons", () => {
     await act(async () => {
       if (root) {
         root.render(
-          <Header showSettings={false} onToggleSettings={() => {}} />,
+          <DesktopHeader showSettings={false} onToggleSettings={() => {}} />,
         );
       }
     });
@@ -52,7 +52,7 @@ describe("Main screen (Header and Footer) without donation buttons", () => {
   it("ensures Footer does not render donation buttons on the main screen", async () => {
     await act(async () => {
       if (root) {
-        root.render(<Footer />);
+        root.render(<DesktopFooter />);
       }
     });
 

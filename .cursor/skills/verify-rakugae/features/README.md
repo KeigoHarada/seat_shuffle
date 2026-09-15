@@ -35,3 +35,4 @@ Each file: H1, one paragraph, then exactly `Sub-features`, `How to get to it (us
 - [Student settings](./student-settings.md) — settings drawer, student add/list/sort, other tabs.
 - [Shuffle](./shuffle.md) — footer shuffle, toast, undo, optimize vs random.
 - [View mode](./view-mode.md) — 編集/閲覧 toggle, settings hidden, shuffle animation path.
+- [Phone layout](./phone-layout.md) — C1 destinations, phone-only chrome, no desktop sidebar.

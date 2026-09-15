@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { PHONE_MAX_WIDTH_PX } from "../layout/shell";
 import { Seat, CanvasObject } from "../types";
 import { calculateCenterPanZoom } from "../utils/canvas";
 
-const MIN_SCALE = 0.5;
+const MIN_SCALE = 0.25;
 const MAX_SCALE = 2.0;
+const DESKTOP_FIT_PADDING = 60;
+const PHONE_FIT_PADDING = 24;
 
 export const usePanZoom = (
   seats: Seat[] = [],
@@ -138,13 +141,17 @@ export const usePanZoom = (
 
     const viewportWidth = el.clientWidth;
     const viewportHeight = el.clientHeight;
+    const padding =
+      viewportWidth <= PHONE_MAX_WIDTH_PX
+        ? PHONE_FIT_PADDING
+        : DESKTOP_FIT_PADDING;
 
     const result = calculateCenterPanZoom(
       seats,
       objects,
       viewportWidth,
       viewportHeight,
-      60,
+      padding,
       MIN_SCALE,
       MAX_SCALE,
     );

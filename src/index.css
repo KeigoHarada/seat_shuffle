@@ -374,7 +374,7 @@ input[type="number"] {
   }
 }
 
-/* Shell layout policy. Compact overrides live in one @media. */
+/* Shell layout policy. Phone chrome lives in src/views/phone/phone.css. */
 .app-shell {
   display: flex;
   flex-direction: column;
@@ -426,6 +426,150 @@ input[type="number"] {
   position: relative;
   min-width: 0;
   min-height: 0;
+}
+
+.app-canvas-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--c-text-sub);
+  pointer-events: none;
+}
+
+.app-canvas-toolbar {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+  padding: 4px;
+  gap: 4px;
+  z-index: 100;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.app-canvas-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--c-text-main);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.app-canvas-toolbar-btn:hover,
+.app-canvas-toolbar-btn.is-open {
+  background-color: var(--c-surface-hover);
+}
+
+.app-canvas-toolbar-btn-accent {
+  color: var(--c-primary);
+}
+
+.app-canvas-toolbar-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 0;
+  background-color: var(--c-border);
+  flex-shrink: 0;
+}
+
+.app-canvas-toolbar-menu-wrap {
+  position: relative;
+}
+
+.app-canvas-toolbar-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+  padding: 4px 0;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  z-index: 101;
+}
+
+.app-canvas-toolbar-menu-item {
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--c-text-main);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
+.app-canvas-toolbar-menu-item:hover {
+  background-color: var(--c-surface-hover);
+}
+
+.app-canvas-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+  padding: 6px 12px;
+  gap: 12px;
+  z-index: 100;
+  user-select: none;
+}
+
+.app-canvas-controls-scale {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--c-text-main);
+  min-width: 48px;
+  text-align: center;
+}
+
+.app-canvas-controls-divider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--c-border);
+}
+
+.app-canvas-controls-reset {
+  background: none;
+  border: none;
+  color: var(--c-text-sub);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.app-canvas-controls-reset:hover {
+  background-color: var(--c-surface-disabled);
+  color: var(--c-text-main);
 }
 
 .app-settings {
@@ -519,11 +663,6 @@ input[type="number"] {
   flex-shrink: 0;
 }
 
-.view-mode-toggle.compact {
-  width: 120px;
-  height: 36px;
-}
-
 .view-mode-toggle-knob {
   position: absolute;
   top: 4px;
@@ -545,11 +684,6 @@ input[type="number"] {
   font-weight: 700;
   z-index: 1;
   transition: color 0.3s ease;
-}
-
-.view-mode-toggle.compact .view-mode-toggle-label {
-  font-size: 11px;
-  gap: 2px;
 }
 
 .shuffle-controls {
@@ -582,181 +716,6 @@ input[type="number"] {
 .shuffle-run:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-}
-
-.shuffle-controls-phone {
-  width: 100%;
-  gap: 8px;
-}
-
-.shuffle-controls-phone .shuffle-run {
-  flex: 1;
-  padding: 12px 16px;
-  font-size: 16px;
-}
-
-.phone-header {
-  height: 52px;
-  padding: 0 12px;
-}
-
-.phone-more {
-  position: relative;
-}
-
-.phone-more-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  min-width: 200px;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-3);
-  padding: 6px;
-  z-index: 40;
-  display: flex;
-  flex-direction: column;
-}
-
-.phone-more-menu button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  border: none;
-  background: none;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--c-text-main);
-  text-align: left;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.phone-more-menu button:hover {
-  background: var(--c-surface-hover);
-}
-
-.phone-body {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.phone-roster,
-.phone-settings-screen {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--c-surface);
-  overflow: hidden;
-}
-
-.phone-roster-switch {
-  display: flex;
-  gap: 4px;
-  padding: 8px 12px 0;
-  flex-shrink: 0;
-}
-
-.phone-roster-switch-btn {
-  flex: 1;
-  border: 1px solid var(--c-border);
-  background: var(--c-surface);
-  color: var(--c-text-sub);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 8px 0;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.phone-roster-switch-btn.on {
-  background: var(--c-primary-pale);
-  border-color: var(--c-primary);
-  color: var(--c-primary-hover);
-}
-
-.phone-shuffle-bar {
-  flex-shrink: 0;
-  padding: 8px 12px;
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-border);
-}
-
-.phone-tabbar {
-  height: 64px;
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-border);
-  display: flex;
-  flex-shrink: 0;
-}
-
-.phone-tab {
-  flex: 1;
-  border: none;
-  background: none;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--c-text-sub);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-}
-
-.phone-tab[aria-current="page"] {
-  color: var(--c-primary-hover);
-}
-
-.phone-tab-icon {
-  display: flex;
-}
-
-.phone-overlay {
-  position: absolute;
-  inset: 0;
-  background: var(--c-surface);
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-}
-
-.phone-overlay-bar {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--c-border);
-  flex-shrink: 0;
-}
-
-.app-shell[data-kind="phone"] .app-canvas-toolbar {
-  flex-wrap: wrap;
-  max-width: calc(100% - 24px);
-  top: 12px;
-  left: 12px;
-}
-
-.app-shell[data-kind="phone"] .app-canvas-controls {
-  max-width: calc(100% - 24px);
-  bottom: 12px;
-  left: 12px;
-}
-
-.app-shell[data-kind="phone"] .app-settings-content {
-  overflow-y: auto;
-}
-
-.app-shell[data-kind="phone"] .app-settings-tab-body,
-.app-shell[data-kind="phone"] .app-settings-fill {
-  min-height: 0;
 }
 
 .app-settings-tabs {

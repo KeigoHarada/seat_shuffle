@@ -3,9 +3,9 @@ import { LayoutGrid, ShieldCheck, Users } from "lucide-react";
 import { PHONE_TABS, type PhoneDestination } from "../../layout/shell";
 
 const ICONS: Record<PhoneDestination, React.ReactNode> = {
-  seats: <LayoutGrid size={18} />,
-  roster: <Users size={18} />,
-  constraints: <ShieldCheck size={18} />,
+  seats: <LayoutGrid size={20} />,
+  roster: <Users size={20} />,
+  constraints: <ShieldCheck size={20} />,
 };
 
 interface PhoneTabBarProps {
@@ -15,7 +15,7 @@ interface PhoneTabBarProps {
 
 const PhoneTabBar: React.FC<PhoneTabBarProps> = ({ destination, onChange }) => {
   return (
-    <nav className="phone-tabbar" aria-label="電話の画面">
+    <nav className="phone-tabbar" aria-label="画面">
       {PHONE_TABS.map((tab) => (
         <button
           key={tab.id}
