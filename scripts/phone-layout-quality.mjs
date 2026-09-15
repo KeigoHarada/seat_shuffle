@@ -323,6 +323,13 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
     const canvasBefore = await box(page, ".app-canvas");
     await page.locator("#btn-header-settings").click();
     await page.waitForSelector('.app-settings[data-open="true"]');
+    const openSettings = await metrics(page, ".app-settings");
+    record(
+      failures,
+      `${label} settings overlay width`,
+      !!openSettings && openSettings.width >= 280,
+      `width=${openSettings?.width}`,
+    );
     await page.screenshot({
       path: path.join(screenshotDir, `${shotName}-settings.png`),
       fullPage: false,
