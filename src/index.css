@@ -465,7 +465,7 @@ input[type="number"] {
   box-shadow: var(--shadow-1);
   padding: 4px;
   gap: 4px;
-  z-index: 200;
+  z-index: 20;
   user-select: none;
   white-space: nowrap;
   touch-action: manipulation;
@@ -554,7 +554,7 @@ input[type="number"] {
   box-shadow: var(--shadow-1);
   padding: 6px 12px;
   gap: 12px;
-  z-index: 200;
+  z-index: 20;
   user-select: none;
   touch-action: manipulation;
   pointer-events: auto;
@@ -835,7 +835,7 @@ input[type="number"] {
     top: 12px;
     left: 12px;
     max-width: calc(100% - 24px);
-    overflow-x: auto;
+    overflow: visible;
   }
 
   .app-canvas-toolbar-btn {
