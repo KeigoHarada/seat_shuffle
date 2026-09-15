@@ -351,9 +351,10 @@ async function main() {
   const { chromium } = loadPlaywright();
   const port = await listenFreePort();
   const url = `http://127.0.0.1:${port}/`;
+  const viteBin = path.join(root, "node_modules/.bin/vite");
   const vite = spawn(
-    "npx",
-    ["vite", "--host", "127.0.0.1", "--port", String(port), "--strictPort"],
+    viteBin,
+    ["--host", "127.0.0.1", "--port", String(port), "--strictPort"],
     {
       cwd: root,
       stdio: ["ignore", "pipe", "pipe"],
@@ -384,7 +385,20 @@ async function main() {
     if (viteLog) failures.push(`vite log: ${viteLog.slice(-800)}`);
   } finally {
     if (browser) await browser.close();
-    vite.kill("SIGTERM");
+    if (vite.pid) {
+      try {
+        process.kill(vite.pid, "SIGTERM");
+      } catch {
+        // already gone
+      }
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      try {
+        process.kill(vite.pid, 0);
+        process.kill(vite.pid, "SIGKILL");
+      } catch {
+        // already gone
+      }
+    }
   }
 
   if (failures.length > 0) {
@@ -394,6 +408,7 @@ async function main() {
   console.log(
     `Phone layout quality passed. Screenshots: ${screenshotDir}`,
   );
+  process.exit(0);
 }
 
 main();
