@@ -4,27 +4,11 @@ import ConstraintListTable from "./ConstraintListTable";
 
 const ConstraintTab: React.FC = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--spacing-md)",
-        flex: 1,
-        minHeight: 0,
-      }}
-    >
+    <div className="app-settings-fill" style={{ gap: "var(--spacing-md)" }}>
       <div style={{ flexShrink: 0 }}>
         <ConstraintAddForm />
       </div>
-      <div
-        id="constraint-list-area"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
+      <div id="constraint-list-area" className="app-settings-fill">
         <ConstraintListTable />
       </div>
     </div>

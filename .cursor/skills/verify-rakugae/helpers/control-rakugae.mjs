@@ -175,12 +175,13 @@ function chromeLaunchArgs() {
   ];
 }
 
-function chromeSpawnArgs(profileDir, cdpPort) {
+function chromeSpawnArgs(profileDir, cdpPort, viewport = { width: 1440, height: 900 }) {
   return [
     `--user-data-dir=${profileDir}`,
     `--remote-debugging-port=${cdpPort}`,
     "--remote-debugging-address=127.0.0.1",
     "--headless=new",
+    `--window-size=${viewport.width},${viewport.height}`,
     ...chromeLaunchArgs(),
     "about:blank",
   ];
@@ -199,13 +200,25 @@ function assertRunProcesses(meta) {
   }
 }
 
-async function openAppPage(meta) {
+function viewportFromArgs(args = {}) {
+  const raw = args.viewport || process.env.RAKUGAE_VERIFY_VIEWPORT || "1440x900";
+  const match = /^(\d+)x(\d+)$/.exec(String(raw));
+  if (!match) {
+    throw new Error(
+      `Invalid --viewport ${raw}. Use WIDTHxHEIGHT such as 390x844.`,
+    );
+  }
+  return { width: Number(match[1]), height: Number(match[2]) };
+}
+
+async function openAppPage(meta, viewport = { width: 1440, height: 900 }) {
   assertRunProcesses(meta);
   const { chromium } = await loadPlaywright();
   const browser = await chromium.connectOverCDP(`http://127.0.0.1:${meta.cdpPort}`);
   const context = browser.contexts()[0] || (await browser.newContext());
   const page = context.pages()[0] || (await context.newPage());
   page.setDefaultTimeout(15000);
+  await page.setViewportSize(viewport);
   const wanted = meta.url.replace(/\/$/, "");
   const alreadyOnApp = page.url().replace(/\/$/, "") === wanted;
   if (!alreadyOnApp) {
@@ -319,7 +332,12 @@ async function cmdLaunch(args) {
   }
 
   const cdpPort = await freePort();
-  const chrome = spawnLogged(CHROME_BIN, chromeSpawnArgs(paths.profileDir, cdpPort), paths.chromeLogPath);
+  const viewport = viewportFromArgs(args);
+  const chrome = spawnLogged(
+    CHROME_BIN,
+    chromeSpawnArgs(paths.profileDir, cdpPort, viewport),
+    paths.chromeLogPath,
+  );
 
   try {
     await waitForCdp(cdpPort, 20000);
@@ -350,7 +368,7 @@ async function cmdLaunch(args) {
   mkdirSync(VERIFY_ROOT, { recursive: true });
   writeFileSync(currentPointerPath(), `${runId}\n`);
 
-  const { browser } = await openAppPage(meta);
+  const { browser } = await openAppPage(meta, viewport);
   await browser.close();
 
   process.stdout.write(
@@ -395,7 +413,7 @@ async function cmdDoctor(args) {
   let identity = { ok: false };
   if (viteUp && chromeUp && http.ok) {
     try {
-      const { browser, page } = await openAppPage(meta);
+      const { browser, page } = await openAppPage(meta, viewportFromArgs(args));
       const logoCount = await page.locator('svg[aria-label*="ラクガエ"]').count();
       const title = await page.title();
       identity = { ok: logoCount > 0 && title.includes("ラクガエ"), title, logoCount };
@@ -428,7 +446,7 @@ async function withPage(args, fn) {
   const runId = runIdFromArgs(args);
   if (!runId) throw new Error("No run id. Pass --run-id or RAKUGAE_VERIFY_RUN_ID.");
   const meta = readMeta(runId);
-  const { browser, page } = await openAppPage(meta);
+  const { browser, page } = await openAppPage(meta, viewportFromArgs(args));
   try {
     return await fn(page, meta);
   } finally {

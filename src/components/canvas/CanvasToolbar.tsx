@@ -56,6 +56,7 @@ const CanvasToolbar: React.FC<Props> = ({
 
   return (
     <div
+      className="app-canvas-toolbar"
       style={{
         position: "absolute",
         top: 24,

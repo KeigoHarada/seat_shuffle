@@ -19,30 +19,10 @@ const Header: React.FC<HeaderProps> = ({ showSettings, onToggleSettings }) => {
   const { handleSave, handleLoad } = useCsvSettings();
 
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 var(--spacing-lg)",
-        height: "60px",
-        backgroundColor: "var(--c-surface)",
-        borderBottom: "1px solid var(--c-border)",
-        boxShadow: "var(--shadow-1)",
-        zIndex: 10,
-        flexShrink: 0,
-        position: "relative",
-      }}
-    >
+    <header className="app-header">
       <Logo size="md" />
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--spacing-md)",
-        }}
-      >
+      <div className="app-header-actions">
         <button
           id="header-guide-btn"
           className="btn-secondary"
