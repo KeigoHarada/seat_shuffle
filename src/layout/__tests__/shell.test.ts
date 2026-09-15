@@ -2,16 +2,18 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect } from "vitest";
-import { PHONE_MAX_WIDTH_PX, shellKindFromWidth } from "../shell";
+import { COMPACT_MAX_WIDTH_PX, isCompactWidth } from "../shell";
 
-describe("shellKindFromWidth", () => {
-  it("treats iPhone widths as phone", () => {
-    expect(shellKindFromWidth(375)).toBe("phone");
-    expect(shellKindFromWidth(PHONE_MAX_WIDTH_PX)).toBe("phone");
+describe("isCompactWidth", () => {
+  it("treats phones and portrait tablets as compact", () => {
+    expect(isCompactWidth(375)).toBe(true);
+    expect(isCompactWidth(768)).toBe(true);
+    expect(isCompactWidth(820)).toBe(true);
+    expect(isCompactWidth(COMPACT_MAX_WIDTH_PX)).toBe(true);
   });
 
-  it("treats iPad portrait and laptops as desktop", () => {
-    expect(shellKindFromWidth(768)).toBe("desktop");
-    expect(shellKindFromWidth(1280)).toBe("desktop");
+  it("treats 1024px and laptops as the full sidebar layout", () => {
+    expect(isCompactWidth(1024)).toBe(false);
+    expect(isCompactWidth(1280)).toBe(false);
   });
 });

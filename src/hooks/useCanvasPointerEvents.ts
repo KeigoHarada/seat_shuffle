@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { screenToWorld } from "../utils/canvas";
+import { isTouchPointerType } from "../utils/panZoomGesture";
 
 interface UseCanvasPointerEventsProps {
   canvasTool: "select" | "hand";
@@ -58,6 +59,13 @@ export const useCanvasPointerEvents = ({
     (e: React.PointerEvent<HTMLDivElement>) => {
       pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
       setContextMenu(null);
+
+      const isTouch = isTouchPointerType(e.pointerType);
+      if (isTouch) {
+        handlePointerDown(e, true);
+        return;
+      }
+
       if (e.target !== e.currentTarget) return;
 
       if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
@@ -154,7 +162,15 @@ export const useCanvasPointerEvents = ({
         }
       }
     },
-    [handlePointerUp, endSelectionBox, pan, scale, viewportRef, setContextMenu],
+    [
+      handlePointerUp,
+      endSelectionBox,
+      pan,
+      scale,
+      viewportRef,
+      setContextMenu,
+      isViewMode,
+    ],
   );
 
   const updatePointerDownPos = useCallback((x: number, y: number) => {

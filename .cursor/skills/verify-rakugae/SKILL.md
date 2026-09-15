@@ -96,9 +96,8 @@ Stable handles (from `src/`):
 | `#tab-btn-global` `設定` | tab | settings global (same visible label as header settings) |
 | `#student-add-form` | region | `名前 (必須)` placeholder, button `追加` |
 | `#btn-sort-students` | button | furigana/name sort |
-| `シャッフル実行` | button | `#btn-footer-shuffle` (desktop) / `#btn-phone-shuffle` (phone seats) |
-| `編集` / `閲覧` | toggle | `#btn-footer-viewmode` (desktop) / `#btn-phone-viewmode` (phone seats) |
-| `座席` / `名簿` / `条件` | tabs | `#tab-phone-seats` `#tab-phone-roster` `#tab-phone-constraints` (width ≤ 767) |
+| `シャッフル実行` | button | `#btn-footer-shuffle` |
+| `編集` / `閲覧` | toggle | `#btn-footer-viewmode` |
 | `スキップ` | button | welcome modal |
 
 Examples:
@@ -171,7 +170,7 @@ Commands: `launch`, `doctor`, `dismiss-welcome`, `click`, `fill`, `count`, `wait
 
 Optional flags: `--run-id`, `--port`, `--viewport WIDTHxHEIGHT` (default `1440x900`; phone proof uses `390x844`). Env: `RAKUGAE_VERIFY_RUN_ID`, `RAKUGAE_VERIFY_PORT`, `RAKUGAE_VERIFY_VIEWPORT`, `RAKUGAE_VERIFY_ROOT` (default `/tmp/rakugae-verify`), `RAKUGAE_CHROME` (default `/usr/bin/google-chrome-stable`).
 
-Phone chrome is a separate view tree. Geometry (overflow, toolbar wrap, tab size) is `npm run test:phone-layout`.
+Compact chrome (width ≤ 1023) is the same shell with an overlay settings panel. Geometry (overflow, toolbar wrap, overlay, touch pan) is `npm run test:phone-layout`.
 
 If `playwright-core` is missing, the helper tells you to run the `npm install --prefix` line above. Chrome is launched from `/usr/bin/google-chrome-stable`. Do not use `/usr/local/bin/google-chrome` here: that wrapper forces port 9222 and `~/.config/google-chrome`, which is the shared desktop session. This skill does not download Playwright browsers.
 

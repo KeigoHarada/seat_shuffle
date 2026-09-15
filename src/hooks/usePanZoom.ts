@@ -1,12 +1,27 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { PHONE_MAX_WIDTH_PX } from "../layout/shell";
+import { COMPACT_MAX_WIDTH_PX } from "../layout/shell";
 import { Seat, CanvasObject } from "../types";
 import { calculateCenterPanZoom } from "../utils/canvas";
+import {
+  isTouchPointerType,
+  MIN_SCALE,
+  MAX_SCALE,
+  panByDelta,
+  pointerDistance,
+  pointerMidpoint,
+  zoomAroundPoint,
+  type Point,
+} from "../utils/panZoomGesture";
 
-const MIN_SCALE = 0.25;
-const MAX_SCALE = 2.0;
 const DESKTOP_FIT_PADDING = 60;
-const PHONE_FIT_PADDING = 24;
+const COMPACT_FIT_PADDING = 24;
+
+type PinchSession = {
+  startDistance: number;
+  startScale: number;
+  startPan: Point;
+  startMid: Point;
+};
 
 export const usePanZoom = (
   seats: Seat[] = [],
@@ -21,6 +36,12 @@ export const usePanZoom = (
   const [isZoomMode, setIsZoomMode] = useState(false);
   const [isSpaceMode, setIsSpaceMode] = useState(false);
   const hasAutoCenteredRef = useRef(false);
+  const transformRef = useRef(transform);
+  const pointersRef = useRef<Map<number, Point>>(new Map());
+  const panSessionRef = useRef<Point | null>(null);
+  const pinchRef = useRef<PinchSession | null>(null);
+
+  transformRef.current = transform;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -65,28 +86,16 @@ export const usePanZoom = (
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        setTransform((prev) => {
-          const newScale = Math.min(
-            Math.max(MIN_SCALE, prev.scale * Math.exp(delta)),
-            MAX_SCALE,
-          );
-          const f = newScale / prev.scale;
-
-          return {
-            scale: newScale,
-            pan: {
-              x: mouseX - (mouseX - prev.pan.x) * f,
-              y: mouseY - (mouseY - prev.pan.y) * f,
-            },
-          };
-        });
+        setTransform((prev) =>
+          zoomAroundPoint(prev.pan, prev.scale, prev.scale * Math.exp(delta), {
+            x: mouseX,
+            y: mouseY,
+          }),
+        );
       } else {
         setTransform((prev) => ({
           ...prev,
-          pan: {
-            x: prev.pan.x - e.deltaX,
-            y: prev.pan.y - e.deltaY,
-          },
+          pan: panByDelta(prev.pan, -e.deltaX, -e.deltaY),
         }));
       }
     };
@@ -95,42 +104,108 @@ export const usePanZoom = (
     return () => el.removeEventListener("wheel", handleWheel);
   }, []);
 
+  const beginPinch = useCallback(() => {
+    const el = viewportRef.current;
+    const points = [...pointersRef.current.values()];
+    if (points.length < 2 || !el) return;
+    const rect = el.getBoundingClientRect();
+    const mid = pointerMidpoint(points[0], points[1]);
+    const current = transformRef.current;
+    pinchRef.current = {
+      startDistance: pointerDistance(points[0], points[1]),
+      startScale: current.scale,
+      startPan: { ...current.pan },
+      startMid: { x: mid.x - rect.left, y: mid.y - rect.top },
+    };
+    panSessionRef.current = null;
+    setIsPanning(false);
+  }, []);
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent, forcePan: boolean) => {
-      if (e.button === 2 || (e.button === 0 && forcePan)) {
-        setIsPanning(true);
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pointersRef.current.size >= 2) {
+        beginPinch();
         e.currentTarget.setPointerCapture(e.pointerId);
-        return true; // Indicates pan started
+        return true;
+      }
+
+      const isTouch = isTouchPointerType(e.pointerType);
+      if (e.button === 2 || (e.button === 0 && (forcePan || isTouch))) {
+        setIsPanning(true);
+        panSessionRef.current = { x: e.clientX, y: e.clientY };
+        e.currentTarget.setPointerCapture(e.pointerId);
+        return true;
       }
       return false;
     },
-    [],
+    [beginPinch],
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
-      if (isPanning) {
-        setTransform((prev) => ({
-          ...prev,
-          pan: {
-            x: prev.pan.x + e.movementX,
-            y: prev.pan.y + e.movementY,
-          },
-        }));
+      if (pointersRef.current.has(e.pointerId)) {
+        pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
       }
+
+      const points = [...pointersRef.current.values()];
+      if (points.length >= 2) {
+        if (!pinchRef.current) beginPinch();
+        const pinch = pinchRef.current;
+        const el = viewportRef.current;
+        if (!pinch || !el || pinch.startDistance < 1) return;
+
+        const rect = el.getBoundingClientRect();
+        const mid = pointerMidpoint(points[0], points[1]);
+        const origin = { x: mid.x - rect.left, y: mid.y - rect.top };
+        const factor =
+          pointerDistance(points[0], points[1]) / pinch.startDistance;
+        const next = zoomAroundPoint(
+          pinch.startPan,
+          pinch.startScale,
+          pinch.startScale * factor,
+          pinch.startMid,
+        );
+        next.pan = panByDelta(
+          next.pan,
+          origin.x - pinch.startMid.x,
+          origin.y - pinch.startMid.y,
+        );
+        setTransform(next);
+        return;
+      }
+
+      const session = panSessionRef.current;
+      if (!session) return;
+      const dx = e.clientX - session.x;
+      const dy = e.clientY - session.y;
+      panSessionRef.current = { x: e.clientX, y: e.clientY };
+      setTransform((prev) => ({
+        ...prev,
+        pan: panByDelta(prev.pan, dx, dy),
+      }));
     },
-    [isPanning],
+    [beginPinch],
   );
 
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      if (isPanning) {
-        setIsPanning(false);
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      }
-    },
-    [isPanning],
-  );
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    pointersRef.current.delete(e.pointerId);
+    pinchRef.current = null;
+
+    if (pointersRef.current.size === 1) {
+      const remaining = [...pointersRef.current.values()][0];
+      panSessionRef.current = { x: remaining.x, y: remaining.y };
+      setIsPanning(true);
+    } else {
+      panSessionRef.current = null;
+      setIsPanning(false);
+    }
+
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+  }, []);
 
   const resetView = useCallback(() => {
     const el = viewportRef.current;
@@ -142,8 +217,8 @@ export const usePanZoom = (
     const viewportWidth = el.clientWidth;
     const viewportHeight = el.clientHeight;
     const padding =
-      viewportWidth <= PHONE_MAX_WIDTH_PX
-        ? PHONE_FIT_PADDING
+      viewportWidth <= COMPACT_MAX_WIDTH_PX
+        ? COMPACT_FIT_PADDING
         : DESKTOP_FIT_PADDING;
 
     const result = calculateCenterPanZoom(

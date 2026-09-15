@@ -374,7 +374,21 @@ input[type="number"] {
   }
 }
 
-/* Shell layout policy. Phone chrome lives in src/views/phone/phone.css. */
+.app-header-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--c-border);
+  margin: 0 var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.app-settings-scrim {
+  display: none;
+}
+
+/* Shell layout policy: one chrome tree. Compact viewports keep the same
+   header / canvas / settings / footer geometry and overlay settings instead
+   of stacking the main row. */
 .app-shell {
   display: flex;
   flex-direction: column;
@@ -740,6 +754,129 @@ input[type="number"] {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --app-header-height: 48px;
+    --app-footer-height: 64px;
+  }
+
+  .app-header {
+    padding: 0 var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+
+  .app-header-actions {
+    gap: 4px;
+  }
+
+  .app-header-actions .btn-primary,
+  .app-header-actions .btn-secondary {
+    padding: 8px;
+  }
+
+  .app-chrome-label {
+    display: none;
+  }
+
+  .app-header-divider {
+    display: none;
+  }
+
+  .app-main {
+    position: relative;
+    flex-direction: row;
+  }
+
+  .app-settings-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: rgba(15, 23, 42, 0.28);
+    z-index: 15;
+    cursor: pointer;
+  }
+
+  .app-settings {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    background-color: var(--c-surface);
+    box-shadow: var(--shadow-3);
+    transition: width var(--transition-normal);
+  }
+
+  .app-settings[data-open="true"] {
+    width: min(360px, 100%);
+  }
+
+  .app-canvas-toolbar {
+    top: 12px;
+    left: 12px;
+    max-width: calc(100% - 24px);
+    overflow-x: auto;
+  }
+
+  .app-canvas-toolbar-label {
+    display: none;
+  }
+
+  .app-canvas-toolbar-btn {
+    padding: 8px;
+  }
+
+  .app-canvas-controls {
+    bottom: 12px;
+    left: 12px;
+  }
+
+  .app-footer {
+    padding: 0 var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+
+  .app-footer-cluster-start {
+    display: none;
+  }
+
+  .app-footer-cluster-center,
+  .app-footer-cluster-end {
+    flex: 0 0 auto;
+  }
+
+  .app-footer {
+    justify-content: space-between;
+  }
+
+  .shuffle-controls {
+    gap: 8px;
+  }
+
+  .shuffle-undo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .shuffle-run {
+    padding: 8px 14px;
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  .view-mode-toggle {
+    width: 88px;
+    height: 36px;
+  }
+
+  .view-mode-toggle-label {
+    gap: 0;
+  }
 }
 
 .app-settings-list {

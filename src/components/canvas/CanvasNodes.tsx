@@ -6,6 +6,7 @@ import {
   getSeatDragDisplayProps,
   getObjectDragDisplayProps,
 } from "../../utils/canvas";
+import { isTouchPointerType } from "../../utils/panZoomGesture";
 
 interface Props {
   seats: Seat[];
@@ -52,6 +53,7 @@ const CanvasNodes: React.FC<Props> = ({
             isSelected={selectedIds.includes(obj.id)}
             scale={scale}
             onPointerDown={(e) => {
+              if (isTouchPointerType(e.pointerType)) return;
               handleNodePointerDown(obj.id, e);
               handleNodeDragPointerDown(obj.id, e);
             }}
@@ -74,6 +76,7 @@ const CanvasNodes: React.FC<Props> = ({
             isSwapTarget={isSwapTarget}
             isSelected={selectedIds.includes(seat.id)}
             onPointerDown={(e) => {
+              if (isTouchPointerType(e.pointerType)) return;
               handleNodePointerDown(seat.id, e);
               handleNodeDragPointerDown(seat.id, e);
             }}

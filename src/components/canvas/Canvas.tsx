@@ -108,6 +108,8 @@ const Canvas: React.FC = () => {
     position: "relative",
     overflow: "hidden",
     touchAction: "none",
+    userSelect: "none",
+    WebkitUserSelect: "none",
     cursor: isPanning
       ? "grabbing"
       : isZoomMode

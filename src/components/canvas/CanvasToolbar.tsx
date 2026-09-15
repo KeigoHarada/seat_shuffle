@@ -48,7 +48,8 @@ const CanvasToolbar: React.FC<Props> = ({
         aria-label="座席を追加"
         title="座席を追加"
       >
-        <Plus size={16} /> 座席を追加
+        <Plus size={16} />
+        <span className="app-canvas-toolbar-label">座席を追加</span>
       </button>
 
       <div className="app-canvas-toolbar-divider" />
@@ -66,7 +67,8 @@ const CanvasToolbar: React.FC<Props> = ({
           title="図形"
           onClick={() => setOpenMenu(openMenu === "shapes" ? null : "shapes")}
         >
-          <Shapes size={16} /> 図形
+          <Shapes size={16} />
+          <span className="app-canvas-toolbar-label">図形</span>
         </button>
 
         {openMenu === "shapes" && (
@@ -112,7 +114,8 @@ const CanvasToolbar: React.FC<Props> = ({
             setOpenMenu(openMenu === "templates" ? null : "templates")
           }
         >
-          <LayoutTemplate size={16} /> テンプレート
+          <LayoutTemplate size={16} />
+          <span className="app-canvas-toolbar-label">テンプレート</span>
         </button>
 
         {openMenu === "templates" && (
@@ -144,7 +147,8 @@ const CanvasToolbar: React.FC<Props> = ({
         aria-label="自動割り当て"
         title="生徒を空席に自動割り当て"
       >
-        <Wand2 size={16} /> 自動割り当て
+        <Wand2 size={16} />
+        <span className="app-canvas-toolbar-label">自動割り当て</span>
       </button>
     </div>
   );

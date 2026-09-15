@@ -1,20 +1,28 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Canvas from "../../components/canvas/Canvas";
 import SettingsPanel from "../../components/SettingsPanel";
+import { useCompactLayout } from "../../hooks/useCompactLayout";
 import { useStore } from "../../stores";
 import DesktopHeader from "./DesktopHeader";
 import DesktopFooter from "./DesktopFooter";
 
 const DesktopApp: React.FC = () => {
+  const isCompact = useCompactLayout();
   const isSettingsOpen = useStore((state) => state.isSettingsOpen);
   const setIsSettingsOpen = useStore((state) => state.setIsSettingsOpen);
   const seats = useStore((state) => state.seats);
   const isViewMode = useStore((state) => state.isViewMode);
 
+  useEffect(() => {
+    if (isCompact) {
+      setIsSettingsOpen(false);
+    }
+  }, [isCompact, setIsSettingsOpen]);
+
   const effectiveSettingsOpen = isSettingsOpen && !isViewMode;
 
   return (
-    <div className="app-shell" data-kind="desktop">
+    <div className="app-shell" data-compact={isCompact ? "true" : "false"}>
       <DesktopHeader
         showSettings={effectiveSettingsOpen}
         onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
@@ -32,6 +40,15 @@ const DesktopApp: React.FC = () => {
             </div>
           )}
         </main>
+
+        {isCompact && effectiveSettingsOpen && (
+          <button
+            type="button"
+            className="app-settings-scrim"
+            aria-label="設定を閉じる"
+            onClick={() => setIsSettingsOpen(false)}
+          />
+        )}
 
         <aside
           className="app-settings"

@@ -12,6 +12,7 @@ const DesktopViewModeToggle: React.FC = () => {
       className="view-mode-toggle"
       onClick={() => setIsViewMode(!isViewMode)}
       type="button"
+      aria-label="編集と閲覧の切り替え"
     >
       <div
         className="view-mode-toggle-knob"
@@ -23,7 +24,8 @@ const DesktopViewModeToggle: React.FC = () => {
           color: !isViewMode ? "var(--c-text-main)" : "var(--c-text-sub)",
         }}
       >
-        <PenLine size={16} /> 編集
+        <PenLine size={16} />
+        <span className="app-chrome-label">編集</span>
       </div>
       <div
         className="view-mode-toggle-label"
@@ -31,7 +33,8 @@ const DesktopViewModeToggle: React.FC = () => {
           color: isViewMode ? "var(--c-text-main)" : "var(--c-text-sub)",
         }}
       >
-        <Eye size={16} /> 閲覧
+        <Eye size={16} />
+        <span className="app-chrome-label">閲覧</span>
       </div>
     </button>
   );

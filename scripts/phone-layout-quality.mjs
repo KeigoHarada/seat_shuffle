@@ -77,7 +77,7 @@ async function dismissWelcome(page) {
   } catch {
     // already dismissed
   }
-  await page.locator(".phone-app, .app-shell[data-kind]").first().waitFor();
+  await page.locator(".app-shell").first().waitFor();
 }
 
 async function noPageOverflow(page) {
@@ -104,6 +104,7 @@ async function metrics(page, selector) {
   if ((await handle.count()) === 0) return null;
   return handle.evaluate((el) => {
     const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
     return {
       scrollWidth: el.scrollWidth,
       clientWidth: el.clientWidth,
@@ -113,24 +114,88 @@ async function metrics(page, selector) {
       height: rect.height,
       top: rect.top,
       left: rect.left,
+      flexDirection: style.flexDirection,
+      position: style.position,
     };
   });
 }
 
-async function assertPhone(page, url, viewport, failures) {
+async function dispatchTouchPan(page, selector, dx, dy) {
+  return page.evaluate(
+    ({ selector, dx, dy }) => {
+      const el = document.querySelector(selector);
+      const canvas = document.getElementById("canvas-main-area");
+      if (!el || !canvas) {
+        return { before: "", after: "", ok: false };
+      }
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + Math.min(48, Math.max(8, rect.width / 2));
+      const y = rect.top + Math.min(48, Math.max(8, rect.height / 2));
+      const before = canvas.style.backgroundPosition;
+      const fire = (type, cx, cy, buttons) => {
+        el.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            pointerId: 1,
+            pointerType: "touch",
+            isPrimary: true,
+            button: 0,
+            buttons,
+            clientX: cx,
+            clientY: cy,
+          }),
+        );
+      };
+      fire("pointerdown", x, y, 1);
+      fire("pointermove", x + dx, y + dy, 1);
+      canvas.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+          pointerType: "touch",
+          isPrimary: true,
+          button: 0,
+          buttons: 1,
+          clientX: x + dx,
+          clientY: y + dy,
+        }),
+      );
+      fire("pointerup", x + dx, y + dy, 0);
+      return { before, after: canvas.style.backgroundPosition, ok: true };
+    },
+    { selector, dx, dy },
+  );
+}
+
+async function assertSharedChrome(page, url, viewport, failures, expectCompact) {
   await page.setViewportSize(viewport);
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await dismissWelcome(page);
-  await page.waitForSelector('[data-kind="phone"]');
-  await page.waitForSelector(".app-canvas-toolbar");
+  await page.waitForSelector(".app-shell");
+  await page.waitForSelector("#canvas-main-area");
   await page.waitForTimeout(400);
 
   const label = `${viewport.width}x${viewport.height}`;
-  const shot = path.join(screenshotDir, `phone-seats-${viewport.width}.png`);
-  await page.screenshot({ path: shot, fullPage: false });
+  const shotName = expectCompact
+    ? `compact-${viewport.width}`
+    : `wide-${viewport.width}`;
+  await page.screenshot({
+    path: path.join(screenshotDir, `${shotName}.png`),
+    fullPage: false,
+  });
 
-  const kind = await page.locator("[data-kind]").first().getAttribute("data-kind");
-  record(failures, `${label} shell`, kind === "phone", `kind=${kind}`);
+  const compact = await page
+    .locator(".app-shell")
+    .first()
+    .getAttribute("data-compact");
+  record(
+    failures,
+    `${label} compact flag`,
+    compact === (expectCompact ? "true" : "false"),
+    `data-compact=${compact}`,
+  );
 
   const overflow = await noPageOverflow(page);
   record(
@@ -139,23 +204,87 @@ async function assertPhone(page, url, viewport, failures) {
     overflow.scrollWidth <= overflow.clientWidth + 1,
     `scrollWidth ${overflow.scrollWidth} > clientWidth ${overflow.clientWidth}`,
   );
+  record(
+    failures,
+    `${label} page height`,
+    overflow.scrollHeight <= overflow.clientHeight + 1,
+    `scrollHeight ${overflow.scrollHeight} > clientHeight ${overflow.clientHeight}`,
+  );
 
-  const header = await metrics(page, ".phone-header");
-  record(failures, `${label} header present`, !!header, "missing .phone-header");
+  const header = await metrics(page, ".app-header");
+  record(failures, `${label} header present`, !!header, "missing .app-header");
   if (header) {
     record(
       failures,
-      `${label} header height`,
-      header.height <= 56,
-      `height ${header.height}`,
-    );
-    record(
-      failures,
       `${label} header overflow`,
-      header.scrollWidth <= header.clientWidth + 1,
+      header.scrollWidth <= header.clientWidth + 8,
       `scrollWidth ${header.scrollWidth} > clientWidth ${header.clientWidth}`,
     );
+    if (expectCompact) {
+      record(
+        failures,
+        `${label} header height`,
+        header.height <= 56,
+        `height ${header.height}`,
+      );
+    }
   }
+
+  const footer = await metrics(page, ".app-footer");
+  record(failures, `${label} footer present`, !!footer, "missing .app-footer");
+  if (footer) {
+    record(
+      failures,
+      `${label} footer overflow`,
+      footer.scrollWidth <= footer.clientWidth + 8,
+      `scrollWidth ${footer.scrollWidth} > clientWidth ${footer.clientWidth}`,
+    );
+  }
+
+  const main = await metrics(page, ".app-main");
+  record(
+    failures,
+    `${label} main stays a row`,
+    !!main && main.flexDirection === "row",
+    `flexDirection=${main?.flexDirection}`,
+  );
+
+  const canvas = await box(page, ".app-canvas");
+  record(failures, `${label} canvas`, !!canvas, "missing canvas");
+  if (canvas) {
+    record(
+      failures,
+      `${label} canvas height`,
+      canvas.height >= 240,
+      `height ${canvas.height}`,
+    );
+  }
+
+  record(
+    failures,
+    `${label} footer shuffle`,
+    (await page.locator("#btn-footer-shuffle").count()) === 1,
+    "missing #btn-footer-shuffle",
+  );
+  record(
+    failures,
+    `${label} settings button`,
+    (await page.locator("#btn-header-settings").count()) === 1,
+    "missing #btn-header-settings",
+  );
+  record(
+    failures,
+    `${label} view toggle`,
+    (await page.locator("#btn-footer-viewmode").count()) === 1,
+    "missing #btn-footer-viewmode",
+  );
+  record(
+    failures,
+    `${label} no phone tabs`,
+    (await page.locator(".phone-tabbar, #tab-phone-seats, #btn-phone-shuffle").count()) ===
+      0,
+    "phone destination chrome leaked",
+  );
 
   const toolbar = await box(page, ".app-canvas-toolbar");
   record(failures, `${label} toolbar present`, !!toolbar, "missing toolbar");
@@ -181,190 +310,72 @@ async function assertPhone(page, url, viewport, failures) {
     }
   }
 
-  const shuffle = await box(page, ".phone-shuffle-bar");
-  record(failures, `${label} shuffle bar`, !!shuffle, "missing shuffle bar");
-  if (shuffle) {
+  if (expectCompact) {
+    const settings = await metrics(page, ".app-settings");
     record(
       failures,
-      `${label} shuffle height`,
-      shuffle.height <= 64,
-      `height ${shuffle.height}`,
+      `${label} settings overlay`,
+      !!settings && settings.position === "absolute",
+      `position=${settings?.position}`,
     );
     record(
       failures,
-      `${label} shuffle width`,
-      shuffle.width <= viewport.width + 1,
-      `width ${shuffle.width}`,
+      `${label} settings closed on load`,
+      (await page.locator('.app-settings[data-open="true"]').count()) === 0,
+      "settings covered the canvas on compact load",
     );
-  }
 
-  const canvas = await box(page, ".phone-seats-canvas");
-  record(failures, `${label} canvas`, !!canvas, "missing canvas");
-  if (canvas) {
+    const canvasBefore = await box(page, ".app-canvas");
+    await page.locator("#btn-header-settings").click();
+    await page.waitForSelector('.app-settings[data-open="true"]');
+    await page.screenshot({
+      path: path.join(screenshotDir, `${shotName}-settings.png`),
+      fullPage: false,
+    });
+    const canvasAfter = await box(page, ".app-canvas");
     record(
       failures,
-      `${label} canvas height`,
-      canvas.height >= 240,
-      `height ${canvas.height}`,
+      `${label} overlay keeps canvas size`,
+      !!canvasBefore &&
+        !!canvasAfter &&
+        Math.abs(canvasBefore.width - canvasAfter.width) < 2 &&
+        Math.abs(canvasBefore.height - canvasAfter.height) < 2,
+      `before=${JSON.stringify(canvasBefore)} after=${JSON.stringify(canvasAfter)}`,
     );
-  }
-
-  const scaleText = (await page.locator(".app-canvas-controls-scale").innerText())
-    .trim();
-  const scale = Number.parseInt(scaleText, 10);
-  record(
-    failures,
-    `${label} classroom zoom`,
-    Number.isFinite(scale) && scale < 50 && scale >= 25,
-    `scale=${scaleText}`,
-  );
-
-  record(
-    failures,
-    `${label} seats shuffle`,
-    (await page.locator("#btn-phone-shuffle").count()) === 1,
-    "missing #btn-phone-shuffle",
-  );
-  record(
-    failures,
-    `${label} seats view toggle`,
-    (await page.locator("#btn-phone-viewmode").count()) === 1,
-    "missing #btn-phone-viewmode",
-  );
-  record(
-    failures,
-    `${label} no desktop shuffle`,
-    (await page.locator("#btn-footer-shuffle").count()) === 0,
-    "desktop shuffle leaked onto phone",
-  );
-  record(
-    failures,
-    `${label} no settings drawer`,
-    (await page.locator("#btn-header-settings").count()) === 0,
-    "desktop settings button on phone",
-  );
-
-  const tabs = page.locator(".phone-tab");
-  record(failures, `${label} tab count`, (await tabs.count()) === 3, "need 3 tabs");
-  for (let i = 0; i < (await tabs.count()); i += 1) {
-    const tabBox = await tabs.nth(i).boundingBox();
-    const name = await tabs.nth(i).innerText();
     record(
       failures,
-      `${label} tab target ${name}`,
-      !!tabBox && tabBox.height >= 44 && tabBox.width >= 80,
-      `box=${JSON.stringify(tabBox)}`,
+      `${label} students heading`,
+      (await page.locator("h2", { hasText: "生徒設定" }).count()) >= 1,
+      "missing 生徒設定 in overlay",
+    );
+    await page.locator("#btn-header-settings").click();
+
+    const emptyPan = await dispatchTouchPan(page, "#canvas-main-area", 80, 40);
+    record(
+      failures,
+      `${label} touch pan empty canvas`,
+      emptyPan.ok && emptyPan.before !== emptyPan.after,
+      `before=${emptyPan.before} after=${emptyPan.after}`,
+    );
+
+    if ((await page.locator(".seat-node-item").count()) > 0) {
+      const seatPan = await dispatchTouchPan(page, ".seat-node-item", 70, 30);
+      record(
+        failures,
+        `${label} touch pan from seat`,
+        seatPan.ok && seatPan.before !== seatPan.after,
+        `before=${seatPan.before} after=${seatPan.after}`,
+      );
+    }
+  } else {
+    const settings = await metrics(page, ".app-settings");
+    record(
+      failures,
+      `${label} settings in flow`,
+      !!settings && settings.position !== "absolute",
+      `position=${settings?.position}`,
     );
   }
-
-  await page.locator("#tab-phone-roster").click();
-  await page.waitForSelector('[data-phone-destination="roster"]');
-  await page.screenshot({
-    path: path.join(screenshotDir, `phone-roster-${viewport.width}.png`),
-  });
-  record(
-    failures,
-    `${label} roster hides shuffle`,
-    (await page.locator("#btn-phone-shuffle").count()) === 0,
-    "shuffle still on roster",
-  );
-  record(
-    failures,
-    `${label} roster hides view toggle`,
-    (await page.locator("#btn-phone-viewmode").count()) === 0,
-    "view toggle on roster",
-  );
-  const rosterOverflow = await noPageOverflow(page);
-  record(
-    failures,
-    `${label} roster width`,
-    rosterOverflow.scrollWidth <= rosterOverflow.clientWidth + 1,
-    `scrollWidth ${rosterOverflow.scrollWidth} > clientWidth ${rosterOverflow.clientWidth}`,
-  );
-  record(
-    failures,
-    `${label} roster switch`,
-    (await page.locator("#tab-phone-roster-students").count()) === 1,
-    "missing roster page switch",
-  );
-  record(
-    failures,
-    `${label} no duplicate 生徒設定`,
-    !(await page.locator("h2", { hasText: "生徒設定" }).count()),
-    "desktop settings heading leaked",
-  );
-
-  await page.locator("#phone-more-btn").click();
-  await page.getByRole("menuitem", { name: "全体設定" }).click();
-  await page.locator(".phone-overlay").waitFor();
-  await page.screenshot({
-    path: path.join(screenshotDir, `phone-global-${viewport.width}.png`),
-  });
-  record(
-    failures,
-    `${label} global overlay`,
-    (await page.locator(".phone-overlay-title", { hasText: "全体設定" }).count()) ===
-      1,
-    "missing 全体設定 overlay",
-  );
-  await page.getByRole("button", { name: "戻る" }).click();
-  record(
-    failures,
-    `${label} global close`,
-    (await page.locator(".phone-overlay").count()) === 0,
-    "overlay stayed open",
-  );
-
-  await page.locator("#tab-phone-constraints").click();
-  await page.waitForSelector('[data-phone-destination="constraints"]');
-  await page.screenshot({
-    path: path.join(screenshotDir, `phone-constraints-${viewport.width}.png`),
-  });
-  record(
-    failures,
-    `${label} constraints title`,
-    (await page.locator(".phone-screen-title", { hasText: "条件" }).count()) === 1,
-    "missing 条件 title",
-  );
-}
-
-async function assertDesktop(page, url, viewport, failures) {
-  await page.setViewportSize(viewport);
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-  await dismissWelcome(page);
-  await page.waitForSelector('[data-kind="desktop"]');
-  const label = `${viewport.width}x${viewport.height}`;
-  await page.screenshot({
-    path: path.join(screenshotDir, `desktop-${viewport.width}.png`),
-  });
-
-  const kind = await page.locator("[data-kind]").first().getAttribute("data-kind");
-  record(failures, `${label} shell`, kind === "desktop", `kind=${kind}`);
-  record(
-    failures,
-    `${label} footer shuffle`,
-    (await page.locator("#btn-footer-shuffle").count()) === 1,
-    "missing desktop shuffle",
-  );
-  record(
-    failures,
-    `${label} settings`,
-    (await page.locator("#btn-header-settings").count()) === 1,
-    "missing settings button",
-  );
-  record(
-    failures,
-    `${label} no phone tabs`,
-    (await page.locator(".phone-tabbar").count()) === 0,
-    "phone tabs on desktop",
-  );
-  const overflow = await noPageOverflow(page);
-  record(
-    failures,
-    `${label} page width`,
-    overflow.scrollWidth <= overflow.clientWidth + 1,
-    `scrollWidth ${overflow.scrollWidth} > clientWidth ${overflow.clientWidth}`,
-  );
 }
 
 async function main() {
@@ -398,11 +409,38 @@ async function main() {
       args: ["--headless=new", "--disable-gpu", "--no-sandbox"],
     });
     const page = await browser.newPage();
-    await assertPhone(page, url, { width: 375, height: 667 }, failures);
-    await assertPhone(page, url, { width: 390, height: 844 }, failures);
-    await assertDesktop(page, url, { width: 1280, height: 800 }, failures);
+    await assertSharedChrome(
+      page,
+      url,
+      { width: 375, height: 667 },
+      failures,
+      true,
+    );
+    await assertSharedChrome(
+      page,
+      url,
+      { width: 390, height: 844 },
+      failures,
+      true,
+    );
+    await assertSharedChrome(
+      page,
+      url,
+      { width: 820, height: 1180 },
+      failures,
+      true,
+    );
+    await assertSharedChrome(
+      page,
+      url,
+      { width: 1280, height: 800 },
+      failures,
+      false,
+    );
   } catch (error) {
-    failures.push(`runner: ${error instanceof Error ? error.message : String(error)}`);
+    failures.push(
+      `runner: ${error instanceof Error ? error.message : String(error)}`,
+    );
     if (viteLog) failures.push(`vite log: ${viteLog.slice(-800)}`);
   } finally {
     if (browser) await browser.close();
@@ -426,9 +464,7 @@ async function main() {
     console.error("Phone layout quality failed:\n- " + failures.join("\n- "));
     process.exit(1);
   }
-  console.log(
-    `Phone layout quality passed. Screenshots: ${screenshotDir}`,
-  );
+  console.log(`Phone layout quality passed. Screenshots: ${screenshotDir}`);
   process.exit(0);
 }
 

@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Settings, Download, Upload, Sprout } from "lucide-react";
 import { useCsvSettings } from "../../hooks/useCsvSettings";
+import { useCompactLayout } from "../../hooks/useCompactLayout";
 import Input from "../../components/ui/Input";
 import Logo from "../../components/ui/Logo";
 import { useStore } from "../../stores";
@@ -16,6 +17,7 @@ const DesktopHeader: React.FC<HeaderProps> = ({
   onToggleSettings,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isCompact = useCompactLayout();
   const isViewMode = useStore((state) => state.isViewMode);
   const openGuideHub = useOnboardingStore((state) => state.openGuideHub);
 
@@ -23,7 +25,7 @@ const DesktopHeader: React.FC<HeaderProps> = ({
 
   return (
     <header className="app-header">
-      <Logo size="md" />
+      <Logo size={isCompact ? "sm" : "md"} />
 
       <div className="app-header-actions">
         <button
@@ -38,8 +40,10 @@ const DesktopHeader: React.FC<HeaderProps> = ({
           }}
           onClick={() => openGuideHub("tour")}
           title="操作ガイド・ツアーを見る"
+          aria-label="はじめてガイド"
         >
-          <Sprout size={16} style={{ marginTop: "-1px" }} /> はじめてガイド
+          <Sprout size={16} style={{ marginTop: "-1px" }} />
+          <span className="app-chrome-label">はじめてガイド</span>
         </button>
 
         <Input
@@ -53,25 +57,22 @@ const DesktopHeader: React.FC<HeaderProps> = ({
           className="btn-secondary"
           style={{ gap: "4px" }}
           onClick={() => fileInputRef.current?.click()}
+          aria-label="読み込み"
         >
-          <Upload size={16} /> 読み込み
+          <Upload size={16} />
+          <span className="app-chrome-label">読み込み</span>
         </button>
         <button
           className="btn-secondary"
           style={{ gap: "4px" }}
           onClick={handleSave}
+          aria-label="保存"
         >
-          <Download size={16} /> 保存
+          <Download size={16} />
+          <span className="app-chrome-label">保存</span>
         </button>
 
-        <div
-          style={{
-            width: "1px",
-            height: "24px",
-            backgroundColor: "var(--c-border)",
-            margin: "0 var(--spacing-xs)",
-          }}
-        ></div>
+        <div className="app-header-divider" />
 
         {!isViewMode && (
           <button
@@ -80,8 +81,10 @@ const DesktopHeader: React.FC<HeaderProps> = ({
             onClick={onToggleSettings}
             style={{ gap: "4px" }}
             title="設定パネルの表示/非表示"
+            aria-label="設定"
           >
-            <Settings size={16} /> 設定
+            <Settings size={16} />
+            <span className="app-chrome-label">設定</span>
           </button>
         )}
       </div>

@@ -31,6 +31,7 @@ const DesktopFooter: React.FC = () => {
             disabled={!canUndo}
             type="button"
             title="一つ前の配置に戻す"
+            aria-label="一つ前の配置に戻す"
           >
             <Undo2 size={20} />
           </button>
@@ -41,8 +42,10 @@ const DesktopFooter: React.FC = () => {
             disabled={isShuffling}
             type="button"
           >
-            <Shuffle size={20} />{" "}
-            {isShuffling ? "シャッフル中..." : "シャッフル実行"}
+            <Shuffle size={20} />
+            <span className="shuffle-run-label">
+              {isShuffling ? "シャッフル中..." : "シャッフル実行"}
+            </span>
           </button>
         </div>
       </div>
