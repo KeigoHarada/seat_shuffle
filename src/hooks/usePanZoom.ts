@@ -127,7 +127,11 @@ export const usePanZoom = (
 
       if (pointersRef.current.size >= 2) {
         beginPinch();
-        e.currentTarget.setPointerCapture(e.pointerId);
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          // same as single-pointer capture
+        }
         return true;
       }
 
@@ -135,7 +139,11 @@ export const usePanZoom = (
       if (e.button === 2 || (e.button === 0 && (forcePan || isTouch))) {
         setIsPanning(true);
         panSessionRef.current = { x: e.clientX, y: e.clientY };
-        e.currentTarget.setPointerCapture(e.pointerId);
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          // Capture can fail on synthetic events; client-delta pan still works.
+        }
         return true;
       }
       return false;

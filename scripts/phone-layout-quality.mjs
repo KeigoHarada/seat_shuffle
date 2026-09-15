@@ -121,22 +121,23 @@ async function metrics(page, selector) {
 }
 
 async function dispatchTouchPan(page, selector, dx, dy) {
-  return page.evaluate(
-    ({ selector, dx, dy }) => {
+  const before = await page.locator("#canvas-main-area").evaluate((el) => {
+    return el.style.backgroundPosition;
+  });
+  const ok = await page.evaluate(
+    async ({ selector, dx, dy }) => {
       const el = document.querySelector(selector);
       const canvas = document.getElementById("canvas-main-area");
-      if (!el || !canvas) {
-        return { before: "", after: "", ok: false };
-      }
+      if (!el || !canvas) return false;
       const rect = el.getBoundingClientRect();
       const x = rect.left + Math.min(48, Math.max(8, rect.width / 2));
       const y = rect.top + Math.min(48, Math.max(8, rect.height / 2));
-      const before = canvas.style.backgroundPosition;
-      const fire = (type, cx, cy, buttons) => {
-        el.dispatchEvent(
+      const fire = (target, type, cx, cy, buttons) => {
+        target.dispatchEvent(
           new PointerEvent(type, {
             bubbles: true,
             cancelable: true,
+            composed: true,
             pointerId: 1,
             pointerType: "touch",
             isPrimary: true,
@@ -147,26 +148,20 @@ async function dispatchTouchPan(page, selector, dx, dy) {
           }),
         );
       };
-      fire("pointerdown", x, y, 1);
-      fire("pointermove", x + dx, y + dy, 1);
-      canvas.dispatchEvent(
-        new PointerEvent("pointermove", {
-          bubbles: true,
-          cancelable: true,
-          pointerId: 1,
-          pointerType: "touch",
-          isPrimary: true,
-          button: 0,
-          buttons: 1,
-          clientX: x + dx,
-          clientY: y + dy,
-        }),
-      );
-      fire("pointerup", x + dx, y + dy, 0);
-      return { before, after: canvas.style.backgroundPosition, ok: true };
+      fire(el, "pointerdown", x, y, 1);
+      fire(el, "pointermove", x + dx, y + dy, 1);
+      fire(canvas, "pointermove", x + dx, y + dy, 1);
+      fire(el, "pointerup", x + dx, y + dy, 0);
+      fire(canvas, "pointerup", x + dx, y + dy, 0);
+      return true;
     },
     { selector, dx, dy },
   );
+  await page.waitForTimeout(80);
+  const after = await page.locator("#canvas-main-area").evaluate((el) => {
+    return el.style.backgroundPosition;
+  });
+  return { before, after, ok };
 }
 
 async function assertSharedChrome(page, url, viewport, failures, expectCompact) {
