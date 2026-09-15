@@ -60,6 +60,11 @@ describe("DesktopApp compact chrome", () => {
     const shell = container.querySelector(".app-shell");
     expect(shell?.getAttribute("data-compact")).toBe("true");
     expect(container.querySelector("#btn-footer-shuffle")).not.toBeNull();
+    expect(
+      container
+        .querySelector(".app-footer-cluster-center")
+        ?.contains(container.querySelector("#btn-footer-shuffle")),
+    ).toBe(true);
     expect(container.querySelector("#btn-header-settings")).not.toBeNull();
     expect(container.querySelector(".phone-tabbar")).toBeNull();
     expect(

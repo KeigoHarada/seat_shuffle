@@ -223,5 +223,6 @@ export const useCanvasDrag = (
     handleNodeDragPointerDown,
     handleNodeDragPointerMove,
     handleNodeDragPointerUp,
+    cancelDrag: () => setDragState(null),
   };
 };

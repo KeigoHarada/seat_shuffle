@@ -6,7 +6,6 @@ import {
   getSeatDragDisplayProps,
   getObjectDragDisplayProps,
 } from "../../utils/canvas";
-import { isTouchPointerType } from "../../utils/panZoomGesture";
 
 interface Props {
   seats: Seat[];
@@ -18,6 +17,8 @@ interface Props {
   handleNodeDragPointerMove: (e: React.PointerEvent) => void;
   handleNodeDragPointerUp: (e: React.PointerEvent) => void;
   handleNodePointerDown: (id: string, e: React.PointerEvent) => void;
+  handleNodeLongPressMove: (e: React.PointerEvent) => void;
+  handleNodeLongPressUp: (id: string, e: React.PointerEvent) => void;
   handleSeatDoubleClick: (id: string, e: React.MouseEvent) => void;
   updateObject: (id: string, updates: Partial<CanvasObject>) => void;
   selectionBox: any;
@@ -33,6 +34,8 @@ const CanvasNodes: React.FC<Props> = ({
   handleNodeDragPointerMove,
   handleNodeDragPointerUp,
   handleNodePointerDown,
+  handleNodeLongPressMove,
+  handleNodeLongPressUp,
   handleSeatDoubleClick,
   updateObject,
   selectionBox,
@@ -53,13 +56,21 @@ const CanvasNodes: React.FC<Props> = ({
             isSelected={selectedIds.includes(obj.id)}
             scale={scale}
             onPointerDown={(e) => {
-              if (isTouchPointerType(e.pointerType)) return;
               handleNodePointerDown(obj.id, e);
               handleNodeDragPointerDown(obj.id, e);
             }}
-            onPointerMove={handleNodeDragPointerMove}
-            onPointerUp={handleNodeDragPointerUp}
-            onPointerCancel={handleNodeDragPointerUp}
+            onPointerMove={(e) => {
+              handleNodeLongPressMove(e);
+              handleNodeDragPointerMove(e);
+            }}
+            onPointerUp={(e) => {
+              handleNodeLongPressUp(obj.id, e);
+              handleNodeDragPointerUp(e);
+            }}
+            onPointerCancel={(e) => {
+              handleNodeLongPressUp(obj.id, e);
+              handleNodeDragPointerUp(e);
+            }}
             updateObject={updateObject}
           />
         );
@@ -76,13 +87,21 @@ const CanvasNodes: React.FC<Props> = ({
             isSwapTarget={isSwapTarget}
             isSelected={selectedIds.includes(seat.id)}
             onPointerDown={(e) => {
-              if (isTouchPointerType(e.pointerType)) return;
               handleNodePointerDown(seat.id, e);
               handleNodeDragPointerDown(seat.id, e);
             }}
-            onPointerMove={handleNodeDragPointerMove}
-            onPointerUp={handleNodeDragPointerUp}
-            onPointerCancel={handleNodeDragPointerUp}
+            onPointerMove={(e) => {
+              handleNodeLongPressMove(e);
+              handleNodeDragPointerMove(e);
+            }}
+            onPointerUp={(e) => {
+              handleNodeLongPressUp(seat.id, e);
+              handleNodeDragPointerUp(e);
+            }}
+            onPointerCancel={(e) => {
+              handleNodeLongPressUp(seat.id, e);
+              handleNodeDragPointerUp(e);
+            }}
             onDoubleClick={(e) => handleSeatDoubleClick(seat.id, e)}
           />
         );

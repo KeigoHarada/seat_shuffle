@@ -465,9 +465,11 @@ input[type="number"] {
   box-shadow: var(--shadow-1);
   padding: 4px;
   gap: 4px;
-  z-index: 100;
+  z-index: 200;
   user-select: none;
   white-space: nowrap;
+  touch-action: manipulation;
+  pointer-events: auto;
 }
 
 .app-canvas-toolbar-btn {
@@ -552,8 +554,10 @@ input[type="number"] {
   box-shadow: var(--shadow-1);
   padding: 6px 12px;
   gap: 12px;
-  z-index: 100;
+  z-index: 200;
   user-select: none;
+  touch-action: manipulation;
+  pointer-events: auto;
 }
 
 .app-canvas-controls-scale {
@@ -604,6 +608,7 @@ input[type="number"] {
 .app-settings[data-open="false"] {
   width: 0;
   border: none;
+  pointer-events: none;
 }
 
 .app-settings-inner {
@@ -616,9 +621,9 @@ input[type="number"] {
   height: var(--app-footer-height);
   background-color: var(--c-surface);
   border-top: 1px solid var(--c-border);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   padding: 0 var(--spacing-lg);
   flex-shrink: 0;
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
@@ -634,12 +639,16 @@ input[type="number"] {
 }
 
 .app-footer-cluster-start {
-  flex: 1;
+  justify-self: start;
+  justify-content: flex-end;
+  gap: 16px;
+  width: 100%;
+  padding-right: 8px;
 }
 
 .app-footer-cluster-center {
-  flex: 1;
   justify-content: center;
+  justify-self: center;
   gap: 16px;
 }
 
@@ -648,8 +657,8 @@ input[type="number"] {
 }
 
 .app-footer-cluster-end {
-  flex: 1;
   justify-content: flex-end;
+  justify-self: end;
 }
 
 .app-legal-link {
@@ -661,6 +670,7 @@ input[type="number"] {
   text-decoration: underline;
   padding: 8px;
   font-family: inherit;
+  margin-right: auto;
 }
 
 .view-mode-toggle {
@@ -828,6 +838,11 @@ input[type="number"] {
     overflow-x: auto;
   }
 
+  .app-canvas-toolbar-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
   .app-canvas-toolbar-label {
     display: none;
   }
@@ -844,19 +859,20 @@ input[type="number"] {
   .app-footer {
     padding: 0 var(--spacing-sm);
     gap: var(--spacing-sm);
+    justify-content: stretch;
+  }
+
+  .app-legal-link {
+    display: none;
   }
 
   .app-footer-cluster-start {
-    display: none;
+    min-height: 1px;
   }
 
   .app-footer-cluster-center,
   .app-footer-cluster-end {
-    flex: 0 0 auto;
-  }
-
-  .app-footer {
-    justify-content: space-between;
+    flex: unset;
   }
 
   .shuffle-controls {
@@ -914,4 +930,100 @@ input[type="number"] {
 
 #settings-main-area {
   min-height: 0;
+}
+
+.guide-hub {
+  width: min(840px, calc(100vw - 24px));
+  height: min(620px, calc(100dvh - 24px));
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-hub-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.guide-hub-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  background-color: var(--c-bg-main);
+  border-right: 1px solid var(--c-border);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-hub-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.guide-hub-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.welcome-modal {
+  max-width: min(480px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+
+.tour-tooltip {
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(70dvh, 480px);
+  overflow-y: auto;
+}
+
+.guide-hub-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.canvas-context-menu {
+  touch-action: manipulation;
+}
+
+@media (max-width: 1023px) {
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-start;
+  }
+
+  .guide-hub-body {
+    flex-direction: column;
+  }
+
+  .guide-hub-sidebar {
+    width: 100%;
+    max-height: 34%;
+    border-right: none;
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .guide-hub-content {
+    padding: 16px;
+  }
+
+  .guide-hub-title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .guide-hub-shortcuts {
+    grid-template-columns: 1fr;
+  }
 }

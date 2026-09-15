@@ -1,4 +1,5 @@
 import React from "react";
+import { usePressAction } from "../../hooks/usePressAction";
 
 interface Props {
   scale: number;
@@ -6,10 +7,13 @@ interface Props {
 }
 
 const CanvasControls: React.FC<Props> = ({ scale, onResetView }) => {
+  const resetPress = usePressAction(onResetView);
+
   return (
     <div
       className="app-canvas-controls"
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
       onWheel={(e) => e.stopPropagation()}
     >
@@ -20,8 +24,8 @@ const CanvasControls: React.FC<Props> = ({ scale, onResetView }) => {
       <button
         type="button"
         className="app-canvas-controls-reset"
-        onClick={onResetView}
         title="位置とズームを初期状態に戻す"
+        {...resetPress}
       >
         表示リセット
       </button>

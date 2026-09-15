@@ -1,6 +1,12 @@
-import { useRef, useCallback } from "react";
-import { screenToWorld } from "../utils/canvas";
-import { isTouchPointerType } from "../utils/panZoomGesture";
+import { useRef, useCallback, type PointerEvent, type MouseEvent, type RefObject } from "react";
+import { screenToWorld, contextMenuFromClient } from "../utils/canvas";
+import {
+  isCanvasChromeTarget,
+  isCanvasNodeTarget,
+  isTouchPointerType,
+  LONG_PRESS_MS,
+  movedPastTap,
+} from "../utils/panZoomGesture";
 
 interface UseCanvasPointerEventsProps {
   canvasTool: "select" | "hand";
@@ -8,7 +14,7 @@ interface UseCanvasPointerEventsProps {
   isViewMode: boolean;
   pan: { x: number; y: number };
   scale: number;
-  viewportRef: React.RefObject<HTMLDivElement | null>;
+  viewportRef: RefObject<HTMLDivElement | null>;
   clearSelection: () => void;
   startSelectionBox: (x: number, y: number) => void;
   updateSelectionBox: (
@@ -18,9 +24,9 @@ interface UseCanvasPointerEventsProps {
     ids: string[],
   ) => void;
   endSelectionBox: () => void;
-  handlePointerDown: (e: React.PointerEvent, forcePan: boolean) => boolean;
-  handlePointerMove: (e: React.PointerEvent) => void;
-  handlePointerUp: (e: React.PointerEvent) => void;
+  handlePointerDown: (e: PointerEvent, forcePan: boolean) => boolean;
+  handlePointerMove: (e: PointerEvent) => void;
+  handlePointerUp: (e: PointerEvent) => void;
   setContextMenu: (
     menu: { x: number; y: number; worldX: number; worldY: number } | null,
   ) => void;
@@ -46,23 +52,60 @@ export const useCanvasPointerEvents = ({
   const isMarqueeRef = useRef(false);
   const initialCtrlPressedRef = useRef(false);
   const initialSelectedIdsRef = useRef<string[]>([]);
+  const longPressTimerRef = useRef<number | null>(null);
+
+  const clearLongPress = useCallback(() => {
+    if (longPressTimerRef.current != null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const openMenuAt = useCallback(
+    (clientX: number, clientY: number) => {
+      if (isViewMode) return;
+      const rect = viewportRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setContextMenu(contextMenuFromClient(clientX, clientY, rect, pan, scale));
+    },
+    [isViewMode, pan, scale, viewportRef, setContextMenu],
+  );
 
   const handleContextMenu = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: MouseEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
+      if (isCanvasChromeTarget(e.target)) return;
+      openMenuAt(e.clientX, e.clientY);
     },
-    [],
+    [openMenuAt],
   );
 
   const onCanvasPointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+    (e: PointerEvent<HTMLDivElement>) => {
       pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
       setContextMenu(null);
+      clearLongPress();
+
+      if (isCanvasChromeTarget(e.target)) return;
 
       const isTouch = isTouchPointerType(e.pointerType);
+      if (isTouch && isCanvasNodeTarget(e.target)) return;
+
       if (isTouch) {
         handlePointerDown(e, true);
+        if (!isViewMode) {
+          const { clientX, clientY, pointerId } = e;
+          const canvasEl = e.currentTarget;
+          longPressTimerRef.current = window.setTimeout(() => {
+            longPressTimerRef.current = null;
+            if (canvasEl?.hasPointerCapture?.(pointerId)) {
+              canvasEl.releasePointerCapture(pointerId);
+            }
+            handlePointerUp(e);
+            openMenuAt(clientX, clientY);
+          }, LONG_PRESS_MS);
+        }
         return;
       }
 
@@ -102,13 +145,21 @@ export const useCanvasPointerEvents = ({
       viewportRef,
       clearSelection,
       handlePointerDown,
+      handlePointerUp,
       startSelectionBox,
       setContextMenu,
+      clearLongPress,
+      openMenuAt,
     ],
   );
 
   const onCanvasPointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+    (e: PointerEvent<HTMLDivElement>) => {
+      if (longPressTimerRef.current != null) {
+        const dx = e.clientX - pointerDownPosRef.current.x;
+        const dy = e.clientY - pointerDownPosRef.current.y;
+        if (movedPastTap(dx, dy)) clearLongPress();
+      }
       handlePointerMove(e);
       if (isMarqueeRef.current && viewportRef.current) {
         const rect = viewportRef.current.getBoundingClientRect();
@@ -127,11 +178,19 @@ export const useCanvasPointerEvents = ({
         );
       }
     },
-    [handlePointerMove, pan, scale, viewportRef, updateSelectionBox],
+    [
+      handlePointerMove,
+      pan,
+      scale,
+      viewportRef,
+      updateSelectionBox,
+      clearLongPress,
+    ],
   );
 
   const onCanvasPointerUp = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+    (e: PointerEvent<HTMLDivElement>) => {
+      clearLongPress();
       handlePointerUp(e);
       if (isMarqueeRef.current) {
         isMarqueeRef.current = false;
@@ -142,33 +201,16 @@ export const useCanvasPointerEvents = ({
       if (e.button === 2 && !isViewMode) {
         const dx = e.clientX - pointerDownPosRef.current.x;
         const dy = e.clientY - pointerDownPosRef.current.y;
-        if (dx * dx + dy * dy <= 25) {
-          const rect = viewportRef.current?.getBoundingClientRect();
-          if (rect) {
-            const { worldX, worldY } = screenToWorld(
-              e.clientX,
-              e.clientY,
-              rect,
-              pan,
-              scale,
-            );
-            setContextMenu({
-              x: e.clientX - rect.left,
-              y: e.clientY - rect.top,
-              worldX,
-              worldY,
-            });
-          }
+        if (!movedPastTap(dx, dy)) {
+          openMenuAt(e.clientX, e.clientY);
         }
       }
     },
     [
       handlePointerUp,
       endSelectionBox,
-      pan,
-      scale,
-      viewportRef,
-      setContextMenu,
+      clearLongPress,
+      openMenuAt,
       isViewMode,
     ],
   );

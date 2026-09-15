@@ -120,18 +120,51 @@ async function metrics(page, selector) {
   });
 }
 
-async function dispatchTouchPan(page, selector, dx, dy) {
+async function pickEmptyCanvasPoint(page) {
+  return page.evaluate(() => {
+    const canvas = document.getElementById("canvas-main-area");
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const avoidEls = [
+      document.querySelector(".app-canvas-toolbar"),
+      document.querySelector(".app-canvas-controls"),
+      document.querySelector(".canvas-context-menu"),
+    ].filter(Boolean);
+    const avoid = avoidEls.map((el) => el.getBoundingClientRect());
+    const seats = [...document.querySelectorAll(".seat-node-item")].map((el) =>
+      el.getBoundingClientRect(),
+    );
+    const hits = (boxes, x, y) =>
+      boxes.some(
+        (box) =>
+          x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
+      );
+    const candidates = [
+      { x: rect.right - 28, y: rect.top + 28 },
+      { x: rect.right - 28, y: rect.bottom - 28 },
+      { x: rect.left + 28, y: rect.bottom - 28 },
+      { x: rect.left + rect.width * 0.82, y: rect.top + rect.height * 0.18 },
+    ];
+    return (
+      candidates.find(
+        (point) => !hits(avoid, point.x, point.y) && !hits(seats, point.x, point.y),
+      ) || candidates[0]
+    );
+  });
+}
+
+async function dispatchTouchPan(page, selector, dx, dy, point) {
   const before = await page.locator("#canvas-main-area").evaluate((el) => {
     return el.style.backgroundPosition;
   });
   const ok = await page.evaluate(
-    async ({ selector, dx, dy }) => {
+    async ({ selector, dx, dy, point }) => {
       const el = document.querySelector(selector);
       const canvas = document.getElementById("canvas-main-area");
       if (!el || !canvas) return false;
       const rect = el.getBoundingClientRect();
-      const x = rect.left + Math.min(48, Math.max(8, rect.width / 2));
-      const y = rect.top + Math.min(48, Math.max(8, rect.height / 2));
+      const x = point?.x ?? rect.left + Math.min(48, Math.max(8, rect.width / 2));
+      const y = point?.y ?? rect.top + Math.min(48, Math.max(8, rect.height / 2));
       const fire = (target, type, cx, cy, buttons) => {
         target.dispatchEvent(
           new PointerEvent(type, {
@@ -155,13 +188,40 @@ async function dispatchTouchPan(page, selector, dx, dy) {
       fire(canvas, "pointerup", x + dx, y + dy, 0);
       return true;
     },
-    { selector, dx, dy },
+    { selector, dx, dy, point: point ?? null },
   );
   await page.waitForTimeout(80);
   const after = await page.locator("#canvas-main-area").evaluate((el) => {
     return el.style.backgroundPosition;
   });
   return { before, after, ok };
+}
+
+async function dispatchTouchLongPress(page, point) {
+  return page.evaluate(async ({ x, y }) => {
+    const canvas = document.getElementById("canvas-main-area");
+    if (!canvas) return false;
+    const fire = (type, buttons) => {
+      canvas.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+          pointerId: 7,
+          pointerType: "touch",
+          isPrimary: true,
+          button: 0,
+          buttons,
+          clientX: x,
+          clientY: y,
+        }),
+      );
+    };
+    fire("pointerdown", 1);
+    await new Promise((resolve) => setTimeout(resolve, 650));
+    fire("pointerup", 0);
+    return true;
+  }, point);
 }
 
 async function assertSharedChrome(page, url, viewport, failures, expectCompact) {
@@ -303,6 +363,31 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         `first.y=${first.y} last.y=${last.y}`,
       );
     }
+    const seatsBefore = await page.locator(".seat-node-item").count();
+    const addSeatBtn = page.locator(".app-canvas-toolbar-btn").first();
+    if (expectCompact) {
+      await addSeatBtn.tap();
+    } else {
+      await addSeatBtn.click();
+    }
+    const seatsAfter = await page.locator(".seat-node-item").count();
+    record(
+      failures,
+      `${label} toolbar adds a seat`,
+      seatsAfter === seatsBefore + 1,
+      `before=${seatsBefore} after=${seatsAfter}`,
+    );
+
+    const shuffleBox = await box(page, "#btn-footer-shuffle");
+    if (shuffleBox) {
+      const center = shuffleBox.x + shuffleBox.width / 2;
+      record(
+        failures,
+        `${label} shuffle centered`,
+        Math.abs(center - viewport.width / 2) < 56,
+        `center=${center} viewport=${viewport.width / 2}`,
+      );
+    }
   }
 
   if (expectCompact) {
@@ -352,23 +437,81 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
     );
     await page.locator("#btn-header-settings").click();
 
-    const emptyPan = await dispatchTouchPan(page, "#canvas-main-area", 80, 40);
+    const emptyPoint = await pickEmptyCanvasPoint(page);
+    const emptyPan = await dispatchTouchPan(
+      page,
+      "#canvas-main-area",
+      80,
+      40,
+      emptyPoint,
+    );
     record(
       failures,
       `${label} touch pan empty canvas`,
       emptyPan.ok && emptyPan.before !== emptyPan.after,
-      `before=${emptyPan.before} after=${emptyPan.after}`,
+      `before=${emptyPan.before} after=${emptyPan.after} point=${JSON.stringify(emptyPoint)}`,
     );
 
     if ((await page.locator(".seat-node-item").count()) > 0) {
-      const seatPan = await dispatchTouchPan(page, ".seat-node-item", 70, 30);
+      const seatDrag = await dispatchTouchPan(page, ".seat-node-item", 70, 30);
       record(
         failures,
-        `${label} touch pan from seat`,
-        seatPan.ok && seatPan.before !== seatPan.after,
-        `before=${seatPan.before} after=${seatPan.after}`,
+        `${label} seat drag does not pan canvas`,
+        seatDrag.ok && seatDrag.before === seatDrag.after,
+        `before=${seatDrag.before} after=${seatDrag.after}`,
       );
     }
+
+    const longPressPoint = await pickEmptyCanvasPoint(page);
+    if (longPressPoint) {
+      await dispatchTouchLongPress(page, longPressPoint);
+      await page.waitForTimeout(80);
+      const menuCount = await page.locator(".canvas-context-menu").count();
+      record(
+        failures,
+        `${label} long-press opens context menu`,
+        menuCount === 1,
+        `menuCount=${menuCount} point=${JSON.stringify(longPressPoint)}`,
+      );
+    }
+
+    await page.locator("#header-guide-btn").click();
+    await page.getByRole("heading", { name: "ラクガエ はじめてガイド" }).waitFor();
+    const hub = await metrics(page, ".guide-hub");
+    record(failures, `${label} guide hub`, !!hub, "missing .guide-hub");
+    const hubBody = await metrics(page, ".guide-hub-body");
+    record(
+      failures,
+      `${label} guide hub stacks`,
+      !!hubBody && hubBody.flexDirection === "column",
+      `flexDirection=${hubBody?.flexDirection}`,
+    );
+    if (hub) {
+      record(
+        failures,
+        `${label} guide hub width`,
+        hub.width <= viewport.width + 1,
+        `width=${hub.width}`,
+      );
+      record(
+        failures,
+        `${label} guide hub height`,
+        hub.height <= viewport.height + 1,
+        `height=${hub.height}`,
+      );
+    }
+    const hubOverflow = await noPageOverflow(page);
+    record(
+      failures,
+      `${label} guide page width`,
+      hubOverflow.scrollWidth <= hubOverflow.clientWidth + 1,
+      `scrollWidth ${hubOverflow.scrollWidth} > clientWidth ${hubOverflow.clientWidth}`,
+    );
+    await page.screenshot({
+      path: path.join(screenshotDir, `${shotName}-guide.png`),
+      fullPage: false,
+    });
+    await page.getByTitle("閉じる").first().click();
   } else {
     const settings = await metrics(page, ".app-settings");
     record(
@@ -410,7 +553,8 @@ async function main() {
       executablePath: chromePath,
       args: ["--headless=new", "--disable-gpu", "--no-sandbox"],
     });
-    const page = await browser.newPage();
+    const context = await browser.newContext({ hasTouch: true });
+    const page = await context.newPage();
     await assertSharedChrome(
       page,
       url,

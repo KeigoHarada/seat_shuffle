@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Shapes, LayoutTemplate, Wand2 } from "lucide-react";
+import { usePressAction } from "../../hooks/usePressAction";
 
 interface Props {
   onAddSeat: () => void;
@@ -16,6 +17,24 @@ const TEMPLATES = [
   { id: "group6_h", label: "6人席（横）" },
 ] as const;
 
+const ToolbarMenuItem: React.FC<{
+  id?: string;
+  children: React.ReactNode;
+  onSelect: () => void;
+}> = ({ id, children, onSelect }) => {
+  const press = usePressAction(onSelect);
+  return (
+    <button
+      id={id}
+      type="button"
+      className="app-canvas-toolbar-menu-item"
+      {...press}
+    >
+      {children}
+    </button>
+  );
+};
+
 const CanvasToolbar: React.FC<Props> = ({
   onAddSeat,
   onAddRectangle,
@@ -24,9 +43,23 @@ const CanvasToolbar: React.FC<Props> = ({
   onAutoAssign,
 }) => {
   const [openMenu, setOpenMenu] = useState<"shapes" | "templates" | null>(null);
+  const addSeatPress = usePressAction(onAddSeat);
+  const autoAssignPress = usePressAction(onAutoAssign);
+  const shapesPress = usePressAction(() =>
+    setOpenMenu((current) => (current === "shapes" ? null : "shapes")),
+  );
+  const templatesPress = usePressAction(() =>
+    setOpenMenu((current) => (current === "templates" ? null : "templates")),
+  );
 
   useEffect(() => {
-    const handleOutsideClick = () => setOpenMenu(null);
+    const handleOutsideClick = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest(".app-canvas-toolbar")) {
+        return;
+      }
+      setOpenMenu(null);
+    };
     if (openMenu) {
       window.addEventListener("pointerdown", handleOutsideClick);
     }
@@ -37,6 +70,7 @@ const CanvasToolbar: React.FC<Props> = ({
     <div
       className="app-canvas-toolbar"
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
       onWheel={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.stopPropagation()}
@@ -44,9 +78,9 @@ const CanvasToolbar: React.FC<Props> = ({
       <button
         type="button"
         className="app-canvas-toolbar-btn"
-        onClick={onAddSeat}
         aria-label="座席を追加"
         title="座席を追加"
+        {...addSeatPress}
       >
         <Plus size={16} />
         <span className="app-canvas-toolbar-label">座席を追加</span>
@@ -65,7 +99,7 @@ const CanvasToolbar: React.FC<Props> = ({
           aria-label="図形"
           aria-expanded={openMenu === "shapes"}
           title="図形"
-          onClick={() => setOpenMenu(openMenu === "shapes" ? null : "shapes")}
+          {...shapesPress}
         >
           <Shapes size={16} />
           <span className="app-canvas-toolbar-label">図形</span>
@@ -73,26 +107,22 @@ const CanvasToolbar: React.FC<Props> = ({
 
         {openMenu === "shapes" && (
           <div className="app-canvas-toolbar-menu">
-            <button
-              type="button"
-              className="app-canvas-toolbar-menu-item"
-              onClick={() => {
+            <ToolbarMenuItem
+              onSelect={() => {
                 onAddRectangle();
                 setOpenMenu(null);
               }}
             >
               四角形
-            </button>
-            <button
-              type="button"
-              className="app-canvas-toolbar-menu-item"
-              onClick={() => {
+            </ToolbarMenuItem>
+            <ToolbarMenuItem
+              onSelect={() => {
                 onAddCircle();
                 setOpenMenu(null);
               }}
             >
               円形
-            </button>
+            </ToolbarMenuItem>
           </div>
         )}
       </div>
@@ -110,9 +140,7 @@ const CanvasToolbar: React.FC<Props> = ({
           aria-label="テンプレート"
           aria-expanded={openMenu === "templates"}
           title="テンプレート"
-          onClick={() =>
-            setOpenMenu(openMenu === "templates" ? null : "templates")
-          }
+          {...templatesPress}
         >
           <LayoutTemplate size={16} />
           <span className="app-canvas-toolbar-label">テンプレート</span>
@@ -121,18 +149,16 @@ const CanvasToolbar: React.FC<Props> = ({
         {openMenu === "templates" && (
           <div className="app-canvas-toolbar-menu">
             {TEMPLATES.map((tpl) => (
-              <button
+              <ToolbarMenuItem
                 key={tpl.id}
                 id={`btn-template-${tpl.id}`}
-                type="button"
-                className="app-canvas-toolbar-menu-item"
-                onClick={() => {
+                onSelect={() => {
                   onApplyTemplate(tpl.id);
                   setOpenMenu(null);
                 }}
               >
                 {tpl.label}
-              </button>
+              </ToolbarMenuItem>
             ))}
           </div>
         )}
@@ -143,9 +169,9 @@ const CanvasToolbar: React.FC<Props> = ({
       <button
         type="button"
         className="app-canvas-toolbar-btn app-canvas-toolbar-btn-accent"
-        onClick={onAutoAssign}
         aria-label="自動割り当て"
         title="生徒を空席に自動割り当て"
+        {...autoAssignPress}
       >
         <Wand2 size={16} />
         <span className="app-canvas-toolbar-label">自動割り当て</span>

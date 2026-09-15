@@ -27,10 +27,7 @@ export const WelcomeModal: React.FC = () => {
   return (
     <div className="modal-overlay" onClick={handleSkip}>
       <div
-        className="modal-content"
-        style={{
-          maxWidth: "480px",
-        }}
+        className="modal-content welcome-modal"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header decoration */}

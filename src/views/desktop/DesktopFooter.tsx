@@ -18,36 +18,34 @@ const DesktopFooter: React.FC = () => {
         >
           利用規約・免責事項
         </button>
+        <button
+          className="btn-secondary shuffle-undo"
+          onClick={undoShuffle}
+          disabled={!canUndo}
+          type="button"
+          title="一つ前の配置に戻す"
+          aria-label="一つ前の配置に戻す"
+        >
+          <Undo2 size={20} />
+        </button>
       </div>
       <LegalModal
         isOpen={isLegalModalOpen}
         onClose={() => setIsLegalModalOpen(false)}
       />
       <div className="app-footer-cluster app-footer-cluster-center">
-        <div className="shuffle-controls">
-          <button
-            className="btn-secondary shuffle-undo"
-            onClick={undoShuffle}
-            disabled={!canUndo}
-            type="button"
-            title="一つ前の配置に戻す"
-            aria-label="一つ前の配置に戻す"
-          >
-            <Undo2 size={20} />
-          </button>
-          <button
-            id="btn-footer-shuffle"
-            className="btn-primary shuffle-run"
-            onClick={handleShuffle}
-            disabled={isShuffling}
-            type="button"
-          >
-            <Shuffle size={20} />
-            <span className="shuffle-run-label">
-              {isShuffling ? "シャッフル中..." : "シャッフル実行"}
-            </span>
-          </button>
-        </div>
+        <button
+          id="btn-footer-shuffle"
+          className="btn-primary shuffle-run"
+          onClick={handleShuffle}
+          disabled={isShuffling}
+          type="button"
+        >
+          <Shuffle size={20} />
+          <span className="shuffle-run-label">
+            {isShuffling ? "シャッフル中..." : "シャッフル実行"}
+          </span>
+        </button>
       </div>
       <div className="app-footer-cluster app-footer-cluster-end">
         <DesktopViewModeToggle />

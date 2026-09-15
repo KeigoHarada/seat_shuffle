@@ -1,7 +1,13 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, expect, it } from "vitest";
 import {
   clampScale,
+  isCanvasChromeTarget,
+  isCanvasNodeTarget,
   isTouchPointerType,
+  movedPastTap,
   panByDelta,
   pointerDistance,
   pointerMidpoint,
@@ -9,13 +15,38 @@ import {
 } from "../panZoomGesture";
 
 describe("panZoomGesture", () => {
+  it("ignores toolbar chrome when starting a canvas pan", () => {
+    const toolbar = document.createElement("div");
+    toolbar.className = "app-canvas-toolbar";
+    const button = document.createElement("button");
+    toolbar.appendChild(button);
+    document.body.appendChild(toolbar);
+    expect(isCanvasChromeTarget(button)).toBe(true);
+    expect(isCanvasNodeTarget(button)).toBe(false);
+    toolbar.remove();
+  });
+
+  it("treats seats as canvas nodes", () => {
+    const seat = document.createElement("div");
+    seat.className = "seat-node-item";
+    document.body.appendChild(seat);
+    expect(isCanvasNodeTarget(seat)).toBe(true);
+    expect(isCanvasChromeTarget(seat)).toBe(false);
+    seat.remove();
+  });
+
   it("treats only touch as the finger pointer type", () => {
     expect(isTouchPointerType("touch")).toBe(true);
     expect(isTouchPointerType("mouse")).toBe(false);
     expect(isTouchPointerType("pen")).toBe(false);
   });
 
-  it("pans by client deltas instead of movementX", () => {
+  it("ignores jitter below the tap move threshold", () => {
+    expect(movedPastTap(3, 4)).toBe(false);
+    expect(movedPastTap(8, 8)).toBe(true);
+  });
+
+  it("pans by a client delta", () => {
     expect(panByDelta({ x: 10, y: 20 }, 5, -3)).toEqual({ x: 15, y: 17 });
   });
 

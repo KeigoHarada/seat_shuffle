@@ -77,6 +77,7 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   return (
     <div
       ref={menuRef}
+      className="canvas-context-menu"
       style={{
         position: "absolute",
         left: pos.left,

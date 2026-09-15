@@ -134,6 +134,22 @@ export const screenToWorld = (
   return { worldX, worldY };
 };
 
+export const contextMenuFromClient = (
+  clientX: number,
+  clientY: number,
+  rect: DOMRect,
+  pan: { x: number; y: number },
+  scale: number,
+) => {
+  const { worldX, worldY } = screenToWorld(clientX, clientY, rect, pan, scale);
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top,
+    worldX,
+    worldY,
+  };
+};
+
 export const worldToGrid = (worldX: number, worldY: number) => {
   return {
     x: Math.floor(worldX / GRID_SIZE),

@@ -210,8 +210,9 @@ export const usePanZoom = (
       setIsPanning(false);
     }
 
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
+    const target = e.currentTarget;
+    if (target?.hasPointerCapture?.(e.pointerId)) {
+      target.releasePointerCapture(e.pointerId);
     }
   }, []);
 

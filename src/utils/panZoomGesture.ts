@@ -1,10 +1,30 @@
 export const MIN_SCALE = 0.25;
 export const MAX_SCALE = 2.0;
+export const LONG_PRESS_MS = 520;
+export const TAP_MOVE_PX = 10;
 
 export type Point = { x: number; y: number };
 
 export function isTouchPointerType(pointerType: string): boolean {
   return pointerType === "touch";
+}
+
+export function isCanvasChromeTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  return Boolean(
+    target.closest(
+      ".app-canvas-toolbar, .app-canvas-controls, .app-canvas-toolbar-menu",
+    ),
+  );
+}
+
+export function isCanvasNodeTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest(".seat-node-item, .canvas-object-node"));
+}
+
+export function movedPastTap(dx: number, dy: number): boolean {
+  return dx * dx + dy * dy > TAP_MOVE_PX * TAP_MOVE_PX;
 }
 
 export function clampScale(scale: number): number {

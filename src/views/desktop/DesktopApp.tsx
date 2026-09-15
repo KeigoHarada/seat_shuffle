@@ -35,7 +35,7 @@ const DesktopApp: React.FC = () => {
           {seats.length === 0 && (
             <div className="app-canvas-empty">
               <p className="text-title3">
-                右クリックまたはツールバーから座席を追加
+                長押しまたはツールバーから座席を追加
               </p>
             </div>
           )}
