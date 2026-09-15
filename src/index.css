@@ -62,9 +62,6 @@
   --app-header-height: 60px;
   --app-footer-height: 80px;
   --app-settings-width: clamp(320px, 30vw, 400px);
-  --app-compact-max: 720px;
-  --app-settings-stack-height: min(45vh, 360px);
-  --app-canvas-min-height: 7.5rem;
 }
 
 * {
@@ -386,6 +383,7 @@ input[type="number"] {
   width: 100vw;
   overflow: hidden;
   min-width: 0;
+  position: relative;
 }
 
 .app-header {
@@ -496,6 +494,271 @@ input[type="number"] {
   justify-content: flex-end;
 }
 
+.app-legal-link {
+  background: none;
+  border: none;
+  color: var(--c-text-sub);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 8px;
+  font-family: inherit;
+}
+
+.view-mode-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--c-surface-disabled);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  width: 160px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.view-mode-toggle.compact {
+  width: 120px;
+  height: 36px;
+}
+
+.view-mode-toggle-knob {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: calc(50% - 4px);
+  background: var(--c-surface);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-1);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-mode-toggle-label {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.view-mode-toggle.compact .view-mode-toggle-label {
+  font-size: 11px;
+  gap: 2px;
+}
+
+.shuffle-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.shuffle-undo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  padding: 0;
+}
+
+.shuffle-undo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shuffle-run {
+  gap: 8px;
+  padding: 12px 32px;
+  font-size: 18px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2);
+  white-space: nowrap;
+}
+
+.shuffle-run:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.shuffle-controls-phone {
+  width: 100%;
+  gap: 8px;
+}
+
+.shuffle-controls-phone .shuffle-run {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 16px;
+}
+
+.phone-header {
+  height: 52px;
+  padding: 0 12px;
+}
+
+.phone-more {
+  position: relative;
+}
+
+.phone-more-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 200px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
+  padding: 6px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-more-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-text-main);
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.phone-more-menu button:hover {
+  background: var(--c-surface-hover);
+}
+
+.phone-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-roster,
+.phone-settings-screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-surface);
+  overflow: hidden;
+}
+
+.phone-roster-switch {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px 0;
+  flex-shrink: 0;
+}
+
+.phone-roster-switch-btn {
+  flex: 1;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-sub);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.phone-roster-switch-btn.on {
+  background: var(--c-primary-pale);
+  border-color: var(--c-primary);
+  color: var(--c-primary-hover);
+}
+
+.phone-shuffle-bar {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  background: var(--c-surface);
+  border-top: 1px solid var(--c-border);
+}
+
+.phone-tabbar {
+  height: 64px;
+  background: var(--c-surface);
+  border-top: 1px solid var(--c-border);
+  display: flex;
+  flex-shrink: 0;
+}
+
+.phone-tab {
+  flex: 1;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-text-sub);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.phone-tab[aria-current="page"] {
+  color: var(--c-primary-hover);
+}
+
+.phone-tab-icon {
+  display: flex;
+}
+
+.phone-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--c-surface);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-overlay-bar {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--c-border);
+  flex-shrink: 0;
+}
+
+.app-shell[data-kind="phone"] .app-canvas-toolbar {
+  flex-wrap: wrap;
+  max-width: calc(100% - 24px);
+  top: 12px;
+  left: 12px;
+}
+
+.app-shell[data-kind="phone"] .app-canvas-controls {
+  max-width: calc(100% - 24px);
+  bottom: 12px;
+  left: 12px;
+}
+
+.app-shell[data-kind="phone"] .app-settings-content {
+  overflow-y: auto;
+}
+
+.app-shell[data-kind="phone"] .app-settings-tab-body,
+.app-shell[data-kind="phone"] .app-settings-fill {
+  min-height: 0;
+}
+
 .app-settings-tabs {
   display: flex;
   border-bottom: 1px solid var(--c-border);
@@ -539,103 +802,4 @@ input[type="number"] {
 
 #settings-main-area {
   min-height: 0;
-}
-
-@media (max-width: 720px) {
-  .app-main {
-    flex-direction: column;
-  }
-
-  .app-canvas {
-    flex: 1 1 auto;
-    min-height: var(--app-canvas-min-height);
-    min-height: min(7.5rem, 30dvh);
-    min-width: 0;
-  }
-
-  .app-settings[data-open="true"] {
-    width: 100%;
-    height: auto;
-    max-height: var(--app-settings-stack-height);
-    max-height: min(45dvh, 360px);
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-    border-left: none;
-    border-top: 1px solid var(--c-border);
-  }
-
-  .app-settings[data-open="false"] {
-    height: 0;
-    width: 100%;
-    overflow: hidden;
-    border: none;
-  }
-
-  .app-header {
-    height: auto;
-    min-height: var(--app-header-height);
-    flex-wrap: wrap;
-    overflow-x: auto;
-  }
-
-  .app-header-actions {
-    flex: 1 1 auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    overflow-x: auto;
-  }
-
-  .app-footer {
-    height: auto;
-    min-height: var(--app-footer-height);
-    flex-wrap: wrap;
-    row-gap: var(--spacing-sm);
-    overflow-x: auto;
-    padding: var(--spacing-sm) var(--spacing-lg);
-  }
-
-  .app-footer-cluster {
-    flex: 1 1 auto;
-    justify-content: center;
-  }
-
-  .app-settings-content {
-    overflow-y: auto;
-  }
-
-  .app-settings-tab-body,
-  .app-settings-fill {
-    flex: none;
-    min-height: auto;
-  }
-
-  .app-settings-list {
-    height: auto;
-    overflow: visible;
-  }
-
-  .app-settings-list-body {
-    flex: none;
-    min-height: auto;
-    overflow: visible;
-  }
-
-  .app-canvas-toolbar {
-    flex-wrap: wrap;
-    max-width: calc(100% - 48px);
-  }
-
-  .app-canvas-controls {
-    max-width: calc(100% - 48px);
-  }
-
-  .app-settings-tabs {
-    overflow-x: auto;
-    min-width: 0;
-  }
-
-  .app-settings-tab {
-    flex: 1 0 auto;
-  }
 }

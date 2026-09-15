@@ -13,7 +13,10 @@ import ConstraintTab from "./settings/constraint/ConstraintTab";
 import GlobalTab from "./settings/global/GlobalTab";
 import { useStore } from "../stores";
 
-type Tab = "students" | "roles" | "groups" | "constraints" | "global";
+export type SettingsTab =
+  "students" | "roles" | "groups" | "constraints" | "global";
+
+type Tab = SettingsTab;
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "students", label: "生徒", icon: <Users size={16} /> },
@@ -76,7 +79,52 @@ const TabContainer: React.FC<{ title: string; children: React.ReactNode }> = ({
   </div>
 );
 
-const SettingsContent: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
+export const SettingsContent: React.FC<{ activeTab: Tab }> = ({
+  activeTab,
+}) => {
+  let body: React.ReactNode;
+  switch (activeTab) {
+    case "students":
+      body = (
+        <TabContainer title="生徒設定">
+          <StudentTab />
+        </TabContainer>
+      );
+      break;
+    case "roles":
+      body = (
+        <TabContainer title="役割設定">
+          <RoleTab />
+        </TabContainer>
+      );
+      break;
+    case "groups":
+      body = (
+        <TabContainer title="グループ設定">
+          <GroupTab />
+        </TabContainer>
+      );
+      break;
+    case "constraints":
+      body = (
+        <TabContainer title="条件設定">
+          <ConstraintTab />
+        </TabContainer>
+      );
+      break;
+    case "global":
+      body = (
+        <TabContainer title="全体設定">
+          <GlobalTab />
+        </TabContainer>
+      );
+      break;
+    default: {
+      const unhandled: never = activeTab;
+      throw new Error(`Unhandled settings tab: ${String(unhandled)}`);
+    }
+  }
+
   return (
     <div
       id="settings-content-area"
@@ -88,31 +136,7 @@ const SettingsContent: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
         padding: "var(--spacing-md)",
       }}
     >
-      {activeTab === "students" && (
-        <TabContainer title="生徒設定">
-          <StudentTab />
-        </TabContainer>
-      )}
-      {activeTab === "roles" && (
-        <TabContainer title="役割設定">
-          <RoleTab />
-        </TabContainer>
-      )}
-      {activeTab === "groups" && (
-        <TabContainer title="グループ設定">
-          <GroupTab />
-        </TabContainer>
-      )}
-      {activeTab === "constraints" && (
-        <TabContainer title="条件設定">
-          <ConstraintTab />
-        </TabContainer>
-      )}
-      {activeTab === "global" && (
-        <TabContainer title="全体設定">
-          <GlobalTab />
-        </TabContainer>
-      )}
+      {body}
     </div>
   );
 };
