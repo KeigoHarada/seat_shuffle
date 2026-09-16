@@ -15,7 +15,7 @@ import {
   type Point,
 } from "../utils/panZoomGesture";
 
-const DESKTOP_FIT_PADDING = 60;
+const WIDE_FIT_PADDING = 60;
 const COMPACT_FIT_PADDING = 24;
 
 type PinchSession = {
@@ -219,7 +219,7 @@ export const usePanZoom = (
     const padding =
       viewportWidth <= COMPACT_MAX_WIDTH_PX
         ? COMPACT_FIT_PADDING
-        : DESKTOP_FIT_PADDING;
+        : WIDE_FIT_PADDING;
 
     const result = calculateCenterPanZoom(
       seats,

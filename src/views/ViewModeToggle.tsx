@@ -1,8 +1,8 @@
 import React from "react";
 import { Eye, PenLine } from "lucide-react";
-import { useStore } from "../../stores";
+import { useStore } from "../stores";
 
-const DesktopViewModeToggle: React.FC = () => {
+const ViewModeToggle: React.FC = () => {
   const isViewMode = useStore((state) => state.isViewMode);
   const setIsViewMode = useStore((state) => state.setIsViewMode);
 
@@ -40,4 +40,4 @@ const DesktopViewModeToggle: React.FC = () => {
   );
 };
 
-export default DesktopViewModeToggle;
+export default ViewModeToggle;

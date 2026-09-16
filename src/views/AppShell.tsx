@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
-import Canvas from "../../components/canvas/Canvas";
-import SettingsPanel from "../../components/SettingsPanel";
-import { useCompactLayout } from "../../hooks/useCompactLayout";
-import { useStore } from "../../stores";
-import DesktopHeader from "./DesktopHeader";
-import DesktopFooter from "./DesktopFooter";
+import Canvas from "../components/canvas/Canvas";
+import SettingsPanel from "../components/SettingsPanel";
+import { useCompactLayout } from "../hooks/useCompactLayout";
+import { useStore } from "../stores";
+import AppHeader from "./AppHeader";
+import AppFooter from "./AppFooter";
 
-const DesktopApp: React.FC = () => {
+const AppShell: React.FC = () => {
   const isCompact = useCompactLayout();
   const isSettingsOpen = useStore((state) => state.isSettingsOpen);
   const setIsSettingsOpen = useStore((state) => state.setIsSettingsOpen);
@@ -23,7 +23,7 @@ const DesktopApp: React.FC = () => {
 
   return (
     <div className="app-shell" data-compact={isCompact ? "true" : "false"}>
-      <DesktopHeader
+      <AppHeader
         showSettings={effectiveSettingsOpen}
         onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
@@ -60,9 +60,9 @@ const DesktopApp: React.FC = () => {
         </aside>
       </div>
 
-      <DesktopFooter />
+      <AppFooter />
     </div>
   );
 };
 
-export default DesktopApp;
+export default AppShell;

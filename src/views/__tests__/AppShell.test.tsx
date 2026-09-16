@@ -1,8 +1,8 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useStore } from "../../../stores";
-import DesktopApp from "../DesktopApp";
+import { useStore } from "../../stores";
+import AppShell from "../AppShell";
 
 function mockMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
@@ -19,7 +19,7 @@ function mockMatchMedia(matches: boolean) {
   });
 }
 
-describe("DesktopApp compact chrome", () => {
+describe("AppShell compact chrome", () => {
   let container: HTMLDivElement;
   let root: ReturnType<typeof createRoot> | null = null;
 
@@ -51,7 +51,7 @@ describe("DesktopApp compact chrome", () => {
     window.innerWidth = 375;
 
     await act(async () => {
-      root?.render(<DesktopApp />);
+      root?.render(<AppShell />);
     });
 
     const shell = container.querySelector(".app-shell");
@@ -74,7 +74,7 @@ describe("DesktopApp compact chrome", () => {
     window.innerWidth = 1280;
 
     await act(async () => {
-      root?.render(<DesktopApp />);
+      root?.render(<AppShell />);
     });
 
     expect(

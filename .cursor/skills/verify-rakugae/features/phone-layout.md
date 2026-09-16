@@ -1,6 +1,6 @@
 # Compact layout
 
-Width 1023px and below keeps the same header / canvas / settings / footer chrome as desktop (VS Code-style). Settings overlay the canvas instead of stacking. Touch one-finger pan and pinch live on the canvas at every width.
+Width 1023px and below keeps the same header / canvas / settings / footer chrome as the wide layout (VS Code-style). Settings overlay the canvas instead of stacking. Touch one-finger pan and pinch live on the canvas at every width.
 
 ## Sub-features
 
@@ -30,7 +30,7 @@ Geometry, overflow, toolbar wrap, and touch pan are `npm run test:phone-layout`,
 
 ## Gotchas
 
-- There are no `#tab-phone-*` or `#btn-phone-shuffle` handles. Desktop recipes that click `#btn-header-settings` / `#btn-footer-shuffle` apply on compact too; the drawer starts **closed** on compact mount.
+- There are no `#tab-phone-*` or `#btn-phone-shuffle` handles. Recipes that click `#btn-header-settings` / `#btn-footer-shuffle` apply on compact too; the drawer starts **closed** on compact mount.
 - Toolbar labels are visually hidden under 1023px; accessible names remain `座席を追加`, `図形`, `テンプレート`, `自動割り当て`.
 - Header button labels (はじめてガイド / 読み込み / 保存 / 設定) are visually hidden; use ids or `aria-label`.
 - iPad landscape 1024px is the wide sidebar, but touch pan still works.

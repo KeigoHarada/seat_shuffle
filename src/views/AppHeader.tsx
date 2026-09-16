@@ -1,18 +1,18 @@
 import React, { useRef } from "react";
 import { Settings, Download, Upload, Sprout } from "lucide-react";
-import { useCsvSettings } from "../../hooks/useCsvSettings";
-import { useCompactLayout } from "../../hooks/useCompactLayout";
-import Input from "../../components/ui/Input";
-import Logo from "../../components/ui/Logo";
-import { useStore } from "../../stores";
-import { useOnboardingStore } from "../../stores/onboarding";
+import { useCsvSettings } from "../hooks/useCsvSettings";
+import { useCompactLayout } from "../hooks/useCompactLayout";
+import Input from "../components/ui/Input";
+import Logo from "../components/ui/Logo";
+import { useStore } from "../stores";
+import { useOnboardingStore } from "../stores/onboarding";
 
 interface HeaderProps {
   showSettings: boolean;
   onToggleSettings: () => void;
 }
 
-const DesktopHeader: React.FC<HeaderProps> = ({
+const AppHeader: React.FC<HeaderProps> = ({
   showSettings,
   onToggleSettings,
 }) => {
@@ -92,4 +92,4 @@ const DesktopHeader: React.FC<HeaderProps> = ({
   );
 };
 
-export default DesktopHeader;
+export default AppHeader;
