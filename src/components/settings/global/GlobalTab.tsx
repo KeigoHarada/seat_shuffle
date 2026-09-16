@@ -18,6 +18,7 @@ const GlobalTab: React.FC = () => {
   >(null);
 
   const timerRef = useRef<number | null>(null);
+  const settingsWhenTestStarted = useRef(appSettings);
 
   const clearTestPlay = useCallback(() => {
     if (timerRef.current) {
@@ -28,10 +29,12 @@ const GlobalTab: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isTesting) {
+    const settingsChanged = settingsWhenTestStarted.current !== appSettings;
+    settingsWhenTestStarted.current = appSettings;
+    if (settingsChanged && isTesting) {
       clearTestPlay();
     }
-  }, [appSettings]);
+  }, [appSettings, isTesting, clearTestPlay]);
 
   useEffect(() => {
     if (!isTesting) return;

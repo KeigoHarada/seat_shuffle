@@ -3,6 +3,10 @@ import { Seat, CanvasObject } from "../types";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
 import { DragNode, checkCollision, screenToWorld } from "../utils/canvas";
+import {
+  tryReleasePointerCapture,
+  trySetPointerCapture,
+} from "../utils/panZoomGesture";
 import { showToast } from "../stores/toast";
 
 export const useCanvasDrag = (
@@ -80,7 +84,7 @@ export const useCanvasDrag = (
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
       });
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      trySetPointerCapture(e.currentTarget, e.pointerId);
     },
     [nodes, selectedIds],
   );
@@ -207,12 +211,7 @@ export const useCanvasDrag = (
       }
 
       setDragState(null);
-      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-        try {
-          e.currentTarget.releasePointerCapture(e.pointerId);
-        } catch (err) {
-        }
-      }
+      tryReleasePointerCapture(e.currentTarget, e.pointerId);
     },
     [dragState, nodes, seats, updateSeat, updateObject],
   );

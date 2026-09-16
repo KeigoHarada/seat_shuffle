@@ -9,6 +9,8 @@ import {
   panByDelta,
   pointerDistance,
   pointerMidpoint,
+  tryReleasePointerCapture,
+  trySetPointerCapture,
   zoomAroundPoint,
   type Point,
 } from "../utils/panZoomGesture";
@@ -127,10 +129,7 @@ export const usePanZoom = (
 
       if (pointersRef.current.size >= 2) {
         beginPinch();
-        try {
-          e.currentTarget.setPointerCapture(e.pointerId);
-        } catch {
-        }
+        trySetPointerCapture(e.currentTarget, e.pointerId);
         return true;
       }
 
@@ -138,11 +137,7 @@ export const usePanZoom = (
       if (e.button === 2 || (e.button === 0 && (forcePan || isTouch))) {
         setIsPanning(true);
         panSessionRef.current = { x: e.clientX, y: e.clientY };
-        try {
-          e.currentTarget.setPointerCapture(e.pointerId);
-        } catch {
-          // Capture can fail on synthetic events; client-delta pan still works.
-        }
+        trySetPointerCapture(e.currentTarget, e.pointerId);
         return true;
       }
       return false;
@@ -209,10 +204,7 @@ export const usePanZoom = (
       setIsPanning(false);
     }
 
-    const target = e.currentTarget;
-    if (target?.hasPointerCapture?.(e.pointerId)) {
-      target.releasePointerCapture(e.pointerId);
-    }
+    tryReleasePointerCapture(e.currentTarget, e.pointerId);
   }, []);
 
   const resetView = useCallback(() => {

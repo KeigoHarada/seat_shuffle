@@ -59,3 +59,30 @@ export function pointerDistance(a: Point, b: Point): number {
 export function pointerMidpoint(a: Point, b: Point): Point {
   return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
 }
+
+export function trySetPointerCapture(
+  target: EventTarget | null,
+  pointerId: number,
+): void {
+  if (!(target instanceof Element)) return;
+  if (typeof target.setPointerCapture !== "function") return;
+  try {
+    target.setPointerCapture(pointerId);
+  } catch {
+    return;
+  }
+}
+
+export function tryReleasePointerCapture(
+  target: EventTarget | null,
+  pointerId: number,
+): void {
+  if (!(target instanceof Element)) return;
+  if (typeof target.hasPointerCapture !== "function") return;
+  if (!target.hasPointerCapture(pointerId)) return;
+  try {
+    target.releasePointerCapture(pointerId);
+  } catch {
+    return;
+  }
+}
