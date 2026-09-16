@@ -107,6 +107,7 @@ const SeatNode: React.FC<Props> = ({
     userSelect: "none",
     transition: isDragging ? "none" : "all 0.1s ease",
     pointerEvents: isGhost ? "none" : "auto",
+    touchAction: "none",
   };
 
   return (
@@ -130,7 +131,7 @@ const SeatNode: React.FC<Props> = ({
         e.stopPropagation();
         if (onDoubleClick) onDoubleClick(e);
       }}
-      title="右クリックでメニュー / ドラッグで移動"
+      title="長押しまたは右クリックでメニュー / ドラッグで移動"
     >
       {student ? (
         <>

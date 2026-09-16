@@ -30,6 +30,7 @@ Preconditions:
 ## Gotchas
 
 - The toggle is one button containing both labels; click `#btn-footer-viewmode`, not the word `閲覧` as a separate control (both labels stay in the tree).
+- Compact width hides the 編集/閲覧 text and keeps the icons; the control is still `#btn-footer-viewmode`.
 - `isSettingsOpen` stays true in the store while viewing; the App gate is `isSettingsOpen && !isViewMode`. Do not treat store `isSettingsOpen` as "drawer visible".
 - View-mode shuffle is slow; do not use it as the fast shuffle proof in [shuffle.md](./shuffle.md).
 - Group color fills on seats are suppressed in view mode (`SeatNode` uses surface color).

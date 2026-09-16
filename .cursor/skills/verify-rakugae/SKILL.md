@@ -170,6 +170,8 @@ Commands: `launch`, `doctor`, `dismiss-welcome`, `click`, `fill`, `count`, `wait
 
 Optional flags: `--run-id`, `--port`, `--viewport WIDTHxHEIGHT` (default `1440x900`; phone proof uses `390x844`). Env: `RAKUGAE_VERIFY_RUN_ID`, `RAKUGAE_VERIFY_PORT`, `RAKUGAE_VERIFY_VIEWPORT`, `RAKUGAE_VERIFY_ROOT` (default `/tmp/rakugae-verify`), `RAKUGAE_CHROME` (default `/usr/bin/google-chrome-stable`).
 
+Compact chrome (width ≤ 1023) is the same shell with an overlay settings panel. Geometry (overflow, toolbar wrap, overlay, touch pan) is `npm run test:phone-layout`.
+
 If `playwright-core` is missing, the helper tells you to run the `npm install --prefix` line above. Chrome is launched from `/usr/bin/google-chrome-stable`. Do not use `/usr/local/bin/google-chrome` here: that wrapper forces port 9222 and `~/.config/google-chrome`, which is the shared desktop session. This skill does not download Playwright browsers.
 
 Keep the feature map honest with `/maintain-verification-skill` when UI strings, ids, or startup change.

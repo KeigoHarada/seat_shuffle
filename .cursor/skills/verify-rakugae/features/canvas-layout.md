@@ -36,5 +36,6 @@ Preconditions:
 - Seats are `div.seat-node-item` with no role. Count that class, not `getByRole`.
 - Toolbar `pointerdown` is stopped on the toolbar root; click the button name, not a canvas coordinate.
 - `自動割り当て` needs empty seats; the default sample has every seat filled, so assign does nothing visible until you add a seat or clear a student.
-- View mode hides editing tools; switch to `編集` via `#btn-footer-viewmode` first.
+- View mode hides editing tools; switch to `編集` via `#btn-footer-viewmode`.
+- Compact toolbar buttons keep accessible names (`座席を追加`) via `aria-label` even when the visible label is hidden.
 - Right-click canvas context menu is an alternate add path; it is not covered by the named toolbar recipe above — report skip if you cannot open it via the helper.

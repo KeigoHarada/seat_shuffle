@@ -101,6 +101,7 @@ const CanvasObjectNode: React.FC<Props> = ({
 
   return (
     <div
+      className="canvas-object-node"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -128,6 +129,7 @@ const CanvasObjectNode: React.FC<Props> = ({
         zIndex: isDragging ? 2 : isSelected ? 1 : 0,
         opacity: isDragging ? 0.8 : 1,
         cursor: isEditing ? "text" : "grab",
+        touchAction: "none",
       }}
     >
       {/* Visual Background Layer */}

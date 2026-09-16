@@ -4,6 +4,7 @@ import {
   calculateCenterPanZoom,
   worldToGrid,
   screenToWorld,
+  contextMenuFromClient,
   clampMenuPosition,
 } from "../canvas";
 import { generateTemplate } from "../templates";
@@ -51,6 +52,14 @@ describe("canvas utils", () => {
       expect(result.scale).toBeLessThan(1.0);
       expect(result.scale).toBeGreaterThanOrEqual(0.5);
     });
+
+    it("can scale below 50% so a classroom fits a phone canvas", () => {
+      const { seats, objects } = generateTemplate("classroom", 0, 0);
+      const result = calculateCenterPanZoom(seats, objects, 375, 495, 24, 0.25);
+
+      expect(result.scale).toBeLessThan(0.5);
+      expect(result.scale).toBeGreaterThanOrEqual(0.25);
+    });
   });
 
   describe("coordinate conversions", () => {
@@ -70,6 +79,17 @@ describe("canvas utils", () => {
       // worldY = (200 - 50 - 20) / 1.5 = 130 / 1.5 = 86.666...
       expect(worldX).toBe(100);
       expect(Math.round(worldY)).toBe(87);
+    });
+
+    it("builds a context menu point from client coordinates", () => {
+      const rect = { left: 40, top: 20 } as DOMRect;
+      const menu = contextMenuFromClient(90, 70, rect, { x: 10, y: 5 }, 2);
+      expect(menu).toEqual({
+        x: 50,
+        y: 50,
+        worldX: 20,
+        worldY: 22.5,
+      });
     });
   });
 

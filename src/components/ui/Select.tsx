@@ -54,7 +54,7 @@ const Select: React.FC<SelectProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: PointerEvent) => {
       const target = e.target as Node;
       if (
         containerRef.current &&
@@ -66,9 +66,10 @@ const Select: React.FC<SelectProps> = ({
       }
     };
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("pointerdown", handleClickOutside);
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("pointerdown", handleClickOutside);
   }, [isOpen]);
 
   const handleSelect = (val: string) => {

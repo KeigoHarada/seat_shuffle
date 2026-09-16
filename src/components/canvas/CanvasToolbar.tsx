@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Shapes, LayoutTemplate, Wand2 } from "lucide-react";
+import { usePressAction } from "../../hooks/usePressAction";
 
 interface Props {
   onAddSeat: () => void;
@@ -9,6 +10,31 @@ interface Props {
   onAutoAssign: () => void;
 }
 
+const TEMPLATES = [
+  { id: "classroom", label: "教室" },
+  { id: "group4", label: "4人席" },
+  { id: "group6_v", label: "6人席（縦）" },
+  { id: "group6_h", label: "6人席（横）" },
+] as const;
+
+const ToolbarMenuItem: React.FC<{
+  id?: string;
+  children: React.ReactNode;
+  onSelect: () => void;
+}> = ({ id, children, onSelect }) => {
+  const press = usePressAction(onSelect);
+  return (
+    <button
+      id={id}
+      type="button"
+      className="app-canvas-toolbar-menu-item"
+      {...press}
+    >
+      {children}
+    </button>
+  );
+};
+
 const CanvasToolbar: React.FC<Props> = ({
   onAddSeat,
   onAddRectangle,
@@ -17,258 +43,138 @@ const CanvasToolbar: React.FC<Props> = ({
   onAutoAssign,
 }) => {
   const [openMenu, setOpenMenu] = useState<"shapes" | "templates" | null>(null);
+  const addSeatPress = usePressAction(onAddSeat);
+  const autoAssignPress = usePressAction(onAutoAssign);
+  const shapesPress = usePressAction(() =>
+    setOpenMenu((current) => (current === "shapes" ? null : "shapes")),
+  );
+  const templatesPress = usePressAction(() =>
+    setOpenMenu((current) => (current === "templates" ? null : "templates")),
+  );
 
   useEffect(() => {
-    const handleOutsideClick = () => setOpenMenu(null);
+    const handleOutsideClick = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest(".app-canvas-toolbar")) {
+        return;
+      }
+      setOpenMenu(null);
+    };
     if (openMenu) {
       window.addEventListener("pointerdown", handleOutsideClick);
     }
     return () => window.removeEventListener("pointerdown", handleOutsideClick);
   }, [openMenu]);
 
-  const buttonStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    padding: "6px 12px",
-    borderRadius: "var(--radius-md)",
-    border: "none",
-    background: "transparent",
-    color: "var(--c-text-main)",
-    fontSize: 14,
-    fontWeight: 500,
-    cursor: "pointer",
-    transition: "background-color 0.1s",
-  };
-
-  const menuItemStyle = {
-    padding: "8px 16px",
-    textAlign: "left" as const,
-    background: "none",
-    border: "none",
-    color: "var(--c-text-main)",
-    fontSize: 14,
-    cursor: "pointer",
-    transition: "background-color 0.1s",
-    width: "100%",
-  };
-
   return (
     <div
       className="app-canvas-toolbar"
-      style={{
-        position: "absolute",
-        top: 24,
-        left: 24,
-        display: "flex",
-        backgroundColor: "var(--c-surface)",
-        border: "1px solid var(--c-border)",
-        borderRadius: "var(--radius-md)",
-        boxShadow: "var(--shadow-1)",
-        padding: 4,
-        gap: 4,
-        zIndex: 100,
-        userSelect: "none",
-      }}
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
       onWheel={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.stopPropagation()}
     >
       <button
-        onClick={onAddSeat}
-        style={buttonStyle}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = "transparent")
-        }
+        type="button"
+        className="app-canvas-toolbar-btn"
+        aria-label="座席を追加"
+        title="座席を追加"
+        {...addSeatPress}
       >
-        <Plus size={16} /> 座席を追加
+        <Plus size={16} />
+        <span className="app-canvas-toolbar-label">座席を追加</span>
       </button>
 
-      <div
-        style={{
-          width: 1,
-          backgroundColor: "var(--c-border)",
-          margin: "4px 0",
-        }}
-      />
+      <div className="app-canvas-toolbar-divider" />
 
-      <div style={{ position: "relative" }}>
+      <div className="app-canvas-toolbar-menu-wrap">
         <button
-          onClick={() => setOpenMenu(openMenu === "shapes" ? null : "shapes")}
-          style={{
-            ...buttonStyle,
-            backgroundColor:
-              openMenu === "shapes" ? "var(--c-surface-hover)" : "transparent",
-          }}
-          onMouseEnter={(e) => {
-            if (openMenu !== "shapes")
-              e.currentTarget.style.backgroundColor = "var(--c-surface-hover)";
-          }}
-          onMouseLeave={(e) => {
-            if (openMenu !== "shapes")
-              e.currentTarget.style.backgroundColor = "transparent";
-          }}
+          type="button"
+          className={
+            openMenu === "shapes"
+              ? "app-canvas-toolbar-btn is-open"
+              : "app-canvas-toolbar-btn"
+          }
+          aria-label="図形"
+          aria-expanded={openMenu === "shapes"}
+          title="図形"
+          {...shapesPress}
         >
-          <Shapes size={16} /> 図形
+          <Shapes size={16} />
+          <span className="app-canvas-toolbar-label">図形</span>
         </button>
 
         {openMenu === "shapes" && (
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              marginTop: 4,
-              backgroundColor: "var(--c-surface)",
-              border: "1px solid var(--c-border)",
-              borderRadius: "var(--radius-md)",
-              boxShadow: "var(--shadow-1)",
-              padding: "4px 0",
-              minWidth: 120,
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <button
-              onClick={() => {
+          <div className="app-canvas-toolbar-menu">
+            <ToolbarMenuItem
+              onSelect={() => {
                 onAddRectangle();
                 setOpenMenu(null);
               }}
-              style={menuItemStyle}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--c-surface-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
             >
               四角形
-            </button>
-            <button
-              onClick={() => {
+            </ToolbarMenuItem>
+            <ToolbarMenuItem
+              onSelect={() => {
                 onAddCircle();
                 setOpenMenu(null);
               }}
-              style={menuItemStyle}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--c-surface-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
             >
               円形
-            </button>
+            </ToolbarMenuItem>
           </div>
         )}
       </div>
 
-      <div
-        style={{
-          width: 1,
-          backgroundColor: "var(--c-border)",
-          margin: "4px 0",
-        }}
-      />
+      <div className="app-canvas-toolbar-divider" />
 
-      <div id="btn-toolbar-template" style={{ position: "relative" }}>
+      <div id="btn-toolbar-template" className="app-canvas-toolbar-menu-wrap">
         <button
-          onClick={() =>
-            setOpenMenu(openMenu === "templates" ? null : "templates")
+          type="button"
+          className={
+            openMenu === "templates"
+              ? "app-canvas-toolbar-btn is-open"
+              : "app-canvas-toolbar-btn"
           }
-          style={{
-            ...buttonStyle,
-            backgroundColor:
-              openMenu === "templates"
-                ? "var(--c-surface-hover)"
-                : "transparent",
-          }}
-          onMouseEnter={(e) => {
-            if (openMenu !== "templates")
-              e.currentTarget.style.backgroundColor = "var(--c-surface-hover)";
-          }}
-          onMouseLeave={(e) => {
-            if (openMenu !== "templates")
-              e.currentTarget.style.backgroundColor = "transparent";
-          }}
+          aria-label="テンプレート"
+          aria-expanded={openMenu === "templates"}
+          title="テンプレート"
+          {...templatesPress}
         >
-          <LayoutTemplate size={16} /> テンプレート
+          <LayoutTemplate size={16} />
+          <span className="app-canvas-toolbar-label">テンプレート</span>
         </button>
 
         {openMenu === "templates" && (
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              marginTop: 4,
-              backgroundColor: "var(--c-surface)",
-              border: "1px solid var(--c-border)",
-              borderRadius: "var(--radius-md)",
-              boxShadow: "var(--shadow-1)",
-              padding: "4px 0",
-              minWidth: 160,
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            {[
-              { id: "classroom", label: "教室" },
-              { id: "group4", label: "4人席" },
-              { id: "group6_v", label: "6人席（縦）" },
-              { id: "group6_h", label: "6人席（横）" },
-            ].map((tpl) => (
-              <button
+          <div className="app-canvas-toolbar-menu">
+            {TEMPLATES.map((tpl) => (
+              <ToolbarMenuItem
                 key={tpl.id}
                 id={`btn-template-${tpl.id}`}
-                onClick={() => {
+                onSelect={() => {
                   onApplyTemplate(tpl.id);
                   setOpenMenu(null);
                 }}
-                style={menuItemStyle}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "var(--c-bg-sub)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
               >
                 {tpl.label}
-              </button>
+              </ToolbarMenuItem>
             ))}
           </div>
         )}
       </div>
 
-      <div
-        style={{
-          width: 1,
-          backgroundColor: "var(--c-border)",
-          margin: "4px 0",
-        }}
-      />
+      <div className="app-canvas-toolbar-divider" />
+
       <button
-        onClick={onAutoAssign}
-        style={{
-          ...buttonStyle,
-          color: "var(--c-primary)",
-        }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = "transparent")
-        }
+        type="button"
+        className="app-canvas-toolbar-btn app-canvas-toolbar-btn-accent"
+        aria-label="自動割り当て"
         title="生徒を空席に自動割り当て"
+        {...autoAssignPress}
       >
-        <Wand2 size={16} /> 自動割り当て
+        <Wand2 size={16} />
+        <span className="app-canvas-toolbar-label">自動割り当て</span>
       </button>
     </div>
   );

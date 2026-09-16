@@ -14,25 +14,9 @@ export const GuideHubContent: React.FC = () => {
     GUIDE_ITEMS.find((item) => item.id === selectedTab) || TOUR_ITEM;
 
   return (
-    <main
-      style={{
-        flex: 1,
-        padding: "24px",
-        overflowY: "auto",
-        display: "flex",
-        flexDirection: "column",
-        gap: "20px",
-      }}
-    >
+    <main className="guide-hub-content">
       {/* Title */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "16px",
-        }}
-      >
+      <div className="guide-hub-title-row">
         <div>
           <h3
             className="text-title2"
@@ -290,13 +274,7 @@ export const GuideHubContent: React.FC = () => {
                 >
                   <Keyboard size={15} /> 便利なショートカット:
                 </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "8px",
-                  }}
-                >
+                <div className="guide-hub-shortcuts">
                   {currentItem.shortcuts.map((sc, idx) => (
                     <div
                       key={idx}

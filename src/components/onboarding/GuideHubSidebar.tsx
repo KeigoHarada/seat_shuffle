@@ -26,19 +26,7 @@ export const GuideHubSidebar: React.FC = () => {
   };
 
   return (
-    <aside
-      style={{
-        width: "260px",
-        backgroundColor: "var(--c-bg-sub)",
-        borderRight: "1px solid var(--c-border)",
-        padding: "12px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-        overflowY: "auto",
-        flexShrink: 0,
-      }}
-    >
+    <aside className="guide-hub-sidebar">
       <button
         onClick={() => setSelectedTab("tour")}
         style={{

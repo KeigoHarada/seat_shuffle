@@ -22,14 +22,7 @@ export const GuideHubModal: React.FC = () => {
       `}</style>
       <div className="modal-overlay" onClick={closeGuideHub}>
         <div
-          className="modal-content"
-          style={{
-            width: "840px",
-            maxWidth: "90vw",
-            height: "min(620px, 90vh)",
-            display: "flex",
-            flexDirection: "column",
-          }}
+          className="modal-content guide-hub"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -58,7 +51,7 @@ export const GuideHubModal: React.FC = () => {
           </div>
 
           {/* 2-Column Body */}
-          <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+          <div className="guide-hub-body">
             <GuideHubSidebar />
             <GuideHubContent />
           </div>

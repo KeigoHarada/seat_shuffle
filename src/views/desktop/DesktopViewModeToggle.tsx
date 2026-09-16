@@ -2,20 +2,17 @@ import React from "react";
 import { Eye, PenLine } from "lucide-react";
 import { useStore } from "../../stores";
 
-interface ViewModeToggleProps {
-  compact?: boolean;
-}
-
-const ViewModeToggle: React.FC<ViewModeToggleProps> = ({ compact = false }) => {
+const DesktopViewModeToggle: React.FC = () => {
   const isViewMode = useStore((state) => state.isViewMode);
   const setIsViewMode = useStore((state) => state.setIsViewMode);
 
   return (
     <button
       id="btn-footer-viewmode"
-      className={compact ? "view-mode-toggle compact" : "view-mode-toggle"}
+      className="view-mode-toggle"
       onClick={() => setIsViewMode(!isViewMode)}
       type="button"
+      aria-label="編集と閲覧の切り替え"
     >
       <div
         className="view-mode-toggle-knob"
@@ -27,7 +24,8 @@ const ViewModeToggle: React.FC<ViewModeToggleProps> = ({ compact = false }) => {
           color: !isViewMode ? "var(--c-text-main)" : "var(--c-text-sub)",
         }}
       >
-        <PenLine size={compact ? 14 : 16} /> 編集
+        <PenLine size={16} />
+        <span className="app-chrome-label">編集</span>
       </div>
       <div
         className="view-mode-toggle-label"
@@ -35,10 +33,11 @@ const ViewModeToggle: React.FC<ViewModeToggleProps> = ({ compact = false }) => {
           color: isViewMode ? "var(--c-text-main)" : "var(--c-text-sub)",
         }}
       >
-        <Eye size={compact ? 14 : 16} /> 閲覧
+        <Eye size={16} />
+        <span className="app-chrome-label">閲覧</span>
       </div>
     </button>
   );
 };
 
-export default ViewModeToggle;
+export default DesktopViewModeToggle;

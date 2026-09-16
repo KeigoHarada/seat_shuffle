@@ -23,7 +23,7 @@ The right-hand settings drawer holds roster, roles, groups, constraints, and glo
 Preconditions:
 
 - Doctor green; welcome dismissed; not in 閲覧 mode.
-- `#settings-main-area` visible (default launch has the drawer open).
+- `#settings-main-area` visible on wide chrome (default launch has the drawer open). On compact (≤ 1023) the overlay starts closed; `click --id btn-header-settings` first.
 - `#tab-btn-students` selected; heading `生徒設定`; sample names such as `く太郎` exist in the list.
 
 - **Open drawer if needed.** If `#student-add-form` is missing, `click --id btn-header-settings`. Form heading `新規生徒の追加` appears.
@@ -35,6 +35,7 @@ Preconditions:
 ## Gotchas
 
 - Header `設定` and tab `設定` (`#tab-btn-global`) share the visible label `設定`. Use ids when both are on screen.
+- Compact overlay uses the same `#tab-btn-students` heading `生徒設定` as the desktop sidebar. It starts closed; open it with `#btn-header-settings`.
 - Gender defaults to その他 if left unset (`StudentAddForm`). Do not assert a specific gender unless you chose `性別を選択`.
 - Roster rows are not links; proof is the name text plus storage length.
 - Roster names live in list textboxes. `wait-text --text "検証太郎"` may miss them; prove with eval `students.length` and a snapshot that includes `textbox "名前": 検証太郎`.

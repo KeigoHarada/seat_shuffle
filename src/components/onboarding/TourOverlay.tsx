@@ -243,8 +243,6 @@ export const TourOverlay: React.FC = () => {
     const defaultStyle: React.CSSProperties = {
       position: "fixed",
       zIndex: 1002,
-      width: "360px",
-      maxWidth: "calc(100vw - 32px)",
     };
 
     let baseTop = 0;
@@ -260,8 +258,8 @@ export const TourOverlay: React.FC = () => {
     }
 
     const margin = 16;
-    const tooltipWidth = 360;
-    const tooltipHeight = 240;
+    const tooltipWidth = Math.min(360, window.innerWidth - 32);
+    const tooltipHeight = Math.min(240, window.innerHeight * 0.55);
 
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
@@ -405,8 +403,8 @@ export const TourOverlay: React.FC = () => {
       {/* Tooltip Card */}
       <div
         ref={tooltipRef}
+        className="tooltip-card-mock tour-tooltip"
         style={{ ...getTooltipStyle(), pointerEvents: "auto" }}
-        className="tooltip-card-mock"
       >
         <div
           style={{

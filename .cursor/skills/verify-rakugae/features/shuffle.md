@@ -37,3 +37,4 @@ Preconditions:
 - Toast is a timed overlay; capture it immediately. A late screenshot may miss it; the seat permutation still counts as proof if ids changed.
 - Undo is disabled when `pastSeats` is empty; shuffle must run first.
 - Do not prove shuffle by calling `optimizeShuffle` from eval.
+- Compact width (≤ 1023) still uses `#btn-footer-shuffle`. There is no phone-only shuffle control.

@@ -65,6 +65,7 @@ const Canvas: React.FC = () => {
     handleNodeDragPointerDown,
     handleNodeDragPointerMove,
     handleNodeDragPointerUp,
+    cancelDrag,
   } = useCanvasDrag(
     seats,
     objects,
@@ -108,6 +109,8 @@ const Canvas: React.FC = () => {
     position: "relative",
     overflow: "hidden",
     touchAction: "none",
+    userSelect: "none",
+    WebkitUserSelect: "none",
     cursor: isPanning
       ? "grabbing"
       : isZoomMode
@@ -140,12 +143,22 @@ const Canvas: React.FC = () => {
     setContextMenu,
   });
 
-  const { handleNodePointerDown, handleSeatDoubleClick } = useNodeEvents({
+  const {
+    handleNodePointerDown,
+    handleNodeLongPressMove,
+    handleNodeLongPressUp,
+    handleSeatDoubleClick,
+  } = useNodeEvents({
     seats,
     selectedIds,
     toggleSelection,
     selectOnly,
     viewportRef,
+    pan,
+    scale,
+    isViewMode,
+    cancelDrag,
+    setContextMenu,
     setPopoverPos,
     setAssignPopoverSeatId,
     setIsSettingsOpen,
@@ -279,6 +292,7 @@ const Canvas: React.FC = () => {
           width: 0,
           height: 0,
           overflow: "visible",
+          zIndex: 1,
         }}
       >
         <CanvasNodes
@@ -288,6 +302,10 @@ const Canvas: React.FC = () => {
           selectedIds={selectedIds}
           scale={scale}
           handleNodePointerDown={isViewMode ? () => {} : handleNodePointerDown}
+          handleNodeLongPressMove={
+            isViewMode ? () => {} : handleNodeLongPressMove
+          }
+          handleNodeLongPressUp={isViewMode ? () => {} : handleNodeLongPressUp}
           handleSeatDoubleClick={isViewMode ? () => {} : handleSeatDoubleClick}
           updateObject={updateObject}
           selectionBox={selectionBox}
