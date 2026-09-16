@@ -1,4 +1,4 @@
-import { GenderType } from "../constants";
+export type GenderType = "male" | "female" | "other";
 
 export type SeatId = string;
 
@@ -46,10 +46,6 @@ export interface CanvasObject {
 }
 
 export interface AppSettings {
-  gridRows: number;
-  gridCols: number;
-  soundEnabled: boolean;
-  theme: "light" | "dark" | "system";
   algorithm: "random" | "optimize";
   shuffleAnimation: "none" | "confetti" | "slide" | "flash";
   autoAssignAlgorithm:
@@ -89,7 +85,7 @@ export type StudentGroupConstraint = BaseConstraint & {
 export type GroupMatchConstraint = BaseConstraint & {
   type: "group-match";
   targetType: "role" | "gender";
-  targetId: string; // roleId or GenderType
+  targetId: string;
   groupIds: string[];
   minCount: number;
 };

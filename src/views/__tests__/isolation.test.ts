@@ -10,5 +10,11 @@ describe("responsive shell", () => {
     const app = readFileSync(join(SRC, "App.tsx"), "utf8");
     expect(app).not.toMatch(/PhoneApp/);
     expect(app).not.toMatch(/useShellKind/);
+    expect(app).not.toMatch(/DonationModal/);
+  });
+
+  it("does not ship the unused in-app donation module", () => {
+    expect(existsSync(join(SRC, "components/donation"))).toBe(false);
+    expect(existsSync(join(SRC, "stores/donation.ts"))).toBe(false);
   });
 });

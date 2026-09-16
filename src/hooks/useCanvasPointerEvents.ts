@@ -17,12 +17,7 @@ interface UseCanvasPointerEventsProps {
   viewportRef: RefObject<HTMLDivElement | null>;
   clearSelection: () => void;
   startSelectionBox: (x: number, y: number) => void;
-  updateSelectionBox: (
-    x: number,
-    y: number,
-    ctrl: boolean,
-    ids: string[],
-  ) => void;
+  updateSelectionBox: (x: number, y: number) => void;
   endSelectionBox: () => void;
   handlePointerDown: (e: PointerEvent, forcePan: boolean) => boolean;
   handlePointerMove: (e: PointerEvent) => void;
@@ -50,8 +45,6 @@ export const useCanvasPointerEvents = ({
 }: UseCanvasPointerEventsProps) => {
   const pointerDownPosRef = useRef({ x: 0, y: 0 });
   const isMarqueeRef = useRef(false);
-  const initialCtrlPressedRef = useRef(false);
-  const initialSelectedIdsRef = useRef<string[]>([]);
   const longPressTimerRef = useRef<number | null>(null);
 
   const clearLongPress = useCallback(() => {
@@ -122,8 +115,6 @@ export const useCanvasPointerEvents = ({
       if (e.button === 0 && canvasTool === "select" && !isSpaceMode) {
         e.currentTarget.setPointerCapture(e.pointerId);
         isMarqueeRef.current = true;
-        initialCtrlPressedRef.current = false;
-        initialSelectedIdsRef.current = [];
 
         const rect = viewportRef.current!.getBoundingClientRect();
         const { worldX, worldY } = screenToWorld(
@@ -170,12 +161,7 @@ export const useCanvasPointerEvents = ({
           pan,
           scale,
         );
-        updateSelectionBox(
-          worldX,
-          worldY,
-          initialCtrlPressedRef.current,
-          initialSelectedIdsRef.current,
-        );
+        updateSelectionBox(worldX, worldY);
       }
     },
     [
