@@ -58,7 +58,7 @@ export const useCanvasDrag = (
       const node = nodes.find((n) => n.id === id);
       if (!node) return;
 
-      if (isRightClick && !node.isSeat) return; // Right click swap only for seats
+      if (isRightClick && !node.isSeat) return;
 
       const draggedIds =
         !isRightClick && selectedIds.includes(id) ? selectedIds : [id];
@@ -211,7 +211,6 @@ export const useCanvasDrag = (
         try {
           e.currentTarget.releasePointerCapture(e.pointerId);
         } catch (err) {
-          // Ignore DOMException if capture is already released
         }
       }
     },

@@ -1,21 +1,14 @@
 import React from "react";
 
 export interface LogoProps {
-  /** サイズバリエーション または ピクセル高さ (デフォルト: "md" / 36px) */
   size?: "sm" | "md" | "lg" | number;
-  /** 「席替え支援Webアプリ」などのサブタグラインを表示するか */
   showTagline?: boolean;
-  /** 表示バリエーション: フルロゴ(full)、コンパクト(compact)、アイコンのみ(icon)、テキストのみ(text) */
   variant?: "full" | "compact" | "icon" | "text";
-  /** タイトルタグを h1 としてアクセシビリティマークアップするか (デフォルト: true) */
   asH1?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
 
-/**
- * ラクガエのブランドシンボルマーク (SVG)
- */
 export const BrandSymbol: React.FC<{
   size?: number;
   className?: string;
@@ -64,7 +57,6 @@ export const BrandSymbol: React.FC<{
         </filter>
       </defs>
 
-      {/* ベース Squircle */}
       <rect width="64" height="64" rx="16" fill="url(#rakugae-sym-grad)" />
       <rect
         x="1"
@@ -77,7 +69,6 @@ export const BrandSymbol: React.FC<{
         strokeWidth="1.5"
       />
 
-      {/* 上部円弧矢印 (左席 → 右席) */}
       <path
         d="M 32 16 C 43 16 48 21 48 28"
         stroke="#FFFFFF"
@@ -94,7 +85,6 @@ export const BrandSymbol: React.FC<{
         fill="none"
       />
 
-      {/* 下部円弧矢印 (右席 → 左席) */}
       <path
         d="M 32 48 C 21 48 16 43 16 36"
         stroke="#FFFFFF"
@@ -111,7 +101,6 @@ export const BrandSymbol: React.FC<{
         fill="none"
       />
 
-      {/* 左上の座席カード (ブルーグループ) */}
       <g filter="url(#rakugae-sym-shadow)">
         <rect x="13" y="14" width="18" height="14" rx="3.5" fill="#FFFFFF" />
         <rect x="15.5" y="16.5" width="13" height="3" rx="1.5" fill="#93C5FD" />
@@ -120,7 +109,6 @@ export const BrandSymbol: React.FC<{
         <circle cx="26.5" cy="23.5" r="1.5" fill="#CBD5E1" />
       </g>
 
-      {/* 右下の座席カード (ピンクグループ) */}
       <g filter="url(#rakugae-sym-shadow)">
         <rect x="33" y="36" width="18" height="14" rx="3.5" fill="#FFFFFF" />
         <rect x="35.5" y="38.5" width="13" height="3" rx="1.5" fill="#FCA5A5" />
@@ -129,7 +117,6 @@ export const BrandSymbol: React.FC<{
         <circle cx="46.5" cy="45.5" r="1.5" fill="#CBD5E1" />
       </g>
 
-      {/* 中央のきらめき (ワクワク感・ラク) */}
       <path
         d="M 32 29 Q 32 32 35 32 Q 32 32 32 35 Q 32 32 29 32 Q 32 32 32 29 Z"
         fill="#FEF3C7"
@@ -138,9 +125,6 @@ export const BrandSymbol: React.FC<{
   );
 };
 
-/**
- * ラクガエの完全なSVGタイトルロゴ (SVGベクターグラフィック)
- */
 export const LogoSvg: React.FC<{
   height?: number;
   showTagline?: boolean;
@@ -148,7 +132,6 @@ export const LogoSvg: React.FC<{
   style?: React.CSSProperties;
 }> = ({ height = 36, showTagline = false, className, style }) => {
   if (!showTagline) {
-    // コンパクト版 (比率 160:36)
     const width = (height * 160) / 36;
     return (
       <svg
@@ -274,7 +257,6 @@ export const LogoSvg: React.FC<{
     );
   }
 
-  // タグライン付き標準版 (比率 220:48)
   const width = (height * 220) / 48;
   return (
     <svg
@@ -409,9 +391,6 @@ export const LogoSvg: React.FC<{
   );
 };
 
-/**
- * ラクガエのブランドタイトルロゴコンポーネント
- */
 export const Logo: React.FC<LogoProps> = ({
   size = "md",
   showTagline = false,

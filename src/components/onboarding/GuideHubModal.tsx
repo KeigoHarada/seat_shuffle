@@ -25,7 +25,6 @@ export const GuideHubModal: React.FC = () => {
           className="modal-content guide-hub"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
           <div className="modal-header">
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <Sparkles size={20} />
@@ -50,7 +49,6 @@ export const GuideHubModal: React.FC = () => {
             </button>
           </div>
 
-          {/* 2-Column Body */}
           <div className="guide-hub-body">
             <GuideHubSidebar />
             <GuideHubContent />

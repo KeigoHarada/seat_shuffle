@@ -286,7 +286,6 @@ export const TOUR_STEPS: TourStep[] = [
       mainStore.setIsViewMode(false);
       mainStore.setIsSettingsOpen(true);
 
-      // Clear shuffle history and unassign seats
       mainStore.loadState({ pastSeats: [] } as any);
       const newSeats = mainStore.seats.map((s) => ({ ...s, studentId: null }));
       mainStore.setSeats(newSeats);

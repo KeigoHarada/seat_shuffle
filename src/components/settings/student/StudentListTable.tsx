@@ -48,7 +48,6 @@ const StudentListTable: React.FC = () => {
 
   return (
     <div className="app-settings-list">
-      {/* Table Header */}
       <div style={{ flexShrink: 0 }}>
         <div
           style={{
@@ -91,7 +90,6 @@ const StudentListTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Table Rows */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -125,7 +123,6 @@ const StudentListTable: React.FC = () => {
         </div>
       </DndContext>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteTargetId !== null}
         title="生徒の削除"

@@ -47,7 +47,7 @@ export const usePanZoom = (
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) setIsZoomMode(true);
       if (e.code === "Space") {
-        e.preventDefault(); // Prevent page scrolling
+        e.preventDefault();
         setIsSpaceMode(true);
       }
     };
@@ -130,7 +130,6 @@ export const usePanZoom = (
         try {
           e.currentTarget.setPointerCapture(e.pointerId);
         } catch {
-          // same as single-pointer capture
         }
         return true;
       }
@@ -243,7 +242,6 @@ export const usePanZoom = (
     setTransform(result);
   }, [seats, objects]);
 
-  // 初回マウント時、ビューポートのサイズが取得できたら自動で画面中央に配置
   useEffect(() => {
     const el = viewportRef.current;
     if (!el) return;

@@ -94,7 +94,6 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Drag Handle */}
       <div
         {...attributes}
         {...listeners}
@@ -108,7 +107,6 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
         <GripVertical size={16} />
       </div>
 
-      {/* 1. No */}
       <div
         style={{
           fontSize: "11px",
@@ -120,7 +118,6 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
         {student.attendanceNumber}
       </div>
 
-      {/* 2. Name & Furigana */}
       <div
         style={{
           display: "flex",
@@ -185,7 +182,6 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
         </div>
       </div>
 
-      {/* 3. Gender */}
       <div style={{ display: "flex", justifyContent: "center", minWidth: 0 }}>
         <Select
           options={GENDER_OPTIONS}
@@ -197,7 +193,6 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
         />
       </div>
 
-      {/* 4. Action */}
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button
           className="btn-icon-danger"

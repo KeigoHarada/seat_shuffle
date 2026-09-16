@@ -143,12 +143,9 @@ export const autoAssignStudents = (
       return a.x - b.x;
     }
 
-    // デフォルト: N字（右上から下、次列へ） -> right-top-down
-    // 同じx座標（列）でない場合は、右側（xが大きい方）を優先
     if (Math.abs(b.x - a.x) > 0.1) {
       return b.x - a.x;
     }
-    // 同じx座標（列）の場合は、上側（yが小さい方）を優先
     return a.y - b.y;
   });
 
@@ -185,7 +182,6 @@ export const optimizeShuffle = (
     currentAssignment.push(null);
   }
 
-  // Initial random shuffle
   for (let i = currentAssignment.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [currentAssignment[i], currentAssignment[j]] = [

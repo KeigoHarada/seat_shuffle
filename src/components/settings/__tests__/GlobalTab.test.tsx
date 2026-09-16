@@ -46,7 +46,6 @@ describe("GlobalTab Support Section", () => {
     expect(container.textContent).toContain("開発者を応援・寄付する");
     expect(container.textContent).toContain("応援メッセージ・寄付を送る");
 
-    // Must not contain "その他" wrapper or explicit "OFUSE" label or emojis
     expect(container.textContent).not.toContain("その他");
     expect(container.textContent).not.toContain("OFUSE");
     expect(container.textContent).not.toContain("URLコピー");

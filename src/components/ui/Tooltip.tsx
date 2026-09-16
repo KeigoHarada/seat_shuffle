@@ -20,7 +20,6 @@ const Tooltip: React.FC<TooltipProps> = ({
     timeoutRef.current = setTimeout(() => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        // Position above the element, centered
         setPosition({
           top: rect.top - 8,
           left: rect.left + rect.width / 2,
@@ -45,7 +44,6 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <>
-      {/* Target element */}
       <div
         ref={containerRef}
         onMouseEnter={handleMouseEnter}
@@ -57,7 +55,6 @@ const Tooltip: React.FC<TooltipProps> = ({
         {children}
       </div>
 
-      {/* Tooltip Portal / Overlay */}
       {isVisible && (
         <div
           style={{
@@ -84,7 +81,6 @@ const Tooltip: React.FC<TooltipProps> = ({
         >
           {content}
 
-          {/* Arrow */}
           <div
             style={{
               position: "absolute",

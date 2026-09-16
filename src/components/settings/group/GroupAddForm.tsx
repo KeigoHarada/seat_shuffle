@@ -22,7 +22,6 @@ const GroupAddForm: React.FC = () => {
       description: newDescription.trim(),
     };
     addGroup(newGroup);
-    // Reset form
     setNewName("");
     setNewColor(PREDEFINED_COLORS[0]);
     setNewDescription("");
@@ -50,7 +49,6 @@ const GroupAddForm: React.FC = () => {
           gap: "var(--spacing-sm)",
         }}
       >
-        {/* Color & Name Row */}
         <div
           style={{
             display: "flex",
@@ -73,7 +71,6 @@ const GroupAddForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Description Row */}
         <div
           style={{
             width: "100%",
