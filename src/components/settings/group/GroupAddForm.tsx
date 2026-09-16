@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useStore } from "../../../stores";
 import { Plus } from "lucide-react";
 import { Group } from "../../../types";
-import ColorPicker, { PREDEFINED_COLORS } from "../../ui/ColorPicker";
+import ColorPicker from "../../ui/ColorPicker";
+import { PREDEFINED_COLORS } from "../../../constants";
 import Input from "../../ui/Input";
 
 const GroupAddForm: React.FC = () => {
@@ -21,7 +22,6 @@ const GroupAddForm: React.FC = () => {
       description: newDescription.trim(),
     };
     addGroup(newGroup);
-    // Reset form
     setNewName("");
     setNewColor(PREDEFINED_COLORS[0]);
     setNewDescription("");
@@ -49,7 +49,6 @@ const GroupAddForm: React.FC = () => {
           gap: "var(--spacing-sm)",
         }}
       >
-        {/* Color & Name Row */}
         <div
           style={{
             display: "flex",
@@ -72,7 +71,6 @@ const GroupAddForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Description Row */}
         <div
           style={{
             width: "100%",

@@ -19,7 +19,6 @@ export const OnboardingController: React.FC = () => {
   );
 
   useEffect(() => {
-    // Show welcome modal on first visit if not completed and not in active tour
     if (!hasCompletedOnboarding && !isTourActive && !isWelcomeModalOpen) {
       const timer = setTimeout(() => {
         openWelcomeModal();

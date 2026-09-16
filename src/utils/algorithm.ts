@@ -7,6 +7,10 @@ import {
   GroupMatchConstraint,
 } from "../types";
 
+const SHUFFLE_MAX_SWAPS = 50000;
+const SHUFFLE_TIME_BUDGET_MS = 300;
+const SHUFFLE_ACCEPT_WORSE_RATE = 0.01;
+
 export const evaluateStudentStudentConstraint = (
   c: StudentStudentConstraint,
   seats: Seat[],
@@ -75,10 +79,14 @@ export const evaluateConstraint = (
       return evaluateStudentGroupConstraint(c, seats);
     case "group-match":
       return evaluateGroupMatchConstraint(c, seats, students);
-    default:
-      return true;
+    default: {
+      const _exhaustive: never = c;
+      return _exhaustive;
+    }
   }
 };
+
+export type AutoAssignError = "no-waiting-students" | "no-empty-seats";
 
 export const autoAssignStudents = (
   seats: Seat[],
@@ -88,7 +96,10 @@ export const autoAssignStudents = (
     | "left-top-down"
     | "left-top-right"
     | "random" = "right-top-down",
-): { assignments: { seatId: string; studentId: string }[]; error?: string } => {
+): {
+  assignments: { seatId: string; studentId: string }[];
+  error?: AutoAssignError;
+} => {
   const assignedStudentIds = new Set(
     seats.map((s) => s.studentId).filter(Boolean),
   );
@@ -99,17 +110,13 @@ export const autoAssignStudents = (
   const availableSeats = seats.filter((s) => !s.studentId && !s.isLocked);
 
   if (unassignedStudents.length === 0) {
-    return { assignments: [], error: "割り当て待ちの生徒がいません。" };
+    return { assignments: [], error: "no-waiting-students" };
   }
 
   if (availableSeats.length === 0) {
-    return {
-      assignments: [],
-      error: "空席がありません。座席を追加してください。",
-    };
+    return { assignments: [], error: "no-empty-seats" };
   }
 
-  // 生徒を出席番号順（昇順）でソート
   let sortedStudents = [...unassignedStudents];
   if (algorithm !== "random") {
     sortedStudents.sort((a, b) => a.attendanceNumber - b.attendanceNumber);
@@ -117,14 +124,12 @@ export const autoAssignStudents = (
     sortedStudents.sort(() => Math.random() - 0.5);
   }
 
-  // 座席をアルゴリズムに従ってソート
   const sortedSeats = [...availableSeats].sort((a, b) => {
     if (algorithm === "random") {
       return Math.random() - 0.5;
     }
 
     if (algorithm === "left-top-down") {
-      // 左上から下、右の次列へ（1列目上->下、2列目上->下...）
       if (Math.abs(a.x - b.x) > 0.1) {
         return a.x - b.x;
       }
@@ -132,21 +137,15 @@ export const autoAssignStudents = (
     }
 
     if (algorithm === "left-top-right") {
-      // Z字（左上から右、次行へ）
-      // y座標が異なる場合は、上側（yが小さい方）を優先
       if (Math.abs(a.y - b.y) > 0.1) {
         return a.y - b.y;
       }
-      // 同じy座標（行）の場合は、左側（xが小さい方）を優先
       return a.x - b.x;
     }
 
-    // デフォルト: N字（右上から下、次列へ） -> right-top-down
-    // 同じx座標（列）でない場合は、右側（xが大きい方）を優先
     if (Math.abs(b.x - a.x) > 0.1) {
       return b.x - a.x;
     }
-    // 同じx座標（列）の場合は、上側（yが小さい方）を優先
     return a.y - b.y;
   });
 
@@ -183,7 +182,6 @@ export const optimizeShuffle = (
     currentAssignment.push(null);
   }
 
-  // Initial random shuffle
   for (let i = currentAssignment.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [currentAssignment[i], currentAssignment[j]] = [
@@ -293,13 +291,11 @@ export const optimizeShuffle = (
 
   let current = calculateScore(currentAssignment);
 
-  const maxIterations = 50000;
   const startTime = performance.now();
 
-  for (let iter = 0; iter < maxIterations; iter++) {
+  for (let iter = 0; iter < SHUFFLE_MAX_SWAPS; iter++) {
     if (current.score === 0) break;
-    // Return early to ensure execution < 1s. We use 300ms to be safe and responsive.
-    if (performance.now() - startTime > 300) break;
+    if (performance.now() - startTime > SHUFFLE_TIME_BUDGET_MS) break;
 
     const idx1 = Math.floor(Math.random() * currentAssignment.length);
     const idx2 = Math.floor(Math.random() * currentAssignment.length);
@@ -317,8 +313,7 @@ export const optimizeShuffle = (
       currentAssignment = newAssignment;
       current = next;
     } else {
-      // Small chance to accept worse state
-      if (Math.random() < 0.01) {
+      if (Math.random() < SHUFFLE_ACCEPT_WORSE_RATE) {
         currentAssignment = newAssignment;
         current = next;
       }

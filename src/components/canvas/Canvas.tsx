@@ -22,6 +22,7 @@ const Canvas: React.FC = () => {
   const objects = useStore((state) => state.objects);
   const addSeat = useStore((state) => state.addSeat);
   const updateSeat = useStore((state) => state.updateSeat);
+  const setSeats = useStore((state) => state.setSeats);
   const removeSeat = useStore((state) => state.removeSeat);
   const addObject = useStore((state) => state.addObject);
   const updateObject = useStore((state) => state.updateObject);
@@ -204,20 +205,32 @@ const Canvas: React.FC = () => {
     );
 
     if (error) {
-      if (error.includes("空席")) {
-        showToast.error(error);
-      } else {
-        showToast.info(error);
+      switch (error) {
+        case "no-empty-seats":
+          showToast.error("空席がありません。座席を追加してください。");
+          return;
+        case "no-waiting-students":
+          showToast.info("割り当て待ちの生徒がいません。");
+          return;
+        default: {
+          const _exhaustive: never = error;
+          return _exhaustive;
+        }
       }
-      return;
     }
 
-    assignments.forEach(({ seatId, studentId }) => {
-      updateSeat(seatId, { studentId });
-    });
+    const assigned = new Map(
+      assignments.map(({ seatId, studentId }) => [seatId, studentId]),
+    );
+    setSeats(
+      seats.map((seat) => {
+        const studentId = assigned.get(seat.id);
+        return studentId === undefined ? seat : { ...seat, studentId };
+      }),
+    );
 
     showToast.success(`${assignments.length}人の生徒を自動割り当てしました！`);
-  }, [seats, students, updateSeat]);
+  }, [seats, students, setSeats]);
 
   const selectedSeats = selectedIds
     .map((id) => seats.find((s) => s.id === id))

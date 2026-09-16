@@ -22,9 +22,9 @@ describe("canvas utils", () => {
       expect(bbox).not.toBeNull();
       if (bbox) {
         expect(bbox.minX).toBe(0);
-        expect(bbox.maxX).toBe(800); // (34 + 6) * 20
-        expect(bbox.minY).toBe(-120); // -6 * 20 (teacher desk)
-        expect(bbox.maxY).toBe(560); // (24 + 4) * 20
+        expect(bbox.maxX).toBe(800);
+        expect(bbox.minY).toBe(-120);
+        expect(bbox.maxY).toBe(560);
         expect(bbox.width).toBe(800);
         expect(bbox.height).toBe(680);
         expect(bbox.centerX).toBe(400);
@@ -39,9 +39,7 @@ describe("canvas utils", () => {
       const result = calculateCenterPanZoom(seats, objects, 1200, 800, 60);
 
       expect(result.scale).toBe(1.0);
-      // panX: 1200 / 2 - 400 = 200
       expect(result.pan.x).toBe(200);
-      // panY: 800 / 2 - 220 = 180
       expect(result.pan.y).toBe(180);
     });
 
@@ -75,8 +73,6 @@ describe("canvas utils", () => {
       const scale = 1.5;
 
       const { worldX, worldY } = screenToWorld(300, 200, rect, pan, scale);
-      // worldX = (300 - 100 - 50) / 1.5 = 150 / 1.5 = 100
-      // worldY = (200 - 50 - 20) / 1.5 = 130 / 1.5 = 86.666...
       expect(worldX).toBe(100);
       expect(Math.round(worldY)).toBe(87);
     });

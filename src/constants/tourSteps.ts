@@ -7,8 +7,8 @@ import {
 } from "./defaultData";
 import { sortStudentsByNameLogic } from "../utils/student";
 import { optimizeShuffle } from "../utils/algorithm";
-import { StateAndActions } from "../stores/index";
-import { OnboardingState } from "../stores/onboarding";
+import type { StateAndActions } from "../stores/index";
+import type { OnboardingState } from "../stores/onboarding";
 
 export interface TourStep {
   id: string;
@@ -286,7 +286,6 @@ export const TOUR_STEPS: TourStep[] = [
       mainStore.setIsViewMode(false);
       mainStore.setIsSettingsOpen(true);
 
-      // Clear shuffle history and unassign seats
       mainStore.loadState({ pastSeats: [] } as any);
       const newSeats = mainStore.seats.map((s) => ({ ...s, studentId: null }));
       mainStore.setSeats(newSeats);

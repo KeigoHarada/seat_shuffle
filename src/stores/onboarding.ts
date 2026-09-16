@@ -14,7 +14,6 @@ export interface OnboardingState {
   isCompletionModalOpen: boolean;
   stepSnapshots: Record<number, any>;
 
-  // Actions
   setHasCompletedOnboarding: (completed: boolean) => void;
   openWelcomeModal: () => void;
   closeWelcomeModal: () => void;
@@ -78,7 +77,7 @@ export const useOnboardingStore = create<OnboardingState>()(
           isWelcomeModalOpen: false,
           isGuideHubOpen: false,
           isResetConfirmOpen: false,
-          stepSnapshots: {}, // Reset snapshots on new tour
+          stepSnapshots: {},
         });
         get().takeSnapshot(step);
       },
@@ -130,7 +129,6 @@ export const useOnboardingStore = create<OnboardingState>()(
 
       takeSnapshot: (step: number) => {
         const state = useStore.getState();
-        // Deep copy important state to avoid reference mutations
         const snapshot = {
           students: JSON.parse(JSON.stringify(state.students)),
           roles: JSON.parse(JSON.stringify(state.roles)),
@@ -166,7 +164,6 @@ export const useOnboardingStore = create<OnboardingState>()(
             activeSettingsTab: snapshot.activeSettingsTab,
           } as any);
         } else {
-          // Fallback if snapshot doesn't exist for some reason
           const prevStep = TOUR_STEPS[step];
           if (prevStep) {
             prevStep.setupPreState(useStore.getState());

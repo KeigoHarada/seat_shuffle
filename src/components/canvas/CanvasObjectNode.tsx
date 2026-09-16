@@ -80,7 +80,6 @@ const CanvasObjectNode: React.FC<Props> = ({
     let newHeight = Math.max(2, resizeRef.current.startHeight + diffRows);
 
     if (isCircle) {
-      // Keep it a perfect circle by taking the max difference
       const maxDiff = Math.max(diffCols, diffRows);
       newWidth = Math.max(2, resizeRef.current.startWidth + maxDiff);
       newHeight = newWidth;
@@ -120,7 +119,7 @@ const CanvasObjectNode: React.FC<Props> = ({
         top: obj.y * GRID_SIZE,
         width: obj.width * GRID_SIZE,
         height: obj.height * GRID_SIZE,
-        backgroundColor: "rgba(0, 0, 0, 0.001)", // Invisible hit-area for draggable
+        backgroundColor: "rgba(0, 0, 0, 0.001)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -132,7 +131,6 @@ const CanvasObjectNode: React.FC<Props> = ({
         touchAction: "none",
       }}
     >
-      {/* Visual Background Layer */}
       <div
         style={{
           position: "absolute",
@@ -146,11 +144,10 @@ const CanvasObjectNode: React.FC<Props> = ({
           transition: isDragging
             ? "none"
             : "box-shadow 0.2s, border-color 0.2s",
-          pointerEvents: "none", // Let the outer div handle interactions
+          pointerEvents: "none",
         }}
       />
 
-      {/* Text Content Layer */}
       <div
         style={{
           position: "relative",
@@ -196,14 +193,13 @@ const CanvasObjectNode: React.FC<Props> = ({
         )}
       </div>
 
-      {/* Resize Handle */}
       {!isEditing && (
         <div
           onPointerDown={handleResizePointerDown}
           onPointerMove={handleResizePointerMove}
           onPointerUp={handleResizePointerUp}
           onPointerCancel={handleResizePointerUp}
-          draggable={false} // Prevent triggering HTML5 drag on handle
+          draggable={false}
           style={{
             position: "absolute",
             right: 4,

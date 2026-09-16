@@ -1,7 +1,7 @@
 import { Student, Role, Group, Seat, CanvasObject, Constraint } from "../types";
 import { generateTemplate } from "../utils/templates";
 import { assignGroupsByBlocks } from "../utils/group";
-import { PREDEFINED_COLORS } from "../components/ui/ColorPicker";
+import { PREDEFINED_COLORS } from "./index";
 
 export const DEFAULT_ROLES: Role[] = [
   {
@@ -258,15 +258,11 @@ export const createSampleStudents = (): Student[] => {
 };
 
 export const createDefaultClassroomState = () => {
-  // 1. 教室テンプレートから座席（30席）と教卓オブジェクトを配置
   const { seats: rawSeats, objects } = generateTemplate("classroom", 0, 0);
 
-  // 2. ロール・グループの定義
   const roles: Role[] = DEFAULT_ROLES.map((r) => ({ ...r }));
   const groups: Group[] = DEFAULT_GROUPS.map((g) => ({ ...g }));
 
-  // 3. 班グループ（1班〜6班）を島・ブロック配置で右上から順に割り当て
-  // 右前=1班, 右後=2班, 中前=3班, 中後=4班, 左前=5班, 左後=6班
   const classGroups = groups.filter((g) => g.id !== "group-vision");
   const seatsWithClassGroups = assignGroupsByBlocks(
     rawSeats,
@@ -276,18 +272,14 @@ export const createDefaultClassroomState = () => {
     "right-to-left",
   );
 
-  // 最前列（y === 0）の座席に「前方配慮（視力等）」グループも付与
   const seatsWithAllGroups = seatsWithClassGroups.map((seat) => ({
     ...seat,
     groupIds:
       seat.y === 0 ? [...seat.groupIds, "group-vision"] : [...seat.groupIds],
   }));
 
-  // 4. サンプル生徒（30名）の生成（並び替え体験のため、あえてバラバラの出席番号順）
   const students: Student[] = createSampleStudents();
 
-  // 5. 初期状態では生徒を座席にバラバラの順序で配置
-  // （ツールバーの「自動割り当て」を実行すると、出席番号順に右上から整列される動作を体験できます）
   const sortedSeatsForPlacement = [...seatsWithAllGroups].sort((a, b) => {
     if (Math.abs(b.x - a.x) > 0.1) return b.x - a.x;
     return a.y - b.y;
@@ -305,14 +297,13 @@ export const createDefaultClassroomState = () => {
     studentId: seatToStudentMap.get(seat.id) || null,
   }));
 
-  // 6. サンプル制約条件
   const constraints: Constraint[] = [
     {
       id: "constraint-default-1",
       type: "student-student",
-      studentId1: "student-6", // あ太郎
-      studentId2: "student-19", // あ花子
-      matchType: "far", // 離す
+      studentId1: "student-6",
+      studentId2: "student-19",
+      matchType: "far",
       isEnabled: true,
     },
     {
@@ -345,7 +336,7 @@ export const createDefaultClassroomState = () => {
     {
       id: "constraint-default-5",
       type: "student-group",
-      studentId: "student-28", // き花子（視力配慮の希望サンプル）
+      studentId: "student-28",
       groupIds: ["group-vision"],
       matchType: "include",
       isEnabled: true,
@@ -364,27 +355,23 @@ export const createDefaultClassroomState = () => {
 };
 
 export const createTourInitialState = () => {
-  // 1. ツアー開始時はキャンバスは空（ユーザーにテンプレート選択を体験してもらう）
   const seats: Seat[] = [];
   const objects: CanvasObject[] = [];
 
-  // 2. ロール・グループの定義
   const roles: Role[] = DEFAULT_ROLES.map((r) => ({ ...r }));
   const groups: Group[] = DEFAULT_GROUPS.map((g) => ({ ...g }));
 
-  // 3. 生徒データは29人分（最後の1人「そ花子」を除外してユーザーに追加してもらう）
   const allStudents = createSampleStudents();
   const students: Student[] = allStudents.slice(0, 29);
 
-  // 4. サンプル制約条件（前方配慮の制約は除外してユーザーに追加・設定してもらう）
   const classGroups = groups.filter((g) => g.id !== "group-vision");
   const constraints: Constraint[] = [
     {
       id: "constraint-default-1",
       type: "student-student",
-      studentId1: "student-6", // あ太郎
-      studentId2: "student-19", // あ花子
-      matchType: "far", // 離す
+      studentId1: "student-6",
+      studentId2: "student-19",
+      matchType: "far",
       isEnabled: true,
     },
     {

@@ -30,7 +30,6 @@ export const WelcomeModal: React.FC = () => {
         className="modal-content welcome-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header decoration */}
         <div
           style={{
             background:
@@ -92,7 +91,6 @@ export const WelcomeModal: React.FC = () => {
           </p>
         </div>
 
-        {/* Feature Highlights */}
         <div
           style={{
             padding: "20px 24px",
@@ -243,7 +241,6 @@ export const WelcomeModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Footer actions */}
         <div
           style={{
             padding: "16px 24px",

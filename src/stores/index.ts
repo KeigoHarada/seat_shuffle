@@ -18,7 +18,6 @@ import {
 } from "../constants/defaultData";
 
 export interface StateAndActions extends AppState {
-  // Global
   clearState: () => void;
   loadDefaultTemplate: () => void;
   loadTourInitialState: () => void;
@@ -26,24 +25,20 @@ export interface StateAndActions extends AppState {
   isViewMode: boolean;
   setIsViewMode: (val: boolean) => void;
 
-  // Students
   addStudent: (student: Student) => void;
   updateStudent: (id: string, updates: Partial<Student>) => void;
   removeStudent: (id: string) => void;
   reorderStudents: (startIndex: number, endIndex: number) => void;
   sortStudentsByName: () => void;
 
-  // Roles
   addRole: (role: Role) => void;
   updateRole: (id: string, updates: Partial<Role>) => void;
   removeRole: (id: string) => void;
 
-  // Groups
   addGroup: (group: Group) => void;
   updateGroup: (id: string, updates: Partial<Group>) => void;
   removeGroup: (id: string) => void;
 
-  // Seats
   addSeat: (seat: Seat) => void;
   updateSeat: (id: string, updates: Partial<Seat>) => void;
   removeSeat: (id: string) => void;
@@ -52,22 +47,18 @@ export interface StateAndActions extends AppState {
   saveSeatHistory: () => void;
   undoShuffle: () => void;
 
-  // Objects
   addObject: (obj: CanvasObject) => void;
   updateObject: (id: string, updates: Partial<CanvasObject>) => void;
   removeObject: (id: string) => void;
 
-  // Constraints
   addConstraint: (constraint: Constraint) => void;
   updateConstraint: (id: string, updates: Partial<Constraint>) => void;
   removeConstraint: (id: string) => void;
 
-  // AppSettings
   updateAppSettings: (updates: Partial<AppSettings>) => void;
   canvasTool: "select" | "hand";
   setCanvasTool: (tool: "select" | "hand") => void;
 
-  // UI State
   isSettingsOpen: boolean;
   setIsSettingsOpen: (isOpen: boolean) => void;
   activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
@@ -97,10 +88,6 @@ const initialState: AppState & {
   isViewMode: false,
   canvasTool: "select",
   appSettings: {
-    gridRows: 6,
-    gridCols: 7,
-    soundEnabled: true,
-    theme: "system",
     algorithm: "optimize",
     shuffleAnimation: "none",
     autoAssignAlgorithm: "right-top-down",

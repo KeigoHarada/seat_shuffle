@@ -1,10 +1,9 @@
 import { AppState } from "../types";
-import { GenderType } from "../constants";
+import type { GenderType } from "../types";
 
 export function exportSettingsToCSV(state: AppState): string {
   const lines: string[] = [];
 
-  // Helper maps for ID -> Name resolution
   const roleIdToName = Object.fromEntries(
     state.roles.map((r) => [r.id, r.name]),
   );
@@ -15,7 +14,6 @@ export function exportSettingsToCSV(state: AppState): string {
     state.students.map((s) => [s.id, s.name]),
   );
 
-  // Students
   lines.push("# Students");
   lines.push("attendanceNumber,name,furigana,gender,roles");
   state.students.forEach((s) => {
@@ -34,7 +32,6 @@ export function exportSettingsToCSV(state: AppState): string {
   });
   lines.push("");
 
-  // Roles
   lines.push("# Roles");
   lines.push("name,iconName,description");
   state.roles.forEach((r) => {
@@ -42,7 +39,6 @@ export function exportSettingsToCSV(state: AppState): string {
   });
   lines.push("");
 
-  // Groups
   lines.push("# Groups");
   lines.push("name,color,description");
   state.groups.forEach((g) => {
@@ -50,14 +46,12 @@ export function exportSettingsToCSV(state: AppState): string {
   });
   lines.push("");
 
-  // Constraints
   lines.push("# Constraints");
   lines.push("type,isEnabled,json_data");
   state.constraints.forEach((c) => {
     const { id, type, isEnabled, ...rest } = c;
     const readableData: any = { ...rest };
 
-    // Resolve IDs to Names for readability
     if (readableData.studentId1)
       readableData.studentName1 = studentIdToName[readableData.studentId1];
     if (readableData.studentId2)
@@ -71,9 +65,8 @@ export function exportSettingsToCSV(state: AppState): string {
     if (readableData.targetId && readableData.targetType === "role")
       readableData.targetName = roleIdToName[readableData.targetId];
     if (readableData.targetId && readableData.targetType === "gender")
-      readableData.targetName = readableData.targetId; // gender is already a readable enum
+      readableData.targetName = readableData.targetId;
 
-    // Remove internal IDs from the JSON export
     delete readableData.studentId1;
     delete readableData.studentId2;
     delete readableData.studentId;
@@ -98,18 +91,16 @@ export function importSettingsFromCSV(csv: string): Partial<AppState> {
   const lines = csv.split(/\r?\n/).map((l) => l.trim());
   let currentSection = "";
 
-  // Temporary arrays to hold raw parsed rows
   const rawStudents: any[] = [];
   const rawConstraints: any[] = [];
 
-  // Parse CSV into temporary arrays
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line) continue;
 
     if (line.startsWith("# ")) {
       currentSection = line.substring(2).trim().toLowerCase();
-      i++; // skip header row
+      i++;
       continue;
     }
 
@@ -154,7 +145,6 @@ export function importSettingsFromCSV(csv: string): Partial<AppState> {
     }
   }
 
-  // Lookup maps: Name -> ID
   const roleNameToId = Object.fromEntries(
     state.roles!.map((r) => [r.name, r.id]),
   );
@@ -162,16 +152,14 @@ export function importSettingsFromCSV(csv: string): Partial<AppState> {
     state.groups!.map((g) => [g.name, g.id]),
   );
 
-  // Process Students (Resolve Role Names to IDs)
   rawStudents.forEach((rs) => {
     const roleIds = rs.roleNames
       .map((rn: string) => {
         if (!roleNameToId[rn]) {
-          // Auto-create missing role
           const newRole = {
             id: crypto.randomUUID(),
             name: rn,
-            iconName: "User", // default
+            iconName: "User",
           };
           state.roles!.push(newRole);
           roleNameToId[rn] = newRole.id;
@@ -194,7 +182,6 @@ export function importSettingsFromCSV(csv: string): Partial<AppState> {
     state.students!.map((s) => [s.name, s.id]),
   );
 
-  // Process Constraints (Resolve Names back to IDs)
   rawConstraints.forEach((rc) => {
     const resolvedData: any = {};
     if (rc.data.studentName1)
@@ -213,12 +200,11 @@ export function importSettingsFromCSV(csv: string): Partial<AppState> {
         if (rc.data.targetType === "role") {
           resolvedData.targetId = roleNameToId[rc.data.targetName];
         } else {
-          resolvedData.targetId = rc.data.targetName; // gender
+          resolvedData.targetId = rc.data.targetName;
         }
       }
     }
 
-    // Copy remaining non-name fields
     Object.keys(rc.data).forEach((k) => {
       if (!k.endsWith("Name") && !k.endsWith("Names")) {
         resolvedData[k] = rc.data[k];

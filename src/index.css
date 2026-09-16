@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap");
 
 :root {
-  /* Colors */
   --c-primary: #f59e0b;
   --c-primary-hover: #d97706;
   --c-primary-pale: #fef3c7;
@@ -22,7 +21,6 @@
   --c-success: #10b981;
   --c-success-pale: #d1fae5;
 
-  /* Group Colors (Pastel) */
   --c-group-pink: #fca5a5;
   --c-group-blue: #93c5fd;
   --c-group-green: #86efac;
@@ -30,35 +28,29 @@
   --c-group-purple: #d8b4fe;
   --c-group-orange: #fdba74;
 
-  /* Typography */
   --font-family: "Zen Maru Gothic", "Rounded Mplus 1c", sans-serif;
 
-  /* Radii */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* Shadows */
   --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-2:
     0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --shadow-3:
     0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
-  /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
 
-  /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s cubic-bezier(0.2, 0, 0, 1);
 
-  /* Shell layout */
   --app-header-height: 60px;
   --app-footer-height: 80px;
   --app-settings-width: clamp(320px, 30vw, 400px);
@@ -80,7 +72,6 @@ body {
   line-height: 1.5;
 }
 
-/* Typography Utilities */
 .text-title1 {
   font-size: 24px;
   font-weight: 700;
@@ -103,7 +94,6 @@ body {
   color: var(--c-text-sub);
 }
 
-/* Buttons */
 .btn-primary,
 .btn-secondary,
 .btn-danger,
@@ -176,7 +166,6 @@ body {
   color: var(--c-error);
 }
 
-/* Common Forms */
 input[type="text"],
 input[type="number"] {
   font-family: var(--font-family);
@@ -198,7 +187,6 @@ input::placeholder {
   color: var(--c-text-placeholder);
 }
 
-/* Checkbox */
 input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
@@ -265,7 +253,6 @@ input[type="checkbox"]:disabled {
   user-select: none;
 }
 
-/* Hide number input spin buttons */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -276,7 +263,6 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Cards */
 .card {
   background-color: var(--c-surface);
   border: 1px solid var(--c-border);
@@ -288,7 +274,6 @@ input[type="number"] {
   box-shadow: var(--shadow-2);
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -304,7 +289,6 @@ input[type="number"] {
   background: var(--c-text-sub);
 }
 
-/* Modals */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -386,9 +370,6 @@ input[type="number"] {
   display: none;
 }
 
-/* Shell layout policy: one chrome tree. Compact viewports keep the same
-   header / canvas / settings / footer geometry and overlay settings instead
-   of stacking the main row. */
 .app-shell {
   display: flex;
   flex-direction: column;
@@ -710,12 +691,6 @@ input[type="number"] {
   transition: color 0.3s ease;
 }
 
-.shuffle-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 .shuffle-undo {
   width: 48px;
   height: 48px;
@@ -868,15 +843,6 @@ input[type="number"] {
 
   .app-footer-cluster-start {
     min-height: 1px;
-  }
-
-  .app-footer-cluster-center,
-  .app-footer-cluster-end {
-    flex: unset;
-  }
-
-  .shuffle-controls {
-    gap: 8px;
   }
 
   .shuffle-undo {

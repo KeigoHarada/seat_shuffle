@@ -1,6 +1,3 @@
-/**
- * @vitest-environment jsdom
- */
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -18,10 +15,6 @@ describe("GlobalTab Support Section", () => {
 
     useStore.setState({
       appSettings: {
-        gridRows: 6,
-        gridCols: 6,
-        soundEnabled: true,
-        theme: "light",
         algorithm: "random",
         shuffleAnimation: "none",
         autoAssignAlgorithm: "right-top-down",
@@ -50,7 +43,6 @@ describe("GlobalTab Support Section", () => {
     expect(container.textContent).toContain("開発者を応援・寄付する");
     expect(container.textContent).toContain("応援メッセージ・寄付を送る");
 
-    // Must not contain "その他" wrapper or explicit "OFUSE" label or emojis
     expect(container.textContent).not.toContain("その他");
     expect(container.textContent).not.toContain("OFUSE");
     expect(container.textContent).not.toContain("URLコピー");
@@ -71,6 +63,30 @@ describe("GlobalTab Support Section", () => {
 
     const buttonParent = supportLink.parentElement;
     expect(buttonParent?.style.justifyContent).toBe("center");
+  });
+
+  it("keeps test playback running until settings change", async () => {
+    await act(async () => {
+      if (root) root.render(<GlobalTab />);
+    });
+
+    const playButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.includes("テスト実行"),
+    );
+    expect(playButton).toBeTruthy();
+
+    await act(async () => {
+      playButton?.click();
+    });
+    expect(container.textContent).toContain("テスト再生中...");
+
+    await act(async () => {
+      useStore.setState((state) => ({
+        appSettings: { ...state.appSettings, algorithm: "optimize" },
+      }));
+    });
+    expect(container.textContent).toContain("テスト実行");
+    expect(container.textContent).not.toContain("テスト再生中...");
   });
 
   it("does not load the Ofuse widget script", async () => {

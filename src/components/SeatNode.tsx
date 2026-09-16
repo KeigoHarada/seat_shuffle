@@ -59,7 +59,6 @@ const SeatNode: React.FC<Props> = ({
   const getBackgroundColor = () => {
     if (isViewMode || !mainGroup) return "var(--c-surface)";
     const c = mainGroup.color;
-    // CSS color-mix to increase lightness by blending with 70% white
     return `color-mix(in srgb, ${c} 30%, white)`;
   };
 
@@ -75,9 +74,7 @@ const SeatNode: React.FC<Props> = ({
     backgroundColor: getBackgroundColor(),
     border: isSelected
       ? "2px solid var(--c-primary)"
-      : mainGroup
-        ? "1px solid var(--c-border)"
-        : "1px solid var(--c-border)",
+      : "1px solid var(--c-border)",
     borderRadius: "var(--radius-md)",
     boxShadow: isDragging
       ? "var(--shadow-3)"

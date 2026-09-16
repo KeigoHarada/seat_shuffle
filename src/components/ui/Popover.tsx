@@ -110,8 +110,6 @@ const Popover: React.FC<PopoverProps> = ({
         }}
         onPointerDown={(e) => {
           e.stopPropagation();
-          // Only start dragging if clicking directly on the popover background or header
-          // (not on inputs, buttons, or scrollable areas if possible, but we check target)
           const target = e.target as HTMLElement;
           if (
             target.tagName.toLowerCase() === "input" ||

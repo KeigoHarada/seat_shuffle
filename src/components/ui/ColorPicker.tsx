@@ -1,17 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-
-export const PREDEFINED_COLORS = [
-  "#FCA5A5", // 1. Group Pink (赤・ピンク)
-  "#93C5FD", // 2. Group Blue (水色・青)
-  "#86EFAC", // 3. Group Green (黄緑・緑)
-  "#FDE047", // 4. Group Yellow (黄色)
-  "#D8B4FE", // 5. Group Purple (紫・ラベンダー)
-  "#FDBA74", // 6. Group Orange (オレンジ)
-  "#5EEAD4", // 7. Group Teal/Mint (ミント・青緑 / 前方配慮等)
-  "#F472B6", // 8. Group Rose (ローズピンク)
-  "#A78BFA", // 9. Group Indigo (バイオレット・藍)
-  "#CBD5E1", // 10. Group Slate (スレートグレー)
-] as const;
+import { PREDEFINED_COLORS } from "../../constants";
 
 interface ColorPickerProps {
   value: string;
