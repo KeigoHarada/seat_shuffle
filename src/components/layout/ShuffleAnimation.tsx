@@ -40,7 +40,6 @@ const ConfettiAnimation: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* 簡易的なCSSアニメーションの紙吹雪を生成 */}
       {Array.from({ length: 50 }).map((_, i) => (
         <div
           key={i}

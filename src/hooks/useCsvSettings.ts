@@ -2,14 +2,18 @@ import { useStore } from "../stores";
 import { exportSettingsToCSV, importSettingsFromCSV } from "../utils/csv";
 import { showToast } from "../stores/toast";
 
+const EXCEL_UTF8_CSV_BOM = new Uint8Array([0xef, 0xbb, 0xbf]);
+
+function clearFileInputForReselect(input: HTMLInputElement) {
+  input.value = "";
+}
+
 export const useCsvSettings = () => {
   const handleSave = () => {
     const state = useStore.getState();
     const csvContent = exportSettingsToCSV(state);
 
-    // add BOM for Excel UTF-8 compatibility
-    const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
-    const blob = new Blob([bom, csvContent], {
+    const blob = new Blob([EXCEL_UTF8_CSV_BOM, csvContent], {
       type: "text/csv;charset=utf-8",
     });
     const url = URL.createObjectURL(blob);
@@ -46,8 +50,7 @@ export const useCsvSettings = () => {
     };
     reader.readAsText(file);
 
-    // reset input so the same file can be loaded again if needed
-    e.target.value = "";
+    clearFileInputForReselect(e.target);
   };
 
   return { handleSave, handleLoad };

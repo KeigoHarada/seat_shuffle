@@ -40,7 +40,6 @@ export const TourOverlay: React.FC = () => {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [hasActionFinished, setHasActionFinished] = useState(false);
 
-  // Dragging state
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
@@ -74,12 +73,10 @@ export const TourOverlay: React.FC = () => {
     };
   }, [isDragging]);
 
-  // Reset drag position when step changes
   useEffect(() => {
     setPosition({ x: 0, y: 0 });
   }, [currentTourStep]);
 
-  // Check if current step condition is satisfied
   const checkStepCompletion = useCallback((): boolean => {
     if (!currentStep) return false;
     const mainStore = useStore.getState();
@@ -96,7 +93,6 @@ export const TourOverlay: React.FC = () => {
     isViewMode,
   ]);
 
-  // Watch for step completion and trigger transition
   useEffect(() => {
     if (!isTourActive || !currentStep) {
       setHasActionFinished(false);
@@ -106,14 +102,11 @@ export const TourOverlay: React.FC = () => {
     const isDone = checkStepCompletion();
     if (isDone && !hasActionFinished) {
       setHasActionFinished(true);
-      // We no longer auto-advance with setTimeout.
-      // The user must manually click Next after confirming the result.
     } else if (!isDone) {
       setHasActionFinished(false);
     }
   }, [isTourActive, currentStep, checkStepCompletion, hasActionFinished]);
 
-  // Update target rect
   const updateRect = useCallback(() => {
     if (!isTourActive || !currentStep) {
       setTargetRect(null);
@@ -122,7 +115,6 @@ export const TourOverlay: React.FC = () => {
 
     let targetSelector = currentStep.targetSelector;
 
-    // Handle dynamic targeting for multi-action steps based on active tab and progress
     if (currentStep.id === "step-add-constraint") {
       if (activeSettingsTab !== "constraints") {
         targetSelector = "#tab-btn-constraints";
@@ -132,7 +124,6 @@ export const TourOverlay: React.FC = () => {
         targetSelector = "#constraint-list-area";
       }
     } else if (hasActionFinished) {
-      // For single-action steps, shift to result area
       switch (currentStep.id) {
         case "step-template":
           targetSelector = "#canvas-main-area";
@@ -216,7 +207,6 @@ export const TourOverlay: React.FC = () => {
     let animationFrameId: number;
     let startTime = Date.now();
 
-    // Poll for 500ms to catch any CSS transitions (e.g. settings panel sliding)
     const pollRect = () => {
       updateRect();
       if (Date.now() - startTime < 500) {
@@ -238,7 +228,6 @@ export const TourOverlay: React.FC = () => {
   const isLastStep = currentTourStep === TOUR_STEPS.length - 1;
   const isFirstStep = currentTourStep === 0;
 
-  // Compute Tooltip position
   const getTooltipStyle = (): React.CSSProperties => {
     const defaultStyle: React.CSSProperties = {
       position: "fixed",
@@ -302,7 +291,6 @@ export const TourOverlay: React.FC = () => {
         baseLeft = targetRect.left;
     }
 
-    // Clamp inside viewport
     if (baseLeft < 16) baseLeft = 16;
     if (baseLeft + tooltipWidth > windowWidth - 16) {
       baseLeft = windowWidth - tooltipWidth - 16;
@@ -330,7 +318,6 @@ export const TourOverlay: React.FC = () => {
         pointerEvents: "none",
       }}
     >
-      {/* Click barrier: block clicks outside the highlighted hole */}
       {targetRect &&
         (() => {
           const hLeft = Math.max(0, targetRect.left - 6);
@@ -355,13 +342,13 @@ export const TourOverlay: React.FC = () => {
                   pointerEvents: "auto",
                   zIndex: 1000,
                   clipPath: `polygon(
-                  0% 0%, 0% 100%, 
-                  ${hLeft}px 100%, 
-                  ${hLeft}px ${hTop}px, 
-                  ${hLeft + hWidth}px ${hTop}px, 
-                  ${hLeft + hWidth}px ${hTop + hHeight}px, 
-                  ${hLeft}px ${hTop + hHeight}px, 
-                  ${hLeft}px 100%, 
+                  0% 0%, 0% 100%,
+                  ${hLeft}px 100%,
+                  ${hLeft}px ${hTop}px,
+                  ${hLeft + hWidth}px ${hTop}px,
+                  ${hLeft + hWidth}px ${hTop + hHeight}px,
+                  ${hLeft}px ${hTop + hHeight}px,
+                  ${hLeft}px 100%,
                   100% 100%, 100% 0%
                 )`,
                 }}
@@ -374,7 +361,6 @@ export const TourOverlay: React.FC = () => {
                   e.stopPropagation();
                 }}
               />
-              {/* Spotlight cutout / highlight ring and dark backdrop via box-shadow */}
               <div
                 style={{
                   position: "fixed",
@@ -400,7 +386,6 @@ export const TourOverlay: React.FC = () => {
           );
         })()}
 
-      {/* Tooltip Card */}
       <div
         ref={tooltipRef}
         className="tooltip-card-mock tour-tooltip"
@@ -420,7 +405,6 @@ export const TourOverlay: React.FC = () => {
             animation: "scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          {/* Drag Handle Area */}
           <div
             onMouseDown={handleMouseDown}
             style={{
@@ -447,7 +431,6 @@ export const TourOverlay: React.FC = () => {
             />
           </div>
 
-          {/* Step Progress & Action Hint Badge */}
           <div
             style={{
               display: "flex",
@@ -550,7 +533,6 @@ export const TourOverlay: React.FC = () => {
             {currentStep.description}
           </p>
 
-          {/* Action Instruction Callout */}
           <div
             style={{
               padding: "8px 12px",
@@ -594,7 +576,6 @@ export const TourOverlay: React.FC = () => {
             </span>
           </div>
 
-          {/* Navigation buttons */}
           <div
             style={{
               display: "flex",

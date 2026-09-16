@@ -29,7 +29,6 @@ const StudentAddForm: React.FC = () => {
       roleIds: newRoleIds,
     };
     addStudent(newStudent);
-    // Reset form
     setNewName("");
     setNewFurigana("");
     setNewGender("");
@@ -42,7 +41,7 @@ const StudentAddForm: React.FC = () => {
     return {
       label: r.name,
       value: r.id,
-      icon: <IconComp size={14} />, // Slightly larger since the add form MultiSelect isn't small
+      icon: <IconComp size={14} />,
     };
   });
 
@@ -68,7 +67,6 @@ const StudentAddForm: React.FC = () => {
           gap: "var(--spacing-sm)",
         }}
       >
-        {/* Name & Furigana Stack */}
         <div
           style={{
             display: "flex",
@@ -93,7 +91,6 @@ const StudentAddForm: React.FC = () => {
           />
         </div>
 
-        {/* Gender & Role Row */}
         <div
           style={{ display: "flex", gap: "var(--spacing-sm)", width: "100%" }}
         >

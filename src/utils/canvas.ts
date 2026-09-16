@@ -34,9 +34,6 @@ export interface CanvasBoundingBox {
   centerY: number;
 }
 
-/**
- * キャンバス上の全座席およびオブジェクトを囲むバウンディングボックス（ピクセル単位）を計算します。
- */
 export const getCanvasBoundingBox = (
   seats: Seat[],
   objects: CanvasObject[],
@@ -86,9 +83,6 @@ export const getCanvasBoundingBox = (
   };
 };
 
-/**
- * ビューポートの中央に座席全体が収まるように、最適な pan と scale を計算します。
- */
 export const calculateCenterPanZoom = (
   seats: Seat[],
   objects: CanvasObject[],
@@ -109,7 +103,6 @@ export const calculateCenterPanZoom = (
   const fitScaleX = availableWidth / bbox.width;
   const fitScaleY = availableHeight / bbox.height;
 
-  // 画面に収まる場合は基本 1.0、小さい画面（タブレット等）では適切に縮小
   const targetScale = Math.min(1.0, fitScaleX, fitScaleY, maxScale);
   const finalScale = Math.max(minScale, targetScale);
 
@@ -303,9 +296,6 @@ export const getObjectDragDisplayProps = (
   return { displayObj, isDragging };
 };
 
-/**
- * メニューやポップオーバーの位置を親コンテナ内に収まるようにクランプします。
- */
 export const clampMenuPosition = (
   x: number,
   y: number,

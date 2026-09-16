@@ -18,6 +18,7 @@ const GlobalTab: React.FC = () => {
   >(null);
 
   const timerRef = useRef<number | null>(null);
+  const settingsWhenTestStarted = useRef(appSettings);
 
   const clearTestPlay = useCallback(() => {
     if (timerRef.current) {
@@ -27,19 +28,17 @@ const GlobalTab: React.FC = () => {
     setIsTesting(false);
   }, []);
 
-  // 設定が変更された瞬間、またはアンマウント時にテストをキャンセル
   useEffect(() => {
-    if (isTesting) {
+    const settingsChanged = settingsWhenTestStarted.current !== appSettings;
+    settingsWhenTestStarted.current = appSettings;
+    if (settingsChanged && isTesting) {
       clearTestPlay();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appSettings]);
+  }, [appSettings, isTesting, clearTestPlay]);
 
   useEffect(() => {
     if (!isTesting) return;
 
-    // 他の操作が入ったらテスト実行を中止する
-    // キャプチャフェーズでクリックやキー入力を検知してテスト状態をクリア
     const abortTest = () => {
       clearTestPlay();
     };
@@ -247,7 +246,6 @@ const GlobalTab: React.FC = () => {
         </div>
       </div>
 
-      {/* 開発者を応援・寄付 */}
       <div
         style={{
           padding: "var(--spacing-md)",
@@ -314,7 +312,6 @@ const GlobalTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Confirm Dialogs */}
       <ConfirmDialog
         isOpen={confirmAction === "restore"}
         title="初期サンプルの復元"

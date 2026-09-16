@@ -24,7 +24,6 @@ export interface GuideCategory {
   items: GuideItem[];
 }
 
-// 独立したツアー項目
 export const TOUR_ITEM: GuideItem = {
   id: "tour",
   label: "3分実践ツアーを始める",
@@ -37,7 +36,6 @@ export const TOUR_ITEM: GuideItem = {
   ],
 };
 
-// アコーディオンカテゴリ
 export const GUIDE_CATEGORIES: GuideCategory[] = [
   {
     id: "layout",
@@ -209,7 +207,6 @@ export const GUIDE_CATEGORIES: GuideCategory[] = [
   },
 ];
 
-// 後方互換性（既存のGUIDE_ITEMS参照箇所が壊れないように、全itemをフラットな配列としてexportしておく）
 export const GUIDE_ITEMS: GuideItem[] = [
   TOUR_ITEM,
   ...GUIDE_CATEGORIES.flatMap((c) => c.items),

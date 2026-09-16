@@ -7,7 +7,7 @@ const mockStudent = (id: string, name: string, furigana?: string): Student => ({
   id,
   name,
   furigana,
-  attendanceNumber: 0, // will be overwritten
+  attendanceNumber: 0,
   gender: "other",
   roleIds: [],
 });
@@ -23,11 +23,10 @@ describe("student utils", () => {
 
       const sorted = sortStudentsByNameLogic(students);
 
-      expect(sorted[0].id).toBe("2"); // いとう
-      expect(sorted[1].id).toBe("3"); // かとう
-      expect(sorted[2].id).toBe("1"); // さとう
+      expect(sorted[0].id).toBe("2");
+      expect(sorted[1].id).toBe("3");
+      expect(sorted[2].id).toBe("1");
 
-      // Attendance number should be updated correctly
       expect(sorted[0].attendanceNumber).toBe(1);
       expect(sorted[1].attendanceNumber).toBe(2);
       expect(sorted[2].attendanceNumber).toBe(3);
@@ -35,16 +34,16 @@ describe("student utils", () => {
 
     it("should place students without furigana at the end and sort them by name", () => {
       const students = [
-        mockStudent("1", "B-Name"), // no furigana
+        mockStudent("1", "B-Name"),
         mockStudent("2", "阿部", "あべ"),
-        mockStudent("3", "A-Name"), // no furigana
+        mockStudent("3", "A-Name"),
       ];
 
       const sorted = sortStudentsByNameLogic(students);
 
-      expect(sorted[0].id).toBe("2"); // あべ (has furigana)
-      expect(sorted[1].id).toBe("3"); // A-Name (no furigana, sorted by name)
-      expect(sorted[2].id).toBe("1"); // B-Name (no furigana)
+      expect(sorted[0].id).toBe("2");
+      expect(sorted[1].id).toBe("3");
+      expect(sorted[2].id).toBe("1");
     });
 
     it("should handle mixed furigana and missing furigana correctly", () => {
@@ -73,7 +72,6 @@ describe("student utils", () => {
 
     it("should start with sample students intentionally not in attendance order, and sort them into 1..30 order", () => {
       const defaultState = createDefaultClassroomState();
-      // Verify initial sample is intentionally
       expect(
         defaultState.students.every((s, idx) => s.attendanceNumber === idx + 1),
       ).toBe(true);
@@ -90,7 +88,6 @@ describe("student utils", () => {
       expect(sorted[29].name).toBe("そ花子");
       expect(sorted[29].attendanceNumber).toBe(30);
 
-      // Verify each item matches index + 1
       for (let i = 0; i < 30; i++) {
         expect(sorted[i].attendanceNumber).toBe(i + 1);
       }

@@ -4,7 +4,6 @@ import { Student } from "../../types";
 
 describe("useStore", () => {
   beforeEach(() => {
-    // Clear state before each test
     useStore.getState().clearState();
   });
 
@@ -149,7 +148,6 @@ describe("useStore", () => {
 
     const state = useStore.getState();
     expect(state.students).toHaveLength(30);
-    // 初期状態で、attendanceNumber は配列順（1〜30）になっている
     expect(
       state.students.every((s, idx) => s.attendanceNumber === idx + 1),
     ).toBe(true);
@@ -196,14 +194,12 @@ describe("useStore", () => {
       expect(visionConstraint.groupIds).toEqual(["group-vision"]);
     }
 
-    // Verify vision consideration group seats (front row y=0)
     const visionSeats = state.seats.filter((s) =>
       s.groupIds.includes("group-vision"),
     );
     expect(visionSeats).toHaveLength(6);
     visionSeats.forEach((s) => expect(s.y).toBe(0));
 
-    // Verify paired columns (0, 6, 14, 20, 28, 34)
     const distinctX = Array.from(new Set(state.seats.map((s) => s.x))).sort(
       (a, b) => a - b,
     );

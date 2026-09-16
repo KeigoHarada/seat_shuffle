@@ -153,7 +153,6 @@ const ConstraintListTable: React.FC = () => {
 
   return (
     <div className="app-settings-list">
-      {/* Table Header */}
       <div style={{ flexShrink: 0 }}>
         <div
           style={{
@@ -175,7 +174,6 @@ const ConstraintListTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Table Rows */}
       <div className="app-settings-list-body">
         {constraints.map((c) => {
           const isSatisfied = c.isEnabled
@@ -211,7 +209,6 @@ const ConstraintListTable: React.FC = () => {
                 transition: "all 0.2s",
               }}
             >
-              {/* 1. Type Icon */}
               <div
                 style={{
                   display: "flex",
@@ -223,10 +220,8 @@ const ConstraintListTable: React.FC = () => {
                 {getIcon(c.type)}
               </div>
 
-              {/* 2. Content */}
               {renderContent(c)}
 
-              {/* 3. Enable Toggle */}
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <Checkbox
                   checked={c.isEnabled}
@@ -237,7 +232,6 @@ const ConstraintListTable: React.FC = () => {
                 />
               </div>
 
-              {/* 4. Action */}
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button
                   className="btn-icon-danger"
@@ -264,7 +258,6 @@ const ConstraintListTable: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteTargetId !== null}
         title="ルールの削除"

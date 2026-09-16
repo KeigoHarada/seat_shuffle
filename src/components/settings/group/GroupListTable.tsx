@@ -15,7 +15,6 @@ const GroupListTable: React.FC = () => {
 
   return (
     <div className="app-settings-list">
-      {/* Table Header */}
       <div style={{ flexShrink: 0 }}>
         <div
           style={{
@@ -36,7 +35,6 @@ const GroupListTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Table Rows */}
       <div className="app-settings-list-body">
         {groups.map((group) => (
           <div
@@ -50,7 +48,6 @@ const GroupListTable: React.FC = () => {
               borderBottom: "1px solid var(--c-surface-disabled)",
             }}
           >
-            {/* 1. Color */}
             <div style={{ display: "flex", justifyContent: "center" }}>
               <div style={{ width: "24px", height: "24px" }}>
                 <ColorPicker
@@ -60,7 +57,6 @@ const GroupListTable: React.FC = () => {
               </div>
             </div>
 
-            {/* 2. Name & Description */}
             <div
               style={{
                 display: "flex",
@@ -113,7 +109,6 @@ const GroupListTable: React.FC = () => {
               </Tooltip>
             </div>
 
-            {/* 3. Action */}
             <div style={{ display: "flex", justifyContent: "center" }}>
               <button
                 className="btn-icon-danger"
@@ -139,7 +134,6 @@ const GroupListTable: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteTargetId !== null}
         title="グループの削除"

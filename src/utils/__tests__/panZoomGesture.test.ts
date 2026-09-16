@@ -1,6 +1,3 @@
-/**
- * @vitest-environment jsdom
- */
 import { describe, expect, it } from "vitest";
 import {
   clampScale,
@@ -11,6 +8,8 @@ import {
   panByDelta,
   pointerDistance,
   pointerMidpoint,
+  tryReleasePointerCapture,
+  trySetPointerCapture,
   zoomAroundPoint,
 } from "../panZoomGesture";
 
@@ -67,5 +66,13 @@ describe("panZoomGesture", () => {
       x: 5,
       y: 3,
     });
+  });
+
+  it("swallows pointer capture when the pointer is not active", () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    expect(() => trySetPointerCapture(el, 99)).not.toThrow();
+    expect(() => tryReleasePointerCapture(el, 99)).not.toThrow();
+    el.remove();
   });
 });
