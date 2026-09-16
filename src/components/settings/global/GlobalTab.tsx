@@ -31,7 +31,6 @@ const GlobalTab: React.FC = () => {
     if (isTesting) {
       clearTestPlay();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appSettings]);
 
   useEffect(() => {
