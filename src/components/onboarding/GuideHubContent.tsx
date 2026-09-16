@@ -15,7 +15,6 @@ export const GuideHubContent: React.FC = () => {
 
   return (
     <main className="guide-hub-content">
-      {/* Title */}
       <div className="guide-hub-title-row">
         <div>
           <h3
@@ -57,7 +56,6 @@ export const GuideHubContent: React.FC = () => {
         )}
       </div>
 
-      {/* Visual Animated Preview (Top Area) */}
       {currentItem.id !== "tour" && (
         <div
           style={{
@@ -172,7 +170,6 @@ export const GuideHubContent: React.FC = () => {
         </div>
       )}
 
-      {/* Steps & Explanation (Bottom Area - only for items without videos or tour) */}
       {(!currentItem.videos ||
         currentItem.videos.length === 0 ||
         currentItem.id === "tour") &&
@@ -216,7 +213,6 @@ export const GuideHubContent: React.FC = () => {
               ))}
             </ol>
 
-            {/* Hint */}
             {currentItem.hint && (
               <div
                 style={{
@@ -250,7 +246,6 @@ export const GuideHubContent: React.FC = () => {
               </div>
             )}
 
-            {/* Shortcuts */}
             {currentItem.shortcuts && currentItem.shortcuts.length > 0 && (
               <div
                 style={{

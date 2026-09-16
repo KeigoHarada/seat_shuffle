@@ -1,11 +1,4 @@
 #!/usr/bin/env node
-/**
- * Drive helper for verify-rakugae.
- * Launch Vite + a dedicated Chrome (CDP) for this run. Commands attach and
- * disconnect; they do not close Chrome, so in-page React state survives.
- *
- * Never kill by process name. Cleanup only SIGTERMs pids recorded for this run.
- */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
@@ -229,7 +222,6 @@ async function openAppPage(meta, viewport = { width: 1440, height: 900 }) {
     try {
       await heading.waitFor({ state: "visible", timeout: 1500 });
     } catch {
-      /* already completed onboarding */
     }
   }
   return { browser, context, page };
@@ -249,14 +241,12 @@ function spawnLogged(command, spawnArgs, logPath, extraEnv = {}) {
 
 function stopPid(pid) {
   if (!pid) return;
-  // Spawned with detached:true so pid is a process-group leader.
   try {
     process.kill(-pid, "SIGTERM");
   } catch {
     try {
       if (pidAlive(pid)) process.kill(pid, "SIGTERM");
     } catch {
-      /* already gone */
     }
   }
 }
@@ -274,7 +264,6 @@ async function waitPidExit(pid, timeoutMs) {
       try {
         process.kill(pid, "SIGKILL");
       } catch {
-        /* already gone */
       }
     }
   }
@@ -450,7 +439,6 @@ async function withPage(args, fn) {
   try {
     return await fn(page, meta);
   } finally {
-    // CDP close drops this Node client; the run's Chrome process stays up.
     await browser.close();
   }
 }

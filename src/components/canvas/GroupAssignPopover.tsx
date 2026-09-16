@@ -27,8 +27,6 @@ const GroupAssignPopover: React.FC<GroupAssignPopoverProps> = ({
   }, [seats, targetSeatIds]);
 
   const toggleGroup = (groupId: string) => {
-    // If all selected seats have the group, remove it from all.
-    // Otherwise, add it to all.
     const allHaveIt =
       selectedSeats.length > 0 &&
       selectedSeats.every((s) => s.groupIds.includes(groupId));

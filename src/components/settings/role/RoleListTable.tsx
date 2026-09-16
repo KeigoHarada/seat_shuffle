@@ -15,7 +15,6 @@ const RoleListTable: React.FC = () => {
 
   return (
     <div className="app-settings-list">
-      {/* Table Header */}
       <div style={{ flexShrink: 0 }}>
         <div
           style={{
@@ -36,7 +35,6 @@ const RoleListTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Table Rows */}
       <div className="app-settings-list-body">
         {roles.map((role) => (
           <div
@@ -50,7 +48,6 @@ const RoleListTable: React.FC = () => {
               borderBottom: "1px solid var(--c-surface-disabled)",
             }}
           >
-            {/* 1. Icon */}
             <div style={{ display: "flex", justifyContent: "center" }}>
               <IconPicker
                 value={role.iconName as IconName}
@@ -58,7 +55,6 @@ const RoleListTable: React.FC = () => {
               />
             </div>
 
-            {/* 2. Name & Description */}
             <div
               style={{
                 display: "flex",
@@ -109,7 +105,6 @@ const RoleListTable: React.FC = () => {
               </Tooltip>
             </div>
 
-            {/* 3. Action */}
             <div style={{ display: "flex", justifyContent: "center" }}>
               <button
                 className="btn-icon-danger"
@@ -135,7 +130,6 @@ const RoleListTable: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteTargetId !== null}
         title="役割の削除"

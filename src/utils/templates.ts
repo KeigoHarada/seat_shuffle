@@ -21,7 +21,6 @@ export const generateTemplate = (
   };
 
   if (templateId === "classroom") {
-    // 2人ペア×3列（計6列）、5行（計30席）の標準的な教室配置
     const colXOffsets = [0, 6, 14, 20, 28, 34];
     const rowYOffsets = [0, 6, 12, 18, 24];
 
@@ -31,7 +30,6 @@ export const generateTemplate = (
       }
     }
 
-    // Add teacher's desk (教卓)
     newObjects.push({
       id: crypto.randomUUID(),
       type: "rectangle",
@@ -43,19 +41,16 @@ export const generateTemplate = (
       color: "var(--c-surface-disabled)",
     });
   } else if (templateId === "group4") {
-    // 2x2 facing each other
     addSeat(startX, startY);
     addSeat(startX + SEAT_COLS, startY);
     addSeat(startX, startY + SEAT_ROWS);
     addSeat(startX + SEAT_COLS, startY + SEAT_ROWS);
   } else if (templateId === "group6_v") {
-    // 2x3 (縦)
     for (let r = 0; r < 3; r++) {
       addSeat(startX, startY + r * SEAT_ROWS);
       addSeat(startX + SEAT_COLS, startY + r * SEAT_ROWS);
     }
   } else if (templateId === "group6_h") {
-    // 3x2 (横)
     for (let c = 0; c < 3; c++) {
       addSeat(startX + c * SEAT_COLS, startY);
       addSeat(startX + c * SEAT_COLS, startY + SEAT_ROWS);

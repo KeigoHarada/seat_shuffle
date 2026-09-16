@@ -21,7 +21,6 @@ const RoleAddForm: React.FC = () => {
       description: newDescription.trim(),
     };
     addRole(newRole);
-    // Reset form
     setNewName("");
     setNewIconName("Star");
     setNewDescription("");
@@ -48,7 +47,6 @@ const RoleAddForm: React.FC = () => {
           gap: "var(--spacing-sm)",
         }}
       >
-        {/* Icon & Name Row */}
         <div
           style={{
             display: "flex",
@@ -71,7 +69,6 @@ const RoleAddForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Description Row */}
         <div
           style={{
             width: "100%",

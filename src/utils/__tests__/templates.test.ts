@@ -10,13 +10,11 @@ describe("templates utils", () => {
       expect(objects).toHaveLength(1);
       expect(objects[0].text).toBe("教卓");
 
-      // Verify X offsets for 6 columns (3 pairs)
       const distinctX = Array.from(new Set(seats.map((s) => s.x))).sort(
         (a, b) => a - b,
       );
       expect(distinctX).toEqual([0, 6, 14, 20, 28, 34]);
 
-      // Verify Y offsets for 5 rows
       const distinctY = Array.from(new Set(seats.map((s) => s.y))).sort(
         (a, b) => a - b,
       );
