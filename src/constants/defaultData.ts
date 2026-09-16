@@ -1,7 +1,7 @@
 import { Student, Role, Group, Seat, CanvasObject, Constraint } from "../types";
 import { generateTemplate } from "../utils/templates";
 import { assignGroupsByBlocks } from "../utils/group";
-import { PREDEFINED_COLORS } from "../components/ui/ColorPicker";
+import { PREDEFINED_COLORS } from "./index";
 
 export const DEFAULT_ROLES: Role[] = [
   {

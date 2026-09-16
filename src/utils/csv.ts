@@ -1,5 +1,5 @@
 import { AppState } from "../types";
-import { GenderType } from "../constants";
+import type { GenderType } from "../types";
 
 export function exportSettingsToCSV(state: AppState): string {
   const lines: string[] = [];

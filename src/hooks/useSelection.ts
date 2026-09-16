@@ -32,12 +32,7 @@ export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
   }, []);
 
   const updateSelectionBox = useCallback(
-    (
-      x: number,
-      y: number,
-      isCtrlPressed: boolean,
-      initialSelectedIds: string[],
-    ) => {
+    (x: number, y: number) => {
       setSelectionBox((prev) => {
         if (!prev) return null;
         const newBox = { ...prev, currentX: x, currentY: y };
@@ -47,7 +42,7 @@ export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
         const minY = Math.min(newBox.startY, newBox.currentY);
         const maxY = Math.max(newBox.startY, newBox.currentY);
 
-        const newSelectedIds = new Set(isCtrlPressed ? initialSelectedIds : []);
+        const newSelectedIds = new Set<string>();
 
         const checkIntersection = (
           nx: number,
@@ -56,7 +51,6 @@ export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
           nh: number,
           id: string,
         ) => {
-          // Node coordinates in pixels
           const px = nx * GRID_SIZE;
           const py = ny * GRID_SIZE;
           const pw = nw * GRID_SIZE;

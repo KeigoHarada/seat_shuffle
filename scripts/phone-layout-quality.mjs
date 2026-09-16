@@ -23,9 +23,7 @@ function loadPlaywright() {
   for (const candidate of candidates) {
     try {
       return require(candidate);
-    } catch {
-      // try next
-    }
+    } catch {}
   }
   throw new Error(
     "playwright-core is missing. Run: npm install --prefix .cursor/skills/verify-rakugae/helpers",
@@ -58,9 +56,7 @@ async function waitForUrl(url, timeoutMs = 20000) {
     try {
       const response = await fetch(url, { redirect: "manual" });
       if (response.ok || response.status === 304) return;
-    } catch {
-      // vite still starting
-    }
+    } catch {}
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
   throw new Error(`Timed out waiting for ${url}`);
@@ -74,9 +70,7 @@ async function dismissWelcome(page) {
   const skip = page.getByRole("button", { name: "スキップ" });
   try {
     await skip.click({ timeout: 4000 });
-  } catch {
-    // already dismissed
-  }
+  } catch {}
   await page.locator(".app-shell").first().waitFor();
 }
 
@@ -740,16 +734,12 @@ async function main() {
     if (vite.pid) {
       try {
         process.kill(vite.pid, "SIGTERM");
-      } catch {
-        // already gone
-      }
+      } catch {}
       await new Promise((resolve) => setTimeout(resolve, 400));
       try {
         process.kill(vite.pid, 0);
         process.kill(vite.pid, "SIGKILL");
-      } catch {
-        // already gone
-      }
+      } catch {}
     }
   }
 

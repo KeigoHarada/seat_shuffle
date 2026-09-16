@@ -18,10 +18,6 @@ describe("GlobalTab Support Section", () => {
 
     useStore.setState({
       appSettings: {
-        gridRows: 6,
-        gridCols: 6,
-        soundEnabled: true,
-        theme: "light",
         algorithm: "random",
         shuffleAnimation: "none",
         autoAssignAlgorithm: "right-top-down",

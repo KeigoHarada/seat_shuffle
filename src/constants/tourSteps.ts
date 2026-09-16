@@ -7,8 +7,8 @@ import {
 } from "./defaultData";
 import { sortStudentsByNameLogic } from "../utils/student";
 import { optimizeShuffle } from "../utils/algorithm";
-import { StateAndActions } from "../stores/index";
-import { OnboardingState } from "../stores/onboarding";
+import type { StateAndActions } from "../stores/index";
+import type { OnboardingState } from "../stores/onboarding";
 
 export interface TourStep {
   id: string;

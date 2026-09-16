@@ -97,10 +97,6 @@ const initialState: AppState & {
   isViewMode: false,
   canvasTool: "select",
   appSettings: {
-    gridRows: 6,
-    gridCols: 7,
-    soundEnabled: true,
-    theme: "system",
     algorithm: "optimize",
     shuffleAnimation: "none",
     autoAssignAlgorithm: "right-top-down",

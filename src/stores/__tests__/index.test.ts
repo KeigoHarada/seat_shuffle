@@ -119,10 +119,10 @@ describe("useStore", () => {
   });
 
   it("should update app settings", () => {
-    useStore.getState().updateAppSettings({ theme: "dark" });
+    useStore.getState().updateAppSettings({ algorithm: "random" });
 
     const settings = useStore.getState().appSettings;
-    expect(settings.theme).toBe("dark");
+    expect(settings.algorithm).toBe("random");
   });
 
   it("should clear state", () => {
