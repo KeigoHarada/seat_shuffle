@@ -7,8 +7,10 @@ const SRC = join(process.cwd(), "src");
 describe("responsive shell", () => {
   it("does not ship a separate phone destination tree", () => {
     expect(existsSync(join(SRC, "views/phone"))).toBe(false);
+    expect(existsSync(join(SRC, "views/desktop"))).toBe(false);
     const app = readFileSync(join(SRC, "App.tsx"), "utf8");
     expect(app).not.toMatch(/PhoneApp/);
+    expect(app).not.toMatch(/DesktopApp/);
     expect(app).not.toMatch(/useShellKind/);
     expect(app).not.toMatch(/DonationModal/);
   });

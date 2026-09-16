@@ -313,7 +313,7 @@ UI上のキャンバス（描画エリア）を用いて、直感的に座席表
 2. **utils**: 席替え・CSV・班割当などの純粋関数。`src/utils/algorithm.ts` など。React コンポーネントを import しない。
 3. **stores**: Zustand。教室データは `src/stores/index.ts`。オンボーディングとトーストは別ストア。Slice 分割はしない。
 4. **hooks**: ストアと utils を画面操作に繋ぐ。
-5. **components / views**: 描画。`App.tsx` は常に `DesktopApp` を描く。
+5. **components / views**: 描画。`App.tsx` は常に `AppShell` を描く。
 
 `optimizeShuffle` はメインスレッドで動き、探索は最大 300ms で打ち切る。Web Worker は使わない。CSV は `src/utils/csv.ts` の手書きパーサで、Excel 用ライブラリは入れない。応援導線は全体設定タブの Ofuse リンクだけである。アプリ内寄付モーダルはない。
 

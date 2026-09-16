@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Shuffle, Undo2 } from "lucide-react";
-import LegalModal from "../../components/ui/LegalModal";
-import { useShuffle } from "../../hooks/useShuffle";
-import DesktopViewModeToggle from "./DesktopViewModeToggle";
+import LegalModal from "../components/ui/LegalModal";
+import { useShuffle } from "../hooks/useShuffle";
+import ViewModeToggle from "./ViewModeToggle";
 
-const DesktopFooter: React.FC = () => {
+const AppFooter: React.FC = () => {
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const { handleShuffle, undoShuffle, isShuffling, canUndo } = useShuffle();
 
@@ -48,10 +48,10 @@ const DesktopFooter: React.FC = () => {
         </button>
       </div>
       <div className="app-footer-cluster app-footer-cluster-end">
-        <DesktopViewModeToggle />
+        <ViewModeToggle />
       </div>
     </footer>
   );
 };
 
-export default DesktopFooter;
+export default AppFooter;
