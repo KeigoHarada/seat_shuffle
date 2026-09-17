@@ -54,6 +54,33 @@ export function resolveCanvasDownGesture(input: {
   return "none";
 }
 
+export function shouldSelectOnNodePointerDown(input: {
+  pointerType: string;
+  isPrimary: boolean;
+  pointerCount: number;
+}): boolean {
+  if (isTouchPointerType(input.pointerType) && !input.isPrimary) return false;
+  return true;
+}
+
+export function shouldClearSelectionForPointerGesture(
+  gesture: CanvasDownGesture,
+): boolean {
+  switch (gesture) {
+    case "marquee":
+    case "pan":
+      return true;
+    case "pinch":
+    case "node":
+    case "none":
+      return false;
+    default: {
+      const _exhaustive: never = gesture;
+      return _exhaustive;
+    }
+  }
+}
+
 export function isCanvasChromeTarget(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
   return Boolean(

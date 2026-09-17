@@ -896,7 +896,35 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       );
     }
 
+    const clearPoint = await pickEmptyCanvasPoint(page);
+    if (clearPoint) {
+      await page.evaluate(({ x, y }) => {
+        const canvas = document.getElementById("canvas-main-area");
+        if (!canvas) return;
+        const fire = (type, buttons) => {
+          canvas.dispatchEvent(
+            new PointerEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+              pointerId: 91,
+              pointerType: "touch",
+              isPrimary: true,
+              button: 0,
+              buttons,
+              clientX: x,
+              clientY: y,
+            }),
+          );
+        };
+        fire("pointerdown", 1);
+        fire("pointerup", 0);
+      }, clearPoint);
+      await page.waitForTimeout(80);
+    }
+    const selectedBeforePinch = await countSelectedSeats(page);
     const pinchOnSeats = await dispatchPinchOnSeats(page);
+    const selectedAfterPinch = await countSelectedSeats(page);
     record(
       failures,
       `${label} pinch on seats zooms`,
@@ -911,6 +939,18 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       !(await assignPopoverOpen(page)) &&
         (await page.locator(".canvas-context-menu").count()) === 0,
       "two-finger pinch opened seat assign or context menu",
+    );
+    record(
+      failures,
+      `${label} pinch on seats does not increase selected count`,
+      pinchOnSeats.ok && selectedAfterPinch <= selectedBeforePinch,
+      `selected ${selectedBeforePinch} -> ${selectedAfterPinch}`,
+    );
+    record(
+      failures,
+      `${label} pinch on seats does not select seats under fingers`,
+      selectedAfterPinch === 0,
+      `selected after pinch=${selectedAfterPinch}`,
     );
 
     if ((await page.locator(".seat-node-item").count()) > 0) {

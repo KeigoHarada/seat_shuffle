@@ -9,6 +9,8 @@ import {
   pointerDistance,
   pointerMidpoint,
   resolveCanvasDownGesture,
+  shouldClearSelectionForPointerGesture,
+  shouldSelectOnNodePointerDown,
   tryReleasePointerCapture,
   trySetPointerCapture,
   zoomAroundPoint,
@@ -203,5 +205,65 @@ describe("resolveCanvasDownGesture", () => {
         canvasTool: "hand",
       }),
     ).toBe("pan");
+  });
+});
+
+describe("shouldSelectOnNodePointerDown", () => {
+  it("selects on the first touch pointer", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "touch",
+        isPrimary: true,
+        pointerCount: 1,
+      }),
+    ).toBe(true);
+  });
+
+  it("does not select once two touch pointers are active", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "touch",
+        isPrimary: true,
+        pointerCount: 2,
+      }),
+    ).toBe(false);
+  });
+
+  it("does not select a non-primary touch", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "touch",
+        isPrimary: false,
+        pointerCount: 2,
+      }),
+    ).toBe(false);
+  });
+
+  it("keeps mouse selection on the primary pointer", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "mouse",
+        isPrimary: true,
+        pointerCount: 1,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("shouldClearSelectionForPointerGesture", () => {
+  it("clears when a touch pinch starts", () => {
+    expect(shouldClearSelectionForPointerGesture("pinch")).toBe(true);
+  });
+
+  it("clears when marquee starts", () => {
+    expect(shouldClearSelectionForPointerGesture("marquee")).toBe(true);
+  });
+
+  it("does not clear when panning", () => {
+    expect(shouldClearSelectionForPointerGesture("pan")).toBe(false);
+  });
+
+  it("does not clear for node drag", () => {
+    expect(shouldClearSelectionForPointerGesture("node")).toBe(false);
   });
 });
