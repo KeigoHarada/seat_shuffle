@@ -358,7 +358,12 @@ async function seatWorldPos(page) {
   return page.evaluate(() => {
     const el = [...document.querySelectorAll(".seat-node-item")].at(-1);
     if (!el) return null;
-    return { left: el.style.left, top: el.style.top };
+    return {
+      left: el.style.left,
+      top: el.style.top,
+      x: Number(el.getAttribute("data-x")),
+      y: Number(el.getAttribute("data-y")),
+    };
   });
 }
 
@@ -409,7 +414,9 @@ async function dispatchSeatDrag(page, dx, dy) {
   const moved =
     !!beforePos &&
     !!afterPos &&
-    (beforePos.left !== afterPos.left || beforePos.top !== afterPos.top);
+    ((beforePos.x !== afterPos.x || beforePos.y !== afterPos.y) ||
+      beforePos.left !== afterPos.left ||
+      beforePos.top !== afterPos.top);
   return { ok, beforePan, afterPan, beforePos, afterPos, moved };
 }
 
@@ -896,7 +903,35 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       );
     }
 
+    const clearPoint = await pickEmptyCanvasPoint(page);
+    if (clearPoint) {
+      await page.evaluate(({ x, y }) => {
+        const canvas = document.getElementById("canvas-main-area");
+        if (!canvas) return;
+        const fire = (type, buttons) => {
+          canvas.dispatchEvent(
+            new PointerEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+              pointerId: 91,
+              pointerType: "touch",
+              isPrimary: true,
+              button: 0,
+              buttons,
+              clientX: x,
+              clientY: y,
+            }),
+          );
+        };
+        fire("pointerdown", 1);
+        fire("pointerup", 0);
+      }, clearPoint);
+      await page.waitForTimeout(80);
+    }
+    const selectedBeforePinch = await countSelectedSeats(page);
     const pinchOnSeats = await dispatchPinchOnSeats(page);
+    const selectedAfterPinch = await countSelectedSeats(page);
     record(
       failures,
       `${label} pinch on seats zooms`,
@@ -912,12 +947,17 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         (await page.locator(".canvas-context-menu").count()) === 0,
       "two-finger pinch opened seat assign or context menu",
     );
-    const pinchSelectedAfter = await countSelectedSeats(page);
     record(
       failures,
-      `${label} pinch on seats does not select`,
-      pinchSelectedAfter === 0,
-      `data-selected-count=${pinchSelectedAfter}`,
+      `${label} pinch on seats does not increase selected count`,
+      pinchOnSeats.ok && selectedAfterPinch <= selectedBeforePinch,
+      `selected ${selectedBeforePinch} -> ${selectedAfterPinch}`,
+    );
+    record(
+      failures,
+      `${label} pinch on seats does not select seats under fingers`,
+      selectedAfterPinch === 0,
+      `selected after pinch=${selectedAfterPinch}`,
     );
 
     if ((await page.locator(".seat-node-item").count()) > 0) {

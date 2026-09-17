@@ -169,6 +169,7 @@ const Canvas: React.FC = () => {
     pan,
     scale,
     isViewMode,
+    getPointerCount,
     cancelDrag,
     setContextMenu,
     setPopoverPos,
