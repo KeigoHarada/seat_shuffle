@@ -106,6 +106,14 @@ export const usePanZoom = (
   }, []);
 
   const trackPointer = useCallback((e: React.PointerEvent) => {
+    if (
+      e.isPrimary &&
+      pinchRef.current == null &&
+      pointersRef.current.size > 0 &&
+      !pointersRef.current.has(e.pointerId)
+    ) {
+      pointersRef.current.clear();
+    }
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
   }, []);
 
@@ -210,6 +218,9 @@ export const usePanZoom = (
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     pointersRef.current.delete(e.pointerId);
+    if (e.buttons === 0) {
+      pointersRef.current.clear();
+    }
     pinchRef.current = null;
 
     if (pointersRef.current.size === 1) {

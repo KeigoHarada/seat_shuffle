@@ -262,6 +262,7 @@ const Canvas: React.FC = () => {
     <div
       id="canvas-main-area"
       ref={viewportRef}
+      data-selected-count={selectedIds.length}
       style={viewportStyle}
       onPointerDownCapture={onCanvasPointerDownCapture}
       onPointerDown={onCanvasPointerDown}

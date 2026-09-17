@@ -312,47 +312,88 @@ async function dispatchPinchOnSeats(page) {
 
 async function countSelectedSeats(page) {
   return page.evaluate(() => {
+    const canvas = document.getElementById("canvas-main-area");
+    const attr = canvas?.getAttribute("data-selected-count");
+    if (attr != null && attr !== "") return Number(attr);
     return [...document.querySelectorAll(".seat-node-item")].filter((el) => {
       return parseFloat(getComputedStyle(el).borderTopWidth) >= 2;
     }).length;
   });
 }
 
-async function dispatchTouchMarquee(page, start) {
+async function dispatchTouchMarquee(page) {
   const before = await countSelectedSeats(page);
-  const ok = await page.evaluate(
-    ({ start }) => {
-      const canvas = document.getElementById("canvas-main-area");
-      if (!canvas || !start) return false;
-      const rect = canvas.getBoundingClientRect();
-      const endX = rect.left + rect.width * 0.42;
-      const endY = rect.top + rect.height * 0.58;
-      const fire = (type, cx, cy, buttons) => {
-        canvas.dispatchEvent(
-          new PointerEvent(type, {
-            bubbles: true,
-            cancelable: true,
-            composed: true,
-            pointerId: 41,
-            pointerType: "touch",
-            isPrimary: true,
-            button: 0,
-            buttons,
-            clientX: cx,
-            clientY: cy,
-          }),
-        );
-      };
-      fire("pointerdown", start.x, start.y, 1);
-      fire("pointermove", endX, endY, 1);
-      fire("pointerup", endX, endY, 0);
-      return true;
-    },
-    { start },
-  );
+  const detail = await page.evaluate(() => {
+    const canvas = document.getElementById("canvas-main-area");
+    if (!canvas) return { ok: false };
+    const canvasRect = canvas.getBoundingClientRect();
+    const chrome = [
+      document.querySelector(".app-canvas-toolbar"),
+      document.querySelector(".app-canvas-controls"),
+      document.querySelector(".app-canvas-toolbar-menu"),
+    ]
+      .filter(Boolean)
+      .map((el) => el.getBoundingClientRect());
+    const hits = (boxes, x, y) =>
+      boxes.some(
+        (box) =>
+          x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
+      );
+    const visible = [...document.querySelectorAll(".seat-node-item")]
+      .map((el) => el.getBoundingClientRect())
+      .filter(
+        (box) =>
+          box.width > 0 &&
+          box.height > 0 &&
+          box.right > canvasRect.left &&
+          box.left < canvasRect.right &&
+          box.bottom > canvasRect.top &&
+          box.top < canvasRect.bottom,
+      );
+    if (visible.length < 2) return { ok: false, visible: visible.length };
+    const minLeft = Math.min(...visible.map((box) => box.left));
+    const minTop = Math.min(...visible.map((box) => box.top));
+    const maxRight = Math.max(...visible.map((box) => box.right));
+    const maxBottom = Math.max(...visible.map((box) => box.bottom));
+    const start = {
+      x: Math.min(maxRight - 8, Math.max(canvasRect.left + 8, minLeft - 20)),
+      y: Math.min(
+        canvasRect.bottom - 8,
+        Math.max(canvasRect.top + 8, maxBottom + 18),
+      ),
+    };
+    const end = {
+      x: Math.min(canvasRect.right - 8, maxRight - 4),
+      y: Math.max(canvasRect.top + 8, minTop - 12),
+    };
+    if (hits(chrome, start.x, start.y) || hits(visible, start.x, start.y)) {
+      start.x = Math.min(canvasRect.right - 12, maxRight + 16);
+      start.y = Math.min(canvasRect.bottom - 12, maxBottom + 16);
+    }
+    const fire = (type, cx, cy, buttons) => {
+      canvas.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+          pointerId: 41,
+          pointerType: "touch",
+          isPrimary: true,
+          button: 0,
+          buttons,
+          clientX: cx,
+          clientY: cy,
+        }),
+      );
+    };
+    fire("pointerdown", start.x, start.y, 1);
+    fire("pointermove", end.x, end.y, 1);
+    fire("pointerup", end.x, end.y, 0);
+    return { ok: true, start, end, visible: visible.length };
+  });
   await page.waitForTimeout(80);
   const after = await countSelectedSeats(page);
-  return { before, after, ok };
+  return { before, after, ...detail };
 }
 
 async function dispatchTouchLongPress(page, point) {
@@ -727,6 +768,18 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       `before=${emptyPan.before} after=${emptyPan.after} point=${JSON.stringify(emptyPoint)}`,
     );
 
+    if ((await page.locator(".seat-node-item").count()) > 0) {
+      await page.getByRole("button", { name: "表示リセット" }).click();
+      await page.waitForTimeout(80);
+      const marquee = await dispatchTouchMarquee(page);
+      record(
+        failures,
+        `${label} touch marquee selects seats`,
+        marquee.ok && marquee.after > marquee.before && marquee.after >= 2,
+        `selected ${marquee.before} -> ${marquee.after} ok=${marquee.ok} visible=${marquee.visible}`,
+      );
+    }
+
     const pinchOnSeats = await dispatchPinchOnSeats(page);
     record(
       failures,
@@ -736,17 +789,6 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
           pinchOnSeats.beforePan !== pinchOnSeats.afterPan),
       `scale ${pinchOnSeats.beforeScale} -> ${pinchOnSeats.afterScale} pan ${pinchOnSeats.beforePan} -> ${pinchOnSeats.afterPan}`,
     );
-
-    if ((await page.locator(".seat-node-item").count()) > 0) {
-      const marqueePoint = await pickEmptyCanvasPoint(page);
-      const marquee = await dispatchTouchMarquee(page, marqueePoint);
-      record(
-        failures,
-        `${label} touch marquee selects seats`,
-        marquee.ok && marquee.after > marquee.before && marquee.after >= 2,
-        `selected ${marquee.before} -> ${marquee.after} point=${JSON.stringify(marqueePoint)}`,
-      );
-    }
 
     if ((await page.locator(".seat-node-item").count()) > 0) {
       const seatDrag = await dispatchTouchPan(page, ".seat-node-item", 70, 30);
