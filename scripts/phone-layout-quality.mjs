@@ -324,11 +324,9 @@ async function dispatchTouchMarquee(page, start) {
     ({ start }) => {
       const canvas = document.getElementById("canvas-main-area");
       if (!canvas || !start) return false;
-      const seats = [...document.querySelectorAll(".seat-node-item")];
-      if (seats.length === 0) return false;
-      const target = seats[Math.min(4, seats.length - 1)].getBoundingClientRect();
-      const endX = target.left + target.width / 2;
-      const endY = target.top + target.height / 2;
+      const rect = canvas.getBoundingClientRect();
+      const endX = rect.left + rect.width * 0.42;
+      const endY = rect.top + rect.height * 0.58;
       const fire = (type, cx, cy, buttons) => {
         canvas.dispatchEvent(
           new PointerEvent(type, {
@@ -761,6 +759,7 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
     }
 
     await page.locator("#btn-footer-viewmode").click();
+    await page.waitForTimeout(80);
     const viewPoint = await pickEmptyCanvasPoint(page);
     const viewPan = await dispatchTouchPan(
       page,
@@ -776,6 +775,7 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       `before=${viewPan.before} after=${viewPan.after} point=${JSON.stringify(viewPoint)}`,
     );
     await page.locator("#btn-footer-viewmode").click();
+    await page.locator(".app-canvas-toolbar").waitFor({ timeout: 3000 });
 
     const longPressPoint = await pickEmptyCanvasPoint(page);
     if (longPressPoint) {

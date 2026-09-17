@@ -13,6 +13,8 @@ import {
   LONG_PRESS_MS,
   movedPastTap,
   resolveCanvasDownGesture,
+  tryReleasePointerCapture,
+  trySetPointerCapture,
 } from "../utils/panZoomGesture";
 
 interface UseCanvasPointerEventsProps {
@@ -105,9 +107,7 @@ export const useCanvasPointerEvents = ({
       const canvasEl = e.currentTarget;
       longPressTimerRef.current = window.setTimeout(() => {
         longPressTimerRef.current = null;
-        if (canvasEl?.hasPointerCapture?.(pointerId)) {
-          canvasEl.releasePointerCapture(pointerId);
-        }
+        tryReleasePointerCapture(canvasEl, pointerId);
         abortMarquee();
         handlePointerUp(e);
         openMenuAt(clientX, clientY);
@@ -118,8 +118,8 @@ export const useCanvasPointerEvents = ({
 
   const beginMarqueeAt = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
-      e.currentTarget.setPointerCapture(e.pointerId);
       isMarqueeRef.current = true;
+      trySetPointerCapture(e.currentTarget, e.pointerId);
       const rect = viewportRef.current?.getBoundingClientRect();
       if (!rect) return;
       const { worldX, worldY } = screenToWorld(
@@ -258,9 +258,7 @@ export const useCanvasPointerEvents = ({
       if (isMarqueeRef.current && getPointerCount() === 0) {
         isMarqueeRef.current = false;
         endSelectionBox();
-        if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
-          e.currentTarget.releasePointerCapture(e.pointerId);
-        }
+        tryReleasePointerCapture(e.currentTarget, e.pointerId);
       }
 
       if (e.button === 2 && !isViewMode) {
