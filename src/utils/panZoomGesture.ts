@@ -10,8 +10,7 @@ export type Point = { x: number; y: number };
  *
  * 1. Toolbar / zoom-reset chrome: never steal (buttons keep the event).
  * 2. Two or more touch pointers, anywhere including seats: pinch zoom + pan.
- *    This cancels in-progress node drag, marquee, and long-press, and
- *    clears selection so seats under the fingers are not selected.
+ *    This cancels in-progress node drag, marquee, and long-press.
  * 3. One touch on a seat/object in edit+select: node select / drag / long-press.
  * 4. One pointer on empty canvas (or on a node while view/hand/space force pan):
  *    pan if view mode, hand tool, space, or right mouse button;
