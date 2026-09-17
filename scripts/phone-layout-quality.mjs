@@ -912,6 +912,13 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         (await page.locator(".canvas-context-menu").count()) === 0,
       "two-finger pinch opened seat assign or context menu",
     );
+    const pinchSelectedAfter = await countSelectedSeats(page);
+    record(
+      failures,
+      `${label} pinch on seats does not select`,
+      pinchSelectedAfter === 0,
+      `data-selected-count=${pinchSelectedAfter}`,
+    );
 
     if ((await page.locator(".seat-node-item").count()) > 0) {
       const seatDrag = await dispatchSeatDrag(page, 90, 50);
