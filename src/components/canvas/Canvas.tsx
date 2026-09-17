@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useStore } from "../../stores";
 import { GRID_SIZE } from "../../constants/canvas";
 import { usePanZoom } from "../../hooks/usePanZoom";
@@ -43,6 +43,9 @@ const Canvas: React.FC = () => {
     isZoomMode,
     isSpaceMode,
     viewportRef,
+    trackPointer,
+    getPointerCount,
+    promoteToPinch,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
@@ -95,6 +98,7 @@ const Canvas: React.FC = () => {
 
   const [showGroupPopover, setShowGroupPopover] = useState(false);
   const [groupPopoverPos, setGroupPopoverPos] = useState({ x: 0, y: 0 });
+  const cancelNodeLongPressRef = useRef(() => {});
 
   const viewportStyle: React.CSSProperties = {
     width: "100%",
@@ -123,6 +127,7 @@ const Canvas: React.FC = () => {
 
   const {
     handleContextMenu,
+    onCanvasPointerDownCapture,
     onCanvasPointerDown,
     onCanvasPointerMove,
     onCanvasPointerUp,
@@ -138,9 +143,14 @@ const Canvas: React.FC = () => {
     startSelectionBox,
     updateSelectionBox,
     endSelectionBox,
+    trackPointer,
+    getPointerCount,
+    promoteToPinch,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
+    cancelDrag,
+    cancelNodeLongPress: () => cancelNodeLongPressRef.current(),
     setContextMenu,
   });
 
@@ -149,6 +159,7 @@ const Canvas: React.FC = () => {
     handleNodeLongPressMove,
     handleNodeLongPressUp,
     handleSeatDoubleClick,
+    cancelNodeLongPress,
   } = useNodeEvents({
     seats,
     selectedIds,
@@ -167,6 +178,7 @@ const Canvas: React.FC = () => {
     setHighlightedStudentId,
     updatePointerDownPos,
   });
+  cancelNodeLongPressRef.current = cancelNodeLongPress;
 
   const {
     handleDeleteSelected,
@@ -251,6 +263,7 @@ const Canvas: React.FC = () => {
       id="canvas-main-area"
       ref={viewportRef}
       style={viewportStyle}
+      onPointerDownCapture={onCanvasPointerDownCapture}
       onPointerDown={onCanvasPointerDown}
       onPointerMove={onCanvasPointerMove}
       onPointerUp={onCanvasPointerUp}

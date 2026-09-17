@@ -1,4 +1,10 @@
-import { useCallback, useRef, type PointerEvent, type MouseEvent, type RefObject } from "react";
+import {
+  useCallback,
+  useRef,
+  type PointerEvent,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import { Seat } from "../types";
 import { contextMenuFromClient } from "../utils/canvas";
 import {
@@ -74,6 +80,7 @@ export const useNodeEvents = ({
 
   const handleNodePointerDown = useCallback(
     (id: string, e: PointerEvent) => {
+      if (isTouchPointerType(e.pointerType) && !e.isPrimary) return;
       e.stopPropagation();
       updatePointerDownPos(e.clientX, e.clientY);
       if (e.ctrlKey || e.metaKey) {
@@ -166,5 +173,6 @@ export const useNodeEvents = ({
     handleNodeLongPressMove,
     handleNodeLongPressUp,
     handleSeatDoubleClick,
+    cancelNodeLongPress: clearLongPress,
   };
 };

@@ -5,8 +5,53 @@ export const TAP_MOVE_PX = 10;
 
 export type Point = { x: number; y: number };
 
+/**
+ * Canvas gesture priority (pointerType, not UA sniffing):
+ *
+ * 1. Toolbar / zoom-reset chrome: never steal (buttons keep the event).
+ * 2. Two or more touch pointers, anywhere including seats: pinch zoom + pan.
+ *    This cancels in-progress node drag, marquee, and long-press.
+ * 3. One touch on a seat/object in edit+select: node select / drag / long-press.
+ * 4. One pointer on empty canvas (or on a node while view/hand/space force pan):
+ *    pan if view mode, hand tool, space, or right mouse button;
+ *    otherwise left/touch drag is marquee multi-select (same as desktop).
+ * 5. Mouse/trackpad otherwise unchanged: wheel pan, ctrl/meta+wheel zoom,
+ *    space/hand/view pan, select-tool drag marquee.
+ */
+export type CanvasDownGesture = "none" | "pinch" | "pan" | "marquee" | "node";
+
 export function isTouchPointerType(pointerType: string): boolean {
   return pointerType === "touch";
+}
+
+export function resolveCanvasDownGesture(input: {
+  pointerType: string;
+  button: number;
+  pointerCount: number;
+  onChrome: boolean;
+  onNode: boolean;
+  isViewMode: boolean;
+  isSpaceMode: boolean;
+  canvasTool: "select" | "hand";
+}): CanvasDownGesture {
+  if (input.onChrome) return "none";
+  if (isTouchPointerType(input.pointerType) && input.pointerCount >= 2) {
+    return "pinch";
+  }
+
+  const forcePan =
+    input.isSpaceMode || input.canvasTool === "hand" || input.isViewMode;
+  if (input.onNode && !forcePan) return "node";
+  if (input.button === 2 || (input.button === 0 && forcePan)) return "pan";
+  if (
+    input.button === 0 &&
+    input.canvasTool === "select" &&
+    !input.isSpaceMode &&
+    !input.isViewMode
+  ) {
+    return "marquee";
+  }
+  return "none";
 }
 
 export function isCanvasChromeTarget(target: EventTarget | null): boolean {

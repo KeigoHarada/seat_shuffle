@@ -215,6 +215,148 @@ async function dispatchTouchPan(page, selector, dx, dy, point) {
   return { before, after, ok };
 }
 
+async function dispatchTwoFingerPan(page, start, dx, dy) {
+  const before = await page.locator("#canvas-main-area").evaluate((el) => {
+    return el.style.backgroundPosition;
+  });
+  const ok = await page.evaluate(
+    ({ start, dx, dy }) => {
+      const canvas = document.getElementById("canvas-main-area");
+      if (!canvas || !start) return false;
+      const fire = (type, pointerId, cx, cy, buttons, isPrimary) => {
+        canvas.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            pointerId,
+            pointerType: "touch",
+            isPrimary,
+            button: 0,
+            buttons,
+            clientX: cx,
+            clientY: cy,
+          }),
+        );
+      };
+      const a = { x: start.x, y: start.y };
+      const b = { x: start.x + 48, y: start.y + 16 };
+      fire("pointerdown", 21, a.x, a.y, 1, true);
+      fire("pointerdown", 22, b.x, b.y, 1, false);
+      fire("pointermove", 21, a.x + dx, a.y + dy, 1, true);
+      fire("pointermove", 22, b.x + dx, b.y + dy, 1, false);
+      fire("pointerup", 21, a.x + dx, a.y + dy, 0, true);
+      fire("pointerup", 22, b.x + dx, b.y + dy, 0, false);
+      return true;
+    },
+    { start, dx, dy },
+  );
+  await page.waitForTimeout(80);
+  const after = await page.locator("#canvas-main-area").evaluate((el) => {
+    return el.style.backgroundPosition;
+  });
+  return { before, after, ok };
+}
+
+async function dispatchPinchOnSeats(page) {
+  const beforeScale = await page.locator(".app-canvas-controls-scale").innerText();
+  const beforePan = await page.locator("#canvas-main-area").evaluate((el) => {
+    return el.style.backgroundPosition;
+  });
+  const ok = await page.evaluate(() => {
+    const canvas = document.getElementById("canvas-main-area");
+    const seats = [...document.querySelectorAll(".seat-node-item")];
+    if (!canvas || seats.length === 0) return false;
+    const first = seats[0].getBoundingClientRect();
+    const second = (seats[1] || seats[0]).getBoundingClientRect();
+    const a = {
+      x: first.left + first.width * 0.35,
+      y: first.top + first.height * 0.45,
+    };
+    const b = {
+      x: second.left + second.width * 0.7,
+      y: second.top + second.height * 0.55,
+    };
+    const fire = (target, type, pointerId, cx, cy, buttons, isPrimary) => {
+      target.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+          pointerId,
+          pointerType: "touch",
+          isPrimary,
+          button: 0,
+          buttons,
+          clientX: cx,
+          clientY: cy,
+        }),
+      );
+    };
+    fire(seats[0], "pointerdown", 31, a.x, a.y, 1, true);
+    fire(seats[1] || seats[0], "pointerdown", 32, b.x, b.y, 1, false);
+    const spread = 70;
+    fire(canvas, "pointermove", 31, a.x - spread, a.y - spread, 1, true);
+    fire(canvas, "pointermove", 32, b.x + spread, b.y + spread, 1, false);
+    fire(canvas, "pointerup", 31, a.x - spread, a.y - spread, 0, true);
+    fire(canvas, "pointerup", 32, b.x + spread, b.y + spread, 0, false);
+    return true;
+  });
+  await page.waitForTimeout(80);
+  const afterScale = await page.locator(".app-canvas-controls-scale").innerText();
+  const afterPan = await page.locator("#canvas-main-area").evaluate((el) => {
+    return el.style.backgroundPosition;
+  });
+  return { beforeScale, afterScale, beforePan, afterPan, ok };
+}
+
+async function countSelectedSeats(page) {
+  return page.evaluate(() => {
+    return [...document.querySelectorAll(".seat-node-item")].filter((el) => {
+      return parseFloat(getComputedStyle(el).borderTopWidth) >= 2;
+    }).length;
+  });
+}
+
+async function dispatchTouchMarquee(page, start) {
+  const before = await countSelectedSeats(page);
+  const ok = await page.evaluate(
+    ({ start }) => {
+      const canvas = document.getElementById("canvas-main-area");
+      if (!canvas || !start) return false;
+      const seats = [...document.querySelectorAll(".seat-node-item")];
+      if (seats.length === 0) return false;
+      const target = seats[Math.min(4, seats.length - 1)].getBoundingClientRect();
+      const endX = target.left + target.width / 2;
+      const endY = target.top + target.height / 2;
+      const fire = (type, cx, cy, buttons) => {
+        canvas.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            pointerId: 41,
+            pointerType: "touch",
+            isPrimary: true,
+            button: 0,
+            buttons,
+            clientX: cx,
+            clientY: cy,
+          }),
+        );
+      };
+      fire("pointerdown", start.x, start.y, 1);
+      fire("pointermove", endX, endY, 1);
+      fire("pointerup", endX, endY, 0);
+      return true;
+    },
+    { start },
+  );
+  await page.waitForTimeout(80);
+  const after = await countSelectedSeats(page);
+  return { before, after, ok };
+}
+
 async function dispatchTouchLongPress(page, point) {
   return page.evaluate(async ({ x, y }) => {
     const canvas = document.getElementById("canvas-main-area");
@@ -579,19 +721,34 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
     await page.locator("#btn-header-settings").click();
 
     const emptyPoint = await pickEmptyCanvasPoint(page);
-    const emptyPan = await dispatchTouchPan(
-      page,
-      "#canvas-main-area",
-      80,
-      40,
-      emptyPoint,
-    );
+    const emptyPan = await dispatchTwoFingerPan(page, emptyPoint, 80, 40);
     record(
       failures,
-      `${label} touch pan empty canvas`,
+      `${label} two-finger pan empty canvas`,
       emptyPan.ok && emptyPan.before !== emptyPan.after,
       `before=${emptyPan.before} after=${emptyPan.after} point=${JSON.stringify(emptyPoint)}`,
     );
+
+    const pinchOnSeats = await dispatchPinchOnSeats(page);
+    record(
+      failures,
+      `${label} pinch on seats zooms`,
+      pinchOnSeats.ok &&
+        (pinchOnSeats.beforeScale !== pinchOnSeats.afterScale ||
+          pinchOnSeats.beforePan !== pinchOnSeats.afterPan),
+      `scale ${pinchOnSeats.beforeScale} -> ${pinchOnSeats.afterScale} pan ${pinchOnSeats.beforePan} -> ${pinchOnSeats.afterPan}`,
+    );
+
+    if ((await page.locator(".seat-node-item").count()) > 0) {
+      const marqueePoint = await pickEmptyCanvasPoint(page);
+      const marquee = await dispatchTouchMarquee(page, marqueePoint);
+      record(
+        failures,
+        `${label} touch marquee selects seats`,
+        marquee.ok && marquee.after > marquee.before && marquee.after >= 2,
+        `selected ${marquee.before} -> ${marquee.after} point=${JSON.stringify(marqueePoint)}`,
+      );
+    }
 
     if ((await page.locator(".seat-node-item").count()) > 0) {
       const seatDrag = await dispatchTouchPan(page, ".seat-node-item", 70, 30);
@@ -602,6 +759,23 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         `before=${seatDrag.before} after=${seatDrag.after}`,
       );
     }
+
+    await page.locator("#btn-footer-viewmode").click();
+    const viewPoint = await pickEmptyCanvasPoint(page);
+    const viewPan = await dispatchTouchPan(
+      page,
+      "#canvas-main-area",
+      80,
+      40,
+      viewPoint,
+    );
+    record(
+      failures,
+      `${label} view-mode one-finger pan`,
+      viewPan.ok && viewPan.before !== viewPan.after,
+      `before=${viewPan.before} after=${viewPan.after} point=${JSON.stringify(viewPoint)}`,
+    );
+    await page.locator("#btn-footer-viewmode").click();
 
     const longPressPoint = await pickEmptyCanvasPoint(page);
     if (longPressPoint) {

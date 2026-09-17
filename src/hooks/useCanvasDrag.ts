@@ -4,6 +4,7 @@ import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
 import { DragNode, checkCollision, screenToWorld } from "../utils/canvas";
 import {
+  isTouchPointerType,
   tryReleasePointerCapture,
   trySetPointerCapture,
 } from "../utils/panZoomGesture";
@@ -56,6 +57,7 @@ export const useCanvasDrag = (
 
   const handleNodeDragPointerDown = useCallback(
     (id: string, e: React.PointerEvent) => {
+      if (isTouchPointerType(e.pointerType) && !e.isPrimary) return;
       const isRightClick = e.button === 2;
       if (e.button !== 0 && !isRightClick) return;
 

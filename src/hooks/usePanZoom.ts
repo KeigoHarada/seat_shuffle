@@ -3,7 +3,6 @@ import { COMPACT_MAX_WIDTH_PX } from "../layout/shell";
 import { Seat, CanvasObject } from "../types";
 import { calculateCenterPanZoom } from "../utils/canvas";
 import {
-  isTouchPointerType,
   MIN_SCALE,
   MAX_SCALE,
   panByDelta,
@@ -106,6 +105,18 @@ export const usePanZoom = (
     return () => el.removeEventListener("wheel", handleWheel);
   }, []);
 
+  const trackPointer = useCallback((e: React.PointerEvent) => {
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  }, []);
+
+  const getPointerCount = useCallback(() => pointersRef.current.size, []);
+
+  const captureTrackedPointers = useCallback((target: EventTarget | null) => {
+    for (const pointerId of pointersRef.current.keys()) {
+      trySetPointerCapture(target, pointerId);
+    }
+  }, []);
+
   const beginPinch = useCallback(() => {
     const el = viewportRef.current;
     const points = [...pointersRef.current.values()];
@@ -123,18 +134,24 @@ export const usePanZoom = (
     setIsPanning(false);
   }, []);
 
+  const promoteToPinch = useCallback(
+    (target: EventTarget | null) => {
+      beginPinch();
+      captureTrackedPointers(target);
+    },
+    [beginPinch, captureTrackedPointers],
+  );
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent, forcePan: boolean) => {
-      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      trackPointer(e);
 
       if (pointersRef.current.size >= 2) {
-        beginPinch();
-        trySetPointerCapture(e.currentTarget, e.pointerId);
+        promoteToPinch(e.currentTarget);
         return true;
       }
 
-      const isTouch = isTouchPointerType(e.pointerType);
-      if (e.button === 2 || (e.button === 0 && (forcePan || isTouch))) {
+      if (e.button === 2 || (e.button === 0 && forcePan)) {
         setIsPanning(true);
         panSessionRef.current = { x: e.clientX, y: e.clientY };
         trySetPointerCapture(e.currentTarget, e.pointerId);
@@ -142,7 +159,7 @@ export const usePanZoom = (
       }
       return false;
     },
-    [beginPinch],
+    [promoteToPinch, trackPointer],
   );
 
   const handlePointerMove = useCallback(
@@ -255,6 +272,9 @@ export const usePanZoom = (
     isZoomMode,
     isSpaceMode,
     viewportRef,
+    trackPointer,
+    getPointerCount,
+    promoteToPinch,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,

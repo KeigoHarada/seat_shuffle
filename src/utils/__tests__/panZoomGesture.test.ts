@@ -8,6 +8,7 @@ import {
   panByDelta,
   pointerDistance,
   pointerMidpoint,
+  resolveCanvasDownGesture,
   tryReleasePointerCapture,
   trySetPointerCapture,
   zoomAroundPoint,
@@ -74,5 +75,133 @@ describe("panZoomGesture", () => {
     expect(() => trySetPointerCapture(el, 99)).not.toThrow();
     expect(() => tryReleasePointerCapture(el, 99)).not.toThrow();
     el.remove();
+  });
+});
+
+describe("resolveCanvasDownGesture", () => {
+  const editSelect = {
+    isViewMode: false,
+    isSpaceMode: false,
+    canvasTool: "select" as const,
+  };
+
+  it("never steals toolbar chrome", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 2,
+        onChrome: true,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("none");
+  });
+
+  it("gives two-finger touch pinch even when both fingers are on seats", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 2,
+        onChrome: false,
+        onNode: true,
+        ...editSelect,
+      }),
+    ).toBe("pinch");
+  });
+
+  it("keeps one-finger seat interaction as node drag in edit select", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: true,
+        ...editSelect,
+      }),
+    ).toBe("node");
+  });
+
+  it("uses marquee for one-finger empty-canvas touch in edit select", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("marquee");
+  });
+
+  it("matches desktop mouse marquee on empty canvas", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "mouse",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("marquee");
+  });
+
+  it("pans with one touch in view mode including when it starts on a seat", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: true,
+        isViewMode: true,
+        isSpaceMode: false,
+        canvasTool: "select",
+      }),
+    ).toBe("pan");
+  });
+
+  it("does not pinch mouse chords; right button pans empty canvas", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "mouse",
+        button: 2,
+        pointerCount: 2,
+        onChrome: false,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("pan");
+  });
+
+  it("lets space/hand force pan instead of marquee", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "mouse",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        isViewMode: false,
+        isSpaceMode: true,
+        canvasTool: "select",
+      }),
+    ).toBe("pan");
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        isViewMode: false,
+        isSpaceMode: false,
+        canvasTool: "hand",
+      }),
+    ).toBe("pan");
   });
 });
