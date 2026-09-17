@@ -358,7 +358,12 @@ async function seatWorldPos(page) {
   return page.evaluate(() => {
     const el = [...document.querySelectorAll(".seat-node-item")].at(-1);
     if (!el) return null;
-    return { left: el.style.left, top: el.style.top };
+    return {
+      left: el.style.left,
+      top: el.style.top,
+      x: Number(el.getAttribute("data-x")),
+      y: Number(el.getAttribute("data-y")),
+    };
   });
 }
 
@@ -409,7 +414,9 @@ async function dispatchSeatDrag(page, dx, dy) {
   const moved =
     !!beforePos &&
     !!afterPos &&
-    (beforePos.left !== afterPos.left || beforePos.top !== afterPos.top);
+    ((beforePos.x !== afterPos.x || beforePos.y !== afterPos.y) ||
+      beforePos.left !== afterPos.left ||
+      beforePos.top !== afterPos.top);
   return { ok, beforePan, afterPan, beforePos, afterPos, moved };
 }
 

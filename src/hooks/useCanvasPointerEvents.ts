@@ -13,6 +13,7 @@ import {
   LONG_PRESS_MS,
   movedPastTap,
   resolveCanvasDownGesture,
+  shouldClearSelectionForPointerGesture,
   tryReleasePointerCapture,
   trySetPointerCapture,
 } from "../utils/panZoomGesture";
@@ -148,12 +149,14 @@ export const useCanvasPointerEvents = ({
       cancelDrag();
       cancelNodeLongPress();
       clearLongPress();
+      clearSelection();
     },
     [
       abortMarquee,
       cancelDrag,
       cancelNodeLongPress,
       clearLongPress,
+      clearSelection,
       getPointerCount,
       promoteToPinch,
       trackPointer,
@@ -186,7 +189,13 @@ export const useCanvasPointerEvents = ({
       }
       if (gesture === "node" || gesture === "none") return;
 
-      if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+      if (
+        shouldClearSelectionForPointerGesture(gesture) &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        e.button === 0
+      ) {
         clearSelection();
       }
 

@@ -110,6 +110,8 @@ const SeatNode: React.FC<Props> = ({
   return (
     <div
       className="seat-node-item"
+      data-x={seat.x}
+      data-y={seat.y}
       style={style}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
