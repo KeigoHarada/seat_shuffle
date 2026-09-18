@@ -11,7 +11,7 @@ Width 1023px and below keeps the same header / canvas / settings / footer chrome
 ## How to get to it (user POV)
 
 - Narrow the window to a phone or tablet portrait width, or open the app on those devices.
-- Use the same header (guide / 設定) and footer (shuffle / 編集・閲覧 / 印刷) as on a laptop.
+- Use the same header (名簿を取り込む / バックアップ / guide / 設定) and footer (shuffle / 編集・閲覧 / 印刷) as on a laptop.
 - Open 設定 to edit 生徒・役割・グループ・条件・全体設定. Tap the dimmed canvas (or 設定 again) to close it.
 - Pinch with two fingers anywhere on the classroom (including on seats) to zoom and pan.
 - In 編集, drag with one finger on empty canvas to marquee-select many seats. In 閲覧, drag with one finger to pan.
@@ -33,7 +33,7 @@ Geometry, overflow, toolbar wrap, pinch-on-seats, touch marquee, and view-mode p
 
 - There are no `#tab-phone-*` or `#btn-phone-shuffle` handles. Desktop recipes that click `#btn-header-settings` / `#btn-footer-shuffle` apply on compact too; the drawer starts **closed** on compact mount.
 - Toolbar labels are visually hidden under 1023px; accessible names remain `座席を追加`, `図形`, `テンプレート`, `自動割り当て`.
-- Header button labels (はじめてガイド / 設定) are visually hidden; use ids or `aria-label`.
+- Header button labels (名簿を取り込む / バックアップ / はじめてガイド / 設定) are visually hidden; use ids or `aria-label`. On 390px, `バックアップ` opens a small `保存` / `読み込み` menu.
 - Footer `印刷` is `#btn-footer-print`.
 - iPad landscape 1024px is the wide sidebar, but two-finger pinch/pan still works on seats.
 - One-finger drag on a seat still moves that seat; it must not pan the canvas unless a second finger starts a pinch.

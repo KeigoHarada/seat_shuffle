@@ -633,6 +633,47 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
   );
   record(
     failures,
+    `${label} roster import`,
+    (await page.getByRole("button", { name: "名簿を取り込む" }).count()) === 1,
+    "missing 名簿を取り込む",
+  );
+  record(
+    failures,
+    `${label} backup`,
+    (await page.getByRole("button", { name: "バックアップ" }).count()) === 1,
+    "missing バックアップ",
+  );
+  const pageText = await page.locator("body").innerText();
+  record(
+    failures,
+    `${label} no import word`,
+    !pageText.includes("インポート"),
+    "teacher UI contains インポート",
+  );
+  record(
+    failures,
+    `${label} no export word`,
+    !pageText.includes("エクスポート"),
+    "teacher UI contains エクスポート",
+  );
+  if (viewport.width === 390) {
+    await page.getByRole("button", { name: "バックアップ" }).click();
+    record(
+      failures,
+      `${label} backup menu save`,
+      (await page.getByRole("button", { name: "保存" }).count()) >= 1,
+      "missing 保存 in backup menu",
+    );
+    record(
+      failures,
+      `${label} backup menu load`,
+      (await page.getByRole("button", { name: "読み込み" }).count()) >= 1,
+      "missing 読み込み in backup menu",
+    );
+    await page.getByRole("button", { name: "バックアップ" }).click();
+  }
+  record(
+    failures,
     `${label} view toggle`,
     (await page.locator("#btn-footer-viewmode").count()) === 1,
     "missing #btn-footer-viewmode",
@@ -864,33 +905,41 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
     );
     record(
       failures,
-      `${label} roster import`,
-      (await page.getByRole("button", { name: "名簿を取り込む" }).count()) >= 1,
-      "missing 名簿を取り込む",
+      `${label} settings has no roster import`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "名簿を取り込む" })
+        .count()) === 0,
+      "名簿を取り込む still in settings",
     );
     record(
       failures,
-      `${label} backup save`,
-      (await page.getByRole("button", { name: "バックアップを保存" }).count()) >=
-        1,
-      "missing バックアップを保存",
+      `${label} settings has no backup save`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "バックアップを保存" })
+        .count()) === 0,
+      "バックアップを保存 still in settings",
     );
     record(
       failures,
-      `${label} backup load`,
-      (await page.getByRole("button", { name: "バックアップを読み込む" }).count()) >=
-        1,
-      "missing バックアップを読み込む",
+      `${label} settings has no backup load`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "バックアップを読み込む" })
+        .count()) === 0,
+      "バックアップを読み込む still in settings",
     );
 
     if (viewport.width === 390) {
       await page.locator("#tab-btn-global").click();
       record(
         failures,
-        `${label} backup handoff heading`,
-        (await page.getByRole("heading", { name: "バックアップ・引き継ぎ" }).count()) >=
-          1,
-        "missing バックアップ・引き継ぎ",
+        `${label} settings has no backup heading`,
+        (await page
+          .getByRole("heading", { name: "バックアップ・引き継ぎ" })
+          .count()) === 0,
+        "バックアップ・引き継ぎ still in settings",
       );
       await page.locator("#tab-btn-students").click();
       const scaleBeforePrint = await page

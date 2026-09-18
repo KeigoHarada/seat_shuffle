@@ -124,7 +124,7 @@ export const GUIDE_CATEGORIES: GuideCategory[] = [
         label: "名簿の取り込みとバックアップがしたい",
         title: "名簿の取り込みとバックアップがしたい",
         description:
-          "名簿を取り込み、バックアップを保存・読み込む方法です。",
+          "画面上部の「名簿を取り込む」と「バックアップ」から操作します。",
         points: ["（動画準備中）"],
       },
       {

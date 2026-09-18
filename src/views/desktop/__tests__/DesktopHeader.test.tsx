@@ -33,7 +33,12 @@ function button(container: ParentNode, label: string): HTMLButtonElement {
   return found;
 }
 
-async function chooseFile(input: HTMLInputElement, name: string, body: string, type: string) {
+async function chooseFile(
+  input: HTMLInputElement,
+  name: string,
+  body: BlobPart,
+  type: string,
+) {
   const file = new File([body], name, { type });
   Object.defineProperty(input, "files", { value: [file], configurable: true });
   await act(async () => {
@@ -248,7 +253,7 @@ describe("DesktopHeader project IO", () => {
     await chooseFile(
       backupInput(),
       "rakugae_backup.json",
-      await (savedBlob as Blob).text(),
+      savedBlob as Blob,
       "application/octet-stream",
     );
 

@@ -11,6 +11,9 @@ import { showToast } from "../stores/toast";
 export const ROSTER_IMPORT_CONFIRM =
   "名簿だけ取り込みます。席の割り当てと条件はクリアされます（座席の配置・グループ設定はそのまま）。";
 
+export const ROSTER_CSV_EXPLAIN =
+  "1行目に「名前」列があるCSVを読み込みます。空の名前はスキップします。";
+
 function clearFileInputForReselect(input: HTMLInputElement) {
   input.value = "";
 }

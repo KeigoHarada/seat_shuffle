@@ -5,7 +5,6 @@ import Select from "../../ui/Select";
 import ShuffleAnimation from "../../layout/ShuffleAnimation";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import { showToast } from "../../../stores/toast";
-import BackupControls from "../BackupControls";
 
 const GlobalTab: React.FC = () => {
   const appSettings = useStore((state) => state.appSettings);
@@ -244,31 +243,6 @@ const GlobalTab: React.FC = () => {
           >
             <Trash2 size={16} /> データを全消去（空にする）
           </button>
-        </div>
-      </div>
-
-      <div
-        style={{
-          padding: "var(--spacing-md)",
-          backgroundColor: "var(--c-surface)",
-          border: "1px solid var(--c-border)",
-          borderRadius: "var(--radius-lg)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-        }}
-      >
-        <h3 className="text-title3">バックアップ・引き継ぎ</h3>
-        <p
-          style={{
-            fontSize: "12px",
-            color: "var(--c-text-sub)",
-          }}
-        >
-          座席と名簿をファイルに保存し、同じ状態を読み込めます。
-        </p>
-        <div className="settings-io-stack">
-          <BackupControls idPrefix="btn-global" />
         </div>
       </div>
 

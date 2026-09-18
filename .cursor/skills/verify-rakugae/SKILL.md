@@ -82,7 +82,7 @@ Stable handles (from `src/`):
 |---|---|---|
 | `svg[aria-label*="ラクガエ"]` | logo | header identity |
 | `はじめてガイド` | button | `#header-guide-btn` |
-| `名簿を取り込む` / `バックアップを保存` / `バックアップを読み込む` | buttons | 生徒タブ。全体設定の `バックアップ・引き継ぎ` にも保存と読み込みがある |
+| `名簿を取り込む` / `バックアップ` | buttons | ヘッダー。バックアップは `保存` / `読み込み` のメニュー。生徒タブと全体設定には置かない |
 | `印刷` | button | `#btn-footer-print` |
 | `設定` | button | `#btn-header-settings` (hidden in view mode) |
 | `座席を追加` | button | canvas toolbar |
