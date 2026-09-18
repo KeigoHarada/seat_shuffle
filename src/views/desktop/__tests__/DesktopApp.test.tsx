@@ -67,9 +67,10 @@ describe("DesktopApp compact chrome", () => {
     );
     const header = container.querySelector(".app-header");
     expect(header?.textContent).toContain("はじめてガイド");
-    expect(header?.textContent).not.toContain("読み込み");
-    expect(header?.textContent).not.toContain("保存");
-    expect(header?.querySelector('input[type="file"]')).toBeNull();
+    expect(header?.textContent).toContain("名簿を取り込む");
+    expect(header?.textContent).toContain("バックアップ");
+    expect(header?.textContent).not.toContain("インポート");
+    expect(header?.textContent).not.toContain("エクスポート");
     expect(
       container
         .querySelector(".app-footer-cluster-center")
