@@ -20,7 +20,7 @@ function rosterErrorMessage(reason: RosterParseErr["reason"]): string {
     case "missing-name-column":
       return "名前の列が見つかりません。";
     case "zero-valid-rows":
-      return "有効な名簿行がありません。現在の状態は変えていません。";
+      return "取り込める名前がありません。いまの教室はそのままです";
     default: {
       const unhandled: never = reason;
       return unhandled;
@@ -41,10 +41,10 @@ function downloadText(filename: string, contents: string, type: string) {
 export function useProjectIo() {
   const importRoster = (parsed: RosterParseOk) => {
     useStore.getState().importRoster(parsed);
-    const skippedNote =
-      parsed.skipped > 0 ? `、${parsed.skipped}行スキップ` : "";
     showToast.success(
-      `名簿を取り込みました（${parsed.rows.length}人${skippedNote}）`,
+      parsed.skipped > 0
+        ? `名前のない行を${parsed.skipped}件スキップして、${parsed.rows.length}人取り込みました`
+        : `名簿を取り込みました（${parsed.rows.length}人）`,
     );
   };
 
