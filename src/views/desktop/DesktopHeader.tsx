@@ -1,28 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Archive, Settings, Sprout, Upload } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Download, Settings, Sprout, Upload } from "lucide-react";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import Input from "../../components/ui/Input";
 import Logo from "../../components/ui/Logo";
 import { useCompactLayout } from "../../hooks/useCompactLayout";
 import {
-  ROSTER_CSV_EXPLAIN,
-  ROSTER_IMPORT_CONFIRM,
+  BACKUP_EXPORT_CONFIRM,
+  BACKUP_EXPORT_EXPLAIN,
+  BACKUP_IMPORT_EXPLAIN,
   useProjectIo,
 } from "../../hooks/useProjectIo";
 import { useOnboardingStore } from "../../stores/onboarding";
 import { useStore } from "../../stores";
-import type { RosterParseOk } from "../../utils/roster";
 
 interface HeaderProps {
   showSettings: boolean;
   onToggleSettings: () => void;
 }
 
-type HeaderIo =
-  | { type: "idle" }
-  | { type: "roster-explain" }
-  | { type: "roster-confirm"; parsed: RosterParseOk }
-  | { type: "backup-menu" };
+type HeaderIo = "idle" | "import-explain" | "export-explain";
 
 const DesktopHeader: React.FC<HeaderProps> = ({
   showSettings,
@@ -31,31 +27,9 @@ const DesktopHeader: React.FC<HeaderProps> = ({
   const isCompact = useCompactLayout();
   const isViewMode = useStore((state) => state.isViewMode);
   const openGuideHub = useOnboardingStore((state) => state.openGuideHub);
-  const rosterInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
-  const backupWrapRef = useRef<HTMLDivElement>(null);
-  const [io, setIo] = useState<HeaderIo>({ type: "idle" });
-  const { handleRosterFile, handleSaveBackup, handleLoadBackup, importRoster } =
-    useProjectIo();
-
-  useEffect(() => {
-    const handleOutsideClick = (event: PointerEvent) => {
-      const target = event.target;
-      if (
-        target instanceof Element &&
-        backupWrapRef.current?.contains(target)
-      ) {
-        return;
-      }
-      setIo((current) =>
-        current.type === "backup-menu" ? { type: "idle" } : current,
-      );
-    };
-    if (io.type === "backup-menu") {
-      window.addEventListener("pointerdown", handleOutsideClick);
-    }
-    return () => window.removeEventListener("pointerdown", handleOutsideClick);
-  }, [io.type]);
+  const [io, setIo] = useState<HeaderIo>("idle");
+  const { handleSaveBackup, handleLoadBackup } = useProjectIo();
 
   return (
     <header className="app-header">
@@ -64,66 +38,29 @@ const DesktopHeader: React.FC<HeaderProps> = ({
       <div className="app-header-actions">
         <button
           type="button"
-          id="btn-header-roster"
+          id="btn-header-import"
           className="btn-secondary"
           style={{ gap: "4px" }}
-          onClick={() => setIo({ type: "roster-explain" })}
-          title="名簿を取り込む"
-          aria-label="名簿を取り込む"
+          onClick={() => setIo("import-explain")}
+          title="インポート"
+          aria-label="インポート"
         >
           <Upload size={16} />
-          <span className="app-chrome-label">名簿を取り込む</span>
+          <span className="app-chrome-label">インポート</span>
         </button>
 
-        <div className="app-header-menu-wrap" ref={backupWrapRef}>
-          <button
-            type="button"
-            id="btn-header-backup"
-            className={
-              io.type === "backup-menu" ? "btn-primary" : "btn-secondary"
-            }
-            style={{ gap: "4px" }}
-            onClick={() =>
-              setIo((current) =>
-                current.type === "backup-menu"
-                  ? { type: "idle" }
-                  : { type: "backup-menu" },
-              )
-            }
-            title="バックアップ"
-            aria-label="バックアップ"
-            aria-expanded={io.type === "backup-menu"}
-          >
-            <Archive size={16} />
-            <span className="app-chrome-label">バックアップ</span>
-          </button>
-          {io.type === "backup-menu" && (
-            <div className="app-header-menu">
-              <button
-                type="button"
-                id="btn-header-backup-save"
-                className="app-header-menu-item"
-                onClick={() => {
-                  handleSaveBackup();
-                  setIo({ type: "idle" });
-                }}
-              >
-                保存
-              </button>
-              <button
-                type="button"
-                id="btn-header-backup-load"
-                className="app-header-menu-item"
-                onClick={() => {
-                  backupInputRef.current?.click();
-                  setIo({ type: "idle" });
-                }}
-              >
-                読み込み
-              </button>
-            </div>
-          )}
-        </div>
+        <button
+          type="button"
+          id="btn-header-export"
+          className="btn-secondary"
+          style={{ gap: "4px" }}
+          onClick={() => setIo("export-explain")}
+          title="エクスポート"
+          aria-label="エクスポート"
+        >
+          <Download size={16} />
+          <span className="app-chrome-label">エクスポート</span>
+        </button>
 
         <div className="app-header-divider" />
 
@@ -162,18 +99,6 @@ const DesktopHeader: React.FC<HeaderProps> = ({
 
       <Input
         type="file"
-        accept=".csv,text/csv"
-        id="btn-header-roster-file"
-        ref={rosterInputRef}
-        style={{ display: "none" }}
-        onChange={(e) =>
-          handleRosterFile(e, (parsed) =>
-            setIo({ type: "roster-confirm", parsed }),
-          )
-        }
-      />
-      <Input
-        type="file"
         id="btn-header-backup-file"
         ref={backupInputRef}
         style={{ display: "none" }}
@@ -181,26 +106,24 @@ const DesktopHeader: React.FC<HeaderProps> = ({
       />
 
       <ConfirmDialog
-        isOpen={io.type === "roster-explain"}
-        title="名簿を取り込む"
-        message={ROSTER_CSV_EXPLAIN}
+        isOpen={io === "import-explain"}
+        title="インポート"
+        message={BACKUP_IMPORT_EXPLAIN}
         confirmText="読み込む"
         cancelText="キャンセル"
         variant="primary"
-        onConfirm={() => rosterInputRef.current?.click()}
-        onCancel={() => setIo({ type: "idle" })}
+        onConfirm={() => backupInputRef.current?.click()}
+        onCancel={() => setIo("idle")}
       />
       <ConfirmDialog
-        isOpen={io.type === "roster-confirm"}
-        title="名簿の取り込み"
-        message={ROSTER_IMPORT_CONFIRM}
-        confirmText="取り込む"
+        isOpen={io === "export-explain"}
+        title="エクスポート"
+        message={BACKUP_EXPORT_EXPLAIN}
+        confirmText={BACKUP_EXPORT_CONFIRM}
         cancelText="キャンセル"
-        variant="warning"
-        onConfirm={() => {
-          if (io.type === "roster-confirm") importRoster(io.parsed);
-        }}
-        onCancel={() => setIo({ type: "idle" })}
+        variant="primary"
+        onConfirm={handleSaveBackup}
+        onCancel={() => setIo("idle")}
       />
     </header>
   );

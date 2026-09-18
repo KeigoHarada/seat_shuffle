@@ -482,6 +482,16 @@ async function cmdClick(args) {
   const result = await withPage(args, async (page) => {
     if (!targetsWelcomeUi(args)) await dismissWelcomeIfPresent(page);
     const loc = locatorFromArgs(page, args);
+    if (args["expect-download"]) {
+      const [download] = await Promise.all([
+        page.waitForEvent("download", { timeout: Number(args.timeout || 5000) }),
+        loc.first().click(),
+      ]);
+      return {
+        clicked: args.id || args.name || args.text || args.selector || args.placeholder,
+        download: download.suggestedFilename(),
+      };
+    }
     await loc.first().click();
     return { clicked: args.id || args.name || args.text || args.selector || args.placeholder };
   });
@@ -552,6 +562,16 @@ async function cmdEval(args) {
   process.stdout.write(`${JSON.stringify({ ok: true, command: "eval", ...result }, null, 2)}\n`);
 }
 
+async function cmdChooseFile(args) {
+  if (!args.path) throw new Error("--path is required");
+  const result = await withPage(args, async (page) => {
+    const loc = locatorFromArgs(page, args);
+    await loc.first().setInputFiles(String(args.path));
+    return { path: String(args.path), target: args.id || args.selector };
+  });
+  process.stdout.write(`${JSON.stringify({ ok: true, command: "choose-file", ...result }, null, 2)}\n`);
+}
+
 async function cmdCleanup(args) {
   const runId = runIdFromArgs(args);
   if (!runId) throw new Error("No run id. Pass --run-id or RAKUGAE_VERIFY_RUN_ID.");
@@ -620,13 +640,16 @@ async function main() {
     case "eval":
       await cmdEval(args);
       break;
+    case "choose-file":
+      await cmdChooseFile(args);
+      break;
     case "cleanup":
       await cmdCleanup(args);
       break;
     default: {
       const never = command;
       throw new Error(
-        `Unknown command ${never}. Use launch|doctor|dismiss-welcome|click|fill|count|wait-text|screenshot|snapshot|eval|cleanup`,
+        `Unknown command ${never}. Use launch|doctor|dismiss-welcome|click|fill|count|wait-text|screenshot|snapshot|eval|choose-file|cleanup`,
       );
     }
   }

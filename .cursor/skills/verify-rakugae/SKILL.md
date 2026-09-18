@@ -82,7 +82,7 @@ Stable handles (from `src/`):
 |---|---|---|
 | `svg[aria-label*="ラクガエ"]` | logo | header identity |
 | `はじめてガイド` | button | `#header-guide-btn` |
-| `名簿を取り込む` / `バックアップ` | buttons | ヘッダー。バックアップは `保存` / `読み込み` のメニュー。生徒タブと全体設定には置かない |
+| `インポート` / `エクスポート` | buttons | ヘッダー。`インポート` はバックアップ読み込みのみ。`エクスポート` はバックアップ保存のみ。名簿CSVは生徒タブの `名簿を読み込む`。全体設定には置かない |
 | `印刷` | button | `#btn-footer-print` |
 | `設定` | button | `#btn-header-settings` (hidden in view mode) |
 | `座席を追加` | button | canvas toolbar |
@@ -113,6 +113,7 @@ $H count --selector ".seat-node-item"
 $H wait-text --text "すべての条件を満たした座席配置が完了しました！" --timeout 8000
 $H screenshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.png
 $H snapshot --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/evidence/after.aria.txt
+$H choose-file --id btn-header-backup-file --path /tmp/rakugae-verify/$RAKUGAE_VERIFY_RUN_ID/backup.json
 ```
 
 `click --name` is `getByRole(button, { name, exact: true })` so `追加` does not match `座席を追加`. For non-buttons use `--role` + `--name` or `--text`. Pass `--exact false` only if you need substring names.
@@ -167,7 +168,7 @@ Executable:
 node .cursor/skills/verify-rakugae/helpers/control-rakugae.mjs <command>
 ```
 
-Commands: `launch`, `doctor`, `dismiss-welcome`, `click`, `fill`, `count`, `wait-text`, `screenshot`, `snapshot`, `eval`, `cleanup`.
+Commands: `launch`, `doctor`, `dismiss-welcome`, `click`, `fill`, `count`, `wait-text`, `screenshot`, `snapshot`, `eval`, `choose-file`, `cleanup`.
 
 Optional flags: `--run-id`, `--port`, `--viewport WIDTHxHEIGHT` (default `1440x900`; phone proof uses `390x844`). Env: `RAKUGAE_VERIFY_RUN_ID`, `RAKUGAE_VERIFY_PORT`, `RAKUGAE_VERIFY_VIEWPORT`, `RAKUGAE_VERIFY_ROOT` (default `/tmp/rakugae-verify`), `RAKUGAE_CHROME` (default `/usr/bin/google-chrome-stable`).
 

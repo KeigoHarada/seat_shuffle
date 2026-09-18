@@ -646,13 +646,15 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
   record(
     failures,
     `${label} no rejected roster label`,
-    (await page.getByRole("button", { name: "名簿を取り込む" }).count()) === 0,
+    (await page.getByRole("button", { name: "名簿を取り込む", exact: true }).count()) ===
+      0,
     "teacher UI contains 名簿を取り込む",
   );
   record(
     failures,
     `${label} no toolbar backup label`,
-    (await page.getByRole("button", { name: "バックアップ" }).count()) === 0,
+    (await page.getByRole("button", { name: "バックアップ", exact: true }).count()) ===
+      0,
     "toolbar labeled バックアップ",
   );
   if (viewport.width === 390) {

@@ -14,6 +14,14 @@ export const ROSTER_IMPORT_CONFIRM =
 export const ROSTER_CSV_EXPLAIN =
   "1行目に「名前」列があるCSVを読み込みます。空の名前はスキップします。";
 
+export const BACKUP_IMPORT_EXPLAIN =
+  "バックアップファイルを読み込むと、いまの教室を置き換えます。壊れたファイルは読み込みません。";
+
+export const BACKUP_EXPORT_EXPLAIN =
+  "いまの教室の状態をバックアップファイルとして保存します。";
+
+export const BACKUP_EXPORT_CONFIRM = "バックアップファイルを保存";
+
 function clearFileInputForReselect(input: HTMLInputElement) {
   input.value = "";
 }

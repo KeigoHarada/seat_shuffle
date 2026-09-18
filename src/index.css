@@ -403,42 +403,6 @@ input[type="number"] {
   flex-wrap: nowrap;
 }
 
-.app-header-menu-wrap {
-  position: relative;
-}
-
-.app-header-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  background-color: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-1);
-  padding: 4px 0;
-  min-width: 120px;
-  display: flex;
-  flex-direction: column;
-  z-index: 20;
-}
-
-.app-header-menu-item {
-  padding: 8px 16px;
-  text-align: left;
-  background: none;
-  border: none;
-  color: var(--c-text-main);
-  font-size: 14px;
-  font-family: inherit;
-  cursor: pointer;
-  width: 100%;
-}
-
-.app-header-menu-item:hover {
-  background-color: var(--c-surface-hover);
-}
-
 .app-header-actions .btn-primary,
 .app-header-actions .btn-secondary {
   flex-shrink: 0;
