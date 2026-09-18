@@ -34,7 +34,7 @@ export const TourOverlay: React.FC = () => {
   const constraints = useStore((state) => state.constraints);
   const isViewMode = useStore((state) => state.isViewMode);
   const isShuffling = useStore((state) => state.isShuffling);
-  const pastSeats = useStore((state) => state.pastSeats);
+  const undoStack = useStore((state) => state.undoStack);
 
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -88,7 +88,7 @@ export const TourOverlay: React.FC = () => {
     students,
     groups,
     constraints,
-    pastSeats.length,
+    undoStack.length,
     isShuffling,
     isViewMode,
   ]);

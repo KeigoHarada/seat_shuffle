@@ -35,6 +35,6 @@ Preconditions:
 - In `閲覧` mode shuffle animates 3–5 seconds (`シャッフル中...`) and does not use the same instant toast path. Use [view-mode.md](./view-mode.md) for that.
 - Random algorithm ignores constraints; do not expect the optimize success toast.
 - Toast is a timed overlay; capture it immediately. A late screenshot may miss it; the seat permutation still counts as proof if ids changed.
-- Undo is disabled when `pastSeats` is empty; shuffle must run first.
+- Undo is disabled when `undoStack` is empty; shuffle or a canvas edit must run first.
 - Do not prove shuffle by calling `optimizeShuffle` from eval.
 - Compact width (≤ 1023) still uses `#btn-footer-shuffle`. There is no phone-only shuffle control.

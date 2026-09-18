@@ -286,18 +286,18 @@ export const TOUR_STEPS: TourStep[] = [
       mainStore.setIsViewMode(false);
       mainStore.setIsSettingsOpen(true);
 
-      mainStore.loadState({ pastSeats: [] } as any);
+      mainStore.loadState({ undoStack: [] } as any);
       const newSeats = mainStore.seats.map((s) => ({ ...s, studentId: null }));
       mainStore.setSeats(newSeats);
     },
     setupPostState: (mainStore) => {
-      if (mainStore.pastSeats.length === 0) {
-        mainStore.saveSeatHistory();
+      if (mainStore.undoStack.length === 0) {
+        mainStore.pushUndo();
       }
     },
     setupIdealState: (mainStore) => {
-      if (mainStore.pastSeats.length === 0) {
-        mainStore.saveSeatHistory();
+      if (mainStore.undoStack.length === 0) {
+        mainStore.pushUndo();
       }
       const { newSeats } = optimizeShuffle(
         mainStore.students,
@@ -307,7 +307,7 @@ export const TOUR_STEPS: TourStep[] = [
       mainStore.setSeats(newSeats);
     },
     checkCondition: (mainStore) =>
-      mainStore.pastSeats.length > 0 || mainStore.isShuffling,
+      mainStore.undoStack.length > 0 || mainStore.isShuffling,
   },
   {
     id: "step-viewmode",

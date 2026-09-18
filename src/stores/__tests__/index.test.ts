@@ -290,4 +290,46 @@ describe("useStore", () => {
     expect(after.seats[0].isLocked).toBe(true);
     expect(after.appSettings.algorithm).toBe("random");
   });
+
+  it("undo restores seats and objects captured at pushUndo", () => {
+    const firstSeat = {
+      id: "seat-keep",
+      x: 0,
+      y: 0,
+      studentId: null,
+      groupIds: [],
+      isLocked: false,
+    };
+    useStore.getState().addSeat(firstSeat);
+    useStore.getState().pushUndo();
+    useStore.getState().addSeat({
+      id: "seat-new",
+      x: 8,
+      y: 0,
+      studentId: null,
+      groupIds: [],
+      isLocked: false,
+    });
+    useStore.getState().addObject({
+      id: "desk-new",
+      type: "rectangle",
+      x: 0,
+      y: 10,
+      width: 8,
+      height: 4,
+    });
+
+    useStore.getState().undo();
+
+    const after = useStore.getState();
+    expect(after.seats.map((s) => s.id)).toEqual(["seat-keep"]);
+    expect(after.objects).toEqual([]);
+    expect(after.undoStack).toEqual([]);
+  });
+
+  it("does not push the same snapshot twice", () => {
+    useStore.getState().pushUndo();
+    useStore.getState().pushUndo();
+    expect(useStore.getState().undoStack).toHaveLength(1);
+  });
 });

@@ -3,6 +3,7 @@ import { Seat, CanvasObject } from "../types";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 import { findEmptyPos, getCenterGridPos } from "../utils/canvas";
 import { generateTemplate } from "../utils/templates";
+import { useStore } from "../stores";
 
 let clipboard: { seats: Seat[]; objects: CanvasObject[] } | null = null;
 
@@ -24,6 +25,8 @@ export const useCanvasActions = (
   scale: number,
 ) => {
   const handleDeleteSelected = useCallback(() => {
+    if (selectedIds.length === 0) return;
+    useStore.getState().pushUndo();
     selectedIds.forEach((id) => {
       removeSeat(id);
       removeObject(id);
@@ -33,11 +36,14 @@ export const useCanvasActions = (
   }, [selectedIds, removeSeat, removeObject, clearSelection, setContextMenu]);
 
   const handleUnassignSelected = useCallback(() => {
-    selectedIds.forEach((id) => {
+    const occupiedIds = selectedIds.filter((id) => {
       const seat = seats.find((s) => s.id === id);
-      if (seat && seat.studentId) {
-        updateSeat(id, { studentId: null, isLocked: false });
-      }
+      return Boolean(seat?.studentId);
+    });
+    if (occupiedIds.length === 0) return;
+    useStore.getState().pushUndo();
+    occupiedIds.forEach((id) => {
+      updateSeat(id, { studentId: null, isLocked: false });
     });
     clearSelection();
     setContextMenu(null);
@@ -45,11 +51,14 @@ export const useCanvasActions = (
 
   const handleToggleLockSelected = useCallback(
     (locked: boolean) => {
-      selectedIds.forEach((id) => {
+      const occupiedIds = selectedIds.filter((id) => {
         const seat = seats.find((s) => s.id === id);
-        if (seat && seat.studentId) {
-          updateSeat(id, { isLocked: locked });
-        }
+        return Boolean(seat?.studentId);
+      });
+      if (occupiedIds.length === 0) return;
+      useStore.getState().pushUndo();
+      occupiedIds.forEach((id) => {
+        updateSeat(id, { isLocked: locked });
       });
       setContextMenu(null);
     },
@@ -105,6 +114,8 @@ export const useCanvasActions = (
 
     const dx = newMinX - minX;
     const dy = newMinY - minY;
+
+    useStore.getState().pushUndo();
 
     const newSelectedIds: string[] = [];
     const nextClipboardSeats: Seat[] = [];
@@ -184,6 +195,7 @@ export const useCanvasActions = (
       y,
       isLocked: false,
     };
+    useStore.getState().pushUndo();
     addSeat(newSeat);
     setSelectedIds([newSeat.id]);
   }, [contextMenu, seats, objects, addSeat, setSelectedIds]);
@@ -204,6 +216,7 @@ export const useCanvasActions = (
     );
 
     const newId = crypto.randomUUID();
+    useStore.getState().pushUndo();
     addSeat({
       id: newId,
       studentId: null,
@@ -223,6 +236,7 @@ export const useCanvasActions = (
     );
     const { x, y } = findEmptyPos(targetX, targetY, 12, 6, seats, objects);
     const newId = crypto.randomUUID();
+    useStore.getState().pushUndo();
     addObject({
       id: newId,
       type: "rectangle",
@@ -242,6 +256,7 @@ export const useCanvasActions = (
     );
     const { x, y } = findEmptyPos(targetX, targetY, 12, 12, seats, objects);
     const newId = crypto.randomUUID();
+    useStore.getState().pushUndo();
     addObject({
       id: newId,
       type: "circle",
@@ -309,6 +324,8 @@ export const useCanvasActions = (
       }));
 
       const newSelectedIds: string[] = [];
+
+      useStore.getState().pushUndo();
 
       finalSeats.forEach((s) => {
         addSeat(s);

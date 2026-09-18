@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { CanvasObject } from "../../types";
 import { GRID_SIZE } from "../../constants/canvas";
+import { useStore } from "../../stores";
 
 interface Props {
   obj: CanvasObject;
@@ -35,6 +36,7 @@ const CanvasObjectNode: React.FC<Props> = ({
     startY: number;
     startWidth: number;
     startHeight: number;
+    recorded: boolean;
   } | null>(null);
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -45,6 +47,8 @@ const CanvasObjectNode: React.FC<Props> = ({
 
   const handleTextBlur = () => {
     setIsEditing(false);
+    if (textValue === (obj.text || "")) return;
+    useStore.getState().pushUndo();
     updateObject(obj.id, { text: textValue });
   };
 
@@ -64,6 +68,7 @@ const CanvasObjectNode: React.FC<Props> = ({
       startY: e.clientY,
       startWidth: obj.width,
       startHeight: obj.height,
+      recorded: false,
     };
   };
 
@@ -86,6 +91,10 @@ const CanvasObjectNode: React.FC<Props> = ({
     }
 
     if (newWidth !== obj.width || newHeight !== obj.height) {
+      if (!resizeRef.current.recorded) {
+        useStore.getState().pushUndo();
+        resizeRef.current.recorded = true;
+      }
       updateObject(obj.id, { width: newWidth, height: newHeight });
     }
   };

@@ -9,6 +9,7 @@ import {
   trySetPointerCapture,
 } from "../utils/panZoomGesture";
 import { showToast } from "../stores/toast";
+import { useStore } from "../stores";
 
 export const useCanvasDrag = (
   seats: Seat[],
@@ -201,12 +202,17 @@ export const useCanvasDrag = (
             const s1 = seats.find((s) => s.id === draggingNode.id);
             const s2 = seats.find((s) => s.id === targetNode.id);
             if (s1 && s2) {
+              useStore.getState().pushUndo();
               updateSeat(s1.id, { studentId: s2.studentId });
               updateSeat(s2.id, { studentId: s1.studentId });
             }
           }
         }
       } else {
+        const moved = session.validDeltaX !== 0 || session.validDeltaY !== 0;
+        if (moved) {
+          useStore.getState().pushUndo();
+        }
         session.draggedIds.forEach((id) => {
           const node = nodes.find((n) => n.id === id);
           if (node) {

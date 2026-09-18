@@ -31,15 +31,19 @@ const GroupAssignPopover: React.FC<GroupAssignPopoverProps> = ({
       selectedSeats.length > 0 &&
       selectedSeats.every((s) => s.groupIds.includes(groupId));
 
-    selectedSeats.forEach((seat) => {
+    const updates = selectedSeats.map((seat) => {
       let newGroupIds = [...seat.groupIds];
       if (allHaveIt) {
         newGroupIds = newGroupIds.filter((id) => id !== groupId);
-      } else {
-        if (!newGroupIds.includes(groupId)) {
-          newGroupIds.push(groupId);
-        }
+      } else if (!newGroupIds.includes(groupId)) {
+        newGroupIds.push(groupId);
       }
+      return { seat, newGroupIds };
+    });
+
+    if (updates.length === 0) return;
+    useStore.getState().pushUndo();
+    updates.forEach(({ seat, newGroupIds }) => {
       updateSeat(seat.id, { groupIds: newGroupIds });
     });
   };
