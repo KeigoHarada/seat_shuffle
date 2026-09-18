@@ -1,6 +1,10 @@
 import type { ChangeEvent } from "react";
 import { useStore } from "../stores";
-import { parseRosterCsv, type RosterParseOk } from "../utils/roster";
+import {
+  parseRosterCsv,
+  type RosterParseErr,
+  type RosterParseOk,
+} from "../utils/roster";
 import { parseProjectBackup, serializeProjectBackup } from "../utils/backup";
 import { showToast } from "../stores/toast";
 
@@ -11,9 +15,7 @@ function clearFileInputForReselect(input: HTMLInputElement) {
   input.value = "";
 }
 
-function rosterErrorMessage(
-  reason: "missing-name-column" | "zero-valid-rows",
-): string {
+function rosterErrorMessage(reason: RosterParseErr["reason"]): string {
   switch (reason) {
     case "missing-name-column":
       return "名前の列が見つかりません。";

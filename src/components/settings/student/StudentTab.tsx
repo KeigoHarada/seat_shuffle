@@ -1,7 +1,8 @@
 import React from "react";
 import StudentAddForm from "./StudentAddForm";
 import StudentListTable from "./StudentListTable";
-import ProjectIoControls from "../ProjectIoControls";
+import RosterImportButton from "../RosterImportButton";
+import BackupControls from "../BackupControls";
 
 const StudentTab: React.FC = () => {
   return (
@@ -9,8 +10,9 @@ const StudentTab: React.FC = () => {
       <div style={{ flexShrink: 0 }}>
         <StudentAddForm />
       </div>
-      <div style={{ flexShrink: 0 }}>
-        <ProjectIoControls mode="prep" idPrefix="btn-prep" />
+      <div className="settings-io-stack">
+        <RosterImportButton />
+        <BackupControls idPrefix="btn-prep" />
       </div>
       <div id="student-list-area" className="app-settings-fill">
         <StudentListTable />

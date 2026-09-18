@@ -868,8 +868,31 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       (await page.getByRole("button", { name: "名簿を取り込む" }).count()) >= 1,
       "missing 名簿を取り込む",
     );
+    record(
+      failures,
+      `${label} backup save`,
+      (await page.getByRole("button", { name: "バックアップを保存" }).count()) >=
+        1,
+      "missing バックアップを保存",
+    );
+    record(
+      failures,
+      `${label} backup load`,
+      (await page.getByRole("button", { name: "バックアップを読み込む" }).count()) >=
+        1,
+      "missing バックアップを読み込む",
+    );
 
     if (viewport.width === 390) {
+      await page.locator("#tab-btn-global").click();
+      record(
+        failures,
+        `${label} backup handoff heading`,
+        (await page.getByRole("heading", { name: "バックアップ・引き継ぎ" }).count()) >=
+          1,
+        "missing バックアップ・引き継ぎ",
+      );
+      await page.locator("#tab-btn-students").click();
       await page.emulateMedia({ media: "print" });
       const printCss = await page.evaluate(() => {
         const displayOf = (selector) => {

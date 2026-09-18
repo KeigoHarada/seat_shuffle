@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { applyRosterImport, parseRosterCsv } from "../roster";
 import type { AppState } from "../../types";
@@ -132,12 +134,74 @@ describe("parseRosterCsv", () => {
       reason: "missing-name-column",
     });
   });
+
+  it("rejects the legacy settings dump because its first line has no 名前", () => {
+    const legacy =
+      "# Students\nattendanceNumber,name,furigana,gender,roles\n1,あ太郎,アタロウ,male,班長";
+    expect(parseRosterCsv(legacy)).toEqual({
+      ok: false,
+      reason: "missing-name-column",
+    });
+  });
+
+  it("reads 出席番号 and quoted ロール lists, falling back to row order", () => {
+    const csv =
+      '名前,出席番号,ロール\n山田,7,"班長|書記"\n鈴木,abc,\n"佐藤, 花",0,班長';
+    expect(parseRosterCsv(csv)).toEqual({
+      ok: true,
+      skipped: 0,
+      rows: [
+        {
+          name: "山田",
+          attendanceNumber: 7,
+          gender: "other",
+          roleNames: ["班長", "書記"],
+        },
+        { name: "鈴木", attendanceNumber: 2, gender: "other", roleNames: [] },
+        {
+          name: "佐藤, 花",
+          attendanceNumber: 3,
+          gender: "other",
+          roleNames: ["班長"],
+        },
+      ],
+    });
+  });
+
+  it("loads the shipped sample roster", () => {
+    const text = readFileSync(
+      path.resolve(__dirname, "../../../sample_30_students.csv"),
+      "utf8",
+    );
+    const result = parseRosterCsv(text);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.rows).toHaveLength(30);
+    expect(result.skipped).toBe(0);
+    expect(result.rows[0]).toEqual({
+      name: "あ太郎",
+      attendanceNumber: 1,
+      furigana: "アタロウ",
+      gender: "male",
+      roleNames: ["班長"],
+    });
+    expect(result.rows[29]).toEqual({
+      name: "そ花子",
+      attendanceNumber: 30,
+      furigana: "ソハナコ",
+      gender: "female",
+      roleNames: [],
+    });
+  });
 });
 
 describe("applyRosterImport", () => {
-  it("clears assignments, locks, and constraints while keeping geometry and groups", () => {
-    const parsed = parseRosterCsv("名前,ロール\n山田,班長");
-    expect(parsed).toEqual({
+  it("clears assignments, locks, and constraints while keeping seat geometry", () => {
+    const state = baseState();
+    const groups = state.groups;
+    const settings = state.appSettings;
+    const objects = state.objects;
+    const next = applyRosterImport(state, {
       ok: true,
       skipped: 0,
       rows: [
@@ -149,26 +213,58 @@ describe("applyRosterImport", () => {
         },
       ],
     });
-    if (!parsed.ok) return;
-    const state = baseState();
-    const next = applyRosterImport(state, parsed);
     expect(next.students.map((s) => s.name)).toEqual(["山田"]);
     expect(next.students[0].roleIds).toEqual(["role-leader"]);
-    expect(next.seats[0]).toEqual({
-      id: "seat-1",
-      x: 2,
-      y: 3,
-      groupIds: ["g1"],
-      studentId: null,
-      isLocked: false,
-    });
+    expect(next.roles).toEqual([
+      { id: "role-leader", name: "班長", iconName: "Crown" },
+    ]);
+    expect(next.seats).toEqual([
+      {
+        id: "seat-1",
+        x: 2,
+        y: 3,
+        groupIds: ["g1"],
+        studentId: null,
+        isLocked: false,
+      },
+    ]);
     expect(next.constraints).toEqual([]);
-    expect(state.groups).toEqual([{ id: "g1", name: "1班", color: "#FCA5A5" }]);
-    expect(state.appSettings).toEqual({
-      algorithm: "optimize",
-      shuffleAnimation: "none",
-      autoAssignAlgorithm: "right-top-down",
+    expect(Object.keys(next).sort()).toEqual([
+      "constraints",
+      "roles",
+      "seats",
+      "students",
+    ]);
+    expect(state.groups).toBe(groups);
+    expect(state.appSettings).toBe(settings);
+    expect(state.objects).toBe(objects);
+  });
+
+  it("creates roles that the roster names but the classroom lacks", () => {
+    const next = applyRosterImport(baseState(), {
+      ok: true,
+      skipped: 0,
+      rows: [
+        {
+          name: "山田",
+          attendanceNumber: 1,
+          gender: "male",
+          roleNames: ["班長", "書記"],
+        },
+        {
+          name: "鈴木",
+          attendanceNumber: 2,
+          gender: "female",
+          roleNames: ["書記"],
+        },
+      ],
     });
-    expect(state.objects[0].text).toBe("教卓");
+    const created = next.roles.find((r) => r.name === "書記");
+    expect(created).toMatchObject({ name: "書記", iconName: "User" });
+    expect(next.roles.map((r) => r.name)).toEqual(["班長", "書記"]);
+    expect(next.students.map((s) => s.roleIds)).toEqual([
+      ["role-leader", created?.id],
+      [created?.id],
+    ]);
   });
 });

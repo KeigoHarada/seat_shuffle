@@ -5,7 +5,7 @@ import Select from "../../ui/Select";
 import ShuffleAnimation from "../../layout/ShuffleAnimation";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import { showToast } from "../../../stores/toast";
-import ProjectIoControls from "../ProjectIoControls";
+import BackupControls from "../BackupControls";
 
 const GlobalTab: React.FC = () => {
   const appSettings = useStore((state) => state.appSettings);
@@ -267,7 +267,9 @@ const GlobalTab: React.FC = () => {
         >
           座席と名簿をファイルに保存し、同じ状態を読み込めます。
         </p>
-        <ProjectIoControls mode="backup" idPrefix="btn-global" />
+        <div className="settings-io-stack">
+          <BackupControls idPrefix="btn-global" />
+        </div>
       </div>
 
       <div

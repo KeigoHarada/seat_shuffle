@@ -62,4 +62,27 @@ describe("project backup", () => {
       reason: "corrupt",
     });
   });
+
+  it("rejects a version-1 document whose fields have the wrong shape", () => {
+    const good = JSON.parse(serializeProjectBackup(state));
+    const badSeat = { ...good, seats: [{ id: "seat-1", x: "1" }] };
+    expect(parseProjectBackup(JSON.stringify(badSeat))).toEqual({
+      ok: false,
+      reason: "corrupt",
+    });
+    const badSettings = {
+      ...good,
+      appSettings: { ...good.appSettings, algorithm: "fastest" },
+    };
+    expect(parseProjectBackup(JSON.stringify(badSettings))).toEqual({
+      ok: false,
+      reason: "corrupt",
+    });
+    const missingField = { ...good };
+    delete missingField.constraints;
+    expect(parseProjectBackup(JSON.stringify(missingField))).toEqual({
+      ok: false,
+      reason: "corrupt",
+    });
+  });
 });
