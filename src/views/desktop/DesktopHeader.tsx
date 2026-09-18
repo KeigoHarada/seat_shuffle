@@ -1,33 +1,68 @@
-import React, { useRef } from "react";
-import { Settings, Download, Upload, Sprout } from "lucide-react";
-import { useCsvSettings } from "../../hooks/useCsvSettings";
-import { useCompactLayout } from "../../hooks/useCompactLayout";
+import React, { useRef, useState } from "react";
+import { Download, Settings, Sprout, Upload } from "lucide-react";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import Input from "../../components/ui/Input";
 import Logo from "../../components/ui/Logo";
-import { useStore } from "../../stores";
+import { useCompactLayout } from "../../hooks/useCompactLayout";
+import {
+  BACKUP_EXPORT_EXPLAIN,
+  BACKUP_IMPORT_EXPLAIN,
+  useProjectIo,
+} from "../../hooks/useProjectIo";
 import { useOnboardingStore } from "../../stores/onboarding";
+import { useStore } from "../../stores";
 
 interface HeaderProps {
   showSettings: boolean;
   onToggleSettings: () => void;
 }
 
+type HeaderIo = "idle" | "import-explain" | "export-explain";
+
 const DesktopHeader: React.FC<HeaderProps> = ({
   showSettings,
   onToggleSettings,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const isCompact = useCompactLayout();
   const isViewMode = useStore((state) => state.isViewMode);
   const openGuideHub = useOnboardingStore((state) => state.openGuideHub);
-
-  const { handleSave, handleLoad } = useCsvSettings();
+  const backupInputRef = useRef<HTMLInputElement>(null);
+  const [io, setIo] = useState<HeaderIo>("idle");
+  const { handleSaveBackup, handleLoadBackup } = useProjectIo();
 
   return (
     <header className="app-header">
       <Logo size={isCompact ? "sm" : "md"} />
 
       <div className="app-header-actions">
+        <button
+          type="button"
+          id="btn-header-import"
+          className="btn-secondary"
+          style={{ gap: "4px" }}
+          onClick={() => setIo("import-explain")}
+          title="インポート"
+          aria-label="インポート"
+        >
+          <Upload size={16} />
+          <span className="app-chrome-label">インポート</span>
+        </button>
+
+        <button
+          type="button"
+          id="btn-header-export"
+          className="btn-secondary"
+          style={{ gap: "4px" }}
+          onClick={() => setIo("export-explain")}
+          title="エクスポート"
+          aria-label="エクスポート"
+        >
+          <Download size={16} />
+          <span className="app-chrome-label">エクスポート</span>
+        </button>
+
+        <div className="app-header-divider" />
+
         <button
           id="header-guide-btn"
           className="btn-secondary"
@@ -46,34 +81,6 @@ const DesktopHeader: React.FC<HeaderProps> = ({
           <span className="app-chrome-label">はじめてガイド</span>
         </button>
 
-        <Input
-          type="file"
-          accept=".csv"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleLoad}
-        />
-        <button
-          className="btn-secondary"
-          style={{ gap: "4px" }}
-          onClick={() => fileInputRef.current?.click()}
-          aria-label="読み込み"
-        >
-          <Upload size={16} />
-          <span className="app-chrome-label">読み込み</span>
-        </button>
-        <button
-          className="btn-secondary"
-          style={{ gap: "4px" }}
-          onClick={handleSave}
-          aria-label="保存"
-        >
-          <Download size={16} />
-          <span className="app-chrome-label">保存</span>
-        </button>
-
-        <div className="app-header-divider" />
-
         {!isViewMode && (
           <button
             id="btn-header-settings"
@@ -88,6 +95,35 @@ const DesktopHeader: React.FC<HeaderProps> = ({
           </button>
         )}
       </div>
+
+      <Input
+        type="file"
+        id="btn-header-backup-file"
+        ref={backupInputRef}
+        style={{ display: "none" }}
+        onChange={handleLoadBackup}
+      />
+
+      <ConfirmDialog
+        isOpen={io === "import-explain"}
+        title="インポート"
+        message={BACKUP_IMPORT_EXPLAIN}
+        confirmText="読み込む"
+        cancelText="キャンセル"
+        variant="primary"
+        onConfirm={() => backupInputRef.current?.click()}
+        onCancel={() => setIo("idle")}
+      />
+      <ConfirmDialog
+        isOpen={io === "export-explain"}
+        title="エクスポート"
+        message={BACKUP_EXPORT_EXPLAIN}
+        confirmText="保存"
+        cancelText="キャンセル"
+        variant="primary"
+        onConfirm={handleSaveBackup}
+        onCancel={() => setIo("idle")}
+      />
     </header>
   );
 };

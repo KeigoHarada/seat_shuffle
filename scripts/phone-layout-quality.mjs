@@ -621,10 +621,54 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
   );
   record(
     failures,
+    `${label} print button`,
+    (await page.locator("#btn-footer-print").count()) === 1,
+    "missing #btn-footer-print",
+  );
+  record(
+    failures,
     `${label} settings button`,
     (await page.locator("#btn-header-settings").count()) === 1,
     "missing #btn-header-settings",
   );
+  record(
+    failures,
+    `${label} import`,
+    (await page.getByRole("button", { name: "インポート" }).count()) === 1,
+    "missing インポート",
+  );
+  record(
+    failures,
+    `${label} export`,
+    (await page.getByRole("button", { name: "エクスポート" }).count()) === 1,
+    "missing エクスポート",
+  );
+  record(
+    failures,
+    `${label} no rejected roster label`,
+    (await page.getByRole("button", { name: "名簿を取り込む", exact: true }).count()) ===
+      0,
+    "teacher UI contains 名簿を取り込む",
+  );
+  record(
+    failures,
+    `${label} no toolbar backup label`,
+    (await page.getByRole("button", { name: "バックアップ", exact: true }).count()) ===
+      0,
+    "toolbar labeled バックアップ",
+  );
+  if (viewport.width === 390) {
+    await page.getByRole("button", { name: "インポート" }).click();
+    const importModal = page.locator(".modal-overlay");
+    record(
+      failures,
+      `${label} import is backup only`,
+      (await importModal.getByText("バックアップファイル").count()) >= 1 &&
+        (await importModal.getByText("ExcelやCSVの名簿").count()) === 0,
+      "import modal is not backup-only",
+    );
+    await importModal.getByRole("button", { name: "キャンセル" }).click();
+  }
   record(
     failures,
     `${label} view toggle`,
@@ -856,6 +900,147 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       (await page.locator("h2", { hasText: "生徒設定" }).count()) >= 1,
       "missing 生徒設定 in overlay",
     );
+    record(
+      failures,
+      `${label} settings roster load`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "名簿を読み込む" })
+        .count()) === 1,
+      "missing 名簿を読み込む in student settings",
+    );
+    record(
+      failures,
+      `${label} settings has no rejected roster label`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "名簿を取り込む" })
+        .count()) === 0,
+      "名簿を取り込む still in settings",
+    );
+    record(
+      failures,
+      `${label} settings has no backup save`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "バックアップを保存" })
+        .count()) === 0,
+      "バックアップを保存 still in settings",
+    );
+    record(
+      failures,
+      `${label} settings has no backup load`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "バックアップを読み込む" })
+        .count()) === 0,
+      "バックアップを読み込む still in settings",
+    );
+    record(
+      failures,
+      `${label} settings has no backup file save`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "バックアップファイルを保存" })
+        .count()) === 0,
+      "バックアップファイルを保存 still in settings",
+    );
+
+    if (viewport.width === 390) {
+      await page.locator("#tab-btn-global").click();
+      record(
+        failures,
+        `${label} settings has no backup heading`,
+        (await page
+          .getByRole("heading", { name: "バックアップ・引き継ぎ" })
+          .count()) === 0,
+        "バックアップ・引き継ぎ still in settings",
+      );
+      await page.locator("#tab-btn-students").click();
+      const scaleBeforePrint = await page
+        .locator(".app-canvas-controls")
+        .textContent();
+      await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+      await page.emulateMedia({ media: "print" });
+      const printCss = await page.evaluate(() => {
+        const displayOf = (selector) => {
+          const el = document.querySelector(selector);
+          return el ? getComputedStyle(el).display : null;
+        };
+        const sheet = document
+          .querySelector("#canvas-main-area")
+          ?.getBoundingClientRect();
+        const seats = Array.from(
+          document.querySelectorAll(".seat-node-item"),
+        ).map((el) => el.getBoundingClientRect());
+        const seatsOnSheet = sheet
+          ? seats.filter(
+              (r) =>
+                r.left >= sheet.left &&
+                r.right <= sheet.right &&
+                r.top >= sheet.top &&
+                r.bottom <= sheet.bottom,
+            ).length
+          : 0;
+        return {
+          header: displayOf(".app-header"),
+          footer: displayOf(".app-footer"),
+          toolbar: displayOf(".app-canvas-toolbar"),
+          heading: displayOf(".print-heading"),
+          sheetHeight: sheet ? sheet.height : 0,
+          seatCount: seats.length,
+          seatsOnSheet,
+        };
+      });
+      record(
+        failures,
+        `${label} print sheet holds every seat`,
+        printCss.seatCount > 0 &&
+          printCss.seatsOnSheet === printCss.seatCount &&
+          printCss.sheetHeight > 0,
+        `seats=${printCss.seatCount} onSheet=${printCss.seatsOnSheet} sheetHeight=${printCss.sheetHeight}`,
+      );
+      record(
+        failures,
+        `${label} print hides header`,
+        printCss.header === "none",
+        `header display=${printCss.header}`,
+      );
+      record(
+        failures,
+        `${label} print hides footer`,
+        printCss.footer === "none",
+        `footer display=${printCss.footer}`,
+      );
+      record(
+        failures,
+        `${label} print hides toolbar`,
+        printCss.toolbar === "none",
+        `toolbar display=${printCss.toolbar}`,
+      );
+      record(
+        failures,
+        `${label} print shows heading`,
+        printCss.heading !== "none" && printCss.heading !== null,
+        `heading display=${printCss.heading}`,
+      );
+      await page.emulateMedia({ media: "screen" });
+      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+      await page
+        .locator(".app-canvas-controls", { hasText: scaleBeforePrint ?? "" })
+        .waitFor({ timeout: 2000 })
+        .catch(() => {});
+      const scaleAfterPrint = await page
+        .locator(".app-canvas-controls")
+        .textContent();
+      record(
+        failures,
+        `${label} print restores zoom`,
+        scaleAfterPrint === scaleBeforePrint,
+        `before=${scaleBeforePrint} after=${scaleAfterPrint}`,
+      );
+    }
+
     await page.locator("#btn-header-settings").click();
 
     const emptyPoint = await pickEmptyCanvasPoint(page);

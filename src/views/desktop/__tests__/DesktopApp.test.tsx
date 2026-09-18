@@ -57,6 +57,20 @@ describe("DesktopApp compact chrome", () => {
     const shell = container.querySelector(".app-shell");
     expect(shell?.getAttribute("data-compact")).toBe("true");
     expect(container.querySelector("#btn-footer-shuffle")).not.toBeNull();
+    const printButton = container.querySelector("#btn-footer-print");
+    expect(printButton?.getAttribute("aria-label")).toBe("印刷");
+    expect(printButton?.querySelector(".app-chrome-label")?.textContent).toBe(
+      "印刷",
+    );
+    expect(container.querySelector(".app-footer")?.contains(printButton)).toBe(
+      true,
+    );
+    const header = container.querySelector(".app-header");
+    expect(header?.textContent).toContain("はじめてガイド");
+    expect(header?.textContent).toContain("インポート");
+    expect(header?.textContent).toContain("エクスポート");
+    expect(header?.textContent).not.toContain("名簿を取り込む");
+    expect(header?.querySelector("#btn-header-backup")).toBeNull();
     expect(
       container
         .querySelector(".app-footer-cluster-center")

@@ -42,6 +42,15 @@ describe("GlobalTab Support Section", () => {
 
     expect(container.textContent).toContain("開発者を応援・寄付する");
     expect(container.textContent).toContain("応援メッセージ・寄付を送る");
+    expect(container.textContent).not.toContain("バックアップ・引き継ぎ");
+    expect(container.textContent).not.toContain("バックアップを保存");
+    expect(container.textContent).not.toContain("バックアップを読み込む");
+    expect(container.textContent).not.toContain("バックアップ");
+    expect(container.textContent).not.toContain("インポート");
+    expect(container.textContent).not.toContain("エクスポート");
+    expect(container.textContent).not.toContain("JSON");
+    expect(container.textContent).not.toContain("json");
+    expect(container.querySelector('input[type="file"]')).toBeNull();
 
     expect(container.textContent).not.toContain("その他");
     expect(container.textContent).not.toContain("OFUSE");
@@ -96,7 +105,9 @@ describe("GlobalTab Support Section", () => {
 
     expect(document.getElementById("ofuse-widget-script")).toBeNull();
     expect(
-      document.querySelector('script[src*="ofuse.me/assets/platform/widget.js"]'),
+      document.querySelector(
+        'script[src*="ofuse.me/assets/platform/widget.js"]',
+      ),
     ).toBeNull();
   });
 });

@@ -400,6 +400,7 @@ input[type="number"] {
   align-items: center;
   gap: var(--spacing-md);
   min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .app-header-actions .btn-primary,
@@ -703,6 +704,13 @@ input[type="number"] {
   cursor: not-allowed;
 }
 
+.footer-print {
+  gap: 6px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
 .shuffle-run {
   gap: 8px;
   padding: 12px 32px;
@@ -850,6 +858,12 @@ input[type="number"] {
     height: 40px;
   }
 
+  .footer-print {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+
   .shuffle-run {
     padding: 8px 14px;
     font-size: 14px;
@@ -991,5 +1005,64 @@ input[type="number"] {
 
   .guide-hub-shortcuts {
     grid-template-columns: 1fr;
+  }
+}
+
+.print-heading {
+  display: none;
+}
+
+@media print {
+  .print-heading {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 12px;
+    color: #334155;
+  }
+
+  .app-header,
+  .app-footer,
+  .app-settings,
+  .app-settings-scrim,
+  .app-canvas-toolbar,
+  .app-canvas-controls,
+  .modal-overlay,
+  .app-canvas-empty {
+    display: none !important;
+  }
+
+  html,
+  body,
+  .app-shell,
+  .app-main,
+  .app-canvas {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  .app-shell {
+    width: auto;
+  }
+
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  #canvas-main-area {
+    width: 960px !important;
+    height: 640px !important;
+    margin: 0 auto;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  .seat-node-item,
+  .seat-node-item * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { AlertCircle, AlertTriangle, RotateCcw } from "lucide-react";
 
 interface ConfirmDialogProps {
@@ -53,7 +54,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     }
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onCancel}>
       <div
         className="modal-content"
@@ -115,7 +116,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

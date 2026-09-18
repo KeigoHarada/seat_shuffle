@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shuffle, Undo2 } from "lucide-react";
+import { Printer, Shuffle, Undo2 } from "lucide-react";
 import LegalModal from "../../components/ui/LegalModal";
 import { useShuffle } from "../../hooks/useShuffle";
 import DesktopViewModeToggle from "./DesktopViewModeToggle";
@@ -27,6 +27,17 @@ const DesktopFooter: React.FC = () => {
           aria-label="一つ前の配置に戻す"
         >
           <Undo2 size={20} />
+        </button>
+        <button
+          type="button"
+          id="btn-footer-print"
+          className="btn-secondary footer-print"
+          onClick={() => window.print()}
+          title="座席表を印刷"
+          aria-label="印刷"
+        >
+          <Printer size={20} />
+          <span className="app-chrome-label">印刷</span>
         </button>
       </div>
       <LegalModal

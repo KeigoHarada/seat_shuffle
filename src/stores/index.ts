@@ -16,12 +16,22 @@ import {
   createTourInitialState,
   createEmptyState,
 } from "../constants/defaultData";
+import {
+  applyRosterImport,
+  type RosterParseOk,
+} from "../utils/roster";
+import {
+  applyProjectBackup,
+  type ProjectSnapshot,
+} from "../utils/backup";
 
 export interface StateAndActions extends AppState {
   clearState: () => void;
   loadDefaultTemplate: () => void;
   loadTourInitialState: () => void;
   loadState: (state: Partial<AppState>) => void;
+  importRoster: (parsed: RosterParseOk) => void;
+  replaceProject: (snapshot: ProjectSnapshot) => void;
   isViewMode: boolean;
   setIsViewMode: (val: boolean) => void;
 
@@ -129,6 +139,21 @@ export const useStore = create<StateAndActions>()(
           activeSettingsTab: "students",
         })),
       loadState: (loaded) => set((state) => ({ ...state, ...loaded })),
+      importRoster: (parsed) =>
+        set((state) => ({
+          ...applyRosterImport(state, parsed),
+          pastSeats: [],
+          highlightedStudentId: null,
+          editingStudentId: null,
+        })),
+      replaceProject: (snapshot) =>
+        set((state) => ({
+          ...state,
+          ...applyProjectBackup(snapshot),
+          pastSeats: [],
+          highlightedStudentId: null,
+          editingStudentId: null,
+        })),
 
       setIsViewMode: (val) => set({ isViewMode: val }),
 
