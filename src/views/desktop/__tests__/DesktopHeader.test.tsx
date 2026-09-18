@@ -150,7 +150,10 @@ describe("DesktopHeader project IO", () => {
     );
     expect(exportModal?.textContent).toContain("エクスポート");
     expect(exportModal?.textContent).toContain(BACKUP_EXPORT_EXPLAIN);
-    expect(exportModal?.textContent).toContain("バックアップファイルを保存");
+    expect(button(exportModal ?? container, "保存").textContent?.trim()).toBe(
+      "保存",
+    );
+    expect(exportModal?.textContent).not.toContain("バックアップファイルを保存");
     expect(exportModal?.textContent).not.toContain("JSON");
   });
 
@@ -168,7 +171,7 @@ describe("DesktopHeader project IO", () => {
     await act(async () => {
       button(
         document.querySelector(".modal-overlay") ?? container,
-        "バックアップファイルを保存",
+        "保存",
       ).click();
     });
     expect(savedBlob).not.toBeNull();
