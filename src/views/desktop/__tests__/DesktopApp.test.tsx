@@ -57,12 +57,15 @@ describe("DesktopApp compact chrome", () => {
     const shell = container.querySelector(".app-shell");
     expect(shell?.getAttribute("data-compact")).toBe("true");
     expect(container.querySelector("#btn-footer-shuffle")).not.toBeNull();
+    expect(container.querySelector("#btn-footer-print")).not.toBeNull();
     expect(
       container
         .querySelector(".app-footer-cluster-center")
         ?.contains(container.querySelector("#btn-footer-shuffle")),
     ).toBe(true);
     expect(container.querySelector("#btn-header-settings")).not.toBeNull();
+    expect(container.querySelector('[aria-label="読み込み"]')).toBeNull();
+    expect(container.querySelector('[aria-label="保存"]')).toBeNull();
     expect(container.querySelector(".phone-tabbar")).toBeNull();
     expect(
       container.querySelector(".app-settings")?.getAttribute("data-open"),

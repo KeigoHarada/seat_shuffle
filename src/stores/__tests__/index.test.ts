@@ -205,4 +205,89 @@ describe("useStore", () => {
     );
     expect(distinctX).toEqual([0, 6, 14, 20, 28, 34]);
   });
+
+  it("importRoster clears assignments and constraints and keeps groups and geometry", () => {
+    useStore.getState().loadDefaultTemplate();
+    const before = useStore.getState();
+    const groupSnapshot = before.groups.map((g) => ({ ...g }));
+    const settingsSnapshot = { ...before.appSettings };
+    const seatGeometry = before.seats.map((s) => ({
+      id: s.id,
+      x: s.x,
+      y: s.y,
+      groupIds: [...s.groupIds],
+    }));
+    expect(before.seats.some((s) => s.studentId !== null)).toBe(true);
+    expect(before.constraints.length).toBeGreaterThan(0);
+
+    useStore.getState().importRoster({
+      ok: true,
+      skipped: 1,
+      rows: [
+        {
+          name: "山田",
+          attendanceNumber: 1,
+          gender: "male",
+          roleNames: [],
+        },
+      ],
+    });
+
+    const after = useStore.getState();
+    expect(after.students.map((s) => s.name)).toEqual(["山田"]);
+    expect(after.seats.every((s) => s.studentId === null)).toBe(true);
+    expect(after.seats.every((s) => s.isLocked === false)).toBe(true);
+    expect(after.constraints).toEqual([]);
+    expect(after.groups).toEqual(groupSnapshot);
+    expect(after.appSettings).toEqual(settingsSnapshot);
+    expect(
+      after.seats.map((s) => ({
+        id: s.id,
+        x: s.x,
+        y: s.y,
+        groupIds: s.groupIds,
+      })),
+    ).toEqual(seatGeometry);
+  });
+
+  it("replaceProject restores seated assignments from a snapshot", () => {
+    useStore.getState().clearState();
+    const snapshot = {
+      version: 1 as const,
+      students: [
+        {
+          id: "s1",
+          name: "山田",
+          gender: "male" as const,
+          attendanceNumber: 1,
+          roleIds: [] as string[],
+        },
+      ],
+      roles: [],
+      groups: [{ id: "g1", name: "1班", color: "#FCA5A5" }],
+      seats: [
+        {
+          id: "seat-1",
+          studentId: "s1",
+          groupIds: ["g1"],
+          x: 4,
+          y: 5,
+          isLocked: true,
+        },
+      ],
+      objects: [],
+      constraints: [],
+      appSettings: {
+        algorithm: "random" as const,
+        shuffleAnimation: "confetti" as const,
+        autoAssignAlgorithm: "left-top-down" as const,
+      },
+    };
+    useStore.getState().replaceProject(snapshot);
+    const after = useStore.getState();
+    expect(after.students[0].name).toBe("山田");
+    expect(after.seats[0].studentId).toBe("s1");
+    expect(after.seats[0].isLocked).toBe(true);
+    expect(after.appSettings.algorithm).toBe("random");
+  });
 });

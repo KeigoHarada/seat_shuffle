@@ -993,3 +993,43 @@ input[type="number"] {
     grid-template-columns: 1fr;
   }
 }
+
+.print-heading {
+  display: none;
+}
+
+@media print {
+  .print-heading {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 12px;
+    color: #334155;
+  }
+
+  .app-header,
+  .app-footer,
+  .app-settings,
+  .app-settings-scrim,
+  .app-canvas-toolbar,
+  .app-canvas-controls,
+  .modal-overlay,
+  .app-canvas-empty {
+    display: none !important;
+  }
+
+  html,
+  body,
+  .app-shell,
+  .app-main,
+  .app-canvas {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  .app-shell {
+    width: auto;
+  }
+}

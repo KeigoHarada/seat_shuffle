@@ -42,6 +42,11 @@ describe("GlobalTab Support Section", () => {
 
     expect(container.textContent).toContain("開発者を応援・寄付する");
     expect(container.textContent).toContain("応援メッセージ・寄付を送る");
+    expect(container.textContent).toContain("バックアップ・引き継ぎ");
+    expect(container.textContent).toContain("バックアップを保存");
+    expect(container.textContent).toContain("バックアップを読み込む");
+    expect(container.textContent).not.toContain("JSON");
+    expect(container.textContent).not.toContain("json");
 
     expect(container.textContent).not.toContain("その他");
     expect(container.textContent).not.toContain("OFUSE");

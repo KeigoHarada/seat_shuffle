@@ -23,6 +23,7 @@ const DesktopApp: React.FC = () => {
 
   return (
     <div className="app-shell" data-compact={isCompact ? "true" : "false"}>
+      <p className="print-heading">ラクガエ 座席表</p>
       <DesktopHeader
         showSettings={effectiveSettingsOpen}
         onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}

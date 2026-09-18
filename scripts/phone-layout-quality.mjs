@@ -621,6 +621,12 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
   );
   record(
     failures,
+    `${label} print button`,
+    (await page.locator("#btn-footer-print").count()) === 1,
+    "missing #btn-footer-print",
+  );
+  record(
+    failures,
     `${label} settings button`,
     (await page.locator("#btn-header-settings").count()) === 1,
     "missing #btn-header-settings",
@@ -856,6 +862,54 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       (await page.locator("h2", { hasText: "生徒設定" }).count()) >= 1,
       "missing 生徒設定 in overlay",
     );
+    record(
+      failures,
+      `${label} roster import`,
+      (await page.getByRole("button", { name: "名簿を取り込む" }).count()) >= 1,
+      "missing 名簿を取り込む",
+    );
+
+    if (viewport.width === 390) {
+      await page.emulateMedia({ media: "print" });
+      const printCss = await page.evaluate(() => {
+        const displayOf = (selector) => {
+          const el = document.querySelector(selector);
+          return el ? getComputedStyle(el).display : null;
+        };
+        return {
+          header: displayOf(".app-header"),
+          footer: displayOf(".app-footer"),
+          toolbar: displayOf(".app-canvas-toolbar"),
+          heading: displayOf(".print-heading"),
+        };
+      });
+      record(
+        failures,
+        `${label} print hides header`,
+        printCss.header === "none",
+        `header display=${printCss.header}`,
+      );
+      record(
+        failures,
+        `${label} print hides footer`,
+        printCss.footer === "none",
+        `footer display=${printCss.footer}`,
+      );
+      record(
+        failures,
+        `${label} print hides toolbar`,
+        printCss.toolbar === "none",
+        `toolbar display=${printCss.toolbar}`,
+      );
+      record(
+        failures,
+        `${label} print shows heading`,
+        printCss.heading !== "none" && printCss.heading !== null,
+        `heading display=${printCss.heading}`,
+      );
+      await page.emulateMedia({ media: "screen" });
+    }
+
     await page.locator("#btn-header-settings").click();
 
     const emptyPoint = await pickEmptyCanvasPoint(page);

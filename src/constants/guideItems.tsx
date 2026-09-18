@@ -121,10 +121,10 @@ export const GUIDE_CATEGORIES: GuideCategory[] = [
       },
       {
         id: "import_export",
-        label: "名簿のインポート/エクスポートがしたい",
-        title: "名簿のインポート/エクスポートがしたい",
+        label: "名簿の取り込みとバックアップがしたい",
+        title: "名簿の取り込みとバックアップがしたい",
         description:
-          "CSVファイルを使って名簿データを一括で読み込み・書き出しする方法です。",
+          "名簿を取り込み、バックアップを保存・読み込む方法です。",
         points: ["（動画準備中）"],
       },
       {
