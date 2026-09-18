@@ -893,19 +893,49 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         "missing バックアップ・引き継ぎ",
       );
       await page.locator("#tab-btn-students").click();
+      const scaleBeforePrint = await page
+        .locator(".app-canvas-controls")
+        .textContent();
+      await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
       await page.emulateMedia({ media: "print" });
       const printCss = await page.evaluate(() => {
         const displayOf = (selector) => {
           const el = document.querySelector(selector);
           return el ? getComputedStyle(el).display : null;
         };
+        const sheet = document
+          .querySelector("#canvas-main-area")
+          ?.getBoundingClientRect();
+        const seats = Array.from(
+          document.querySelectorAll(".seat-node-item"),
+        ).map((el) => el.getBoundingClientRect());
+        const seatsOnSheet = sheet
+          ? seats.filter(
+              (r) =>
+                r.left >= sheet.left &&
+                r.right <= sheet.right &&
+                r.top >= sheet.top &&
+                r.bottom <= sheet.bottom,
+            ).length
+          : 0;
         return {
           header: displayOf(".app-header"),
           footer: displayOf(".app-footer"),
           toolbar: displayOf(".app-canvas-toolbar"),
           heading: displayOf(".print-heading"),
+          sheetHeight: sheet ? sheet.height : 0,
+          seatCount: seats.length,
+          seatsOnSheet,
         };
       });
+      record(
+        failures,
+        `${label} print sheet holds every seat`,
+        printCss.seatCount > 0 &&
+          printCss.seatsOnSheet === printCss.seatCount &&
+          printCss.sheetHeight > 0,
+        `seats=${printCss.seatCount} onSheet=${printCss.seatsOnSheet} sheetHeight=${printCss.sheetHeight}`,
+      );
       record(
         failures,
         `${label} print hides header`,
@@ -931,6 +961,20 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         `heading display=${printCss.heading}`,
       );
       await page.emulateMedia({ media: "screen" });
+      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+      await page
+        .locator(".app-canvas-controls", { hasText: scaleBeforePrint ?? "" })
+        .waitFor({ timeout: 2000 })
+        .catch(() => {});
+      const scaleAfterPrint = await page
+        .locator(".app-canvas-controls")
+        .textContent();
+      record(
+        failures,
+        `${label} print restores zoom`,
+        scaleAfterPrint === scaleBeforePrint,
+        `before=${scaleBeforePrint} after=${scaleAfterPrint}`,
+      );
     }
 
     await page.locator("#btn-header-settings").click();

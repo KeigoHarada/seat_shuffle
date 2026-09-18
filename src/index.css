@@ -1059,4 +1059,23 @@ input[type="number"] {
   .app-shell {
     width: auto;
   }
+
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  #canvas-main-area {
+    width: 960px !important;
+    height: 640px !important;
+    margin: 0 auto;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  .seat-node-item,
+  .seat-node-item * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
 }

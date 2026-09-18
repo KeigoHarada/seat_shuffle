@@ -11,7 +11,6 @@ const BackupControls: React.FC<{ idPrefix: string }> = ({ idPrefix }) => {
     <>
       <Input
         type="file"
-        accept="application/octet-stream"
         id={`${idPrefix}-backup-file`}
         ref={inputRef}
         style={{ display: "none" }}
