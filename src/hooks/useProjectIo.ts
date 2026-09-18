@@ -41,10 +41,12 @@ function downloadText(filename: string, contents: string, type: string) {
 export function useProjectIo() {
   const importRoster = (parsed: RosterParseOk) => {
     useStore.getState().importRoster(parsed);
+    const n = parsed.skipped;
+    const m = parsed.rows.length;
     showToast.success(
-      parsed.skipped > 0
-        ? `名前のない行を${parsed.skipped}件スキップして、${parsed.rows.length}人取り込みました`
-        : `名簿を取り込みました（${parsed.rows.length}人）`,
+      n > 0
+        ? `名前のない行を${n}件スキップして、${m}人取り込みました`
+        : `名簿を取り込みました（${m}人）`,
     );
   };
 

@@ -100,8 +100,10 @@ describe("StudentTab roster IO", () => {
     expect(state.constraints).toEqual([]);
     expect(state.groups).toEqual(groupsBefore);
     expect(document.querySelector(".modal-overlay")).toBeNull();
+    const n = 1;
+    const m = 2;
     expect(useToastStore.getState().toasts.map((t) => t.message)).toEqual([
-      "名前のない行を1件スキップして、2人取り込みました",
+      `名前のない行を${n}件スキップして、${m}人取り込みました`,
     ]);
   });
 
