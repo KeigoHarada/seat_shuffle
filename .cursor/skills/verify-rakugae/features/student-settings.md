@@ -40,5 +40,5 @@ Preconditions:
 - Gender defaults to その他 if left unset (`StudentAddForm`). Do not assert a specific gender unless you chose `性別を選択`.
 - Roster rows are not links; proof is the name text plus storage length.
 - Roster names live in list textboxes. `wait-text --text "検証太郎"` may miss them; prove with eval `students.length` and a snapshot that includes `textbox "名前": 検証太郎`.
-- `名簿を読み込む` (`#btn-prep-import-roster`) lives on the 生徒 tab. It opens a CSV format modal, then the locked confirm. `#btn-header-import` / `#btn-header-export` in the header are backup load and save only. Helper `fill` does not attach files unless you extend it; use `choose-file` on the hidden input after the modal 読み込む / バックアップファイルを保存 path. The global tab has no `バックアップ・引き継ぎ` card.
+- `名簿を読み込む` (`#btn-prep-import-roster`) lives on the 生徒 tab. It opens a CSV format modal, then the locked confirm. `#btn-header-import` / `#btn-header-export` in the header are backup load and save only. Helper `fill` does not attach files unless you extend it; use `choose-file` on the hidden input after the modal 読み込む / 保存 path. The global tab has no `バックアップ・引き継ぎ` card.
 - `データを全消去（空にする）` wipes the classroom. Do not use it as setup for other features unless you restore afterward.

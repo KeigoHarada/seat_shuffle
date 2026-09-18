@@ -20,7 +20,7 @@ export const BACKUP_IMPORT_EXPLAIN =
 export const BACKUP_EXPORT_EXPLAIN =
   "いまの教室の状態をバックアップファイルとして保存します。";
 
-export const BACKUP_EXPORT_CONFIRM = "バックアップファイルを保存";
+export const BACKUP_EXPORT_CONFIRM = "保存";
 
 function clearFileInputForReselect(input: HTMLInputElement) {
   input.value = "";
