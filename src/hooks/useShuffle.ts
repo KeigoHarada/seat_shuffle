@@ -6,16 +6,16 @@ export function useShuffle() {
   const isViewMode = useStore((state) => state.isViewMode);
   const isShuffling = useStore((state) => state.isShuffling);
   const setIsShuffling = useStore((state) => state.setIsShuffling);
-  const pastSeats = useStore((state) => state.pastSeats);
-  const saveSeatHistory = useStore((state) => state.saveSeatHistory);
-  const undoShuffle = useStore((state) => state.undoShuffle);
+  const undoStack = useStore((state) => state.undoStack);
+  const pushUndo = useStore((state) => state.pushUndo);
+  const undo = useStore((state) => state.undo);
 
-  const canUndo = pastSeats.length > 0 && !isShuffling;
+  const canUndo = undoStack.length > 0 && !isShuffling;
 
   const handleShuffle = () => {
     if (isShuffling) return;
 
-    saveSeatHistory();
+    pushUndo();
 
     const state = useStore.getState();
     const { seats, students, constraints, appSettings, setSeats } = state;
@@ -74,7 +74,7 @@ export function useShuffle() {
 
   return {
     handleShuffle,
-    undoShuffle,
+    undo,
     isShuffling,
     canUndo,
   };

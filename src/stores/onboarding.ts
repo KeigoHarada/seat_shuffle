@@ -138,7 +138,7 @@ export const useOnboardingStore = create<OnboardingState>()(
           constraints: JSON.parse(JSON.stringify(state.constraints)),
           appSettings: JSON.parse(JSON.stringify(state.appSettings)),
           isViewMode: state.isViewMode,
-          pastSeats: JSON.parse(JSON.stringify(state.pastSeats)),
+          undoStack: JSON.parse(JSON.stringify(state.undoStack)),
           isSettingsOpen: state.isSettingsOpen,
           activeSettingsTab: state.activeSettingsTab,
         };
@@ -159,7 +159,7 @@ export const useOnboardingStore = create<OnboardingState>()(
             constraints: JSON.parse(JSON.stringify(snapshot.constraints)),
             appSettings: JSON.parse(JSON.stringify(snapshot.appSettings)),
             isViewMode: snapshot.isViewMode,
-            pastSeats: JSON.parse(JSON.stringify(snapshot.pastSeats)),
+            undoStack: JSON.parse(JSON.stringify(snapshot.undoStack)),
             isSettingsOpen: snapshot.isSettingsOpen,
             activeSettingsTab: snapshot.activeSettingsTab,
           } as any);

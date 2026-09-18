@@ -235,6 +235,7 @@ const Canvas: React.FC = () => {
     const assigned = new Map(
       assignments.map(({ seatId, studentId }) => [seatId, studentId]),
     );
+    useStore.getState().pushUndo();
     setSeats(
       seats.map((seat) => {
         const studentId = assigned.get(seat.id);

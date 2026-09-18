@@ -6,7 +6,7 @@ import DesktopViewModeToggle from "./DesktopViewModeToggle";
 
 const DesktopFooter: React.FC = () => {
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
-  const { handleShuffle, undoShuffle, isShuffling, canUndo } = useShuffle();
+  const { handleShuffle, undo, isShuffling, canUndo } = useShuffle();
 
   return (
     <footer className="app-footer">
@@ -20,7 +20,7 @@ const DesktopFooter: React.FC = () => {
         </button>
         <button
           className="btn-secondary shuffle-undo"
-          onClick={undoShuffle}
+          onClick={undo}
           disabled={!canUndo}
           type="button"
           title="一つ前の配置に戻す"

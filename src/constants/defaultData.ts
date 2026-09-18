@@ -1,6 +1,7 @@
 import { Student, Role, Group, Seat, CanvasObject, Constraint } from "../types";
 import { generateTemplate } from "../utils/templates";
 import { assignGroupsByBlocks } from "../utils/group";
+import type { UndoSnapshot } from "../utils/undo";
 import { PREDEFINED_COLORS } from "./index";
 
 export const DEFAULT_ROLES: Role[] = [
@@ -350,7 +351,7 @@ export const createDefaultClassroomState = () => {
     seats,
     objects,
     constraints,
-    pastSeats: [],
+    undoStack: [] as UndoSnapshot[],
   };
 };
 
@@ -401,7 +402,7 @@ export const createTourInitialState = () => {
     seats,
     objects,
     constraints,
-    pastSeats: [],
+    undoStack: [] as UndoSnapshot[],
   };
 };
 
@@ -412,5 +413,5 @@ export const createEmptyState = () => ({
   seats: [] as Seat[],
   objects: [] as CanvasObject[],
   constraints: [] as Constraint[],
-  pastSeats: [] as Seat[][],
+  undoStack: [] as UndoSnapshot[],
 });

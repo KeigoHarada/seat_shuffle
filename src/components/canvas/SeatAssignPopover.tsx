@@ -42,6 +42,7 @@ const SeatAssignPopover: React.FC<SeatAssignPopoverProps> = ({
 
   const handleAssign = (studentId: string) => {
     if (targetSeatId) {
+      useStore.getState().pushUndo();
       updateSeat(targetSeatId, { studentId });
     }
     onClose();

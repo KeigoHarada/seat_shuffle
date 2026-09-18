@@ -16,14 +16,15 @@ import {
   createTourInitialState,
   createEmptyState,
 } from "../constants/defaultData";
+import { applyRosterImport, type RosterParseOk } from "../utils/roster";
+import { applyProjectBackup, type ProjectSnapshot } from "../utils/backup";
 import {
-  applyRosterImport,
-  type RosterParseOk,
-} from "../utils/roster";
-import {
-  applyProjectBackup,
-  type ProjectSnapshot,
-} from "../utils/backup";
+  appendUndoSnapshot,
+  applyUndoSnapshot,
+  captureUndoSnapshot,
+  readPersistedUndoStack,
+  type UndoSnapshot,
+} from "../utils/undo";
 
 export interface StateAndActions extends AppState {
   clearState: () => void;
@@ -53,9 +54,9 @@ export interface StateAndActions extends AppState {
   updateSeat: (id: string, updates: Partial<Seat>) => void;
   removeSeat: (id: string) => void;
   setSeats: (seats: Seat[]) => void;
-  pastSeats: Seat[][];
-  saveSeatHistory: () => void;
-  undoShuffle: () => void;
+  undoStack: UndoSnapshot[];
+  pushUndo: () => void;
+  undo: () => void;
 
   addObject: (obj: CanvasObject) => void;
   updateObject: (id: string, updates: Partial<CanvasObject>) => void;
@@ -86,7 +87,7 @@ export interface StateAndActions extends AppState {
 const defaultClassroomData = createDefaultClassroomState();
 
 const initialState: AppState & {
-  pastSeats: Seat[][];
+  undoStack: UndoSnapshot[];
   canvasTool: "select" | "hand";
   isSettingsOpen: boolean;
   activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
@@ -142,7 +143,7 @@ export const useStore = create<StateAndActions>()(
       importRoster: (parsed) =>
         set((state) => ({
           ...applyRosterImport(state, parsed),
-          pastSeats: [],
+          undoStack: [],
           highlightedStudentId: null,
           editingStudentId: null,
         })),
@@ -150,7 +151,7 @@ export const useStore = create<StateAndActions>()(
         set((state) => ({
           ...state,
           ...applyProjectBackup(snapshot),
-          pastSeats: [],
+          undoStack: [],
           highlightedStudentId: null,
           editingStudentId: null,
         })),
@@ -279,19 +280,23 @@ export const useStore = create<StateAndActions>()(
           seats: state.seats.filter((s) => s.id !== id),
         })),
       setSeats: (seats) => set({ seats }),
-      saveSeatHistory: () =>
-        set((state) => ({
-          pastSeats: [...state.pastSeats, state.seats],
-        })),
-      undoShuffle: () =>
+      pushUndo: () =>
         set((state) => {
-          if (state.pastSeats.length === 0) return {};
-          const newPastSeats = [...state.pastSeats];
-          const previousSeats = newPastSeats.pop()!;
-          return {
-            seats: previousSeats,
-            pastSeats: newPastSeats,
-          };
+          const snapshot = captureUndoSnapshot(state);
+          const undoStack = appendUndoSnapshot(state.undoStack, snapshot);
+          if (undoStack === state.undoStack) return {};
+          return { undoStack };
+        }),
+      undo: () =>
+        set((state) => {
+          if (state.undoStack.length === 0) return {};
+          const snapshot = state.undoStack[state.undoStack.length - 1];
+          const undoStack = state.undoStack.slice(0, -1);
+          const restored = applyUndoSnapshot(snapshot, {
+            studentIds: new Set(state.students.map((student) => student.id)),
+            groupIds: new Set(state.groups.map((group) => group.id)),
+          });
+          return { ...restored, undoStack };
         }),
 
       addObject: (obj) =>
@@ -335,6 +340,19 @@ export const useStore = create<StateAndActions>()(
     }),
     {
       name: "seat-shuffle-storage",
+      merge: (persistedState, currentState) => {
+        const persisted =
+          persistedState && typeof persistedState === "object"
+            ? (persistedState as Record<string, unknown>)
+            : {};
+        const rest = { ...persisted };
+        delete rest.pastSeats;
+        return {
+          ...currentState,
+          ...(rest as Partial<typeof currentState>),
+          undoStack: readPersistedUndoStack(persisted),
+        };
+      },
     },
   ),
 );
