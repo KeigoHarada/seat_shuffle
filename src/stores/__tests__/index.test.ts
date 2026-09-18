@@ -347,7 +347,7 @@ describe("useStore", () => {
     }
     const stack = useStore.getState().undoStack;
     expect(stack).toHaveLength(50);
-    expect(stack[0].seats.at(-1)?.id).toBe("seat-1");
-    expect(stack[49].seats.at(-1)?.id).toBe("seat-50");
+    expect(stack[0].seats[stack[0].seats.length - 1]?.id).toBe("seat-1");
+    expect(stack[49].seats[stack[49].seats.length - 1]?.id).toBe("seat-50");
   });
 });
