@@ -633,44 +633,39 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
   );
   record(
     failures,
-    `${label} roster import`,
-    (await page.getByRole("button", { name: "名簿を取り込む" }).count()) === 1,
-    "missing 名簿を取り込む",
+    `${label} import`,
+    (await page.getByRole("button", { name: "インポート" }).count()) === 1,
+    "missing インポート",
   );
   record(
     failures,
-    `${label} backup`,
-    (await page.getByRole("button", { name: "バックアップ" }).count()) === 1,
-    "missing バックアップ",
-  );
-  const pageText = await page.locator("body").innerText();
-  record(
-    failures,
-    `${label} no import word`,
-    !pageText.includes("インポート"),
-    "teacher UI contains インポート",
+    `${label} export`,
+    (await page.getByRole("button", { name: "エクスポート" }).count()) === 1,
+    "missing エクスポート",
   );
   record(
     failures,
-    `${label} no export word`,
-    !pageText.includes("エクスポート"),
-    "teacher UI contains エクスポート",
+    `${label} no rejected roster label`,
+    (await page.getByRole("button", { name: "名簿を取り込む" }).count()) === 0,
+    "teacher UI contains 名簿を取り込む",
+  );
+  record(
+    failures,
+    `${label} no toolbar backup label`,
+    (await page.getByRole("button", { name: "バックアップ" }).count()) === 0,
+    "toolbar labeled バックアップ",
   );
   if (viewport.width === 390) {
-    await page.getByRole("button", { name: "バックアップ" }).click();
+    await page.getByRole("button", { name: "インポート" }).click();
+    const importModal = page.locator(".modal-overlay");
     record(
       failures,
-      `${label} backup menu save`,
-      (await page.getByRole("button", { name: "保存" }).count()) >= 1,
-      "missing 保存 in backup menu",
+      `${label} import is backup only`,
+      (await importModal.getByText("バックアップファイル").count()) >= 1 &&
+        (await importModal.getByText("ExcelやCSVの名簿").count()) === 0,
+      "import modal is not backup-only",
     );
-    record(
-      failures,
-      `${label} backup menu load`,
-      (await page.getByRole("button", { name: "読み込み" }).count()) >= 1,
-      "missing 読み込み in backup menu",
-    );
-    await page.getByRole("button", { name: "バックアップ" }).click();
+    await importModal.getByRole("button", { name: "キャンセル" }).click();
   }
   record(
     failures,
@@ -905,7 +900,16 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
     );
     record(
       failures,
-      `${label} settings has no roster import`,
+      `${label} settings roster load`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "名簿を読み込む" })
+        .count()) === 1,
+      "missing 名簿を読み込む in student settings",
+    );
+    record(
+      failures,
+      `${label} settings has no rejected roster label`,
       (await page
         .locator(".app-settings")
         .getByRole("button", { name: "名簿を取り込む" })
@@ -929,6 +933,15 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         .getByRole("button", { name: "バックアップを読み込む" })
         .count()) === 0,
       "バックアップを読み込む still in settings",
+    );
+    record(
+      failures,
+      `${label} settings has no backup file save`,
+      (await page
+        .locator(".app-settings")
+        .getByRole("button", { name: "バックアップファイルを保存" })
+        .count()) === 0,
+      "バックアップファイルを保存 still in settings",
     );
 
     if (viewport.width === 390) {
