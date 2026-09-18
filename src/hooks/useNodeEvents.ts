@@ -1,10 +1,17 @@
-import { useCallback, useRef, type PointerEvent, type MouseEvent, type RefObject } from "react";
+import {
+  useCallback,
+  useRef,
+  type PointerEvent,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import { Seat } from "../types";
 import { contextMenuFromClient } from "../utils/canvas";
 import {
   isTouchPointerType,
   LONG_PRESS_MS,
   movedPastTap,
+  shouldSelectOnNodePointerDown,
 } from "../utils/panZoomGesture";
 
 interface UseNodeEventsProps {
@@ -16,6 +23,7 @@ interface UseNodeEventsProps {
   pan: { x: number; y: number };
   scale: number;
   isViewMode: boolean;
+  getPointerCount: () => number;
   cancelDrag: () => void;
   setContextMenu: (
     menu: { x: number; y: number; worldX: number; worldY: number } | null,
@@ -39,6 +47,7 @@ export const useNodeEvents = ({
   pan,
   scale,
   isViewMode,
+  getPointerCount,
   cancelDrag,
   setContextMenu,
   setPopoverPos,
@@ -74,6 +83,17 @@ export const useNodeEvents = ({
 
   const handleNodePointerDown = useCallback(
     (id: string, e: PointerEvent) => {
+      if (
+        !shouldSelectOnNodePointerDown({
+          pointerType: e.pointerType,
+          isPrimary: e.isPrimary,
+          pointerCount: isTouchPointerType(e.pointerType)
+            ? getPointerCount()
+            : 1,
+        })
+      ) {
+        return;
+      }
       e.stopPropagation();
       updatePointerDownPos(e.clientX, e.clientY);
       if (e.ctrlKey || e.metaKey) {
@@ -103,6 +123,7 @@ export const useNodeEvents = ({
       selectOnly,
       updatePointerDownPos,
       isViewMode,
+      getPointerCount,
       clearLongPress,
       cancelDrag,
       viewportRef,
@@ -166,5 +187,6 @@ export const useNodeEvents = ({
     handleNodeLongPressMove,
     handleNodeLongPressUp,
     handleSeatDoubleClick,
+    cancelNodeLongPress: clearLongPress,
   };
 };

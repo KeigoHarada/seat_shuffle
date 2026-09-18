@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { Seat, CanvasObject } from "../types";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
 import { DragNode, checkCollision, screenToWorld } from "../utils/canvas";
 import {
+  isTouchPointerType,
   tryReleasePointerCapture,
   trySetPointerCapture,
 } from "../utils/panZoomGesture";
@@ -52,10 +53,17 @@ export const useCanvasDrag = (
     validDeltaY: number;
     isSwapMode: boolean;
   } | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragStateRef = useRef(dragState);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+
+  const commitDragState = useCallback((next: typeof dragState) => {
+    dragStateRef.current = next;
+    setDragState(next);
+  }, []);
 
   const handleNodeDragPointerDown = useCallback(
     (id: string, e: React.PointerEvent) => {
+      if (isTouchPointerType(e.pointerType) && !e.isPrimary) return;
       const isRightClick = e.button === 2;
       if (e.button !== 0 && !isRightClick) return;
 
@@ -67,7 +75,7 @@ export const useCanvasDrag = (
       const draggedIds =
         !isRightClick && selectedIds.includes(id) ? selectedIds : [id];
 
-      setDragState({
+      commitDragState({
         baseId: id,
         draggedIds,
         startX: node.x,
@@ -80,20 +88,22 @@ export const useCanvasDrag = (
       });
 
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      setDragOffset({
+      dragOffsetRef.current = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
-      });
+      };
       trySetPointerCapture(e.currentTarget, e.pointerId);
     },
-    [nodes, selectedIds],
+    [commitDragState, nodes, selectedIds],
   );
 
   const handleNodeDragPointerMove = useCallback(
     (e: React.PointerEvent) => {
-      if (!dragState) return;
+      const session = dragStateRef.current;
+      if (!session) return;
       if (!viewportRef.current) return;
 
+      const dragOffset = dragOffsetRef.current;
       const rect = viewportRef.current.getBoundingClientRect();
       const { worldX: dropX, worldY: dropY } = screenToWorld(
         e.clientX - dragOffset.x,
@@ -106,11 +116,11 @@ export const useCanvasDrag = (
       const newBaseX = Math.round(dropX / GRID_SIZE);
       const newBaseY = Math.round(dropY / GRID_SIZE);
 
-      const visualDeltaX = newBaseX - dragState.startX;
-      const visualDeltaY = newBaseY - dragState.startY;
+      const visualDeltaX = newBaseX - session.startX;
+      const visualDeltaY = newBaseY - session.startY;
 
       const checkGroupCollision = (dx: number, dy: number) => {
-        for (const dragId of dragState.draggedIds) {
+        for (const dragId of session.draggedIds) {
           const n = nodes.find((no) => no.id === dragId);
           if (!n || !n.isSeat) continue;
 
@@ -119,7 +129,7 @@ export const useCanvasDrag = (
             n.y + dy,
             n.width,
             n.height,
-            dragState.draggedIds,
+            session.draggedIds,
             nodes,
           );
           if (hit) return true;
@@ -127,26 +137,26 @@ export const useCanvasDrag = (
         return false;
       };
 
-      let nextValidDeltaX = dragState.validDeltaX;
-      let nextValidDeltaY = dragState.validDeltaY;
+      let nextValidDeltaX = session.validDeltaX;
+      let nextValidDeltaY = session.validDeltaY;
 
       if (!checkGroupCollision(visualDeltaX, visualDeltaY)) {
         nextValidDeltaX = visualDeltaX;
         nextValidDeltaY = visualDeltaY;
-      } else if (!checkGroupCollision(visualDeltaX, dragState.validDeltaY)) {
+      } else if (!checkGroupCollision(visualDeltaX, session.validDeltaY)) {
         nextValidDeltaX = visualDeltaX;
-      } else if (!checkGroupCollision(dragState.validDeltaX, visualDeltaY)) {
+      } else if (!checkGroupCollision(session.validDeltaX, visualDeltaY)) {
         nextValidDeltaY = visualDeltaY;
       }
 
       if (
-        visualDeltaX !== dragState.visualDeltaX ||
-        visualDeltaY !== dragState.visualDeltaY ||
-        nextValidDeltaX !== dragState.validDeltaX ||
-        nextValidDeltaY !== dragState.validDeltaY
+        visualDeltaX !== session.visualDeltaX ||
+        visualDeltaY !== session.visualDeltaY ||
+        nextValidDeltaX !== session.validDeltaX ||
+        nextValidDeltaY !== session.validDeltaY
       ) {
-        setDragState({
-          ...dragState,
+        commitDragState({
+          ...session,
           visualDeltaX,
           visualDeltaY,
           validDeltaX: nextValidDeltaX,
@@ -154,25 +164,26 @@ export const useCanvasDrag = (
         });
       }
     },
-    [dragState, dragOffset, pan, scale, nodes, viewportRef],
+    [commitDragState, pan, scale, nodes, viewportRef],
   );
 
   const handleNodeDragPointerUp = useCallback(
     (e: React.PointerEvent) => {
-      if (!dragState) return;
+      const session = dragStateRef.current;
+      if (!session) return;
 
-      const draggingNode = nodes.find((n) => n.id === dragState.baseId);
+      const draggingNode = nodes.find((n) => n.id === session.baseId);
       if (!draggingNode) {
-        setDragState(null);
+        commitDragState(null);
         return;
       }
 
-      if (dragState.isSwapMode && draggingNode.isSeat) {
+      if (session.isSwapMode && draggingNode.isSeat) {
         const cx = Math.floor(
-          draggingNode.x + dragState.visualDeltaX + draggingNode.width / 2,
+          draggingNode.x + session.visualDeltaX + draggingNode.width / 2,
         );
         const cy = Math.floor(
-          draggingNode.y + dragState.visualDeltaY + draggingNode.height / 2,
+          draggingNode.y + session.visualDeltaY + draggingNode.height / 2,
         );
         const targetNode = nodes.find(
           (n) =>
@@ -180,7 +191,7 @@ export const useCanvasDrag = (
             cx < n.x + n.width &&
             cy >= n.y &&
             cy < n.y + n.height &&
-            n.id !== dragState.baseId,
+            n.id !== session.baseId,
         );
 
         if (targetNode && targetNode.isSeat) {
@@ -196,11 +207,11 @@ export const useCanvasDrag = (
           }
         }
       } else {
-        dragState.draggedIds.forEach((id) => {
+        session.draggedIds.forEach((id) => {
           const node = nodes.find((n) => n.id === id);
           if (node) {
-            const finalX = node.x + dragState.validDeltaX;
-            const finalY = node.y + dragState.validDeltaY;
+            const finalX = node.x + session.validDeltaX;
+            const finalY = node.y + session.validDeltaY;
             if (node.isSeat) {
               updateSeat(id, { x: finalX, y: finalY });
             } else {
@@ -210,10 +221,10 @@ export const useCanvasDrag = (
         });
       }
 
-      setDragState(null);
+      commitDragState(null);
       tryReleasePointerCapture(e.currentTarget, e.pointerId);
     },
-    [dragState, nodes, seats, updateSeat, updateObject],
+    [commitDragState, nodes, seats, updateSeat, updateObject],
   );
 
   return {
@@ -221,6 +232,6 @@ export const useCanvasDrag = (
     handleNodeDragPointerDown,
     handleNodeDragPointerMove,
     handleNodeDragPointerUp,
-    cancelDrag: () => setDragState(null),
+    cancelDrag: () => commitDragState(null),
   };
 };

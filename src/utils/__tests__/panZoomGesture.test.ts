@@ -8,6 +8,9 @@ import {
   panByDelta,
   pointerDistance,
   pointerMidpoint,
+  resolveCanvasDownGesture,
+  shouldClearSelectionForPointerGesture,
+  shouldSelectOnNodePointerDown,
   tryReleasePointerCapture,
   trySetPointerCapture,
   zoomAroundPoint,
@@ -74,5 +77,193 @@ describe("panZoomGesture", () => {
     expect(() => trySetPointerCapture(el, 99)).not.toThrow();
     expect(() => tryReleasePointerCapture(el, 99)).not.toThrow();
     el.remove();
+  });
+});
+
+describe("resolveCanvasDownGesture", () => {
+  const editSelect = {
+    isViewMode: false,
+    isSpaceMode: false,
+    canvasTool: "select" as const,
+  };
+
+  it("never steals toolbar chrome", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 2,
+        onChrome: true,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("none");
+  });
+
+  it("gives two-finger touch pinch even when both fingers are on seats", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 2,
+        onChrome: false,
+        onNode: true,
+        ...editSelect,
+      }),
+    ).toBe("pinch");
+  });
+
+  it("keeps one-finger seat interaction as node drag in edit select", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: true,
+        ...editSelect,
+      }),
+    ).toBe("node");
+  });
+
+  it("uses marquee for one-finger empty-canvas touch in edit select", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("marquee");
+  });
+
+  it("matches desktop mouse marquee on empty canvas", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "mouse",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("marquee");
+  });
+
+  it("pans with one touch in view mode including when it starts on a seat", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: true,
+        isViewMode: true,
+        isSpaceMode: false,
+        canvasTool: "select",
+      }),
+    ).toBe("pan");
+  });
+
+  it("does not pinch mouse chords; right button pans empty canvas", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "mouse",
+        button: 2,
+        pointerCount: 2,
+        onChrome: false,
+        onNode: false,
+        ...editSelect,
+      }),
+    ).toBe("pan");
+  });
+
+  it("lets space/hand force pan instead of marquee", () => {
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "mouse",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        isViewMode: false,
+        isSpaceMode: true,
+        canvasTool: "select",
+      }),
+    ).toBe("pan");
+    expect(
+      resolveCanvasDownGesture({
+        pointerType: "touch",
+        button: 0,
+        pointerCount: 1,
+        onChrome: false,
+        onNode: false,
+        isViewMode: false,
+        isSpaceMode: false,
+        canvasTool: "hand",
+      }),
+    ).toBe("pan");
+  });
+});
+
+describe("shouldSelectOnNodePointerDown", () => {
+  it("selects on the first touch pointer", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "touch",
+        isPrimary: true,
+        pointerCount: 1,
+      }),
+    ).toBe(true);
+  });
+
+  it("does not select once two touch pointers are active", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "touch",
+        isPrimary: true,
+        pointerCount: 2,
+      }),
+    ).toBe(false);
+  });
+
+  it("does not select a non-primary touch", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "touch",
+        isPrimary: false,
+        pointerCount: 2,
+      }),
+    ).toBe(false);
+  });
+
+  it("keeps mouse selection on the primary pointer", () => {
+    expect(
+      shouldSelectOnNodePointerDown({
+        pointerType: "mouse",
+        isPrimary: true,
+        pointerCount: 1,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("shouldClearSelectionForPointerGesture", () => {
+  it("clears when a touch pinch starts", () => {
+    expect(shouldClearSelectionForPointerGesture("pinch")).toBe(true);
+  });
+
+  it("clears when marquee starts", () => {
+    expect(shouldClearSelectionForPointerGesture("marquee")).toBe(true);
+  });
+
+  it("does not clear when panning", () => {
+    expect(shouldClearSelectionForPointerGesture("pan")).toBe(false);
+  });
+
+  it("does not clear for node drag", () => {
+    expect(shouldClearSelectionForPointerGesture("node")).toBe(false);
   });
 });
