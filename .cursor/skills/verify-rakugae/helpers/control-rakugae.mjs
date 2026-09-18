@@ -479,7 +479,7 @@ function locatorFromArgs(page, args) {
 }
 
 async function cmdClick(args) {
-  const result = await withPage(args, async (page) => {
+  const result = await withPage(args, async (page, meta) => {
     if (!targetsWelcomeUi(args)) await dismissWelcomeIfPresent(page);
     const loc = locatorFromArgs(page, args);
     if (args["expect-download"]) {
@@ -487,9 +487,16 @@ async function cmdClick(args) {
         page.waitForEvent("download", { timeout: Number(args.timeout || 5000) }),
         loc.first().click(),
       ]);
+      const suggested = download.suggestedFilename();
+      const savePath = args["download-path"]
+        ? String(args["download-path"])
+        : join(meta.evidenceDir, suggested);
+      mkdirSync(dirname(savePath), { recursive: true });
+      await download.saveAs(savePath);
       return {
         clicked: args.id || args.name || args.text || args.selector || args.placeholder,
-        download: download.suggestedFilename(),
+        download: suggested,
+        saved: savePath,
       };
     }
     await loc.first().click();
