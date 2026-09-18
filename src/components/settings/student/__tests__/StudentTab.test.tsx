@@ -93,6 +93,7 @@ describe("StudentTab roster editing", () => {
       button(container, "名簿を読み込む").click();
     });
     const explain = document.querySelector(".modal-overlay");
+    expect(explain?.parentElement).toBe(document.body);
     expect(explain?.textContent).toContain(ROSTER_CSV_EXPLAIN);
     expect(explain?.textContent).toContain("読み込む");
     expect(explain?.textContent).not.toContain("JSON");

@@ -122,6 +122,10 @@ describe("DesktopHeader project IO", () => {
       button(container, "インポート").click();
     });
     const importModal = document.querySelector(".modal-overlay");
+    expect(importModal?.parentElement).toBe(document.body);
+    expect(container.querySelector("header")?.contains(importModal)).toBe(
+      false,
+    );
     expect(importModal?.textContent).toContain("インポート");
     expect(importModal?.textContent).toContain(BACKUP_IMPORT_EXPLAIN);
     expect(importModal?.textContent).toContain("バックアップファイル");
@@ -140,6 +144,10 @@ describe("DesktopHeader project IO", () => {
       button(container, "エクスポート").click();
     });
     const exportModal = document.querySelector(".modal-overlay");
+    expect(exportModal?.parentElement).toBe(document.body);
+    expect(container.querySelector("header")?.contains(exportModal)).toBe(
+      false,
+    );
     expect(exportModal?.textContent).toContain("エクスポート");
     expect(exportModal?.textContent).toContain(BACKUP_EXPORT_EXPLAIN);
     expect(exportModal?.textContent).toContain("バックアップファイルを保存");
