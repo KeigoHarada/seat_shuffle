@@ -19,10 +19,10 @@ import {
 import { applyRosterImport, type RosterParseOk } from "../utils/roster";
 import { applyProjectBackup, type ProjectSnapshot } from "../utils/backup";
 import {
+  appendUndoSnapshot,
   applyUndoSnapshot,
   captureUndoSnapshot,
   readPersistedUndoStack,
-  undoSnapshotsEqual,
   type UndoSnapshot,
 } from "../utils/undo";
 
@@ -283,9 +283,9 @@ export const useStore = create<StateAndActions>()(
       pushUndo: () =>
         set((state) => {
           const snapshot = captureUndoSnapshot(state);
-          const last = state.undoStack[state.undoStack.length - 1];
-          if (last && undoSnapshotsEqual(last, snapshot)) return {};
-          return { undoStack: [...state.undoStack, snapshot] };
+          const undoStack = appendUndoSnapshot(state.undoStack, snapshot);
+          if (undoStack === state.undoStack) return {};
+          return { undoStack };
         }),
       undo: () =>
         set((state) => {

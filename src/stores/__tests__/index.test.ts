@@ -332,4 +332,22 @@ describe("useStore", () => {
     useStore.getState().pushUndo();
     expect(useStore.getState().undoStack).toHaveLength(1);
   });
+
+  it("keeps only the newest 50 undo snapshots", () => {
+    for (let i = 0; i < 51; i++) {
+      useStore.getState().addSeat({
+        id: `seat-${i}`,
+        x: i,
+        y: 0,
+        studentId: null,
+        groupIds: [],
+        isLocked: false,
+      });
+      useStore.getState().pushUndo();
+    }
+    const stack = useStore.getState().undoStack;
+    expect(stack).toHaveLength(50);
+    expect(stack[0].seats.at(-1)?.id).toBe("seat-1");
+    expect(stack[49].seats.at(-1)?.id).toBe("seat-50");
+  });
 });

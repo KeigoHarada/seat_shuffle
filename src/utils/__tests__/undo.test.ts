@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { CanvasObject, Seat } from "../../types";
 import {
+  MAX_UNDO_STACK,
   UNDOABLE_KEYS,
+  appendUndoSnapshot,
   applyUndoSnapshot,
   captureUndoSnapshot,
   readPersistedUndoStack,
@@ -108,5 +110,49 @@ describe("undo snapshot", () => {
     });
     expect(stack).toHaveLength(1);
     expect(stack[0].seats[0].id).toBe("new");
+  });
+
+  it("skips appending a snapshot equal to the last entry", () => {
+    const snapshot = captureUndoSnapshot({
+      seats: [seat({ id: "a" })],
+      objects: [],
+    });
+    const once = appendUndoSnapshot([], snapshot);
+    const twice = appendUndoSnapshot(once, snapshot);
+    expect(twice).toBe(once);
+    expect(twice).toHaveLength(1);
+  });
+
+  it("drops the oldest entries past MAX_UNDO_STACK", () => {
+    let stack: ReturnType<typeof captureUndoSnapshot>[] = [];
+    for (let i = 0; i < MAX_UNDO_STACK + 1; i++) {
+      stack = appendUndoSnapshot(
+        stack,
+        captureUndoSnapshot({
+          seats: [seat({ id: `seat-${i}` })],
+          objects: [],
+        }),
+      );
+    }
+    expect(stack).toHaveLength(MAX_UNDO_STACK);
+    expect(stack[0].seats[0].id).toBe("seat-1");
+    expect(stack[MAX_UNDO_STACK - 1].seats[0].id).toBe(
+      `seat-${MAX_UNDO_STACK}`,
+    );
+  });
+
+  it("trims persisted stacks to MAX_UNDO_STACK", () => {
+    const undoStack = Array.from({ length: MAX_UNDO_STACK + 3 }, (_, i) =>
+      captureUndoSnapshot({
+        seats: [seat({ id: `old-${i}` })],
+        objects: [],
+      }),
+    );
+    const stack = readPersistedUndoStack({ undoStack });
+    expect(stack).toHaveLength(MAX_UNDO_STACK);
+    expect(stack[0].seats[0].id).toBe("old-3");
+    expect(stack[MAX_UNDO_STACK - 1].seats[0].id).toBe(
+      `old-${MAX_UNDO_STACK + 2}`,
+    );
   });
 });
