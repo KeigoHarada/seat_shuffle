@@ -5,7 +5,6 @@ import Input from "../../components/ui/Input";
 import Logo from "../../components/ui/Logo";
 import { useCompactLayout } from "../../hooks/useCompactLayout";
 import {
-  BACKUP_EXPORT_CONFIRM,
   BACKUP_EXPORT_EXPLAIN,
   BACKUP_IMPORT_EXPLAIN,
   useProjectIo,
@@ -119,7 +118,7 @@ const DesktopHeader: React.FC<HeaderProps> = ({
         isOpen={io === "export-explain"}
         title="エクスポート"
         message={BACKUP_EXPORT_EXPLAIN}
-        confirmText={BACKUP_EXPORT_CONFIRM}
+        confirmText="保存"
         cancelText="キャンセル"
         variant="primary"
         onConfirm={handleSaveBackup}

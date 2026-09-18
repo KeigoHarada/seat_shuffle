@@ -150,9 +150,7 @@ describe("DesktopHeader project IO", () => {
     );
     expect(exportModal?.textContent).toContain("エクスポート");
     expect(exportModal?.textContent).toContain(BACKUP_EXPORT_EXPLAIN);
-    expect(button(exportModal ?? container, "保存").textContent?.trim()).toBe(
-      "保存",
-    );
+    expect(button(exportModal ?? container, "保存")).toBeTruthy();
     expect(exportModal?.textContent).not.toContain("バックアップファイルを保存");
     expect(exportModal?.textContent).not.toContain("JSON");
   });
