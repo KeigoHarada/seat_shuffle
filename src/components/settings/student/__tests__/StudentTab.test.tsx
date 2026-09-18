@@ -101,7 +101,7 @@ describe("StudentTab roster IO", () => {
     expect(state.groups).toEqual(groupsBefore);
     expect(document.querySelector(".modal-overlay")).toBeNull();
     expect(useToastStore.getState().toasts.map((t) => t.message)).toEqual([
-      "名簿を取り込みました（2人、1行スキップ）",
+      "名前のない行を1件スキップして、2人取り込みました",
     ]);
   });
 
@@ -137,7 +137,7 @@ describe("StudentTab roster IO", () => {
 
     expect(document.querySelector(".modal-overlay")).toBeNull();
     expect(useToastStore.getState().toasts.map((t) => t.message)).toEqual([
-      "有効な名簿行がありません。現在の状態は変えていません。",
+      "取り込める名前がありません。いまの教室はそのままです",
     ]);
     expect(useStore.getState().students).toBe(before.students);
   });
