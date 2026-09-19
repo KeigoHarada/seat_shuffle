@@ -15,7 +15,7 @@ import {
 } from "../../../services/canvasGesture";
 
 import { useCanvasOverlayStore } from "../../../stores/canvasOverlay";
-import { useStore } from "../../../stores/appStore";
+import { useUiStore } from "../../../stores/uiStore";
 
 interface UseNodeEventsProps {
   seats: Seat[];
@@ -153,10 +153,10 @@ export const useNodeEvents = ({
       if (seat && !seat.studentId) {
         openAssign(id, e.clientX, e.clientY);
       } else if (seat && seat.studentId) {
-        const store = useStore.getState();
-        store.setIsSettingsOpen(true);
-        store.setActiveSettingsTab("students");
-        store.setHighlightedStudentId(seat.studentId);
+        const uiStore = useUiStore.getState();
+        uiStore.setIsSettingsOpen(true);
+        uiStore.setActiveSettingsTab("students");
+        uiStore.setHighlightedStudentId(seat.studentId);
       }
     },
     [seats, openAssign],

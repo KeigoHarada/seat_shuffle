@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useStore } from "./appStore";
+import { useUiStore } from "./uiStore";
 import { TOUR_STEPS } from "../data/tourSteps";
 import type { OnboardingState } from "../types/onboarding";
 
@@ -99,6 +100,7 @@ export const useOnboardingStore = create<OnboardingState>()(
 
       takeSnapshot: (step: number) => {
         const state = useStore.getState();
+        const uiState = useUiStore.getState();
         const snapshot = {
           students: JSON.parse(JSON.stringify(state.students)),
           roles: JSON.parse(JSON.stringify(state.roles)),
@@ -107,10 +109,10 @@ export const useOnboardingStore = create<OnboardingState>()(
           objects: JSON.parse(JSON.stringify(state.objects)),
           constraints: JSON.parse(JSON.stringify(state.constraints)),
           appSettings: JSON.parse(JSON.stringify(state.appSettings)),
-          isViewMode: state.isViewMode,
           undoStack: JSON.parse(JSON.stringify(state.undoStack)),
-          isSettingsOpen: state.isSettingsOpen,
-          activeSettingsTab: state.activeSettingsTab,
+          isViewMode: uiState.isViewMode,
+          isSettingsOpen: uiState.isSettingsOpen,
+          activeSettingsTab: uiState.activeSettingsTab,
         };
         set((s) => ({
           stepSnapshots: { ...s.stepSnapshots, [step]: snapshot },
@@ -128,11 +130,12 @@ export const useOnboardingStore = create<OnboardingState>()(
             objects: JSON.parse(JSON.stringify(snapshot.objects)),
             constraints: JSON.parse(JSON.stringify(snapshot.constraints)),
             appSettings: JSON.parse(JSON.stringify(snapshot.appSettings)),
-            isViewMode: snapshot.isViewMode,
             undoStack: JSON.parse(JSON.stringify(snapshot.undoStack)),
-            isSettingsOpen: snapshot.isSettingsOpen,
-            activeSettingsTab: snapshot.activeSettingsTab,
           } as any);
+          const ui = useUiStore.getState();
+          ui.setIsViewMode(snapshot.isViewMode);
+          ui.setIsSettingsOpen(snapshot.isSettingsOpen);
+          ui.setActiveSettingsTab(snapshot.activeSettingsTab);
         } else {
           const prevStep = TOUR_STEPS[step];
           if (prevStep) {

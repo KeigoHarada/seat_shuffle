@@ -24,26 +24,13 @@ const defaultClassroomData = createDefaultClassroomState();
 
 const initialState: AppState & {
   undoStack: UndoSnapshot[];
-  canvasTool: "select" | "hand";
-  isSettingsOpen: boolean;
-  activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
-  highlightedStudentId: string | null;
-  editingStudentId: string | null;
-  isShuffling: boolean;
 } = {
   ...defaultClassroomData,
-  isViewMode: false,
-  canvasTool: "select",
   appSettings: {
     algorithm: "optimize",
     shuffleAnimation: "none",
     autoAssignAlgorithm: "right-top-down",
   },
-  isSettingsOpen: true,
-  activeSettingsTab: "students",
-  highlightedStudentId: null,
-  editingStudentId: null,
-  isShuffling: false,
 };
 
 export const useStore = create<StateAndActions>()(
@@ -55,44 +42,29 @@ export const useStore = create<StateAndActions>()(
         set((state) => ({
           ...state,
           ...createEmptyState(),
-          highlightedStudentId: null,
-          editingStudentId: null,
         })),
       loadDefaultTemplate: () =>
         set((state) => ({
           ...state,
           ...createDefaultClassroomState(),
-          highlightedStudentId: null,
-          editingStudentId: null,
         })),
       loadTourInitialState: () =>
         set((state) => ({
           ...state,
           ...createTourInitialState(),
-          highlightedStudentId: null,
-          editingStudentId: null,
-          isViewMode: false,
-          isSettingsOpen: true,
-          activeSettingsTab: "students",
         })),
       loadState: (loaded) => set((state) => ({ ...state, ...loaded })),
       importRoster: (parsed) =>
         set((state) => ({
           ...applyRosterImport(state, parsed),
           undoStack: [],
-          highlightedStudentId: null,
-          editingStudentId: null,
         })),
       replaceProject: (snapshot) =>
         set((state) => ({
           ...state,
           ...applyProjectBackup(snapshot),
           undoStack: [],
-          highlightedStudentId: null,
-          editingStudentId: null,
         })),
-
-      setIsViewMode: (val) => set({ isViewMode: val }),
 
       addStudent: (student) =>
         set((state) => ({ students: [...state.students, student] })),
@@ -122,12 +94,6 @@ export const useStore = create<StateAndActions>()(
               }
               return true;
             }),
-            highlightedStudentId:
-              state.highlightedStudentId === id
-                ? null
-                : state.highlightedStudentId,
-            editingStudentId:
-              state.editingStudentId === id ? null : state.editingStudentId,
           };
         }),
       reorderStudents: (startIndex, endIndex) =>
@@ -265,26 +231,9 @@ export const useStore = create<StateAndActions>()(
         set((state) => ({
           appSettings: { ...state.appSettings, ...updates },
         })),
-
-      setCanvasTool: (tool) => set({ canvasTool: tool }),
-
-      setIsSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
-      setActiveSettingsTab: (tab) => set({ activeSettingsTab: tab }),
-      setHighlightedStudentId: (id) => set({ highlightedStudentId: id }),
-      setEditingStudentId: (id) => set({ editingStudentId: id }),
-      setIsShuffling: (isShuffling) => set({ isShuffling }),
     }),
     {
       name: "seat-shuffle-storage",
-      partialize: (state) => {
-        const {
-          isShuffling: _isShuffling,
-          highlightedStudentId: _highlightedStudentId,
-          editingStudentId: _editingStudentId,
-          ...persisted
-        } = state;
-        return persisted;
-      },
       merge: (persistedState, currentState) => {
         const persisted =
           persistedState && typeof persistedState === "object"
@@ -292,9 +241,6 @@ export const useStore = create<StateAndActions>()(
             : {};
         const rest = { ...persisted };
         delete rest.pastSeats;
-        delete rest.isShuffling;
-        delete rest.highlightedStudentId;
-        delete rest.editingStudentId;
         return {
           ...currentState,
           ...(rest as Partial<typeof currentState>),

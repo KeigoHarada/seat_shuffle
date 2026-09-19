@@ -31,7 +31,6 @@ const state: AppState = {
     shuffleAnimation: "none",
     autoAssignAlgorithm: "right-top-down",
   },
-  isViewMode: true,
 };
 
 describe("project backup", () => {

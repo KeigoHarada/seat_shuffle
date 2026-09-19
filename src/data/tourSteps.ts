@@ -7,6 +7,7 @@ import {
 } from "./defaultData";
 import { sortStudentsByNameLogic } from "../services/student";
 import { optimizeShuffle } from "../services/shuffle";
+import { useUiStore } from "../stores/uiStore";
 import type { TourStep } from "../types/onboarding";
 
 export const TOUR_STEPS: TourStep[] = [
@@ -20,8 +21,8 @@ export const TOUR_STEPS: TourStep[] = [
     placement: "right",
     isInfoOnly: true,
     setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(false);
+      useUiStore.getState().setIsViewMode(false);
+      useUiStore.getState().setIsSettingsOpen(false);
       mainStore.loadTourInitialState();
       mainStore.setSeats([]);
       mainStore.objects.forEach((o) => mainStore.removeObject(o.id));
@@ -49,9 +50,10 @@ export const TOUR_STEPS: TourStep[] = [
     settingsTab: "global",
     isInfoOnly: true,
     setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
-      mainStore.setActiveSettingsTab("global");
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
+      ui.setActiveSettingsTab("global");
       mainStore.loadTourInitialState();
       mainStore.setSeats([]);
       mainStore.objects.forEach((o) => mainStore.removeObject(o.id));
@@ -77,8 +79,9 @@ export const TOUR_STEPS: TourStep[] = [
     actionHint: "「テンプレート」から「教室」を選択してください",
     placement: "right",
     setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
       mainStore.setSeats([]);
       mainStore.objects.forEach((o) => mainStore.removeObject(o.id));
     },
@@ -103,9 +106,10 @@ export const TOUR_STEPS: TourStep[] = [
     placement: "left",
     settingsTab: "students",
     setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
-      mainStore.setActiveSettingsTab("students");
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
+      ui.setActiveSettingsTab("students");
       const { seats, objects } = generateTemplate("classroom", 0, 0);
       const cleanSeats = seats.map((s) => ({ ...s, groupIds: [] }));
       mainStore.setSeats(cleanSeats);
@@ -137,10 +141,11 @@ export const TOUR_STEPS: TourStep[] = [
     actionHint: "「名前順ソート」ボタンをクリックしてください",
     placement: "left",
     settingsTab: "students",
-    setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
-      mainStore.setActiveSettingsTab("students");
+    setupPreState: () => {
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
+      ui.setActiveSettingsTab("students");
     },
     setupPostState: () => {},
     setupIdealState: (mainStore) => {
@@ -168,9 +173,10 @@ export const TOUR_STEPS: TourStep[] = [
     actionHint: "空席に班を割り当ててください",
     placement: "right",
     setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
-      mainStore.setActiveSettingsTab("groups");
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
+      ui.setActiveSettingsTab("groups");
 
       const classGroups = mainStore.groups.filter(
         (g) => g.id !== "group-vision" && g.id !== "group-6",
@@ -207,9 +213,10 @@ export const TOUR_STEPS: TourStep[] = [
     placement: "left",
     settingsTab: "constraints",
     setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
-      mainStore.setActiveSettingsTab("constraints");
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
+      ui.setActiveSettingsTab("constraints");
 
       const newSeats = mainStore.seats.map((s) => ({
         ...s,
@@ -263,8 +270,9 @@ export const TOUR_STEPS: TourStep[] = [
     actionHint: "「シャッフル実行」をクリックしてください",
     placement: "right",
     setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
 
       mainStore.loadState({ undoStack: [] } as any);
       const newSeats = mainStore.seats.map((s) => ({ ...s, studentId: null }));
@@ -287,7 +295,7 @@ export const TOUR_STEPS: TourStep[] = [
       mainStore.setSeats(newSeats);
     },
     checkCondition: (mainStore) =>
-      mainStore.undoStack.length > 0 || mainStore.isShuffling,
+      mainStore.undoStack.length > 0 || useUiStore.getState().isShuffling,
   },
   {
     id: "step-viewmode",
@@ -297,14 +305,15 @@ export const TOUR_STEPS: TourStep[] = [
       "右下の「閲覧」スイッチをクリックして、生徒に見せる専用モードに切り替えてみましょう。配慮メモが隠れて安心です！",
     actionHint: "「閲覧」スイッチをクリックしてください",
     placement: "right",
-    setupPreState: (mainStore) => {
-      mainStore.setIsViewMode(false);
-      mainStore.setIsSettingsOpen(true);
+    setupPreState: () => {
+      const ui = useUiStore.getState();
+      ui.setIsViewMode(false);
+      ui.setIsSettingsOpen(true);
     },
     setupPostState: () => {},
-    setupIdealState: (mainStore) => {
-      mainStore.setIsViewMode(true);
+    setupIdealState: () => {
+      useUiStore.getState().setIsViewMode(true);
     },
-    checkCondition: (mainStore) => mainStore.isViewMode,
+    checkCondition: () => useUiStore.getState().isViewMode,
   },
 ];

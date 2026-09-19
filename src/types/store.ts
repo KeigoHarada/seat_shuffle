@@ -15,8 +15,6 @@ export interface StateAndActions extends AppState {
   loadState: (state: Partial<AppState>) => void;
   importRoster: (parsed: RosterParseOk) => void;
   replaceProject: (snapshot: ProjectSnapshot) => void;
-  isViewMode: boolean;
-  setIsViewMode: (val: boolean) => void;
 
   addStudent: (student: Student) => void;
   updateStudent: (id: string, updates: Partial<Student>) => void;
@@ -49,19 +47,4 @@ export interface StateAndActions extends AppState {
   removeConstraint: (id: string) => void;
 
   updateAppSettings: (updates: Partial<AppSettings>) => void;
-  canvasTool: "select" | "hand";
-  setCanvasTool: (tool: "select" | "hand") => void;
-
-  isSettingsOpen: boolean;
-  setIsSettingsOpen: (isOpen: boolean) => void;
-  activeSettingsTab: "students" | "roles" | "groups" | "constraints" | "global";
-  setActiveSettingsTab: (
-    tab: "students" | "roles" | "groups" | "constraints" | "global",
-  ) => void;
-  highlightedStudentId: string | null;
-  setHighlightedStudentId: (id: string | null) => void;
-  editingStudentId: string | null;
-  setEditingStudentId: (id: string | null) => void;
-  isShuffling: boolean;
-  setIsShuffling: (isShuffling: boolean) => void;
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Lock } from "lucide-react";
 import { useStore } from "../../stores/appStore";
+import { useUiStore } from "../../stores/uiStore";
 import { AVAILABLE_ICONS, type IconName } from "../../constants/icons";
 import type { Seat } from "../../types/seat";
 import type { Role } from "../../types/student";
@@ -102,8 +103,8 @@ const SeatNode: React.FC<Props> = ({
   const students = useStore((state) => state.students);
   const groups = useStore((state) => state.groups);
   const allRoles = useStore((state) => state.roles);
-  const editingStudentId = useStore((state) => state.editingStudentId);
-  const isViewMode = useStore((state) => state.isViewMode);
+  const editingStudentId = useUiStore((state) => state.editingStudentId);
+  const isViewMode = useUiStore((state) => state.isViewMode);
 
   const student = students.find((s) => s.id === seat.studentId);
   const seatGroups = useMemo(

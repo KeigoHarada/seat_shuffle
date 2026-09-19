@@ -20,5 +20,4 @@ export interface AppState {
   objects: CanvasObject[];
   constraints: Constraint[];
   appSettings: AppSettings;
-  isViewMode: boolean;
 }

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Eye, PenLine, Printer, Shuffle, Undo2 } from "lucide-react";
-import { useStore } from "../stores/appStore";
+import { useUiStore } from "../stores/uiStore";
 import { usePrintSessionStore } from "../stores/printSession";
 import LegalModal from "../components/legal/LegalModal";
 import { useShuffle } from "./hooks/useShuffle";
 
 const ViewModeToggle: React.FC = () => {
-  const isViewMode = useStore((state) => state.isViewMode);
-  const setIsViewMode = useStore((state) => state.setIsViewMode);
+  const isViewMode = useUiStore((state) => state.isViewMode);
+  const setIsViewMode = useUiStore((state) => state.setIsViewMode);
 
   return (
     <button

@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Play } from "lucide-react";
 import { useStore } from "../../../../stores/appStore";
+import { useUiStore } from "../../../../stores/uiStore";
 import Select from "../../../ui/Select";
 import ShuffleAnimation from "../../../animation/ShuffleAnimation";
 
 const AnimationSection: React.FC = () => {
   const appSettings = useStore((state) => state.appSettings);
   const updateAppSettings = useStore((state) => state.updateAppSettings);
-  const isShuffling = useStore((state) => state.isShuffling);
+  const isShuffling = useUiStore((state) => state.isShuffling);
   const [isTesting, setIsTesting] = useState(false);
 
   const timerRef = useRef<number | null>(null);

@@ -69,7 +69,6 @@ const baseState = (): AppState => ({
     shuffleAnimation: "none",
     autoAssignAlgorithm: "right-top-down",
   },
-  isViewMode: false,
 });
 
 describe("parseRosterCsv", () => {

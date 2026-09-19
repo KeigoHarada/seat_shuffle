@@ -1,5 +1,6 @@
 import React from "react";
 import { useStore } from "../../stores/appStore";
+import { useUiStore } from "../../stores/uiStore";
 import ConfettiAnimation from "./ConfettiAnimation";
 import SlideAnimation from "./SlideAnimation";
 import FlashAnimation from "./FlashAnimation";
@@ -9,7 +10,7 @@ interface ShuffleAnimationProps {
 }
 
 const ShuffleAnimation: React.FC<ShuffleAnimationProps> = ({ forceShow }) => {
-  const isShuffling = useStore((state) => state.isShuffling);
+  const isShuffling = useUiStore((state) => state.isShuffling);
   const animationType = useStore(
     (state) => state.appSettings.shuffleAnimation || "none",
   );

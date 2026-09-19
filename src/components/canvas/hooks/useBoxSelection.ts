@@ -43,17 +43,9 @@ function idsInBox(
   return Array.from(selected);
 }
 
-export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
-  const selectedIds = useCanvasSelectionStore((state) => state.selectedIds);
+export const useBoxSelection = (seats: Seat[], objects: CanvasObject[]) => {
   const setSelectedIds = useCanvasSelectionStore(
     (state) => state.setSelectedIds,
-  );
-  const toggleSelection = useCanvasSelectionStore(
-    (state) => state.toggleSelection,
-  );
-  const selectOnly = useCanvasSelectionStore((state) => state.selectOnly);
-  const clearSelection = useCanvasSelectionStore(
-    (state) => state.clearSelection,
   );
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const selectionBoxRef = useRef<SelectionBox | null>(null);
@@ -82,12 +74,7 @@ export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
   }, []);
 
   return {
-    selectedIds,
-    setSelectedIds,
     selectionBox,
-    toggleSelection,
-    selectOnly,
-    clearSelection,
     startSelectionBox,
     updateSelectionBox,
     endSelectionBox,

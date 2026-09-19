@@ -4,6 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
 import type { Student, GenderType } from "../../../types/student";
 import { useStore } from "../../../stores/appStore";
+import { useUiStore } from "../../../stores/uiStore";
 import Select from "../../ui/Select";
 import MultiSelect from "../../ui/MultiSelect";
 import { GENDER_OPTIONS } from "../../../constants/gender";
@@ -27,11 +28,13 @@ const StudentSortableRow: React.FC<Props> = ({ student, onDelete }) => {
 
   const roles = useStore((state) => state.roles);
   const updateStudent = useStore((state) => state.updateStudent);
-  const highlightedStudentId = useStore((state) => state.highlightedStudentId);
-  const setHighlightedStudentId = useStore(
+  const highlightedStudentId = useUiStore(
+    (state) => state.highlightedStudentId,
+  );
+  const setHighlightedStudentId = useUiStore(
     (state) => state.setHighlightedStudentId,
   );
-  const setEditingStudentId = useStore((state) => state.setEditingStudentId);
+  const setEditingStudentId = useUiStore((state) => state.setEditingStudentId);
 
   const isHighlighted = highlightedStudentId === student.id;
   const innerRef = useRef<HTMLDivElement | null>(null);

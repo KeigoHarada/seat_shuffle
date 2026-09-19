@@ -11,7 +11,7 @@ import RoleTab from "./role/RoleTab";
 import GroupTab from "./group/GroupTab";
 import ConstraintTab from "./constraint/ConstraintTab";
 import GlobalTab from "./global/GlobalTab";
-import { useStore } from "../../stores/appStore";
+import { useUiStore } from "../../stores/uiStore";
 
 export type SettingsTab =
   "students" | "roles" | "groups" | "constraints" | "global";
@@ -142,8 +142,8 @@ const SettingsContent: React.FC<{ activeTab: Tab }> = ({
 };
 
 const SettingsPanel: React.FC = () => {
-  const activeTab = useStore((state) => state.activeSettingsTab);
-  const setActiveTab = useStore((state) => state.setActiveSettingsTab);
+  const activeTab = useUiStore((state) => state.activeSettingsTab);
+  const setActiveTab = useUiStore((state) => state.setActiveSettingsTab);
 
   return (
     <div

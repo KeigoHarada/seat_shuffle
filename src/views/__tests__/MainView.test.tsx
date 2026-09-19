@@ -1,7 +1,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useStore } from "../../stores/appStore";
+import { useUiStore } from "../../stores/uiStore";
 import MainView from "../MainView";
 
 function mockMatchMedia(matches: boolean) {
@@ -27,7 +27,7 @@ describe("DesktopApp compact chrome", () => {
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
-    useStore.setState({
+    useUiStore.setState({
       isViewMode: false,
       isSettingsOpen: true,
     });

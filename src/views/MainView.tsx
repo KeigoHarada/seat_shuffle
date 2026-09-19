@@ -3,15 +3,16 @@ import Canvas from "../components/canvas/Canvas";
 import SettingsPanel from "../components/settings/SettingsPanel";
 import { useCompactLayout } from "../hooks/useCompactLayout";
 import { useStore } from "../stores/appStore";
+import { useUiStore } from "../stores/uiStore";
 import Header from "./Header";
 import Footer from "./Footer";
 
 const MainView: React.FC = () => {
   const isCompact = useCompactLayout();
-  const isSettingsOpen = useStore((state) => state.isSettingsOpen);
-  const setIsSettingsOpen = useStore((state) => state.setIsSettingsOpen);
+  const isSettingsOpen = useUiStore((state) => state.isSettingsOpen);
+  const setIsSettingsOpen = useUiStore((state) => state.setIsSettingsOpen);
   const seats = useStore((state) => state.seats);
-  const isViewMode = useStore((state) => state.isViewMode);
+  const isViewMode = useUiStore((state) => state.isViewMode);
 
   useEffect(() => {
     if (isCompact) {

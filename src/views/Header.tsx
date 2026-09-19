@@ -10,7 +10,7 @@ import {
   useProjectIo,
 } from "../hooks/useProjectIo";
 import { useOnboardingStore } from "../stores/onboarding";
-import { useStore } from "../stores/appStore";
+import { useUiStore } from "../stores/uiStore";
 
 interface HeaderProps {
   showSettings: boolean;
@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({
   onToggleSettings,
 }) => {
   const isCompact = useCompactLayout();
-  const isViewMode = useStore((state) => state.isViewMode);
+  const isViewMode = useUiStore((state) => state.isViewMode);
   const openGuideHub = useOnboardingStore((state) => state.openGuideHub);
   const backupInputRef = useRef<HTMLInputElement>(null);
   const [io, setIo] = useState<HeaderIo>("idle");

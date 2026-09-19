@@ -1,9 +1,10 @@
 import React, { useRef } from "react";
 import { useStore } from "../../stores/appStore";
+import { useUiStore } from "../../stores/uiStore";
 import { GRID_SIZE } from "../../constants/canvas";
 import { usePanZoom } from "./hooks/usePanZoom";
 import { useCanvasDrag } from "./hooks/useCanvasDrag";
-import { useSelection } from "./hooks/useSelection";
+import { useBoxSelection } from "./hooks/useBoxSelection";
 import CanvasControls from "./CanvasControls";
 import CanvasToolbar from "./CanvasToolbar";
 import CanvasNodes from "./CanvasNodes";
@@ -15,14 +16,15 @@ import { useCanvasPointerEvents } from "./hooks/useCanvasPointerEvents";
 import { useNodeEvents } from "./hooks/useNodeEvents";
 import { useAutoAssignAction } from "./hooks/useAutoAssignAction";
 import { useCanvasOverlayStore } from "../../stores/canvasOverlay";
+import { useCanvasSelectionStore } from "../../stores/canvasSelection";
 
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
   const updateSeat = useStore((state) => state.updateSeat);
   const updateObject = useStore((state) => state.updateObject);
-  const canvasTool = useStore((state) => state.canvasTool);
-  const isViewMode = useStore((state) => state.isViewMode);
+  const canvasTool = useUiStore((state) => state.canvasTool);
+  const isViewMode = useUiStore((state) => state.isViewMode);
 
   const assignPopoverSeatId = useCanvasOverlayStore(
     (state) => state.assignPopoverSeatId,
@@ -63,16 +65,21 @@ const Canvas: React.FC = () => {
     resetView,
   } = usePanZoom(seats, objects);
 
+  const selectedIds = useCanvasSelectionStore((state) => state.selectedIds);
+  const toggleSelection = useCanvasSelectionStore(
+    (state) => state.toggleSelection,
+  );
+  const selectOnly = useCanvasSelectionStore((state) => state.selectOnly);
+  const clearSelection = useCanvasSelectionStore(
+    (state) => state.clearSelection,
+  );
+
   const {
-    selectedIds,
     selectionBox,
-    toggleSelection,
-    selectOnly,
-    clearSelection,
     startSelectionBox,
     updateSelectionBox,
     endSelectionBox,
-  } = useSelection(seats, objects);
+  } = useBoxSelection(seats, objects);
 
   const {
     dragState,

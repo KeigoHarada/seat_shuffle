@@ -1,15 +1,13 @@
-import { useState, useCallback, useRef, useEffect, type CSSProperties, type MouseEvent } from "react";
+import { useState, useCallback, useRef, useEffect, type CSSProperties } from "react";
 import { useOnboardingStore } from "../../../stores/onboarding";
 import { useStore } from "../../../stores/appStore";
+import { useUiStore } from "../../../stores/uiStore";
 import { TOUR_STEPS } from "../../../data/tourSteps";
 import type { TourStep } from "../../../types/onboarding";
+import { useDraggablePosition } from "./useDraggablePosition";
+import { useTourTargetRect, type TargetRect } from "./useTourTargetRect";
 
-export interface TargetRect {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
+export type { TargetRect };
 
 export function useTourOverlay() {
   const isTourActive = useOnboardingStore((state) => state.isTourActive);
@@ -18,55 +16,29 @@ export function useTourOverlay() {
   const skipTourStep = useOnboardingStore((state) => state.skipTourStep);
   const prevTourStep = useOnboardingStore((state) => state.prevTourStep);
 
-  const activeSettingsTab = useStore((state) => state.activeSettingsTab);
+  const activeSettingsTab = useUiStore((state) => state.activeSettingsTab);
   const seats = useStore((state) => state.seats);
   const students = useStore((state) => state.students);
   const groups = useStore((state) => state.groups);
   const constraints = useStore((state) => state.constraints);
-  const isViewMode = useStore((state) => state.isViewMode);
-  const isShuffling = useStore((state) => state.isShuffling);
+  const isViewMode = useUiStore((state) => state.isViewMode);
+  const isShuffling = useUiStore((state) => state.isShuffling);
   const undoStack = useStore((state) => state.undoStack);
 
-  const [targetRect, setTargetRect] = useState<TargetRect | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [hasActionFinished, setHasActionFinished] = useState(false);
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartPos = useRef({ x: 0, y: 0 });
-  const dragStartElementPos = useRef({ x: 0, y: 0 });
-
   const currentStep: TourStep | undefined = TOUR_STEPS[currentTourStep];
 
-  const handleMouseDown = (e: MouseEvent) => {
-    setIsDragging(true);
-    dragStartPos.current = { x: e.clientX, y: e.clientY };
-    dragStartElementPos.current = { ...position };
-  };
+  const { position, isDragging, handleMouseDown } =
+    useDraggablePosition(currentTourStep);
 
-  useEffect(() => {
-    if (!isDragging) return;
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
-      const dx = e.clientX - dragStartPos.current.x;
-      const dy = e.clientY - dragStartPos.current.y;
-      setPosition({
-        x: dragStartElementPos.current.x + dx,
-        y: dragStartElementPos.current.y + dy,
-      });
-    };
-    const handleMouseUp = () => setIsDragging(false);
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDragging]);
-
-  useEffect(() => {
-    setPosition({ x: 0, y: 0 });
-  }, [currentTourStep]);
+  const targetRect = useTourTargetRect({
+    isTourActive,
+    currentStep,
+    hasActionFinished,
+    activeSettingsTab,
+  });
 
   const checkStepCompletion = useCallback((): boolean => {
     if (!currentStep) return false;
@@ -97,122 +69,6 @@ export function useTourOverlay() {
       setHasActionFinished(false);
     }
   }, [isTourActive, currentStep, checkStepCompletion, hasActionFinished]);
-
-  const updateRect = useCallback(() => {
-    if (!isTourActive || !currentStep) {
-      setTargetRect(null);
-      return;
-    }
-
-    let targetSelector = currentStep.targetSelector;
-
-    if (currentStep.id === "step-add-constraint") {
-      if (activeSettingsTab !== "constraints") {
-        targetSelector = "#tab-btn-constraints";
-      } else if (!hasActionFinished) {
-        targetSelector = "#constraint-add-form";
-      } else {
-        targetSelector = "#constraint-list-area";
-      }
-    } else if (hasActionFinished) {
-      switch (currentStep.id) {
-        case "step-template":
-          targetSelector = "#canvas-main-area";
-          break;
-        case "step-add-student":
-        case "step-sort-students":
-          targetSelector = "#student-list-area";
-          break;
-        case "step-assign-groups":
-        case "step-shuffle":
-        case "step-viewmode":
-          targetSelector = "#canvas-main-area";
-          break;
-      }
-    }
-
-    const el = document.querySelector(targetSelector);
-    if (el) {
-      if (targetSelector === "#btn-toolbar-template") {
-        let minTop = Infinity,
-          minLeft = Infinity,
-          maxBottom = -Infinity,
-          maxRight = -Infinity;
-        const computeRect = (node: Element) => {
-          const b = node.getBoundingClientRect();
-          if (b.width > 0 && b.height > 0) {
-            minTop = Math.min(minTop, b.top);
-            minLeft = Math.min(minLeft, b.left);
-            maxBottom = Math.max(maxBottom, b.bottom);
-            maxRight = Math.max(maxRight, b.right);
-          }
-          for (let i = 0; i < node.children.length; i++) {
-            computeRect(node.children[i]);
-          }
-        };
-        computeRect(el);
-
-        if (minTop !== Infinity) {
-          setTargetRect({
-            top: minTop,
-            left: minLeft,
-            width: maxRight - minLeft,
-            height: maxBottom - minTop,
-          });
-        } else {
-          setTargetRect(null);
-        }
-      } else {
-        const b = el.getBoundingClientRect();
-        setTargetRect({
-          top: b.top,
-          left: b.left,
-          width: b.width,
-          height: b.height,
-        });
-      }
-    } else {
-      setTargetRect(null);
-    }
-  }, [isTourActive, currentStep, hasActionFinished, activeSettingsTab]);
-
-  useEffect(() => {
-    updateRect();
-    const handleResizeOrScroll = () => {
-      updateRect();
-    };
-
-    window.addEventListener("resize", handleResizeOrScroll);
-    window.addEventListener("scroll", handleResizeOrScroll, true);
-
-    const observer = new MutationObserver(() => {
-      updateRect();
-    });
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      characterData: true,
-    });
-
-    let animationFrameId: number;
-    const startTime = Date.now();
-
-    const pollRect = () => {
-      updateRect();
-      if (Date.now() - startTime < 500) {
-        animationFrameId = requestAnimationFrame(pollRect);
-      }
-    };
-    pollRect();
-
-    return () => {
-      window.removeEventListener("resize", handleResizeOrScroll);
-      window.removeEventListener("scroll", handleResizeOrScroll, true);
-      observer.disconnect();
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    };
-  }, [updateRect]);
 
   const getTooltipStyle = (): CSSProperties => {
     const defaultStyle: CSSProperties = {

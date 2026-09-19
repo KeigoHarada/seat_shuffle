@@ -1,11 +1,12 @@
 import { useStore } from "../../stores/appStore";
+import { useUiStore } from "../../stores/uiStore";
 import { optimizeShuffle } from "../../services/shuffle";
 import { showToast } from "../../stores/toast";
 
 export function useShuffle() {
-  const isViewMode = useStore((state) => state.isViewMode);
-  const isShuffling = useStore((state) => state.isShuffling);
-  const setIsShuffling = useStore((state) => state.setIsShuffling);
+  const isViewMode = useUiStore((state) => state.isViewMode);
+  const isShuffling = useUiStore((state) => state.isShuffling);
+  const setIsShuffling = useUiStore((state) => state.setIsShuffling);
   const undoStack = useStore((state) => state.undoStack);
   const pushUndo = useStore((state) => state.pushUndo);
   const undo = useStore((state) => state.undo);
