@@ -1,6 +1,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { PrintProvider } from "../../../components/print/PrintProvider";
 import { useStore } from "../../../stores";
 import DesktopApp from "../DesktopApp";
 
@@ -51,7 +52,11 @@ describe("DesktopApp compact chrome", () => {
     window.innerWidth = 375;
 
     await act(async () => {
-      root?.render(<DesktopApp />);
+      root?.render(
+        <PrintProvider>
+          <DesktopApp />
+        </PrintProvider>,
+      );
     });
 
     const shell = container.querySelector(".app-shell");
@@ -88,7 +93,11 @@ describe("DesktopApp compact chrome", () => {
     window.innerWidth = 1280;
 
     await act(async () => {
-      root?.render(<DesktopApp />);
+      root?.render(
+        <PrintProvider>
+          <DesktopApp />
+        </PrintProvider>,
+      );
     });
 
     expect(

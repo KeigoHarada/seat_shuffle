@@ -1,0 +1,115 @@
+import React from "react";
+import {
+  printOrientationLabel,
+  type PrintMode,
+  type PrintOrientation,
+} from "../../utils/printLayout";
+
+interface PrintDialogProps {
+  draftMode: PrintMode;
+  orientation: PrintOrientation;
+  onChangeMode: (mode: PrintMode) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+const PrintDialog: React.FC<PrintDialogProps> = ({
+  draftMode,
+  orientation,
+  onChangeMode,
+  onConfirm,
+  onCancel,
+}) => {
+  return (
+    <div className="modal-overlay" onClick={onCancel}>
+      <div
+        id="print-dialog"
+        className="modal-content"
+        role="dialog"
+        aria-labelledby="print-dialog-title"
+        style={{
+          width: "100%",
+          maxWidth: "380px",
+          padding: "var(--spacing-lg)",
+          gap: "var(--spacing-md)",
+        }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h3
+          id="print-dialog-title"
+          className="text-title3"
+          style={{ margin: 0, color: "var(--c-text-main)" }}
+        >
+          印刷
+        </h3>
+        <fieldset
+          style={{
+            border: "none",
+            margin: 0,
+            padding: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--spacing-sm)",
+          }}
+        >
+          <legend className="text-body" style={{ color: "var(--c-text-sub)" }}>
+            用途
+          </legend>
+          <label className="print-mode-option" htmlFor="print-mode-wall">
+            <input
+              id="print-mode-wall"
+              type="radio"
+              name="print-mode"
+              checked={draftMode === "wall"}
+              onChange={() => onChangeMode("wall")}
+            />
+            掲示用（文字を正立）
+          </label>
+          <label className="print-mode-option" htmlFor="print-mode-desk">
+            <input
+              id="print-mode-desk"
+              type="radio"
+              name="print-mode"
+              checked={draftMode === "desk"}
+              onChange={() => onChangeMode("desk")}
+            />
+            机上確認用（文字を 180° 回転）
+          </label>
+        </fieldset>
+        <p
+          id="print-orientation"
+          className="text-body"
+          style={{ margin: 0, color: "var(--c-text-sub)" }}
+        >
+          {printOrientationLabel(orientation)}
+        </p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "var(--spacing-sm)",
+          }}
+        >
+          <button
+            id="btn-print-cancel"
+            type="button"
+            className="btn-secondary"
+            onClick={onCancel}
+          >
+            キャンセル
+          </button>
+          <button
+            id="btn-print-confirm"
+            type="button"
+            className="btn-primary"
+            onClick={onConfirm}
+          >
+            印刷する
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PrintDialog;

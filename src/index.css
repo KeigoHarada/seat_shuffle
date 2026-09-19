@@ -1008,61 +1008,127 @@ input[type="number"] {
   }
 }
 
-.print-heading {
+[data-print-root] {
   display: none;
 }
 
-@media print {
-  .print-heading {
-    display: block;
-    font-size: 18px;
-    font-weight: 700;
-    text-align: center;
-    margin: 0 0 12px;
-    color: #334155;
-  }
+.print-mode-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-text-main);
+  font-size: 14px;
+}
 
-  .app-header,
-  .app-footer,
-  .app-settings,
-  .app-settings-scrim,
-  .app-canvas-toolbar,
-  .app-canvas-controls,
-  .modal-overlay,
-  .app-canvas-empty {
+.print-sheet {
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+  max-width: 100%;
+  height: auto;
+  color: #334155;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.print-seat,
+.print-landmark {
+  box-sizing: border-box;
+  container-type: size;
+}
+
+.print-seat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.print-seat-label {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+}
+
+.print-seat-attendance {
+  position: absolute;
+  top: 6%;
+  left: 8%;
+  font-size: 16cqh;
+  font-weight: 700;
+  color: #64748b;
+  line-height: 1;
+}
+
+.print-seat-furigana,
+.print-seat-name,
+.print-seat-empty {
+  max-width: 90%;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.print-seat-furigana {
+  font-size: 14cqh;
+  color: #64748b;
+  line-height: 1.1;
+}
+
+.print-seat-name {
+  font-size: 22cqh;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.15;
+}
+
+.print-seat-empty {
+  font-size: 20cqh;
+  color: #64748b;
+}
+
+.print-landmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+}
+
+.print-landmark[data-shape="circle"] {
+  border-radius: 50%;
+}
+
+.print-landmark[data-shape="rectangle"] {
+  border-radius: 6px;
+}
+
+.print-landmark-text {
+  font-size: 36cqh;
+  font-weight: 700;
+  color: #334155;
+  text-align: center;
+}
+
+@media print {
+  [data-screen-root] {
     display: none !important;
   }
 
+  [data-print-root] {
+    display: block !important;
+  }
+
   html,
-  body,
-  .app-shell,
-  .app-main,
-  .app-canvas {
-    height: auto !important;
-    overflow: visible !important;
+  body {
+    margin: 0 !important;
     background: #fff !important;
-  }
-
-  .app-shell {
-    width: auto;
-  }
-
-  @page {
-    size: landscape;
-    margin: 10mm;
-  }
-
-  #canvas-main-area {
-    width: 960px !important;
-    height: 640px !important;
-    margin: 0 auto;
-    overflow: visible !important;
-    background: #fff !important;
-  }
-
-  .seat-node-item,
-  .seat-node-item * {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
   }
 }

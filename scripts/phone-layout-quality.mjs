@@ -967,29 +967,43 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
           const el = document.querySelector(selector);
           return el ? getComputedStyle(el).display : null;
         };
+        const visibleRect = (selector) => {
+          const el = document.querySelector(selector);
+          if (!el) return { width: 0, height: 0 };
+          return el.getBoundingClientRect();
+        };
         const sheet = document
-          .querySelector("#canvas-main-area")
+          .querySelector("[data-print-root] .print-sheet")
           ?.getBoundingClientRect();
         const seats = Array.from(
-          document.querySelectorAll(".seat-node-item"),
+          document.querySelectorAll("[data-print-root] .print-seat"),
         ).map((el) => el.getBoundingClientRect());
         const seatsOnSheet = sheet
           ? seats.filter(
               (r) =>
-                r.left >= sheet.left &&
-                r.right <= sheet.right &&
-                r.top >= sheet.top &&
-                r.bottom <= sheet.bottom,
+                r.left >= sheet.left - 1 &&
+                r.right <= sheet.right + 1 &&
+                r.top >= sheet.top - 1 &&
+                r.bottom <= sheet.bottom + 1,
             ).length
           : 0;
+        const landmarkText = Array.from(
+          document.querySelectorAll("[data-print-root] .print-landmark"),
+        )
+          .map((el) => el.textContent ?? "")
+          .join("");
         return {
-          header: displayOf(".app-header"),
-          footer: displayOf(".app-footer"),
-          toolbar: displayOf(".app-canvas-toolbar"),
+          screenRoot: displayOf("[data-screen-root]"),
+          printRoot: displayOf("[data-print-root]"),
+          headerBox: visibleRect(".app-header"),
+          footerBox: visibleRect(".app-footer"),
+          toolbarBox: visibleRect(".app-canvas-toolbar"),
           heading: displayOf(".print-heading"),
           sheetHeight: sheet ? sheet.height : 0,
           seatCount: seats.length,
           seatsOnSheet,
+          hasDeskText: landmarkText.includes("教卓"),
+          printRoleSvg: document.querySelector("[data-print-root] svg") !== null,
         };
       });
       record(
@@ -1002,27 +1016,45 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       );
       record(
         failures,
+        `${label} print hides the screen root`,
+        printCss.screenRoot === "none",
+        `screen-root display=${printCss.screenRoot}`,
+      );
+      record(
+        failures,
+        `${label} print shows the print root`,
+        printCss.printRoot === "block",
+        `print-root display=${printCss.printRoot}`,
+      );
+      record(
+        failures,
         `${label} print hides header`,
-        printCss.header === "none",
-        `header display=${printCss.header}`,
+        printCss.headerBox.width === 0 && printCss.headerBox.height === 0,
+        `header box=${JSON.stringify(printCss.headerBox)}`,
       );
       record(
         failures,
         `${label} print hides footer`,
-        printCss.footer === "none",
-        `footer display=${printCss.footer}`,
+        printCss.footerBox.width === 0 && printCss.footerBox.height === 0,
+        `footer box=${JSON.stringify(printCss.footerBox)}`,
       );
       record(
         failures,
         `${label} print hides toolbar`,
-        printCss.toolbar === "none",
-        `toolbar display=${printCss.toolbar}`,
+        printCss.toolbarBox.width === 0 && printCss.toolbarBox.height === 0,
+        `toolbar box=${JSON.stringify(printCss.toolbarBox)}`,
       );
       record(
         failures,
-        `${label} print shows heading`,
-        printCss.heading !== "none" && printCss.heading !== null,
+        `${label} print has no heading`,
+        printCss.heading === "none" || printCss.heading === null,
         `heading display=${printCss.heading}`,
+      );
+      record(
+        failures,
+        `${label} print keeps 教卓 and drops role icons`,
+        printCss.hasDeskText && !printCss.printRoleSvg,
+        `desk=${printCss.hasDeskText} svg=${printCss.printRoleSvg}`,
       );
       await page.emulateMedia({ media: "screen" });
       await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));

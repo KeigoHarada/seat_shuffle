@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
+import { useCanvasSelectionStore } from "../stores/canvasSelection";
 import { Seat, CanvasObject } from "../types";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
@@ -42,23 +43,35 @@ function idsInBox(
 }
 
 export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const selectedIds = useCanvasSelectionStore((state) => state.selectedIds);
+  const setSelectedIds = useCanvasSelectionStore(
+    (state) => state.setSelectedIds,
+  );
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const selectionBoxRef = useRef<SelectionBox | null>(null);
 
-  const toggleSelection = useCallback((id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
-  }, []);
+  const toggleSelection = useCallback(
+    (id: string) => {
+      const previous = useCanvasSelectionStore.getState().selectedIds;
+      setSelectedIds(
+        previous.includes(id)
+          ? previous.filter((entry) => entry !== id)
+          : [...previous, id],
+      );
+    },
+    [setSelectedIds],
+  );
 
-  const selectOnly = useCallback((id: string) => {
-    setSelectedIds([id]);
-  }, []);
+  const selectOnly = useCallback(
+    (id: string) => {
+      setSelectedIds([id]);
+    },
+    [setSelectedIds],
+  );
 
   const clearSelection = useCallback(() => {
     setSelectedIds([]);
-  }, []);
+  }, [setSelectedIds]);
 
   const startSelectionBox = useCallback((x: number, y: number) => {
     const next = { startX: x, startY: y, currentX: x, currentY: y };
@@ -75,7 +88,7 @@ export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
       setSelectedIds(idsInBox(newBox, seats, objects));
       setSelectionBox(newBox);
     },
-    [seats, objects],
+    [seats, objects, setSelectedIds],
   );
 
   const endSelectionBox = useCallback(() => {

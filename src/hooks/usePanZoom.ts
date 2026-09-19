@@ -1,10 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { flushSync } from "react-dom";
-import {
-  COMPACT_MAX_WIDTH_PX,
-  PRINT_FIT_PADDING_PX,
-  PRINT_SHEET_PX,
-} from "../layout/shell";
+import { COMPACT_MAX_WIDTH_PX } from "../layout/shell";
 import { Seat, CanvasObject } from "../types";
 import { calculateCenterPanZoom } from "../utils/canvas";
 import {
@@ -280,36 +275,6 @@ export const usePanZoom = (
       resetView();
     }
   }, [resetView, seats.length, objects.length]);
-
-  useEffect(() => {
-    let screenTransform: typeof transformRef.current | null = null;
-    const fitForPrint = () => {
-      screenTransform = transformRef.current;
-      flushSync(() => {
-        setTransform(
-          calculateCenterPanZoom(
-            seats,
-            objects,
-            PRINT_SHEET_PX.width,
-            PRINT_SHEET_PX.height,
-            PRINT_FIT_PADDING_PX,
-            MIN_SCALE,
-            MAX_SCALE,
-          ),
-        );
-      });
-    };
-    const restoreScreen = () => {
-      if (screenTransform) setTransform(screenTransform);
-      screenTransform = null;
-    };
-    window.addEventListener("beforeprint", fitForPrint);
-    window.addEventListener("afterprint", restoreScreen);
-    return () => {
-      window.removeEventListener("beforeprint", fitForPrint);
-      window.removeEventListener("afterprint", restoreScreen);
-    };
-  }, [seats, objects]);
 
   return {
     pan: transform.pan,

@@ -36,3 +36,4 @@ Each file: H1, one paragraph, then exactly `Sub-features`, `How to get to it (us
 - [Shuffle](./shuffle.md) — footer shuffle, toast, undo, optimize vs random.
 - [View mode](./view-mode.md) — 編集/閲覧 toggle, settings hidden, shuffle animation path.
 - [Compact layout](./phone-layout.md) — same desktop chrome, overlay settings, pinch-on-seats, touch marquee.
+- [Print](./print.md) — footer print dialog, A4 sheet, view-mode paint, selection bounds.
