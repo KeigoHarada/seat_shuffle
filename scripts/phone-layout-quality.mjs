@@ -962,6 +962,34 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         .textContent();
       await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
       await page.emulateMedia({ media: "print" });
+      const selectedPrint = await page.evaluate(() => ({
+        seats: document.querySelectorAll("[data-print-root] .print-seat")
+          .length,
+        landmarks: document.querySelectorAll(
+          "[data-print-root] .print-landmark",
+        ).length,
+      }));
+      record(
+        failures,
+        `${label} print uses the current selection`,
+        selectedPrint.seats === 0 && selectedPrint.landmarks >= 1,
+        `seats=${selectedPrint.seats} landmarks=${selectedPrint.landmarks}`,
+      );
+      await page.emulateMedia({ media: "screen" });
+      if (
+        (await page.locator('.app-settings[data-open="true"]').count()) === 1
+      ) {
+        await page.locator("#btn-header-settings").click();
+      }
+      const clearPoint = await pickEmptyCanvasPoint(page);
+      await page.mouse.click(clearPoint.x, clearPoint.y);
+      await page.waitForFunction(
+        () =>
+          document.querySelectorAll("[data-print-root] .print-seat").length >=
+          30,
+        { timeout: 2000 },
+      );
+      await page.emulateMedia({ media: "print" });
       const printCss = await page.evaluate(() => {
         const displayOf = (selector) => {
           const el = document.querySelector(selector);
@@ -1071,6 +1099,7 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         scaleAfterPrint === scaleBeforePrint,
         `before=${scaleBeforePrint} after=${scaleAfterPrint}`,
       );
+      await page.locator("#btn-header-settings").click();
     }
 
     await page.locator("#btn-header-settings").click();
