@@ -19,12 +19,8 @@ import { useCanvasOverlayStore } from "../../stores/canvasOverlay";
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
-  const addSeat = useStore((state) => state.addSeat);
   const updateSeat = useStore((state) => state.updateSeat);
-  const removeSeat = useStore((state) => state.removeSeat);
-  const addObject = useStore((state) => state.addObject);
   const updateObject = useStore((state) => state.updateObject);
-  const removeObject = useStore((state) => state.removeObject);
   const canvasTool = useStore((state) => state.canvasTool);
   const isViewMode = useStore((state) => state.isViewMode);
 
@@ -69,7 +65,6 @@ const Canvas: React.FC = () => {
 
   const {
     selectedIds,
-    setSelectedIds,
     selectionBox,
     toggleSelection,
     selectOnly,
@@ -182,21 +177,11 @@ const Canvas: React.FC = () => {
     handleAddCircle,
     handleApplyTemplate,
     handleToggleLockSelected,
-  } = useCanvasActions(
-    seats,
-    objects,
-    addSeat,
-    updateSeat,
-    removeSeat,
-    addObject,
-    removeObject,
-    selectedIds,
-    setSelectedIds,
-    clearSelection,
+  } = useCanvasActions({
     viewportRef,
     pan,
     scale,
-  );
+  });
 
   const { handleAutoAssign } = useAutoAssignAction();
 

@@ -1,6 +1,6 @@
-import { useStore } from "../stores/appStore";
-import { optimizeShuffle } from "../services/shuffle";
-import { showToast } from "../stores/toast";
+import { useStore } from "../../stores/appStore";
+import { optimizeShuffle } from "../../services/shuffle";
+import { showToast } from "../../stores/toast";
 
 export function useShuffle() {
   const isViewMode = useStore((state) => state.isViewMode);

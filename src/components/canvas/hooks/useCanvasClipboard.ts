@@ -5,21 +5,19 @@ import { SEAT_COLS, SEAT_ROWS } from "../../../constants/canvas";
 import { findEmptyPos } from "../../../services/canvasGeometry";
 import { useStore } from "../../../stores/appStore";
 import { useClipboardStore } from "../../../stores/clipboard";
+import { useCanvasSelectionStore } from "../../../stores/canvasSelection";
 
-interface UseCanvasClipboardProps {
-  selectedIds: string[];
-  setSelectedIds: (ids: string[]) => void;
-}
-
-export const useCanvasClipboard = ({
-  selectedIds,
-  setSelectedIds,
-}: UseCanvasClipboardProps) => {
+export const useCanvasClipboard = () => {
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
   const addSeat = useStore((state) => state.addSeat);
   const addObject = useStore((state) => state.addObject);
   const pushUndo = useStore((state) => state.pushUndo);
+
+  const selectedIds = useCanvasSelectionStore((state) => state.selectedIds);
+  const setSelectedIds = useCanvasSelectionStore(
+    (state) => state.setSelectedIds,
+  );
 
   const clipboard = useClipboardStore((state) => state.clipboard);
   const setClipboard = useClipboardStore((state) => state.setClipboard);
@@ -107,7 +105,15 @@ export const useCanvasClipboard = ({
     });
 
     setSelectedIds(newSelectedIds);
-  }, [addSeat, addObject, setSelectedIds, seats, objects, pushUndo, setClipboard]);
+  }, [
+    addSeat,
+    addObject,
+    setSelectedIds,
+    seats,
+    objects,
+    pushUndo,
+    setClipboard,
+  ]);
 
   const handleDuplicate = useCallback(() => {
     handleCopy();

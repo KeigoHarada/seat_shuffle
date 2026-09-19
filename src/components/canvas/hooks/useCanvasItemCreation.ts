@@ -5,21 +5,19 @@ import { findEmptyPos, getCenterGridPos } from "../../../services/canvasGeometry
 import { generateTemplate } from "../../../services/templates";
 import type { TemplateId } from "../../../types/template";
 import { useStore } from "../../../stores/appStore";
-
 import { useCanvasOverlayStore } from "../../../stores/canvasOverlay";
+import { useCanvasSelectionStore } from "../../../stores/canvasSelection";
 
 interface UseCanvasItemCreationProps {
   viewportRef: RefObject<HTMLDivElement | null>;
   pan: { x: number; y: number };
   scale: number;
-  setSelectedIds: (ids: string[]) => void;
 }
 
 export const useCanvasItemCreation = ({
   viewportRef,
   pan,
   scale,
-  setSelectedIds,
 }: UseCanvasItemCreationProps) => {
   const contextMenu = useCanvasOverlayStore((state) => state.contextMenu);
   const seats = useStore((state) => state.seats);
@@ -27,6 +25,10 @@ export const useCanvasItemCreation = ({
   const addSeat = useStore((state) => state.addSeat);
   const addObject = useStore((state) => state.addObject);
   const pushUndo = useStore((state) => state.pushUndo);
+
+  const setSelectedIds = useCanvasSelectionStore(
+    (state) => state.setSelectedIds,
+  );
 
   const handleAddSeatFromMenu = useCallback(() => {
     if (!contextMenu) return;

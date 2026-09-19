@@ -1,21 +1,19 @@
 import { useCallback } from "react";
 import { useStore } from "../../../stores/appStore";
 import { useCanvasOverlayStore } from "../../../stores/canvasOverlay";
+import { useCanvasSelectionStore } from "../../../stores/canvasSelection";
 
-interface UseCanvasSelectionActionsProps {
-  selectedIds: string[];
-  clearSelection: () => void;
-}
-
-export const useCanvasSelectionActions = ({
-  selectedIds,
-  clearSelection,
-}: UseCanvasSelectionActionsProps) => {
+export const useCanvasSelectionActions = () => {
   const seats = useStore((state) => state.seats);
   const removeSeat = useStore((state) => state.removeSeat);
   const removeObject = useStore((state) => state.removeObject);
   const updateSeat = useStore((state) => state.updateSeat);
   const pushUndo = useStore((state) => state.pushUndo);
+
+  const selectedIds = useCanvasSelectionStore((state) => state.selectedIds);
+  const clearSelection = useCanvasSelectionStore(
+    (state) => state.clearSelection,
+  );
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedIds.length === 0) return;

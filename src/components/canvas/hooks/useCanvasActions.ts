@@ -1,39 +1,27 @@
 import type { RefObject } from "react";
-import type { Seat } from "../../../types/seat";
-import type { CanvasObject } from "../../../types/canvas";
 import { useCanvasSelectionActions } from "./useCanvasSelectionActions";
 import { useCanvasClipboard } from "./useCanvasClipboard";
 import { useCanvasKeyboardShortcuts } from "./useCanvasKeyboardShortcuts";
 import { useCanvasItemCreation } from "./useCanvasItemCreation";
 
-export const useCanvasActions = (
-  _seats: Seat[],
-  _objects: CanvasObject[],
-  _addSeat: (seat: Seat) => void,
-  _updateSeat: (id: string, updates: Partial<Seat>) => void,
-  _removeSeat: (id: string) => void,
-  _addObject: (obj: CanvasObject) => void,
-  _removeObject: (id: string) => void,
-  selectedIds: string[],
-  setSelectedIds: (ids: string[]) => void,
-  clearSelection: () => void,
-  viewportRef: RefObject<HTMLDivElement | null>,
-  pan: { x: number; y: number },
-  scale: number,
-) => {
+interface UseCanvasActionsProps {
+  viewportRef: RefObject<HTMLDivElement | null>;
+  pan: { x: number; y: number };
+  scale: number;
+}
+
+export const useCanvasActions = ({
+  viewportRef,
+  pan,
+  scale,
+}: UseCanvasActionsProps) => {
   const {
     handleDeleteSelected,
     handleUnassignSelected,
     handleToggleLockSelected,
-  } = useCanvasSelectionActions({
-    selectedIds,
-    clearSelection,
-  });
+  } = useCanvasSelectionActions();
 
-  const { handleCopy, handlePaste, handleDuplicate } = useCanvasClipboard({
-    selectedIds,
-    setSelectedIds,
-  });
+  const { handleCopy, handlePaste, handleDuplicate } = useCanvasClipboard();
 
   useCanvasKeyboardShortcuts({
     onDelete: handleDeleteSelected,
@@ -52,7 +40,6 @@ export const useCanvasActions = (
     viewportRef,
     pan,
     scale,
-    setSelectedIds,
   });
 
   return {
