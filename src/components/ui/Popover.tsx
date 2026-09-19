@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect } from "react";
-import { clampMenuPosition } from "../../utils/canvas";
+import { clampMenuPosition } from "../../services/canvasGeometry";
 
 interface PopoverProps {
   isOpen: boolean;

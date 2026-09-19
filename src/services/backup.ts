@@ -5,22 +5,14 @@ import type { GenderType, Role, Student } from "../types/student";
 import type { Group } from "../types/group";
 import type { Seat } from "../types/seat";
 
-export const PROJECT_BACKUP_VERSION = 1 as const;
+import type {
+  ProjectSnapshot,
+  BackupParseResult,
+} from "../types/backup";
+import { PROJECT_BACKUP_VERSION } from "../types/backup";
 
-export type ProjectSnapshot = {
-  version: typeof PROJECT_BACKUP_VERSION;
-  students: Student[];
-  roles: Role[];
-  groups: Group[];
-  seats: Seat[];
-  objects: CanvasObject[];
-  constraints: Constraint[];
-  appSettings: AppSettings;
-};
-
-export type BackupParseResult =
-  | { ok: true; snapshot: ProjectSnapshot }
-  | { ok: false; reason: "corrupt" };
+export { PROJECT_BACKUP_VERSION };
+export type { ProjectSnapshot, BackupParseResult };
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

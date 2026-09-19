@@ -5,8 +5,8 @@ import { usePrintSessionStore } from "../../stores/printSession";
 import {
   createPrintPlan,
   printPageRule,
-  type PrintPlan,
-} from "../../utils/printLayout";
+} from "../../services/printLayout";
+import type { PrintPlan } from "../../types/print";
 
 type ReadyPlan = Extract<PrintPlan, { kind: "ready" }>;
 type ReadySeat = ReadyPlan["seats"][number];

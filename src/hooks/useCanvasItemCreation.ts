@@ -1,7 +1,7 @@
 import { useCallback, type RefObject } from "react";
 import type { Seat } from "../types/seat";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
-import { findEmptyPos, getCenterGridPos } from "../utils/canvas";
+import { findEmptyPos, getCenterGridPos } from "../services/canvasGeometry";
 import { generateTemplate } from "../services/templates";
 import { useStore } from "../stores/appStore";
 

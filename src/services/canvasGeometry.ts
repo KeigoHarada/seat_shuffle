@@ -1,39 +1,13 @@
 import type { Seat } from "../types/seat";
-import type { CanvasObject } from "../types/canvas";
+import type {
+  CanvasObject,
+  DragState,
+  DragNode,
+  CanvasBoundingBox,
+} from "../types/canvas";
 import { SEAT_COLS, SEAT_ROWS, GRID_SIZE } from "../constants/canvas";
 
-export interface DragState {
-  baseId: string;
-  draggedIds: string[];
-  startX: number;
-  startY: number;
-  visualDeltaX: number;
-  visualDeltaY: number;
-  validDeltaX: number;
-  validDeltaY: number;
-  isSwapMode: boolean;
-}
-
-export interface DragNode {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  isSeat: boolean;
-  isLocked?: boolean;
-}
-
-export interface CanvasBoundingBox {
-  minX: number;
-  maxX: number;
-  minY: number;
-  maxY: number;
-  width: number;
-  height: number;
-  centerX: number;
-  centerY: number;
-}
+export type { DragState, DragNode, CanvasBoundingBox };
 
 export const getCanvasBoundingBox = (
   seats: Seat[],

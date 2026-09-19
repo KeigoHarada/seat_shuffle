@@ -6,7 +6,7 @@ import { CanvasObject } from "../../types/canvas";
 import {
   getSeatDragDisplayProps,
   getObjectDragDisplayProps,
-} from "../../utils/canvas";
+} from "../../services/canvasGeometry";
 
 interface Props {
   seats: Seat[];

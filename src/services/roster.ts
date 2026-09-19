@@ -2,26 +2,21 @@ import type { AppState } from "../types/app";
 import type { GenderType, Role, Student } from "../types/student";
 import { GENDERS } from "../constants/gender";
 
-export type ParsedRosterRow = {
-  name: string;
-  attendanceNumber: number;
-  furigana?: string;
-  gender: GenderType;
-  roleNames: string[];
-};
+import type {
+  ParsedRosterRow,
+  RosterParseOk,
+  RosterParseErr,
+  RosterParseResult,
+  RosterImportPatch,
+} from "../types/roster";
 
-export type RosterParseOk = {
-  ok: true;
-  rows: ParsedRosterRow[];
-  skipped: number;
+export type {
+  ParsedRosterRow,
+  RosterParseOk,
+  RosterParseErr,
+  RosterParseResult,
+  RosterImportPatch,
 };
-
-export type RosterParseErr = {
-  ok: false;
-  reason: "missing-name-column" | "zero-valid-rows";
-};
-
-export type RosterParseResult = RosterParseOk | RosterParseErr;
 
 const ROSTER_HEADERS = {
   name: "名前",
@@ -125,11 +120,6 @@ export function parseRosterCsv(text: string): RosterParseResult {
 
   return { ok: true, rows, skipped };
 }
-
-export type RosterImportPatch = Pick<
-  AppState,
-  "students" | "roles" | "seats" | "constraints"
->;
 
 export function applyRosterImport(
   state: AppState,

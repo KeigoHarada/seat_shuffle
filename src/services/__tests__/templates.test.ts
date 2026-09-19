@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { generateTemplate } from "../templates";
 
-describe("templates utils", () => {
+describe("templates service", () => {
   describe("generateTemplate - classroom", () => {
     it("should generate 30 seats in 2-person pairs across 3 columns and 5 rows, plus a teacher desk", () => {
       const { seats, objects } = generateTemplate("classroom", 0, 0);

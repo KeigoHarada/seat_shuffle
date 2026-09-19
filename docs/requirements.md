@@ -349,13 +349,13 @@ UI上のキャンバス（描画エリア）を用いて、直感的に座席表
 
 モジュールの向きは次のとおり。下の層は上の層を import しない。
 
-1. **types**: エンティティの型。`src/types/index.ts`
-2. **utils**: 席替え・名簿CSV・バックアップ・班割当・印刷レイアウトなどの純粋関数。`src/utils/algorithm.ts` など。React コンポーネントを import しない。
-3. **stores**: Zustand。教室データは `src/stores/index.ts`。オンボーディングとトーストは別ストア。印刷の一時設定も別ストアとし、LocalStorage には保存しない。Slice 分割はしない。
-4. **hooks**: ストアと utils を画面操作に繋ぐ。
-5. **components / views**: 描画。`App.tsx` は常に `DesktopApp` を描く。
+1. **types**: エンティティおよびドメインモデルの型。`src/types/` 配下に明示的ファイル（`student.ts`, `seat.ts`, `canvas.ts`, `print.ts`, `backup.ts`, `roster.ts` 等）で定義。
+2. **services**: 席替え・名簿CSV・バックアップ・班割当・印刷レイアウト・幾何計算などのドメインロジック・純粋関数。`src/services/`（`shuffle.ts`, `roster.ts`, `autoAssign.ts` など）。React コンポーネントを import しない。
+3. **stores**: Zustand。教室データは `src/stores/appStore.ts`。オンボーディングとトーストは別ストア。印刷の一時設定も別ストアとし、LocalStorage には保存しない。Slice 分割はしない。
+4. **hooks**: ストアと services を画面操作に繋ぐ。
+5. **components / views**: 描画。`App.tsx` はレスポンシブな `MainView` を描画。
 
-`optimizeShuffle` はメインスレッドで動き、探索は最大 300ms で打ち切る。Web Worker は使わない。名簿CSVは `src/utils/roster.ts` の手書きパーサで、Excel 用ライブラリは入れない。プロジェクトの引き継ぎは `src/utils/backup.ts`。応援導線は全体設定タブの Ofuse リンクだけである。アプリ内寄付モーダルはない。
+`optimizeShuffle` はメインスレッドで動き、探索は最大 300ms で打ち切る。Web Worker は使わない。名簿CSVは `src/services/roster.ts` の手書きパーサで、Excel 用ライブラリは入れない。プロジェクトの引き継ぎは `src/services/backup.ts`。応援導線は全体設定タブの Ofuse リンクだけである。アプリ内寄付モーダルはない。
 
 ### 4.1 データモデル設計
 

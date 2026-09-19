@@ -1,10 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import {
-  printOrientationLabel,
-  type PrintMode,
-  type PrintOrientation,
-} from "../../utils/printLayout";
+import { printOrientationLabel } from "../../services/printLayout";
+import type { PrintMode, PrintOrientation } from "../../types/print";
 
 interface PrintDialogProps {
   draftMode: PrintMode;

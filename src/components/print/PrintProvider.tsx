@@ -10,11 +10,8 @@ import { useStore } from "../../stores/appStore";
 import { useCanvasSelectionStore } from "../../stores/canvasSelection";
 import { usePrintSessionStore } from "../../stores/printSession";
 import { showToast } from "../../stores/toast";
-import {
-  createPrintPlan,
-  type PrintMode,
-  type PrintOrientation,
-} from "../../utils/printLayout";
+import { createPrintPlan } from "../../services/printLayout";
+import type { PrintMode, PrintOrientation } from "../../types/print";
 import PrintDialog from "./PrintDialog";
 import PrintSheet from "./PrintSheet";
 

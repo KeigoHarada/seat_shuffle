@@ -7,27 +7,9 @@ import {
 } from "../../../data/defaultData";
 import { sortStudentsByNameLogic } from "../../../services/student";
 import { optimizeShuffle } from "../../../services/shuffle";
-import type { StateAndActions } from "../../../stores/appStore";
-import type { OnboardingState } from "../../../stores/onboarding";
 
-export interface TourStep {
-  id: string;
-  targetSelector: string;
-  title: string;
-  description: string;
-  actionHint: string;
-  placement: "top" | "bottom" | "left" | "right" | "top-right" | "top-left";
-  settingsTab?: "students" | "roles" | "groups" | "constraints" | "global";
-  isInfoOnly?: boolean;
-
-  setupPreState: (mainStore: StateAndActions) => void;
-  setupPostState: (mainStore: StateAndActions) => void;
-  setupIdealState: (mainStore: StateAndActions) => void;
-  checkCondition: (
-    mainStore: StateAndActions,
-    onboardingStore: OnboardingState,
-  ) => boolean;
-}
+import type { TourStep } from "../../../types/onboarding";
+export type { TourStep };
 
 export const TOUR_STEPS: TourStep[] = [
   {

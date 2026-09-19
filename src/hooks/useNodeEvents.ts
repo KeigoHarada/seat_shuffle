@@ -6,13 +6,13 @@ import {
   type RefObject,
 } from "react";
 import type { Seat } from "../types/seat";
-import { contextMenuFromClient } from "../utils/canvas";
+import { contextMenuFromClient } from "../services/canvasGeometry";
 import {
   isTouchPointerType,
   LONG_PRESS_MS,
   movedPastTap,
   shouldSelectOnNodePointerDown,
-} from "../utils/panZoomGesture";
+} from "../services/canvasGesture";
 
 interface UseNodeEventsProps {
   seats: Seat[];

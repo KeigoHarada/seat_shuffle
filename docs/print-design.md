@@ -70,7 +70,7 @@ if (portrait.kind === "ready") {
 - `usePanZoom` の印刷リスナー、`PRINT_SHEET_PX`、`.print-heading` は削除する。画面のパン／ズーム／選択は印刷が書き戻さない。
 - 用途と向きの選択は非永続ストア（トーストと同じ）。`isViewMode` も `perspective` も読まない。閲覧相当の情報量は `createPrintPlan` が決める。
 
-層は types → `src/utils/printLayout.ts` → 印刷コンポーネント → `App` / フッタ。utils は React を import しない。選択 ID はキャンバスの `useSelection` から Provider が読む。
+層は types → `src/services/printLayout.ts` → 印刷コンポーネント → `App` / フッタ。services は React を import しない。選択 ID はキャンバスの `useSelection` から Provider が読む。
 
 ## Synthesis decision
 

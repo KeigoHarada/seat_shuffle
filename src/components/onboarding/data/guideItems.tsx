@@ -1,28 +1,7 @@
-import React from "react";
 import { LayoutGrid, Users, Shield, Shuffle } from "lucide-react";
 
-export interface GuideItem {
-  id: string;
-  label: string;
-  title: string;
-  description: string;
-  points: string[];
-  hint?: React.ReactNode;
-  shortcuts?: { key: string; desc: string }[];
-  videos?: {
-    url: string;
-    title: string;
-    description?: string;
-    steps?: string[];
-  }[];
-}
-
-export interface GuideCategory {
-  id: string;
-  label: string;
-  iconNode?: React.ReactNode;
-  items: GuideItem[];
-}
+import type { GuideItem, GuideCategory } from "../../../types/onboarding";
+export type { GuideItem, GuideCategory };
 
 export const TOUR_ITEM: GuideItem = {
   id: "tour",

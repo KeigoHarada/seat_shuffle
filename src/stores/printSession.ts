@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { PrintMode, PrintOrientation } from "../utils/printLayout";
+import type { PrintMode, PrintOrientation } from "../types/print";
 
 interface PrintSessionStore {
   mode: PrintMode;

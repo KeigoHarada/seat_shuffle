@@ -14,7 +14,7 @@ import {
   tryReleasePointerCapture,
   trySetPointerCapture,
   zoomAroundPoint,
-} from "../panZoomGesture";
+} from "../canvasGesture";
 
 describe("panZoomGesture", () => {
   it("ignores toolbar chrome when starting a canvas pan", () => {

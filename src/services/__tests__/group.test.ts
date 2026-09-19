@@ -6,7 +6,7 @@ import {
 import type { Seat } from "../../types/seat";
 import type { Group } from "../../types/group";
 
-describe("group utils", () => {
+describe("group service", () => {
   const mockGroups: Group[] = [
     { id: "group-1", name: "1班", color: "#FCA5A5" },
     { id: "group-2", name: "2班", color: "#93C5FD" },

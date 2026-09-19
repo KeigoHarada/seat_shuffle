@@ -6,10 +6,10 @@ import {
   screenToWorld,
   contextMenuFromClient,
   clampMenuPosition,
-} from "../canvas";
-import { generateTemplate } from "../../services/templates";
+} from "../canvasGeometry";
+import { generateTemplate } from "../templates";
 
-describe("canvas utils", () => {
+describe("canvasGeometry service", () => {
   describe("getCanvasBoundingBox", () => {
     it("should return null if there are no seats and no objects", () => {
       expect(getCanvasBoundingBox([], [])).toBeNull();

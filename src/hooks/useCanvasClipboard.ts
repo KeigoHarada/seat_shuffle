@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import type { Seat } from "../types/seat";
 import type { CanvasObject } from "../types/canvas";
 import { SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
-import { findEmptyPos } from "../utils/canvas";
+import { findEmptyPos } from "../services/canvasGeometry";
 import { useStore } from "../stores/appStore";
 
 let clipboard: { seats: Seat[]; objects: CanvasObject[] } | null = null;

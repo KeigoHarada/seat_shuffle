@@ -12,7 +12,7 @@ const mockStudent = (id: string, name: string, furigana?: string): Student => ({
   roleIds: [],
 });
 
-describe("student utils", () => {
+describe("student service", () => {
   describe("sortStudentsByNameLogic", () => {
     it("should sort students with furigana alphabetically", () => {
       const students = [

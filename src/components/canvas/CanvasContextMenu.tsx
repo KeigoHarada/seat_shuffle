@@ -1,7 +1,6 @@
 import React, { useRef, useLayoutEffect, useState } from "react";
-
 import { Lock, Unlock } from "lucide-react";
-import { clampMenuPosition } from "../../utils/canvas";
+import { clampMenuPosition } from "../../services/canvasGeometry";
 
 interface CanvasContextMenuProps {
   contextMenu: { x: number; y: number; worldX: number; worldY: number } | null;

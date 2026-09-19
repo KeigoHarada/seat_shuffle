@@ -3,22 +3,9 @@ export const MAX_SCALE = 2.0;
 export const LONG_PRESS_MS = 520;
 export const TAP_MOVE_PX = 10;
 
-export type Point = { x: number; y: number };
+import type { Point, CanvasDownGesture } from "../types/canvas";
 
-/**
- * Canvas gesture priority (pointerType, not UA sniffing):
- *
- * 1. Toolbar / zoom-reset chrome: never steal (buttons keep the event).
- * 2. Two or more touch pointers, anywhere including seats: pinch zoom + pan.
- *    This cancels in-progress node drag, marquee, and long-press.
- * 3. One touch on a seat/object in edit+select: node select / drag / long-press.
- * 4. One pointer on empty canvas (or on a node while view/hand/space force pan):
- *    pan if view mode, hand tool, space, or right mouse button;
- *    otherwise left/touch drag is marquee multi-select (same as desktop).
- * 5. Mouse/trackpad otherwise unchanged: wheel pan, ctrl/meta+wheel zoom,
- *    space/hand/view pan, select-tool drag marquee.
- */
-export type CanvasDownGesture = "none" | "pinch" | "pan" | "marquee" | "node";
+export type { Point, CanvasDownGesture };
 
 export function isTouchPointerType(pointerType: string): boolean {
   return pointerType === "touch";

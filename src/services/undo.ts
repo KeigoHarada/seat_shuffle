@@ -2,22 +2,16 @@ import type { AppState } from "../types/app";
 import type { CanvasObject } from "../types/canvas";
 import type { Seat } from "../types/seat";
 
-/** Fields restored by Undo. Add a key to include it. */
-export const UNDOABLE_KEYS = ["seats", "objects"] as const;
+import {
+  UNDOABLE_KEYS,
+  MAX_UNDO_STACK,
+  type UndoableKey,
+  type UndoSnapshot,
+  type UndoLiveRefs,
+} from "../types/history";
 
-/** Oldest entries drop first. */
-export const MAX_UNDO_STACK = 50;
-
-export type UndoableKey = (typeof UNDOABLE_KEYS)[number];
-
-export type UndoSnapshot = {
-  [K in UndoableKey]: AppState[K];
-};
-
-export type UndoLiveRefs = {
-  studentIds: ReadonlySet<string>;
-  groupIds: ReadonlySet<string>;
-};
+export { UNDOABLE_KEYS, MAX_UNDO_STACK };
+export type { UndoableKey, UndoSnapshot, UndoLiveRefs };
 
 export function captureUndoSnapshot(
   state: Pick<AppState, UndoableKey>,

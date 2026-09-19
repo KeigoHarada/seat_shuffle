@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { COMPACT_MAX_WIDTH_PX } from "../layout/shell";
 import type { Seat } from "../types/seat";
-import type { CanvasObject } from "../types/canvas";
-import { calculateCenterPanZoom } from "../utils/canvas";
+import type { CanvasObject, Point } from "../types/canvas";
+import { calculateCenterPanZoom } from "../services/canvasGeometry";
 import {
   MIN_SCALE,
   MAX_SCALE,
@@ -12,8 +12,7 @@ import {
   tryReleasePointerCapture,
   trySetPointerCapture,
   zoomAroundPoint,
-  type Point,
-} from "../utils/panZoomGesture";
+} from "../services/canvasGesture";
 
 const DESKTOP_FIT_PADDING = 60;
 const COMPACT_FIT_PADDING = 24;
