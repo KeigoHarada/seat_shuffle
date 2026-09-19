@@ -47,6 +47,9 @@ if (group.kind === "ready") {
   expect(group.landmarks[0].text).toBe("教卓");
   expect(group.landmarks[0].rotation).toBe(180);
 }
+if (portrait.kind === "ready") {
+  expect(portrait.page.orientation).toBe("portrait");
+}
 ```
 
 未選択はキャンバス全体。`selectedIds` が 1 件以上ならその ID の座席と図形だけ。相対位置は世界座標のまま。外接だけが狭くなる。
