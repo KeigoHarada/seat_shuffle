@@ -960,6 +960,60 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       const scaleBeforePrint = await page
         .locator(".app-canvas-controls")
         .textContent();
+      await page.locator(".seat-node-item").first().waitFor();
+      await page.evaluate(() => {
+        const canvas = document.getElementById("canvas-main-area");
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const blocked = [
+          ...document.querySelectorAll(
+            ".seat-node-item, .canvas-object-node, .app-canvas-toolbar, .app-canvas-controls",
+          ),
+        ].map((el) => el.getBoundingClientRect());
+        const hits = (x, y) =>
+          blocked.some(
+            (box) =>
+              x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
+          );
+        const candidates = [
+          { x: rect.left + 24, y: rect.bottom - 24 },
+          { x: rect.right - 24, y: rect.bottom - 24 },
+          { x: rect.left + 24, y: rect.top + rect.height / 2 },
+        ];
+        const point =
+          candidates.find((candidate) => !hits(candidate.x, candidate.y)) ||
+          candidates[0];
+        const fire = (type, buttons) => {
+          canvas.dispatchEvent(
+            new PointerEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+              pointerId: 91,
+              pointerType: "mouse",
+              isPrimary: true,
+              button: 0,
+              buttons,
+              clientX: point.x,
+              clientY: point.y,
+            }),
+          );
+        };
+        fire("pointerdown", 1);
+        fire("pointerup", 0);
+      });
+      await page.waitForFunction(() => {
+        const selected = Number(
+          document
+            .getElementById("canvas-main-area")
+            ?.getAttribute("data-selected-count") || "0",
+        );
+        const canvasSeats = document.querySelectorAll(".seat-node-item").length;
+        const printSeats = document.querySelectorAll(
+          "[data-print-root] .print-seat",
+        ).length;
+        return selected === 0 && canvasSeats >= 30 && printSeats === canvasSeats;
+      });
       await page.emulateMedia({ media: "print" });
       const printCss = await page.evaluate(() => {
         const displayOf = (selector) => {
@@ -970,6 +1024,9 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         const screenRoot = document.querySelector("[data-screen-root]");
         const appShell = document.querySelector(".app-shell");
         const printRootBox = printRoot?.getBoundingClientRect();
+        const canvasSeatCount = document.querySelectorAll(
+          ".seat-node-item",
+        ).length;
         const seatCount = printRoot
           ? printRoot.querySelectorAll(".print-seat").length
           : 0;
@@ -983,6 +1040,13 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
           printRootHeight: printRootBox ? printRootBox.height : 0,
           heading: document.querySelector(".print-heading"),
           seatCount,
+          canvasSeatCount,
+          printRoots: document.querySelectorAll("[data-print-root]").length,
+          printSeatsAll: document.querySelectorAll(".print-seat").length,
+          selectedCount: document
+            .getElementById("canvas-main-area")
+            ?.getAttribute("data-selected-count"),
+          printChildCount: printRoot ? printRoot.childElementCount : 0,
         };
       });
       record(
@@ -1002,8 +1066,9 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       record(
         failures,
         `${label} print root has classroom seats`,
-        printCss.seatCount === 30,
-        `seats=${printCss.seatCount}`,
+        printCss.seatCount === printCss.canvasSeatCount &&
+          printCss.canvasSeatCount >= 30,
+        `seats=${printCss.seatCount} canvas=${printCss.canvasSeatCount} roots=${printCss.printRoots} all=${printCss.printSeatsAll} selected=${printCss.selectedCount} children=${printCss.printChildCount}`,
       );
       record(
         failures,
