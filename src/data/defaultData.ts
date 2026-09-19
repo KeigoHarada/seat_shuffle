@@ -6,7 +6,7 @@ import type { Constraint } from "../types/constraint";
 import { generateTemplate } from "../services/templates";
 import { assignGroupsByBlocks } from "../services/group";
 import type { UndoSnapshot } from "../services/undo";
-import { PREDEFINED_COLORS } from "../constants/colors";
+import { PREDEFINED_COLORS } from "../constants/groupPalette";
 
 export const DEFAULT_ROLES: Role[] = [
   {

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { PREDEFINED_COLORS } from "../../constants/colors";
+import { PREDEFINED_COLORS } from "../../constants/groupPalette";
 
 interface ColorPickerProps {
   value: string;
