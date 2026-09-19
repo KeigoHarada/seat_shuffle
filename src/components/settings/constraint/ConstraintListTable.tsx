@@ -5,7 +5,7 @@ import ConfirmDialog from "../../ui/ConfirmDialog";
 import { Constraint } from "../../../types/constraint";
 import { GENDER_OPTIONS } from "../../../constants/gender";
 import Checkbox from "../../ui/Checkbox";
-import { evaluateConstraint } from "../../../services/algorithm";
+import { evaluateConstraint } from "../../../services/constraintEvaluation";
 
 const ConstraintListTable: React.FC = () => {
   const constraints = useStore((state) => state.constraints);

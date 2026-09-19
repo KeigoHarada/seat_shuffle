@@ -13,7 +13,7 @@ import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
 import GroupAssignPopover from "./GroupAssignPopover";
 import { showToast } from "../../stores/toast";
-import { autoAssignStudents } from "../../services/algorithm";
+import { autoAssignStudents } from "../../services/autoAssign";
 import { useCanvasPointerEvents } from "../../hooks/useCanvasPointerEvents";
 import { useNodeEvents } from "../../hooks/useNodeEvents";
 

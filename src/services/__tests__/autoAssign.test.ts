@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { autoAssignStudents } from "../algorithm";
+import { autoAssignStudents } from "../autoAssign";
 import { Seat } from "../../types/seat";
 import { Student } from "../../types/student";
 

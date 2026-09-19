@@ -6,7 +6,7 @@ import {
   createTourInitialState,
 } from "../../../data/defaultData";
 import { sortStudentsByNameLogic } from "../../../services/student";
-import { optimizeShuffle } from "../../../services/algorithm";
+import { optimizeShuffle } from "../../../services/shuffle";
 import type { StateAndActions } from "../../../stores/appStore";
 import type { OnboardingState } from "../../../stores/onboarding";
 

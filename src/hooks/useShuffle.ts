@@ -1,5 +1,5 @@
 import { useStore } from "../stores/appStore";
-import { optimizeShuffle } from "../services/algorithm";
+import { optimizeShuffle } from "../services/shuffle";
 import { showToast } from "../stores/toast";
 
 export function useShuffle() {
