@@ -960,82 +960,178 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       const scaleBeforePrint = await page
         .locator(".app-canvas-controls")
         .textContent();
-      await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+      await page.locator(".seat-node-item").first().waitFor();
+      await page.evaluate(() => {
+        const canvas = document.getElementById("canvas-main-area");
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const blocked = [
+          ...document.querySelectorAll(
+            ".seat-node-item, .canvas-object-node, .app-canvas-toolbar, .app-canvas-controls",
+          ),
+        ].map((el) => el.getBoundingClientRect());
+        const hits = (x, y) =>
+          blocked.some(
+            (box) =>
+              x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
+          );
+        const candidates = [
+          { x: rect.left + 24, y: rect.bottom - 24 },
+          { x: rect.right - 24, y: rect.bottom - 24 },
+          { x: rect.left + 24, y: rect.top + rect.height / 2 },
+        ];
+        const point =
+          candidates.find((candidate) => !hits(candidate.x, candidate.y)) ||
+          candidates[0];
+        const fire = (type, buttons) => {
+          canvas.dispatchEvent(
+            new PointerEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+              pointerId: 91,
+              pointerType: "mouse",
+              isPrimary: true,
+              button: 0,
+              buttons,
+              clientX: point.x,
+              clientY: point.y,
+            }),
+          );
+        };
+        fire("pointerdown", 1);
+        fire("pointerup", 0);
+      });
+      await page.waitForFunction(() => {
+        const selected = Number(
+          document
+            .getElementById("canvas-main-area")
+            ?.getAttribute("data-selected-count") || "0",
+        );
+        const canvasSeats = document.querySelectorAll(".seat-node-item").length;
+        const printSeats = document.querySelectorAll(
+          "[data-print-root] .print-seat",
+        ).length;
+        return selected === 0 && canvasSeats >= 30 && printSeats === canvasSeats;
+      });
       await page.emulateMedia({ media: "print" });
       const printCss = await page.evaluate(() => {
         const displayOf = (selector) => {
           const el = document.querySelector(selector);
           return el ? getComputedStyle(el).display : null;
         };
-        const sheet = document
-          .querySelector("#canvas-main-area")
-          ?.getBoundingClientRect();
-        const seats = Array.from(
-          document.querySelectorAll(".seat-node-item"),
-        ).map((el) => el.getBoundingClientRect());
-        const seatsOnSheet = sheet
-          ? seats.filter(
-              (r) =>
-                r.left >= sheet.left &&
-                r.right <= sheet.right &&
-                r.top >= sheet.top &&
-                r.bottom <= sheet.bottom,
-            ).length
+        const printRoot = document.querySelector("[data-print-root]");
+        const screenRoot = document.querySelector("[data-screen-root]");
+        const appShell = document.querySelector(".app-shell");
+        const printRootBox = printRoot?.getBoundingClientRect();
+        const sheet = printRoot?.querySelector(".print-sheet") ?? printRoot;
+        const sheetBox = sheet?.getBoundingClientRect();
+        const canvasSeatCount = document.querySelectorAll(
+          ".seat-node-item",
+        ).length;
+        const seatCount = printRoot
+          ? printRoot.querySelectorAll(".print-seat").length
           : 0;
+        const landmarkText = printRoot
+          ? Array.from(printRoot.querySelectorAll(".print-landmark"))
+              .map((el) => el.textContent ?? "")
+              .join("")
+          : "";
+        const markBoxes = printRoot
+          ? Array.from(
+              printRoot.querySelectorAll(".print-seat, .print-landmark"),
+            ).map((el) => el.getBoundingClientRect())
+          : [];
+        const eps = 1.5;
+        const overflowSheet = sheetBox
+          ? markBoxes.filter(
+              (box) =>
+                box.left < sheetBox.left - eps ||
+                box.top < sheetBox.top - eps ||
+                box.right > sheetBox.right + eps ||
+                box.bottom > sheetBox.bottom + eps,
+            ).length
+          : markBoxes.length;
+        const overflowPage = markBoxes.filter(
+          (box) =>
+            box.left < -eps ||
+            box.top < -eps ||
+            box.right > window.innerWidth + eps ||
+            box.bottom > window.innerHeight + eps,
+        ).length;
         return {
-          header: displayOf(".app-header"),
-          footer: displayOf(".app-footer"),
-          toolbar: displayOf(".app-canvas-toolbar"),
-          heading: displayOf(".print-heading"),
-          sheetHeight: sheet ? sheet.height : 0,
-          seatCount: seats.length,
-          seatsOnSheet,
+          screenRoot: displayOf("[data-screen-root]"),
+          appShell: displayOf(".app-shell"),
+          screenHidden:
+            (screenRoot && getComputedStyle(screenRoot).display === "none") ||
+            (appShell && getComputedStyle(appShell).display === "none"),
+          printRoot: displayOf("[data-print-root]"),
+          printRootHeight: printRootBox ? printRootBox.height : 0,
+          heading: document.querySelector(".print-heading"),
+          seatCount,
+          canvasSeatCount,
+          printRoots: document.querySelectorAll("[data-print-root]").length,
+          printSeatsAll: document.querySelectorAll(".print-seat").length,
+          selectedCount: document
+            .getElementById("canvas-main-area")
+            ?.getAttribute("data-selected-count"),
+          printChildCount: printRoot ? printRoot.childElementCount : 0,
+          hasDeskText: landmarkText.includes("教卓"),
+          overflowSheet,
+          overflowPage,
+          sheetWidth: sheetBox ? sheetBox.width : 0,
+          sheetHeight: sheetBox ? sheetBox.height : 0,
+          printRoleSvg: printRoot
+            ? printRoot.querySelector("svg") !== null
+            : false,
         };
       });
       record(
         failures,
-        `${label} print sheet holds every seat`,
-        printCss.seatCount > 0 &&
-          printCss.seatsOnSheet === printCss.seatCount &&
-          printCss.sheetHeight > 0,
-        `seats=${printCss.seatCount} onSheet=${printCss.seatsOnSheet} sheetHeight=${printCss.sheetHeight}`,
+        `${label} print hides the screen root`,
+        printCss.screenHidden === true,
+        `screen-root display=${printCss.screenRoot} app-shell display=${printCss.appShell}`,
       );
       record(
         failures,
-        `${label} print hides header`,
-        printCss.header === "none",
-        `header display=${printCss.header}`,
+        `${label} print root is visible`,
+        printCss.printRoot !== "none" &&
+          printCss.printRoot !== null &&
+          printCss.printRootHeight > 0,
+        `print-root display=${printCss.printRoot} height=${printCss.printRootHeight}`,
       );
       record(
         failures,
-        `${label} print hides footer`,
-        printCss.footer === "none",
-        `footer display=${printCss.footer}`,
+        `${label} print root has classroom seats`,
+        printCss.seatCount === printCss.canvasSeatCount &&
+          printCss.canvasSeatCount >= 30,
+        `seats=${printCss.seatCount} canvas=${printCss.canvasSeatCount} roots=${printCss.printRoots} all=${printCss.printSeatsAll} selected=${printCss.selectedCount} children=${printCss.printChildCount}`,
       );
       record(
         failures,
-        `${label} print hides toolbar`,
-        printCss.toolbar === "none",
-        `toolbar display=${printCss.toolbar}`,
+        `${label} print heading is absent`,
+        printCss.heading === null,
+        `heading=${printCss.heading}`,
       );
       record(
         failures,
-        `${label} print shows heading`,
-        printCss.heading !== "none" && printCss.heading !== null,
-        `heading display=${printCss.heading}`,
+        `${label} print keeps 教卓 and drops role icons`,
+        printCss.hasDeskText && !printCss.printRoleSvg,
+        `desk=${printCss.hasDeskText} svg=${printCss.printRoleSvg}`,
+      );
+      record(
+        failures,
+        `${label} print marks stay on one page`,
+        printCss.overflowSheet === 0 && printCss.overflowPage === 0,
+        `overflowSheet=${printCss.overflowSheet} overflowPage=${printCss.overflowPage} sheet=${printCss.sheetWidth}x${printCss.sheetHeight}`,
       );
       await page.emulateMedia({ media: "screen" });
-      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
-      await page
-        .locator(".app-canvas-controls", { hasText: scaleBeforePrint ?? "" })
-        .waitFor({ timeout: 2000 })
-        .catch(() => {});
       const scaleAfterPrint = await page
         .locator(".app-canvas-controls")
         .textContent();
       record(
         failures,
-        `${label} print restores zoom`,
+        `${label} print leaves zoom HUD unchanged`,
         scaleAfterPrint === scaleBeforePrint,
         `before=${scaleBeforePrint} after=${scaleAfterPrint}`,
       );

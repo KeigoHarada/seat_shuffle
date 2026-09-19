@@ -1008,61 +1008,144 @@ input[type="number"] {
   }
 }
 
-.print-heading {
+[data-print-root] {
   display: none;
 }
 
+.print-mode-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-text-main);
+  font-size: 14px;
+}
+
+.print-seat,
+.print-landmark {
+  box-sizing: border-box;
+  container-type: size;
+  background: #fff;
+  border: 1px solid var(--c-border);
+  font-family: var(--font-family);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.print-seat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.print-seat-label {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+}
+
+.print-seat-attendance {
+  position: absolute;
+  top: 6%;
+  left: 8%;
+  font-size: 16cqh;
+  font-weight: 700;
+  color: var(--c-text-sub);
+  line-height: 1;
+}
+
+.print-seat-furigana,
+.print-seat-name,
+.print-seat-empty {
+  max-width: 90%;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.print-seat-furigana {
+  font-size: 14cqh;
+  color: var(--c-text-sub);
+  line-height: 1.1;
+}
+
+.print-seat-name {
+  font-size: 22cqh;
+  font-weight: 500;
+  color: var(--c-text-main);
+  line-height: 1.15;
+}
+
+.print-seat-empty {
+  font-size: 20cqh;
+  color: var(--c-text-sub);
+}
+
+.print-landmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.print-landmark[data-shape="circle"] {
+  border-radius: 50%;
+}
+
+.print-landmark[data-shape="rectangle"] {
+  border-radius: 8px;
+}
+
+.print-landmark-text {
+  display: block;
+  font-size: 36cqh;
+  font-weight: 700;
+  color: var(--c-text-main);
+  text-align: center;
+  transform-origin: center center;
+}
+
 @media print {
-  .print-heading {
-    display: block;
-    font-size: 18px;
-    font-weight: 700;
-    text-align: center;
-    margin: 0 0 12px;
-    color: #334155;
+  html,
+  body,
+  #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #fff;
   }
 
-  .app-header,
-  .app-footer,
-  .app-settings,
-  .app-settings-scrim,
-  .app-canvas-toolbar,
-  .app-canvas-controls,
-  .modal-overlay,
-  .app-canvas-empty {
+  [data-screen-root] {
     display: none !important;
   }
 
-  html,
-  body,
-  .app-shell,
-  .app-main,
-  .app-canvas {
-    height: auto !important;
-    overflow: visible !important;
-    background: #fff !important;
+  [data-print-root] {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    container-type: size;
+    width: 100%;
+    height: 100%;
+    padding: 10mm;
+    overflow: hidden;
+    background: #fff;
   }
 
-  .app-shell {
-    width: auto;
-  }
-
-  @page {
-    size: landscape;
-    margin: 10mm;
-  }
-
-  #canvas-main-area {
-    width: 960px !important;
-    height: 640px !important;
-    margin: 0 auto;
-    overflow: visible !important;
-    background: #fff !important;
-  }
-
-  .seat-node-item,
-  .seat-node-item * {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+  .print-sheet {
+    position: relative;
+    box-sizing: border-box;
+    aspect-ratio: var(--print-ar-w) / var(--print-ar-h);
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    width: min(100cqw, calc(100cqh * var(--print-ar-w) / var(--print-ar-h)));
   }
 }
