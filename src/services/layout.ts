@@ -1,4 +1,6 @@
-export const COMPACT_MAX_WIDTH_PX = 1023;
+import { COMPACT_MAX_WIDTH_PX } from "../constants/layout";
+
+export { COMPACT_MAX_WIDTH_PX };
 
 export function isCompactWidth(width: number): boolean {
   return width <= COMPACT_MAX_WIDTH_PX;

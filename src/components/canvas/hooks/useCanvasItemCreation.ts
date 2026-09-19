@@ -3,6 +3,7 @@ import type { Seat } from "../../../types/seat";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../../../constants/canvas";
 import { findEmptyPos, getCenterGridPos } from "../../../services/canvasGeometry";
 import { generateTemplate } from "../../../services/templates";
+import type { TemplateId } from "../../../types/template";
 import { useStore } from "../../../stores/appStore";
 
 interface UseCanvasItemCreationProps {
@@ -123,7 +124,7 @@ export const useCanvasItemCreation = ({
   }, [viewportRef, pan, scale, seats, objects, addObject, setSelectedIds, pushUndo]);
 
   const handleApplyTemplate = useCallback(
-    (templateId: string) => {
+    (templateId: TemplateId) => {
       const { x: targetX, y: targetY } = getCenterGridPos(
         viewportRef,
         pan,

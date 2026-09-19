@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { CanvasObject } from "../../types/canvas";
 import type { Seat } from "../../types/seat";
+import { MAX_UNDO_STACK, UNDOABLE_KEYS } from "../../types/history";
 import {
-  MAX_UNDO_STACK,
-  UNDOABLE_KEYS,
   appendUndoSnapshot,
   applyUndoSnapshot,
   captureUndoSnapshot,

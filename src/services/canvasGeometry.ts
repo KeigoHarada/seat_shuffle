@@ -7,8 +7,6 @@ import type {
 } from "../types/canvas";
 import { SEAT_COLS, SEAT_ROWS, GRID_SIZE } from "../constants/canvas";
 
-export type { DragState, DragNode, CanvasBoundingBox };
-
 export const getCanvasBoundingBox = (
   seats: Seat[],
   objects: CanvasObject[],

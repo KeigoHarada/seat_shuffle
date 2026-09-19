@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { COMPACT_MAX_WIDTH_PX } from "../../../layout/shell";
+import { COMPACT_MAX_WIDTH_PX } from "../../../constants/layout";
 import type { Seat } from "../../../types/seat";
 import type { CanvasObject, Point } from "../../../types/canvas";
 import { calculateCenterPanZoom } from "../../../services/canvasGeometry";

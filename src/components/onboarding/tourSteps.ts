@@ -1,15 +1,13 @@
-import { generateTemplate } from "./templates";
-import { assignGroupsByBlocks } from "./group";
+import { generateTemplate } from "../../services/templates";
+import { assignGroupsByBlocks } from "../../services/group";
 import {
   createSampleStudents,
   createDefaultClassroomState,
   createTourInitialState,
-} from "../data/defaultData";
-import { sortStudentsByNameLogic } from "./student";
-import { optimizeShuffle } from "./shuffle";
-
-import type { TourStep } from "../types/onboarding";
-export type { TourStep };
+} from "../../data/defaultData";
+import { sortStudentsByNameLogic } from "../../services/student";
+import { optimizeShuffle } from "../../services/shuffle";
+import type { TourStep } from "../../types/onboarding";
 
 export const TOUR_STEPS: TourStep[] = [
   {

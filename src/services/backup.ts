@@ -11,9 +11,6 @@ import type {
 } from "../types/backup";
 import { PROJECT_BACKUP_VERSION } from "../types/backup";
 
-export { PROJECT_BACKUP_VERSION };
-export type { ProjectSnapshot, BackupParseResult };
-
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

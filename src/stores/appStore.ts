@@ -12,14 +12,16 @@ import {
   createTourInitialState,
   createEmptyState,
 } from "../data/defaultData";
-import { applyRosterImport, type RosterParseOk } from "../services/roster";
-import { applyProjectBackup, type ProjectSnapshot } from "../services/backup";
+import type { RosterParseOk } from "../types/roster";
+import type { ProjectSnapshot } from "../types/backup";
+import type { UndoSnapshot } from "../types/history";
+import { applyRosterImport } from "../services/roster";
+import { applyProjectBackup } from "../services/backup";
 import {
   appendUndoSnapshot,
   applyUndoSnapshot,
   captureUndoSnapshot,
   readPersistedUndoStack,
-  type UndoSnapshot,
 } from "../services/undo";
 
 export interface StateAndActions extends AppState {

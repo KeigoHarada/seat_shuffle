@@ -11,14 +11,6 @@ import type {
   PrintPlan,
 } from "../types/print";
 
-export type {
-  PrintMode,
-  PrintOrientation,
-  PrintSource,
-  PrintFrame,
-  PrintPlan,
-};
-
 const A4_SHORT_MM = 210;
 const A4_LONG_MM = 297;
 const MARGIN_MM = 10;

@@ -1,9 +1,47 @@
 import React, { useState } from "react";
-import { Printer, Shuffle, Undo2 } from "lucide-react";
+import { Eye, PenLine, Printer, Shuffle, Undo2 } from "lucide-react";
+import { useStore } from "../stores/appStore";
 import { usePrintSessionStore } from "../stores/printSession";
-import LegalModal from "../components/ui/LegalModal";
+import LegalModal from "../components/legal/LegalModal";
 import { useShuffle } from "../hooks/useShuffle";
-import ViewModeToggle from "./ViewModeToggle";
+
+const ViewModeToggle: React.FC = () => {
+  const isViewMode = useStore((state) => state.isViewMode);
+  const setIsViewMode = useStore((state) => state.setIsViewMode);
+
+  return (
+    <button
+      id="btn-footer-viewmode"
+      className="view-mode-toggle"
+      onClick={() => setIsViewMode(!isViewMode)}
+      type="button"
+      aria-label="編集と閲覧の切り替え"
+    >
+      <div
+        className="view-mode-toggle-knob"
+        style={{ left: isViewMode ? "50%" : "4px" }}
+      />
+      <div
+        className="view-mode-toggle-label"
+        style={{
+          color: !isViewMode ? "var(--c-text-main)" : "var(--c-text-sub)",
+        }}
+      >
+        <PenLine size={16} />
+        <span className="app-chrome-label">編集</span>
+      </div>
+      <div
+        className="view-mode-toggle-label"
+        style={{
+          color: isViewMode ? "var(--c-text-main)" : "var(--c-text-sub)",
+        }}
+      >
+        <Eye size={16} />
+        <span className="app-chrome-label">閲覧</span>
+      </div>
+    </button>
+  );
+};
 
 const Footer: React.FC = () => {
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);

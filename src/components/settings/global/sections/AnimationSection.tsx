@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Play } from "lucide-react";
 import { useStore } from "../../../../stores/appStore";
 import Select from "../../../ui/Select";
-import ShuffleAnimation from "../../../canvas/ShuffleAnimation";
+import ShuffleAnimation from "../../../animation/ShuffleAnimation";
 
 export const AnimationSection: React.FC = () => {
   const appSettings = useStore((state) => state.appSettings);

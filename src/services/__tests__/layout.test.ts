@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { COMPACT_MAX_WIDTH_PX, isCompactWidth } from "../shell";
+import { COMPACT_MAX_WIDTH_PX, isCompactWidth } from "../layout";
 
 describe("isCompactWidth", () => {
   it("treats phones and portrait tablets as compact", () => {

@@ -5,18 +5,9 @@ import { GENDERS } from "../constants/gender";
 import type {
   ParsedRosterRow,
   RosterParseOk,
-  RosterParseErr,
   RosterParseResult,
   RosterImportPatch,
 } from "../types/roster";
-
-export type {
-  ParsedRosterRow,
-  RosterParseOk,
-  RosterParseErr,
-  RosterParseResult,
-  RosterImportPatch,
-};
 
 const ROSTER_HEADERS = {
   name: "名前",

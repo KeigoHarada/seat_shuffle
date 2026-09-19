@@ -1,9 +1,10 @@
 import type { Seat } from "../types/seat";
 import type { CanvasObject } from "../types/canvas";
+import type { TemplateId } from "../types/template";
 import { SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
 export const generateTemplate = (
-  templateId: string,
+  templateId: TemplateId,
   startX: number,
   startY: number,
 ): { seats: Seat[]; objects: CanvasObject[] } => {

@@ -5,7 +5,7 @@ import type { CanvasObject } from "../types/canvas";
 import type { Constraint } from "../types/constraint";
 import { generateTemplate } from "../services/templates";
 import { assignGroupsByBlocks } from "../services/group";
-import type { UndoSnapshot } from "../services/undo";
+import type { UndoSnapshot } from "../types/history";
 import { PREDEFINED_COLORS } from "../constants/groupPalette";
 
 export const DEFAULT_ROLES: Role[] = [

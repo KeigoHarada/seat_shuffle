@@ -349,7 +349,7 @@ UI上のキャンバス（描画エリア）を用いて、直感的に座席表
 
 モジュールの向きは次のとおり。下の層は上の層を import しない。
 
-1. **types**: エンティティおよびドメインモデルの型。`src/types/` 配下に明示的ファイル（`student.ts`, `seat.ts`, `canvas.ts`, `print.ts`, `backup.ts`, `roster.ts`, `icon.ts` 等）で定義。
+1. **types**: エンティティおよびドメインモデルの型。`src/types/` 配下に明示的ファイル（`student.ts`, `seat.ts`, `canvas.ts`, `print.ts`, `backup.ts`, `roster.ts`, `icon.ts`, `template.ts` 等）で定義。
 2. **services**: 席替え・名簿CSV・バックアップ・班割当・印刷レイアウト・幾何計算などのドメインロジック・純粋関数。`src/services/`（`shuffle.ts`, `roster.ts`, `autoAssign.ts` など）。React コンポーネントを import しない。
 3. **stores**: Zustand。教室データは `src/stores/appStore.ts`。オンボーディング・トースト・クリップボードは別ストア。印刷セッション（`printSession.ts`）も別ストアとし、LocalStorage には保存しない。Slice 分割はしない。
 4. **hooks**: 共通フックは `src/hooks/`、特定機能固有のフックは各コンポーネント配下（例: `src/components/canvas/hooks/`）に配置（コロケーション）。ストアと services を画面操作に繋ぐ。

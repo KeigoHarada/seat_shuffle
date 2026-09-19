@@ -10,9 +10,6 @@ import {
   type UndoLiveRefs,
 } from "../types/history";
 
-export { UNDOABLE_KEYS, MAX_UNDO_STACK };
-export type { UndoableKey, UndoSnapshot, UndoLiveRefs };
-
 export function captureUndoSnapshot(
   state: Pick<AppState, UndoableKey>,
 ): UndoSnapshot {

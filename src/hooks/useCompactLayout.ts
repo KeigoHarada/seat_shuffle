@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { compactMediaQuery, isCompactWidth } from "../layout/shell";
+import { compactMediaQuery, isCompactWidth } from "../services/layout";
 
 export function useCompactLayout(): boolean {
   const [compact, setCompact] = useState(() =>

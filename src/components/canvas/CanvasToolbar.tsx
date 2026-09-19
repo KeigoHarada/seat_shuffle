@@ -1,21 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Shapes, LayoutTemplate, Wand2 } from "lucide-react";
 import { usePressAction } from "../../hooks/usePressAction";
+import type { TemplateId } from "../../types/template";
+import { TEMPLATES } from "../../constants/templates";
 
 interface Props {
   onAddSeat: () => void;
   onAddRectangle: () => void;
   onAddCircle: () => void;
-  onApplyTemplate: (templateName: string) => void;
+  onApplyTemplate: (templateId: TemplateId) => void;
   onAutoAssign: () => void;
 }
-
-const TEMPLATES = [
-  { id: "classroom", label: "教室" },
-  { id: "group4", label: "4人席" },
-  { id: "group6_v", label: "6人席（縦）" },
-  { id: "group6_h", label: "6人席（横）" },
-] as const;
 
 const ToolbarMenuItem: React.FC<{
   id?: string;

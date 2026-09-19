@@ -1,10 +1,7 @@
 import type { ChangeEvent } from "react";
 import { useStore } from "../stores/appStore";
-import {
-  readRosterFile,
-  type RosterParseErr,
-  type RosterParseOk,
-} from "../services/roster";
+import type { RosterParseErr, RosterParseOk } from "../types/roster";
+import { readRosterFile } from "../services/roster";
 import {
   downloadBackupFile,
   readBackupFile,

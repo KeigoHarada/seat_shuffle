@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  createPrintPlan,
-  printPageRule,
-  type PrintPlan,
-  type PrintSource,
-} from "../printLayout";
+import type { PrintPlan, PrintSource } from "../../types/print";
+import { createPrintPlan, printPageRule } from "../printLayout";
 
 const CLASSROOM_COL_X = [0, 6, 14, 20, 28, 34];
 const CLASSROOM_ROW_Y = [0, 6, 12, 18, 24];

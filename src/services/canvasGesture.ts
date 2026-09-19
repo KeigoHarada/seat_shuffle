@@ -5,8 +5,6 @@ export const TAP_MOVE_PX = 10;
 
 import type { Point, CanvasDownGesture } from "../types/canvas";
 
-export type { Point, CanvasDownGesture };
-
 export function isTouchPointerType(pointerType: string): boolean {
   return pointerType === "touch";
 }
