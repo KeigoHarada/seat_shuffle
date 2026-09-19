@@ -1024,6 +1024,8 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         const screenRoot = document.querySelector("[data-screen-root]");
         const appShell = document.querySelector(".app-shell");
         const printRootBox = printRoot?.getBoundingClientRect();
+        const sheet = printRoot?.querySelector(".print-sheet") ?? printRoot;
+        const sheetBox = sheet?.getBoundingClientRect();
         const canvasSeatCount = document.querySelectorAll(
           ".seat-node-item",
         ).length;
@@ -1035,6 +1037,28 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
               .map((el) => el.textContent ?? "")
               .join("")
           : "";
+        const markBoxes = printRoot
+          ? Array.from(
+              printRoot.querySelectorAll(".print-seat, .print-landmark"),
+            ).map((el) => el.getBoundingClientRect())
+          : [];
+        const eps = 1.5;
+        const overflowSheet = sheetBox
+          ? markBoxes.filter(
+              (box) =>
+                box.left < sheetBox.left - eps ||
+                box.top < sheetBox.top - eps ||
+                box.right > sheetBox.right + eps ||
+                box.bottom > sheetBox.bottom + eps,
+            ).length
+          : markBoxes.length;
+        const overflowPage = markBoxes.filter(
+          (box) =>
+            box.left < -eps ||
+            box.top < -eps ||
+            box.right > window.innerWidth + eps ||
+            box.bottom > window.innerHeight + eps,
+        ).length;
         return {
           screenRoot: displayOf("[data-screen-root]"),
           appShell: displayOf(".app-shell"),
@@ -1053,6 +1077,10 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
             ?.getAttribute("data-selected-count"),
           printChildCount: printRoot ? printRoot.childElementCount : 0,
           hasDeskText: landmarkText.includes("教卓"),
+          overflowSheet,
+          overflowPage,
+          sheetWidth: sheetBox ? sheetBox.width : 0,
+          sheetHeight: sheetBox ? sheetBox.height : 0,
           printRoleSvg: printRoot
             ? printRoot.querySelector("svg") !== null
             : false,
@@ -1090,6 +1118,12 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         `${label} print keeps 教卓 and drops role icons`,
         printCss.hasDeskText && !printCss.printRoleSvg,
         `desk=${printCss.hasDeskText} svg=${printCss.printRoleSvg}`,
+      );
+      record(
+        failures,
+        `${label} print marks stay on one page`,
+        printCss.overflowSheet === 0 && printCss.overflowPage === 0,
+        `overflowSheet=${printCss.overflowSheet} overflowPage=${printCss.overflowPage} sheet=${printCss.sheetWidth}x${printCss.sheetHeight}`,
       );
       await page.emulateMedia({ media: "screen" });
       const scaleAfterPrint = await page

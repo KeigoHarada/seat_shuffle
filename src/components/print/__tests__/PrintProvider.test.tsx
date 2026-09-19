@@ -137,6 +137,63 @@ describe("PrintProvider", () => {
     expect(printMock).toHaveBeenCalledTimes(1);
     expect(document.querySelector("#print-dialog")).toBeNull();
     expect(usePrintSessionStore.getState().mode).toBe("wall");
+    expect(
+      document.querySelector<HTMLElement>("[data-print-seat-id='seat-a']")
+        ?.style.left,
+    ).toMatch(/%$/);
+  });
+
+  it("rotates seat and landmark text in desk mode", async () => {
+    usePrintSessionStore.setState({ mode: "desk" });
+    useStore.setState({
+      seats: [
+        {
+          id: "seat-a",
+          studentId: "stu-a",
+          groupIds: [],
+          x: 0,
+          y: 0,
+          isLocked: false,
+        },
+      ],
+      objects: [
+        {
+          id: "desk",
+          type: "rectangle",
+          x: 8,
+          y: -4,
+          width: 8,
+          height: 4,
+          text: "教卓",
+        },
+      ],
+      students: [
+        {
+          id: "stu-a",
+          name: "山田太郎",
+          furigana: "やまだたろう",
+          gender: "male",
+          attendanceNumber: 1,
+          roleIds: [],
+        },
+      ],
+    });
+
+    await act(async () => {
+      root?.render(
+        <PrintProvider>
+          <PrintTrigger />
+        </PrintProvider>,
+      );
+    });
+
+    expect(
+      document.querySelector<HTMLElement>(".print-seat-label")?.style.transform,
+    ).toBe("rotate(180deg)");
+    expect(
+      document.querySelector<HTMLElement>(".print-landmark-text")?.style
+        .transform,
+    ).toBe("rotate(180deg)");
   });
 
   it("prints the selection frozen when the dialog opened", async () => {

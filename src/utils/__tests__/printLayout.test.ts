@@ -95,11 +95,12 @@ describe("createPrintPlan", () => {
     expect(plan.landmarks[0]?.id).toBe("desk");
     expect(plan.landmarks[0]?.text).toBe("教卓");
     expect(plan.landmarks[0]?.shape).toBe("rectangle");
+    expect(plan.landmarks[0]?.rotation).toBe(0);
     expect(plan.seats.every((seat) => seat.label.rotation === 0)).toBe(true);
     expectFramesInside(plan);
   });
 
-  it("rotates only seat labels in desk mode and keeps landmark frames", () => {
+  it("rotates seat and landmark labels in desk mode and keeps frames", () => {
     const source = classroomSource();
     const wall = createPrintPlan(source, "wall");
     const desk = createPrintPlan(source, "desk");
@@ -111,6 +112,8 @@ describe("createPrintPlan", () => {
     expect(desk.seats.every((seat) => seat.label.rotation === 180)).toBe(true);
     expect(desk.landmarks).toHaveLength(1);
     expect(desk.landmarks[0]?.text).toBe("教卓");
+    expect(desk.landmarks[0]?.rotation).toBe(180);
+    expect(wall.landmarks[0]?.rotation).toBe(0);
     expect(desk.landmarks.map((landmark) => landmark.frame)).toEqual(
       wall.landmarks.map((landmark) => landmark.frame),
     );

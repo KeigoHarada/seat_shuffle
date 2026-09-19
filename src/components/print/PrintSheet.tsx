@@ -10,13 +10,17 @@ type ReadyLandmark = ReadyPlan["landmarks"][number];
 
 const PAGE_STYLE_ID = "rakugae-print-page";
 
-function frameStyle(frame: ReadySeat["frame"]): React.CSSProperties {
+function frameStyle(
+  frame: ReadySeat["frame"],
+  contentWidthMm: number,
+  contentHeightMm: number,
+): React.CSSProperties {
   return {
     position: "absolute",
-    left: `${frame.xMm}mm`,
-    top: `${frame.yMm}mm`,
-    width: `${frame.widthMm}mm`,
-    height: `${frame.heightMm}mm`,
+    left: `${(frame.xMm / contentWidthMm) * 100}%`,
+    top: `${(frame.yMm / contentHeightMm) * 100}%`,
+    width: `${(frame.widthMm / contentWidthMm) * 100}%`,
+    height: `${(frame.heightMm / contentHeightMm) * 100}%`,
   };
 }
 
@@ -57,28 +61,49 @@ function SeatLabel({ label }: { label: ReadySeat["label"] }) {
   }
 }
 
-function PrintSeatNode({ seat }: { seat: ReadySeat }) {
+function PrintSeatNode({
+  seat,
+  contentWidthMm,
+  contentHeightMm,
+}: {
+  seat: ReadySeat;
+  contentWidthMm: number;
+  contentHeightMm: number;
+}) {
   return (
     <div
       className="print-seat"
       data-print-seat-id={seat.id}
-      style={frameStyle(seat.frame)}
+      style={frameStyle(seat.frame, contentWidthMm, contentHeightMm)}
     >
       <SeatLabel label={seat.label} />
     </div>
   );
 }
 
-function PrintLandmarkNode({ landmark }: { landmark: ReadyLandmark }) {
+function PrintLandmarkNode({
+  landmark,
+  contentWidthMm,
+  contentHeightMm,
+}: {
+  landmark: ReadyLandmark;
+  contentWidthMm: number;
+  contentHeightMm: number;
+}) {
   return (
     <div
       className="print-landmark"
       data-print-landmark-id={landmark.id}
       data-shape={landmark.shape}
-      style={frameStyle(landmark.frame)}
+      style={frameStyle(landmark.frame, contentWidthMm, contentHeightMm)}
     >
       {landmark.text ? (
-        <span className="print-landmark-text">{landmark.text}</span>
+        <span
+          className="print-landmark-text"
+          style={{ transform: labelTransform(landmark.rotation) }}
+        >
+          {landmark.text}
+        </span>
       ) : null}
     </div>
   );
@@ -125,17 +150,31 @@ const PrintSheet: React.FC<{ selectedIds?: readonly string[] }> = ({
         <div
           data-print-root
           data-orientation={plan.page.orientation}
-          style={{
-            width: `${plan.page.contentWidthMm}mm`,
-            aspectRatio: `${plan.page.contentWidthMm} / ${plan.page.contentHeightMm}`,
-          }}
+          style={
+            {
+              "--print-ar-w": plan.page.contentWidthMm,
+              "--print-ar-h": plan.page.contentHeightMm,
+            } as React.CSSProperties
+          }
         >
-          {plan.landmarks.map((landmark) => (
-            <PrintLandmarkNode key={landmark.id} landmark={landmark} />
-          ))}
-          {plan.seats.map((seat) => (
-            <PrintSeatNode key={seat.id} seat={seat} />
-          ))}
+          <div className="print-sheet">
+            {plan.landmarks.map((landmark) => (
+              <PrintLandmarkNode
+                key={landmark.id}
+                landmark={landmark}
+                contentWidthMm={plan.page.contentWidthMm}
+                contentHeightMm={plan.page.contentHeightMm}
+              />
+            ))}
+            {plan.seats.map((seat) => (
+              <PrintSeatNode
+                key={seat.id}
+                seat={seat}
+                contentWidthMm={plan.page.contentWidthMm}
+                contentHeightMm={plan.page.contentHeightMm}
+              />
+            ))}
+          </div>
         </div>
       );
     default: {

@@ -44,6 +44,7 @@ if (group.kind === "ready") {
   expect(group.seats[0].label?.rotation).toBe(180);
   expect(group.seats[0].label?.name).toBeTruthy();
   expect(group.landmarks[0].text).toBe("教卓");
+  expect(group.landmarks[0].rotation).toBe(180);
 }
 ```
 
@@ -58,9 +59,9 @@ if (group.kind === "ready") {
 - `createPrintPlan` が閲覧相当の文字、外接範囲、A4 縦横の比較、倍率（100% 上限なし）、中央配置、丸め後のはみ出し再縮小を一度に決める。内容の外接は既存の `getCanvasBoundingBox` に、対象だけを渡す。
 - 座席ラベルは閲覧と同じ: 出席番号、ふりがな、氏名。空席は `"空席"`。ロール・グループ・ロックのフィールドは型に無い。
 - 図形は枠（四角／円）と任意の `text`（「教卓」）を持つ。リサイズつまみは型に無い。
-- 180° は座席の文字グループにだけ付く。座席枠・図形・図形文字は回さない。
+- 180° は座席の文字と図形の文字に付く。座席枠と図形の位置は回さない。
 - 向きは印刷対象の外接で縦横の大きい倍率を採る。同率なら横。設定 UI に「A4 横（自動）」と出すだけ。選択範囲が縦長なら縦、横長なら横になり得る。
-- 画面 CSS は `[data-screen-root]` / `[data-print-root]` の切り替えだけ。要素ごとの隠しリストは持たない。印刷ルートは mm の幅・高さを明示し、`overflow: hidden` と `max-width: 100%; height: auto` でダイアログ余白の拡大にも切れない。
+- 画面 CSS は `[data-screen-root]` / `[data-print-root]` の切り替えだけ。要素ごとの隠しリストは持たない。印刷ルートは用紙の内容領域いっぱいにし、シートを縦横とも contain する。座席・図形はシートに対する割合で置くので、ブラウザ余白で用紙が狭くなっても切れない。
 - `usePanZoom` の印刷リスナー、`PRINT_SHEET_PX`、`.print-heading` は削除する。画面のパン／ズーム／選択は印刷が書き戻さない。
 - 用途の選択は非永続ストア（トーストと同じ）。`isViewMode` も `perspective` も読まない。閲覧相当の情報量は `createPrintPlan` が決める。
 
@@ -97,4 +98,4 @@ if (group.kind === "ready") {
 
 ## Next implementation step
 
-`createPrintPlan` のテーブルテストを、閲覧相当のラベル・図形文字・未選択は全体・選択 ID だけが残ること・180° が座席文字だけ、に更新してから書く。
+`createPrintPlan` のテーブルテストは、閲覧相当のラベル・図形文字・未選択は全体・選択 ID だけが残ること・机上確認では座席文字と図形文字の両方が 180°、を固定する。

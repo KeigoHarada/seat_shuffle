@@ -55,6 +55,7 @@ export type PrintPlan =
         shape: "rectangle" | "circle";
         frame: PrintFrame;
         text: string | null;
+        rotation: 0 | 180;
       }>;
     };
 
@@ -336,6 +337,7 @@ export function createPrintPlan(
       shape: landmarkShape(object.type),
       frame: objectFrames[index],
       text: object.text ?? null,
+      rotation,
     })),
   };
 }
