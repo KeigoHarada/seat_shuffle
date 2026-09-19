@@ -14,7 +14,7 @@ import {
   shouldSelectOnNodePointerDown,
 } from "../../../services/canvasGesture";
 
-import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
+import { useCanvasOverlayStore } from "../../../stores/canvasOverlay";
 import { useStore } from "../../../stores/appStore";
 
 interface UseNodeEventsProps {

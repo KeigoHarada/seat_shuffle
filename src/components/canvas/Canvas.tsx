@@ -14,7 +14,7 @@ import GroupAssignPopover from "./GroupAssignPopover";
 import { useCanvasPointerEvents } from "./hooks/useCanvasPointerEvents";
 import { useNodeEvents } from "./hooks/useNodeEvents";
 import { useAutoAssignAction } from "./hooks/useAutoAssignAction";
-import { useCanvasOverlayStore } from "./stores/canvasOverlayStore";
+import { useCanvasOverlayStore } from "../../stores/canvasOverlay";
 
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);

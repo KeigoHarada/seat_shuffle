@@ -18,7 +18,7 @@ import {
   trySetPointerCapture,
 } from "../../../services/canvasGesture";
 
-import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
+import { useCanvasOverlayStore } from "../../../stores/canvasOverlay";
 
 interface UseCanvasPointerEventsProps {
   canvasTool: "select" | "hand";

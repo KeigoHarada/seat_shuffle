@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useStore } from "../../../stores/appStore";
-import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
+import { useCanvasOverlayStore } from "../../../stores/canvasOverlay";
 
 interface UseCanvasSelectionActionsProps {
   selectedIds: string[];

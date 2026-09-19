@@ -1,7 +1,7 @@
 import React, { useRef, useLayoutEffect, useState } from "react";
 import { Lock, Unlock } from "lucide-react";
 import { clampMenuPosition } from "../../services/canvasGeometry";
-import { useCanvasOverlayStore } from "./stores/canvasOverlayStore";
+import { useCanvasOverlayStore } from "../../stores/canvasOverlay";
 
 interface MenuItemProps {
   onClick: () => void;

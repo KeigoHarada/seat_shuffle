@@ -6,7 +6,7 @@ import { generateTemplate } from "../../../services/templates";
 import type { TemplateId } from "../../../types/template";
 import { useStore } from "../../../stores/appStore";
 
-import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
+import { useCanvasOverlayStore } from "../../../stores/canvasOverlay";
 
 interface UseCanvasItemCreationProps {
   viewportRef: RefObject<HTMLDivElement | null>;
