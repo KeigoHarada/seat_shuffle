@@ -1,21 +1,21 @@
 import React, { useState, useCallback, useRef } from "react";
 import { useStore } from "../../stores/appStore";
 import { GRID_SIZE } from "../../constants/canvas";
-import { usePanZoom } from "../../hooks/usePanZoom";
-import { useCanvasDrag } from "../../hooks/useCanvasDrag";
-import { useSelection } from "../../hooks/useSelection";
+import { usePanZoom } from "./hooks/usePanZoom";
+import { useCanvasDrag } from "./hooks/useCanvasDrag";
+import { useSelection } from "./hooks/useSelection";
 import CanvasControls from "./CanvasControls";
 
 import CanvasToolbar from "./CanvasToolbar";
 import CanvasNodes from "./CanvasNodes";
-import { useCanvasActions } from "../../hooks/useCanvasActions";
+import { useCanvasActions } from "./hooks/useCanvasActions";
 import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
 import GroupAssignPopover from "./GroupAssignPopover";
 import { showToast } from "../../stores/toast";
 import { autoAssignStudents } from "../../services/autoAssign";
-import { useCanvasPointerEvents } from "../../hooks/useCanvasPointerEvents";
-import { useNodeEvents } from "../../hooks/useNodeEvents";
+import { useCanvasPointerEvents } from "./hooks/useCanvasPointerEvents";
+import { useNodeEvents } from "./hooks/useNodeEvents";
 
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);

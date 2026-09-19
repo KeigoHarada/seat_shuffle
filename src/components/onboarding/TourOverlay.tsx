@@ -9,7 +9,7 @@ import {
   Lightbulb,
   Target,
 } from "lucide-react";
-import { useTourOverlay } from "../../hooks/useTourOverlay";
+import { useTourOverlay } from "./hooks/useTourOverlay";
 
 export const TourOverlay: React.FC = () => {
   const {

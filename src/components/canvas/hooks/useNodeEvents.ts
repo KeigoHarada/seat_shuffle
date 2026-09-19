@@ -5,14 +5,14 @@ import {
   type MouseEvent,
   type RefObject,
 } from "react";
-import type { Seat } from "../types/seat";
-import { contextMenuFromClient } from "../services/canvasGeometry";
+import type { Seat } from "../../../types/seat";
+import { contextMenuFromClient } from "../../../services/canvasGeometry";
 import {
   isTouchPointerType,
   LONG_PRESS_MS,
   movedPastTap,
   shouldSelectOnNodePointerDown,
-} from "../services/canvasGesture";
+} from "../../../services/canvasGesture";
 
 interface UseNodeEventsProps {
   seats: Seat[];

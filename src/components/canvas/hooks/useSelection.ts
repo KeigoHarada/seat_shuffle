@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
-import { useCanvasSelectionStore } from "../stores/canvasSelection";
-import type { Seat } from "../types/seat";
-import type { CanvasObject } from "../types/canvas";
-import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
+import { useCanvasSelectionStore } from "../../../stores/canvasSelection";
+import type { Seat } from "../../../types/seat";
+import type { CanvasObject } from "../../../types/canvas";
+import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../../../constants/canvas";
 
 export interface SelectionBox {
   startX: number;

@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useEffect, type CSSProperties, type MouseEvent } from "react";
-import { useOnboardingStore } from "../stores/onboarding";
-import { useStore } from "../stores/appStore";
-import { TOUR_STEPS } from "../services/onboardingTour";
-import type { TourStep } from "../types/onboarding";
+import { useOnboardingStore } from "../../../stores/onboarding";
+import { useStore } from "../../../stores/appStore";
+import { TOUR_STEPS } from "../../../services/onboardingTour";
+import type { TourStep } from "../../../types/onboarding";
 
 export interface TargetRect {
   top: number;

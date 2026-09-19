@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useStore } from "../../../stores/appStore";
 import { Plus } from "lucide-react";
 import { Role } from "../../../types/student";
-import IconPicker, { IconName } from "../../ui/IconPicker";
+import type { IconName } from "../../../types/icon";
+import IconPicker from "../../ui/IconPicker";
 import Input from "../../ui/Input";
 
 const RoleAddForm: React.FC = () => {

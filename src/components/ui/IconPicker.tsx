@@ -1,63 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Star,
-  Crown,
-  Flag,
-  Medal,
-  PenTool,
-  BookOpen,
-  ClipboardList,
-  Eraser,
-  HeartPulse,
-  Activity,
-  Trophy,
-  Sparkles,
-  Trash,
-  PawPrint,
-  Sprout,
-  Leaf,
-  Mic,
-  Megaphone,
-  Utensils,
-  Apple,
-  Palette,
-  Scissors,
-  Calendar,
-  Clock,
-  Bell,
-  Users,
-} from "lucide-react";
+import { AVAILABLE_ICONS, type IconName } from "../../constants/icons";
 
-export const AVAILABLE_ICONS = {
-  Star,
-  Crown,
-  Flag,
-  Medal,
-  PenTool,
-  BookOpen,
-  ClipboardList,
-  Eraser,
-  HeartPulse,
-  Activity,
-  Trophy,
-  Sparkles,
-  Trash,
-  PawPrint,
-  Sprout,
-  Leaf,
-  Mic,
-  Megaphone,
-  Utensils,
-  Apple,
-  Palette,
-  Scissors,
-  Calendar,
-  Clock,
-  Bell,
-  Users,
-};
-
-export type IconName = keyof typeof AVAILABLE_ICONS;
+export { AVAILABLE_ICONS };
+export type { IconName };
 
 interface IconPickerProps {
   value: IconName;
@@ -81,7 +26,7 @@ const IconPicker: React.FC<IconPickerProps> = ({ value, onChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const SelectedIcon = AVAILABLE_ICONS[value] || Star;
+  const SelectedIcon = AVAILABLE_ICONS[value] || AVAILABLE_ICONS.Star;
 
   return (
     <div ref={containerRef} style={{ position: "relative" }}>

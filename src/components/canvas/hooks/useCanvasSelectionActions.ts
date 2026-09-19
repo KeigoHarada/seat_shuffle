@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useStore } from "../stores/appStore";
+import { useStore } from "../../../stores/appStore";
 
 interface UseCanvasSelectionActionsProps {
   selectedIds: string[];

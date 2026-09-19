@@ -1,16 +1,16 @@
 import { useState, useCallback, useMemo, useRef } from "react";
-import type { Seat } from "../types/seat";
-import type { CanvasObject, DragNode } from "../types/canvas";
-import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
+import type { Seat } from "../../../types/seat";
+import type { CanvasObject, DragNode } from "../../../types/canvas";
+import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../../../constants/canvas";
 
-import { checkCollision, screenToWorld } from "../services/canvasGeometry";
+import { checkCollision, screenToWorld } from "../../../services/canvasGeometry";
 import {
   isTouchPointerType,
   tryReleasePointerCapture,
   trySetPointerCapture,
-} from "../services/canvasGesture";
-import { showToast } from "../stores/toast";
-import { useStore } from "../stores/appStore";
+} from "../../../services/canvasGesture";
+import { showToast } from "../../../stores/toast";
+import { useStore } from "../../../stores/appStore";
 
 export const useCanvasDrag = (
   seats: Seat[],

@@ -1,11 +1,10 @@
 import { useCallback } from "react";
-import type { Seat } from "../types/seat";
-import type { CanvasObject } from "../types/canvas";
-import { SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
-import { findEmptyPos } from "../services/canvasGeometry";
-import { useStore } from "../stores/appStore";
-
-let clipboard: { seats: Seat[]; objects: CanvasObject[] } | null = null;
+import type { Seat } from "../../../types/seat";
+import type { CanvasObject } from "../../../types/canvas";
+import { SEAT_COLS, SEAT_ROWS } from "../../../constants/canvas";
+import { findEmptyPos } from "../../../services/canvasGeometry";
+import { useStore } from "../../../stores/appStore";
+import { useClipboardStore } from "../../../stores/clipboard";
 
 interface UseCanvasClipboardProps {
   selectedIds: string[];
@@ -22,6 +21,9 @@ export const useCanvasClipboard = ({
   const addObject = useStore((state) => state.addObject);
   const pushUndo = useStore((state) => state.pushUndo);
 
+  const clipboard = useClipboardStore((state) => state.clipboard);
+  const setClipboard = useClipboardStore((state) => state.setClipboard);
+
   const handleCopy = useCallback(() => {
     if (selectedIds.length === 0) return;
     const copiedSeats = seats
@@ -31,26 +33,31 @@ export const useCanvasClipboard = ({
       .filter((o) => selectedIds.includes(o.id))
       .map((o) => ({ ...o }));
 
-    clipboard = { seats: copiedSeats, objects: copiedObjects };
-  }, [selectedIds, seats, objects]);
+    setClipboard({ seats: copiedSeats, objects: copiedObjects });
+  }, [selectedIds, seats, objects, setClipboard]);
 
   const handlePaste = useCallback(() => {
-    if (!clipboard) return;
-    if (clipboard.seats.length === 0 && clipboard.objects.length === 0) return;
+    const currentClipboard = useClipboardStore.getState().clipboard;
+    if (!currentClipboard) return;
+    if (
+      currentClipboard.seats.length === 0 &&
+      currentClipboard.objects.length === 0
+    )
+      return;
 
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
     let maxY = -Infinity;
 
-    clipboard.seats.forEach((s) => {
+    currentClipboard.seats.forEach((s) => {
       minX = Math.min(minX, s.x);
       minY = Math.min(minY, s.y);
       maxX = Math.max(maxX, s.x + SEAT_COLS);
       maxY = Math.max(maxY, s.y + SEAT_ROWS);
     });
 
-    clipboard.objects.forEach((o) => {
+    currentClipboard.objects.forEach((o) => {
       minX = Math.min(minX, o.x);
       minY = Math.min(minY, o.y);
       maxX = Math.max(maxX, o.x + o.width);
@@ -78,7 +85,7 @@ export const useCanvasClipboard = ({
     const nextClipboardSeats: Seat[] = [];
     const nextClipboardObjects: CanvasObject[] = [];
 
-    clipboard.seats.forEach((s) => {
+    currentClipboard.seats.forEach((s) => {
       const newId = crypto.randomUUID();
       newSelectedIds.push(newId);
       const newSeat = { ...s, id: newId, x: s.x + dx, y: s.y + dy };
@@ -86,7 +93,7 @@ export const useCanvasClipboard = ({
       nextClipboardSeats.push(newSeat);
     });
 
-    clipboard.objects.forEach((o) => {
+    currentClipboard.objects.forEach((o) => {
       const newId = crypto.randomUUID();
       newSelectedIds.push(newId);
       const newObj = { ...o, id: newId, x: o.x + dx, y: o.y + dy };
@@ -94,13 +101,13 @@ export const useCanvasClipboard = ({
       nextClipboardObjects.push(newObj);
     });
 
-    clipboard = {
+    setClipboard({
       seats: nextClipboardSeats,
       objects: nextClipboardObjects,
-    };
+    });
 
     setSelectedIds(newSelectedIds);
-  }, [addSeat, addObject, setSelectedIds, seats, objects, pushUndo]);
+  }, [addSeat, addObject, setSelectedIds, seats, objects, pushUndo, setClipboard]);
 
   const handleDuplicate = useCallback(() => {
     handleCopy();
@@ -108,6 +115,7 @@ export const useCanvasClipboard = ({
   }, [handleCopy, handlePaste]);
 
   return {
+    clipboard,
     handleCopy,
     handlePaste,
     handleDuplicate,

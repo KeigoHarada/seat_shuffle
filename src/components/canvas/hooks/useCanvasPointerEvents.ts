@@ -5,7 +5,7 @@ import {
   type MouseEvent,
   type RefObject,
 } from "react";
-import { screenToWorld, contextMenuFromClient } from "../services/canvasGeometry";
+import { screenToWorld, contextMenuFromClient } from "../../../services/canvasGeometry";
 import {
   isCanvasChromeTarget,
   isCanvasNodeTarget,
@@ -16,7 +16,7 @@ import {
   shouldClearSelectionForPointerGesture,
   tryReleasePointerCapture,
   trySetPointerCapture,
-} from "../services/canvasGesture";
+} from "../../../services/canvasGesture";
 
 interface UseCanvasPointerEventsProps {
   canvasTool: "select" | "hand";

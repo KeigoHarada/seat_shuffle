@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
-import type { Seat } from "../types/seat";
-import type { CanvasObject } from "../types/canvas";
+import type { Seat } from "../../../types/seat";
+import type { CanvasObject } from "../../../types/canvas";
 import { useCanvasSelectionActions } from "./useCanvasSelectionActions";
 import { useCanvasClipboard } from "./useCanvasClipboard";
 import { useCanvasKeyboardShortcuts } from "./useCanvasKeyboardShortcuts";

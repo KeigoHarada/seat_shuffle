@@ -8,7 +8,7 @@ import Select from "../../ui/Select";
 import MultiSelect from "../../ui/MultiSelect";
 import { GENDER_OPTIONS } from "../../../constants/gender";
 import Input from "../../ui/Input";
-import { AVAILABLE_ICONS, IconName } from "../../ui/IconPicker";
+import { AVAILABLE_ICONS, type IconName } from "../../../constants/icons";
 
 interface Props {
   student: Student;
