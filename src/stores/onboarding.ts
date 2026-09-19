@@ -1,40 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useStore } from "./appStore";
-import { TOUR_STEPS } from "../components/onboarding/tourSteps";
+import { TOUR_STEPS } from "../data/tourSteps";
+import type { OnboardingState } from "../types/onboarding";
 
-export interface OnboardingState {
-  hasCompletedOnboarding: boolean;
-  isTourActive: boolean;
-  currentTourStep: number;
-  isWelcomeModalOpen: boolean;
-  isGuideHubOpen: boolean;
-  selectedGuideTab: string;
-  isResetConfirmOpen: boolean;
-  isCompletionModalOpen: boolean;
-  stepSnapshots: Record<number, any>;
-
-  setHasCompletedOnboarding: (completed: boolean) => void;
-  openWelcomeModal: () => void;
-  closeWelcomeModal: () => void;
-  openGuideHub: (tabId?: string) => void;
-  closeGuideHub: () => void;
-  setSelectedGuideTab: (tabId: string) => void;
-  openResetConfirm: () => void;
-  closeResetConfirm: () => void;
-  openCompletionModal: () => void;
-  closeCompletionModal: () => void;
-
-  startTour: (step?: number) => void;
-  nextTourStep: () => void;
-  skipTourStep: () => void;
-  prevTourStep: () => void;
-  endTour: (completed?: boolean) => void;
-  handleStartTourRequest: () => void;
-  confirmStartTourWithDefaultData: () => void;
-  takeSnapshot: (step: number) => void;
-  restoreSnapshot: (step: number) => void;
-}
+export type { OnboardingState };
 
 export const useOnboardingStore = create<OnboardingState>()(
   persist(

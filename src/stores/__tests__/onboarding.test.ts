@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useOnboardingStore } from "../onboarding";
-import { TOUR_STEPS } from "../../components/onboarding/tourSteps";
+import { TOUR_STEPS } from "../../data/tourSteps";
 import { useStore } from "../appStore";
 
 describe("useOnboardingStore", () => {
