@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Printer, Shuffle, Undo2 } from "lucide-react";
-import { usePrint } from "../components/print/PrintProvider";
+import { usePrintSessionStore } from "../stores/printSession";
 import LegalModal from "../components/ui/LegalModal";
 import { useShuffle } from "../hooks/useShuffle";
 import ViewModeToggle from "./ViewModeToggle";
@@ -8,7 +8,9 @@ import ViewModeToggle from "./ViewModeToggle";
 const Footer: React.FC = () => {
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const { handleShuffle, undo, isShuffling, canUndo } = useShuffle();
-  const { requestPrint } = usePrint();
+  const openPrintDialog = usePrintSessionStore(
+    (state) => state.openPrintDialog,
+  );
 
   return (
     <footer className="app-footer">
@@ -34,7 +36,7 @@ const Footer: React.FC = () => {
           type="button"
           id="btn-footer-print"
           className="btn-secondary footer-print"
-          onClick={requestPrint}
+          onClick={openPrintDialog}
           title="座席表を印刷"
           aria-label="印刷"
         >

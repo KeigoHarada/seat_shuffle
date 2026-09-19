@@ -5,18 +5,20 @@ import { useStore } from "../../../stores/appStore";
 import { useCanvasSelectionStore } from "../../../stores/canvasSelection";
 import { usePrintSessionStore } from "../../../stores/printSession";
 import { useToastStore } from "../../../stores/toast";
-import { PrintProvider, usePrint } from "../PrintProvider";
+import PrintArea from "../PrintArea";
 
 function PrintTrigger() {
-  const { requestPrint } = usePrint();
+  const openPrintDialog = usePrintSessionStore(
+    (state) => state.openPrintDialog,
+  );
   return (
-    <button id="btn-footer-print" type="button" onClick={requestPrint}>
+    <button id="btn-footer-print" type="button" onClick={openPrintDialog}>
       印刷
     </button>
   );
 }
 
-describe("PrintProvider", () => {
+describe("PrintArea", () => {
   let container: HTMLDivElement;
   let root: ReturnType<typeof createRoot> | null = null;
   let printMock: ReturnType<typeof vi.fn>;
@@ -54,9 +56,10 @@ describe("PrintProvider", () => {
 
     await act(async () => {
       root?.render(
-        <PrintProvider>
+        <>
           <PrintTrigger />
-        </PrintProvider>,
+          <PrintArea />
+        </>,
       );
     });
 
@@ -108,9 +111,10 @@ describe("PrintProvider", () => {
 
     await act(async () => {
       root?.render(
-        <PrintProvider>
+        <>
           <PrintTrigger />
-        </PrintProvider>,
+          <PrintArea />
+        </>,
       );
     });
 
@@ -167,9 +171,10 @@ describe("PrintProvider", () => {
 
     await act(async () => {
       root?.render(
-        <PrintProvider>
+        <>
           <PrintTrigger />
-        </PrintProvider>,
+          <PrintArea />
+        </>,
       );
     });
 
@@ -235,9 +240,10 @@ describe("PrintProvider", () => {
 
     await act(async () => {
       root?.render(
-        <PrintProvider>
+        <>
           <PrintTrigger />
-        </PrintProvider>,
+          <PrintArea />
+        </>,
       );
     });
 
@@ -277,9 +283,10 @@ describe("PrintProvider", () => {
 
     await act(async () => {
       root?.render(
-        <PrintProvider>
+        <>
           <PrintTrigger />
-        </PrintProvider>,
+          <PrintArea />
+        </>,
       );
     });
 

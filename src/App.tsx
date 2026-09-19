@@ -1,20 +1,21 @@
 import React from "react";
 import ShuffleAnimation from "./components/canvas/ShuffleAnimation";
 import OnboardingController from "./components/onboarding/OnboardingController";
-import { PrintProvider } from "./components/print/PrintProvider";
+import PrintArea from "./components/print/PrintArea";
 import { ToastContainer } from "./components/ui/Toast";
 import MainView from "./views/MainView";
 
 const App: React.FC = () => {
   return (
-    <PrintProvider>
+    <>
       <div data-screen-root>
         <MainView />
         <ShuffleAnimation />
         <ToastContainer />
         <OnboardingController />
       </div>
-    </PrintProvider>
+      <PrintArea />
+    </>
   );
 };
 

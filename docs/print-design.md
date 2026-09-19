@@ -13,21 +13,20 @@
 `App` は画面ルートと印刷ルートを並べて持つ。フッタは印刷コマンドだけを呼ぶ。用紙・フィット・文字の向き・選択の解釈は呼び出し側が知らない。
 
 ```tsx
-<PrintProvider>
-  <div data-screen-root>
-    <DesktopApp />
-    <ShuffleAnimation />
-    <ToastContainer />
-    <OnboardingController />
-  </div>
-</PrintProvider>
+<div data-screen-root>
+  <MainView />
+  <ShuffleAnimation />
+  <ToastContainer />
+  <OnboardingController />
+</div>
+<PrintArea />
 ```
 
-`PrintProvider` が画面ルートの兄弟として印刷面を載せる。トースト・ツアー・シャッフルは `.app-shell` の外にいるので、画面ルートに含めないと紙に漏れる。
+`PrintArea` が画面ルートの兄弟として印刷面（`PrintSheet`）とダイアログ（`PrintDialog`）を載せる。トースト・ツアー・シャッフルは `.app-shell` の外にいるので、画面ルートに含めないと紙に漏れる。
 
 ```tsx
-const { requestPrint } = usePrint();
-<button id="btn-footer-print" type="button" onClick={requestPrint}>印刷</button>
+const openPrintDialog = usePrintSessionStore((state) => state.openPrintDialog);
+<button id="btn-footer-print" type="button" onClick={openPrintDialog}>印刷</button>
 ```
 
 `requestPrint()` が設定（掲示用／机上確認用）を出し、確定時にその時点の `selectedIds` を読んで `flushSync` してから `window.print()` する。`Ctrl` / `Cmd` + `P` は既に載っている印刷面を刷る（最後に確定した用途。未確定なら掲示用。対象は開いた時点の選択）。
