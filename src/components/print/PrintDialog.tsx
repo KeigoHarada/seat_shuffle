@@ -8,16 +8,18 @@ import {
 
 interface PrintDialogProps {
   draftMode: PrintMode;
-  orientation: PrintOrientation;
+  draftOrientation: PrintOrientation;
   onChangeMode: (mode: PrintMode) => void;
+  onChangeOrientation: (orientation: PrintOrientation) => void;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 const PrintDialog: React.FC<PrintDialogProps> = ({
   draftMode,
-  orientation,
+  draftOrientation,
   onChangeMode,
+  onChangeOrientation,
   onConfirm,
   onCancel,
 }) => {
@@ -79,13 +81,47 @@ const PrintDialog: React.FC<PrintDialogProps> = ({
             机上確認用（文字を 180° 回転）
           </label>
         </fieldset>
-        <p
+        <fieldset
           id="print-orientation"
-          className="text-body"
-          style={{ margin: 0, color: "var(--c-text-sub)" }}
+          style={{
+            border: "none",
+            margin: 0,
+            padding: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--spacing-sm)",
+          }}
         >
-          {printOrientationLabel(orientation)}
-        </p>
+          <legend className="text-body" style={{ color: "var(--c-text-sub)" }}>
+            用紙
+          </legend>
+          <label
+            className="print-mode-option"
+            htmlFor="print-orientation-landscape"
+          >
+            <input
+              id="print-orientation-landscape"
+              type="radio"
+              name="print-orientation"
+              checked={draftOrientation === "landscape"}
+              onChange={() => onChangeOrientation("landscape")}
+            />
+            {printOrientationLabel("landscape")}
+          </label>
+          <label
+            className="print-mode-option"
+            htmlFor="print-orientation-portrait"
+          >
+            <input
+              id="print-orientation-portrait"
+              type="radio"
+              name="print-orientation"
+              checked={draftOrientation === "portrait"}
+              onChange={() => onChangeOrientation("portrait")}
+            />
+            {printOrientationLabel("portrait")}
+          </label>
+        </fieldset>
         <div
           style={{
             display: "flex",

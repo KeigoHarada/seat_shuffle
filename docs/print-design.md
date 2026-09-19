@@ -37,6 +37,7 @@ const { requestPrint } = usePrint();
 ```ts
 const all = createPrintPlan(source, "wall");
 const group = createPrintPlan(source, "desk", ["seat-a", "seat-b", "desk"]);
+const portrait = createPrintPlan(source, "wall", undefined, "portrait");
 
 if (group.kind === "ready") {
   expect(group.seats.map((s) => s.id).sort()).toEqual(["seat-a", "seat-b"]);
@@ -52,18 +53,19 @@ if (group.kind === "ready") {
 
 ## Shape
 
-公開面は `requestPrint` と純粋関数 `createPrintPlan(source, mode, selectedIds?)` の 2 つ。ブランド付き millimetre 型は置かない。
+公開面は `requestPrint` と純粋関数 `createPrintPlan(source, mode, selectedIds?, orientation?)` の 2 つ。ブランド付き millimetre 型は置かない。
 
-- `PrintMode`: `"wall" | "desk"`。先生が選ぶ唯一の項目。
+- `PrintMode`: `"wall" | "desk"`。先生が選ぶ用途。
+- `PrintOrientation`: `"landscape" | "portrait"`。先生が選ぶ用紙向き。初期値は横。省略時だけ外接の大きい倍率を採る（同率なら横）。
 - `selectedIds` が空または省略なら全座席・全図形。1 件以上ならその集合。存在しない ID は無視する。残った対象が 0 件なら `kind: "empty"`。
-- `createPrintPlan` が閲覧相当の文字、外接範囲、A4 縦横の比較、倍率（100% 上限なし）、中央配置、丸め後のはみ出し再縮小を一度に決める。内容の外接は既存の `getCanvasBoundingBox` に、対象だけを渡す。
+- `createPrintPlan` が閲覧相当の文字、外接範囲、選んだ向きへの倍率（100% 上限なし）、中央配置、丸め後のはみ出し再縮小を一度に決める。内容の外接は既存の `getCanvasBoundingBox` に、対象だけを渡す。
 - 座席ラベルは閲覧と同じ: 出席番号、ふりがな、氏名。空席は `"空席"`。ロール・グループ・ロックのフィールドは型に無い。
 - 図形は枠（四角／円）と任意の `text`（「教卓」）を持つ。リサイズつまみは型に無い。
 - 180° は座席の文字と図形の文字に付く。座席枠と図形の位置は回さない。
-- 向きは印刷対象の外接で縦横の大きい倍率を採る。同率なら横。設定 UI に「A4 横（自動）」と出すだけ。選択範囲が縦長なら縦、横長なら横になり得る。
+- 向きは設定 UI の「A4 横」「A4 縦」。用途と同じ非永続ストアに持つ。選んだ向きの余白に収まるまで拡大／縮小する。
 - 画面 CSS は `[data-screen-root]` / `[data-print-root]` の切り替えだけ。要素ごとの隠しリストは持たない。`@page` 余白は 0。見た目の 10mm は印刷ルートの padding。シートは縦横とも contain する。座席・図形はシートに対する割合で置くので、ブラウザ余白で用紙が狭くなっても切れない。左下 URL・右下日付は余白 0 のため出ない。
 - `usePanZoom` の印刷リスナー、`PRINT_SHEET_PX`、`.print-heading` は削除する。画面のパン／ズーム／選択は印刷が書き戻さない。
-- 用途の選択は非永続ストア（トーストと同じ）。`isViewMode` も `perspective` も読まない。閲覧相当の情報量は `createPrintPlan` が決める。
+- 用途と向きの選択は非永続ストア（トーストと同じ）。`isViewMode` も `perspective` も読まない。閲覧相当の情報量は `createPrintPlan` が決める。
 
 層は types → `src/utils/printLayout.ts` → 印刷コンポーネント → `App` / フッタ。utils は React を import しない。選択 ID はキャンバスの `useSelection` から Provider が読む。
 

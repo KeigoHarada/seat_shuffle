@@ -120,12 +120,19 @@ const PrintSheet: React.FC<{ selectedIds?: readonly string[] }> = ({
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
   const mode = usePrintSessionStore((state) => state.mode);
+  const orientation = usePrintSessionStore((state) => state.orientation);
   const liveSelectedIds = useCanvasSelectionStore((state) => state.selectedIds);
   const targetIds = selectedIds ?? liveSelectedIds;
 
   const plan = useMemo(
-    () => createPrintPlan({ students, seats, objects }, mode, targetIds),
-    [students, seats, objects, mode, targetIds],
+    () =>
+      createPrintPlan(
+        { students, seats, objects },
+        mode,
+        targetIds,
+        orientation,
+      ),
+    [students, seats, objects, mode, targetIds, orientation],
   );
 
   useEffect(() => {

@@ -207,14 +207,41 @@ function emptyLabel(rotation: 0 | 180) {
 export function printOrientationLabel(orientation: PrintOrientation): string {
   switch (orientation) {
     case "landscape":
-      return "A4 横（自動）";
+      return "A4 横";
     case "portrait":
-      return "A4 縦（自動）";
+      return "A4 縦";
     default: {
       const _exhaustive: never = orientation;
       return _exhaustive;
     }
   }
+}
+
+function pageContent(orientation: PrintOrientation) {
+  switch (orientation) {
+    case "landscape":
+      return LANDSCAPE_CONTENT;
+    case "portrait":
+      return PORTRAIT_CONTENT;
+    default: {
+      const _exhaustive: never = orientation;
+      return _exhaustive;
+    }
+  }
+}
+
+function autoOrientation(bbox: CanvasBoundingBox): PrintOrientation {
+  const landscapeScale = scaleFor(
+    LANDSCAPE_CONTENT.contentWidthMm,
+    LANDSCAPE_CONTENT.contentHeightMm,
+    bbox,
+  );
+  const portraitScale = scaleFor(
+    PORTRAIT_CONTENT.contentWidthMm,
+    PORTRAIT_CONTENT.contentHeightMm,
+    bbox,
+  );
+  return portraitScale > landscapeScale ? "portrait" : "landscape";
 }
 
 export function printPageRule(orientation: PrintOrientation): string {
@@ -233,6 +260,7 @@ export function createPrintPlan(
   source: PrintSource,
   mode: PrintMode,
   selectedIds?: readonly string[],
+  orientation?: PrintOrientation,
 ): PrintPlan {
   const { seats, objects } = filterMarks(source, selectedIds);
   if (seats.length === 0 && objects.length === 0) {
@@ -247,21 +275,10 @@ export function createPrintPlan(
     return emptyPlan();
   }
 
-  const landscapeScale = scaleFor(
-    LANDSCAPE_CONTENT.contentWidthMm,
-    LANDSCAPE_CONTENT.contentHeightMm,
-    bbox,
-  );
-  const portraitScale = scaleFor(
-    PORTRAIT_CONTENT.contentWidthMm,
-    PORTRAIT_CONTENT.contentHeightMm,
-    bbox,
-  );
-  const page =
-    portraitScale > landscapeScale ? PORTRAIT_CONTENT : LANDSCAPE_CONTENT;
+  const page = pageContent(orientation ?? autoOrientation(bbox));
   const contentWidthMm = page.contentWidthMm;
   const contentHeightMm = page.contentHeightMm;
-  let scale = portraitScale > landscapeScale ? portraitScale : landscapeScale;
+  let scale = scaleFor(contentWidthMm, contentHeightMm, bbox);
 
   const layoutFrames = (nextScale: number) => ({
     seatFrames: seats.map((seat) =>

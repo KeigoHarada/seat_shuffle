@@ -4,8 +4,8 @@ Footer `印刷` opens a settings dialog, then the browser print dialog. The pape
 
 ## Sub-features
 
-- `print-dialog` opens from `#btn-footer-print` and offers `掲示用（文字を正立）` / `机上確認用（文字を 180° 回転）`.
-- `print-orientation` shows `A4 横（自動）` or `A4 縦（自動）` from the current target bounds.
+- `print-dialog` opens from `#btn-footer-print` and offers `掲示用（文字を正立）` / `机上確認用（文字を 180° 回転）` plus `A4 横` / `A4 縦`.
+- `print-orientation` is the paper fieldset. `#print-orientation-landscape` and `#print-orientation-portrait` choose the page box. Default is `A4 横`.
 - `print-sheet` is `[data-print-root]`. Screen chrome lives under `[data-screen-root]` and is hidden in print media.
 - `print-selection` uses the canvas selection at dialog open. No selection prints the whole classroom.
 
@@ -13,7 +13,7 @@ Footer `印刷` opens a settings dialog, then the browser print dialog. The pape
 
 - Keep at least one seat or object on the canvas.
 - Optionally drag a marquee over seats or objects.
-- Press footer `印刷`. Choose 掲示用 or 机上確認用. Press `印刷する`.
+- Press footer `印刷`. Choose 掲示用 or 机上確認用, and A4 横 or A4 縦. Press `印刷する`.
 - Confirm or cancel the browser print dialog.
 
 ## Driving it with control-rakugae
@@ -23,15 +23,15 @@ Preconditions:
 - Doctor green; welcome dismissed; default classroom.
 - Native `window.print()` must not be confirmed. Use print-media emulation for sheet proof.
 
-- **Open settings.** `click --id btn-footer-print`. Dialog `#print-dialog` shows `掲示用（文字を正立）` and an `A4` orientation line.
+- **Open settings.** `click --id btn-footer-print`. Dialog `#print-dialog` shows `掲示用（文字を正立）`, `A4 横`, and `A4 縦`.
 - **Cancel.** `click --id btn-print-cancel`. Dialog is gone. Canvas zoom text is unchanged.
 - **Sheet paint.** Reopen `#btn-footer-print`. `eval` after `matchMedia('print')` is not enough; drive `emulateMedia` only in `npm run test:phone-layout` or a CDP eval that reads `[data-print-root] .print-seat` and `.print-landmark`. Expect `山田` (or another assigned name), `空席` if any seat is empty, and `教卓`. Expect no role SVG in the print root. 机上確認用 then `印刷する` (after stubbing `window.print`) puts `rotate(180deg)` on both `.print-seat-label` and `.print-landmark-text`. Marks stay inside `.print-sheet` and the page box.
 - **Empty canvas.** Clear seats and objects, then `click --id btn-footer-print`. Toast `印刷できる座席や図形がありません`. No dialog.
 
 ## Gotchas
 
-- `#btn-footer-print` no longer calls `window.print()` directly. The dialog is required for the footer path. `Ctrl+P` uses the last confirmed mode (or 掲示用) and the live selection.
+- `#btn-footer-print` no longer calls `window.print()` directly. The dialog is required for the footer path. `Ctrl+P` uses the last confirmed mode and orientation (or 掲示用 + A4 横) and the live selection.
 - Print does not flip `isViewMode` or rewrite pan/zoom. A zoom change after print is a regression.
 - `@page` margin is `0`. Chrome's default URL/date footer needs margin room; prove with print-to-PDF (`preferCSSPageSize`, default headers on) that `http` / `127.0.0.1` and a date string are absent. Visual 10mm inset is print-root padding.
 - View mode blocks marquee selection. Selection print is an edit-mode gesture.
-- Do not persist print mode or selection. Reloading the tab resets the last mode to 掲示用.
+- Do not persist print mode, orientation, or selection. Reloading the tab resets to 掲示用 and A4 横.

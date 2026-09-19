@@ -107,6 +107,17 @@ describe("createPrintPlan", () => {
     );
   });
 
+  it("fits the classroom on A4 portrait when that orientation is chosen", () => {
+    const plan = createPrintPlan(classroomSource(), "wall", undefined, "portrait");
+    expectReady(plan);
+    expect(plan.page.orientation).toBe("portrait");
+    expect(plan.page.contentWidthMm).toBe(190);
+    expect(plan.page.contentHeightMm).toBe(277);
+    expect(plan.seats).toHaveLength(30);
+    expect(plan.landmarks).toHaveLength(1);
+    expectFramesInside(plan);
+  });
+
   it("rotates seat and landmark labels in desk mode and keeps frames", () => {
     const source = classroomSource();
     const wall = createPrintPlan(source, "wall");

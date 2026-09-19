@@ -29,6 +29,7 @@ describe("PrintProvider", () => {
     vi.stubGlobal("print", printMock);
     usePrintSessionStore.setState({
       mode: "wall",
+      orientation: "landscape",
     });
     useCanvasSelectionStore.setState({ selectedIds: [] });
     useToastStore.setState({ toasts: [] });
@@ -128,7 +129,8 @@ describe("PrintProvider", () => {
     const dialog = document.querySelector("#print-dialog");
     expect(dialog).not.toBeNull();
     expect(dialog?.textContent).toContain("掲示用（文字を正立）");
-    expect(dialog?.textContent).toContain("A4 横（自動）");
+    expect(dialog?.textContent).toContain("A4 横");
+    expect(dialog?.textContent).toContain("A4 縦");
 
     await act(async () => {
       document.querySelector<HTMLButtonElement>("#btn-print-confirm")?.click();
@@ -137,12 +139,61 @@ describe("PrintProvider", () => {
     expect(printMock).toHaveBeenCalledTimes(1);
     expect(document.querySelector("#print-dialog")).toBeNull();
     expect(usePrintSessionStore.getState().mode).toBe("wall");
+    expect(usePrintSessionStore.getState().orientation).toBe("landscape");
     expect(
       document.querySelector<HTMLElement>("[data-print-seat-id='seat-a']")
         ?.style.left,
     ).toMatch(/%$/);
     expect(document.getElementById("rakugae-print-page")?.textContent).toBe(
       "@page { size: A4 landscape; margin: 0; }",
+    );
+  });
+
+  it("prints A4 portrait when that orientation is confirmed", async () => {
+    useStore.setState({
+      seats: [
+        {
+          id: "seat-a",
+          studentId: null,
+          groupIds: [],
+          x: 0,
+          y: 0,
+          isLocked: false,
+        },
+      ],
+      objects: [],
+      students: [],
+    });
+
+    await act(async () => {
+      root?.render(
+        <PrintProvider>
+          <PrintTrigger />
+        </PrintProvider>,
+      );
+    });
+
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>("#btn-footer-print")?.click();
+    });
+    await act(async () => {
+      document
+        .querySelector<HTMLInputElement>("#print-orientation-portrait")
+        ?.click();
+    });
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>("#btn-print-confirm")?.click();
+    });
+
+    expect(printMock).toHaveBeenCalledTimes(1);
+    expect(usePrintSessionStore.getState().orientation).toBe("portrait");
+    expect(
+      document
+        .querySelector("[data-print-root]")
+        ?.getAttribute("data-orientation"),
+    ).toBe("portrait");
+    expect(document.getElementById("rakugae-print-page")?.textContent).toBe(
+      "@page { size: A4 portrait; margin: 0; }",
     );
   });
 

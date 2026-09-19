@@ -10,7 +10,11 @@ import { useStore } from "../../stores";
 import { useCanvasSelectionStore } from "../../stores/canvasSelection";
 import { usePrintSessionStore } from "../../stores/printSession";
 import { showToast } from "../../stores/toast";
-import { createPrintPlan, type PrintMode } from "../../utils/printLayout";
+import {
+  createPrintPlan,
+  type PrintMode,
+  type PrintOrientation,
+} from "../../utils/printLayout";
 import PrintDialog from "./PrintDialog";
 import PrintSheet from "./PrintSheet";
 
@@ -37,6 +41,8 @@ export const PrintProvider: React.FC<{ children: React.ReactNode }> = ({
   const objects = useStore((state) => state.objects);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [draftMode, setDraftMode] = useState<PrintMode>("wall");
+  const [draftOrientation, setDraftOrientation] =
+    useState<PrintOrientation>("landscape");
   const [dialogSelectedIds, setDialogSelectedIds] = useState<readonly string[]>(
     [],
   );
@@ -48,22 +54,35 @@ export const PrintProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const requestPrint = useCallback(() => {
     const selectedIds = useCanvasSelectionStore.getState().selectedIds;
-    const mode = usePrintSessionStore.getState().mode;
-    const preview = createPrintPlan(printSourceFromStore(), mode, selectedIds);
+    const { mode, orientation } = usePrintSessionStore.getState();
+    const preview = createPrintPlan(
+      printSourceFromStore(),
+      mode,
+      selectedIds,
+      orientation,
+    );
     if (preview.kind === "empty") {
       showToast.info("印刷できる座席や図形がありません");
       return;
     }
     setDraftMode(mode);
+    setDraftOrientation(orientation);
     setDialogSelectedIds(selectedIds);
     setDialogOpen(true);
   }, []);
 
-  const dialogPlan = createPrintPlan(source, draftMode, dialogSelectedIds);
+  const dialogPlan = createPrintPlan(
+    source,
+    draftMode,
+    dialogSelectedIds,
+    draftOrientation,
+  );
 
   const confirmPrint = () => {
     flushSync(() => {
-      usePrintSessionStore.getState().setMode(draftMode);
+      const session = usePrintSessionStore.getState();
+      session.setMode(draftMode);
+      session.setOrientation(draftOrientation);
     });
     window.print();
     setDialogOpen(false);
@@ -76,8 +95,9 @@ export const PrintProvider: React.FC<{ children: React.ReactNode }> = ({
       {dialogOpen && dialogPlan.kind === "ready" ? (
         <PrintDialog
           draftMode={draftMode}
-          orientation={dialogPlan.page.orientation}
+          draftOrientation={draftOrientation}
           onChangeMode={setDraftMode}
+          onChangeOrientation={setDraftOrientation}
           onConfirm={confirmPrint}
           onCancel={() => setDialogOpen(false)}
         />
