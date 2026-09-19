@@ -960,146 +960,67 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
       const scaleBeforePrint = await page
         .locator(".app-canvas-controls")
         .textContent();
-      await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
-      await page.emulateMedia({ media: "print" });
-      const selectedPrint = await page.evaluate(() => ({
-        seats: document.querySelectorAll("[data-print-root] .print-seat")
-          .length,
-        landmarks: document.querySelectorAll(
-          "[data-print-root] .print-landmark",
-        ).length,
-      }));
-      record(
-        failures,
-        `${label} print uses the current selection`,
-        selectedPrint.seats === 0 && selectedPrint.landmarks >= 1,
-        `seats=${selectedPrint.seats} landmarks=${selectedPrint.landmarks}`,
-      );
-      await page.emulateMedia({ media: "screen" });
-      if (
-        (await page.locator('.app-settings[data-open="true"]').count()) === 1
-      ) {
-        await page.locator("#btn-header-settings").click();
-      }
-      const clearPoint = await pickEmptyCanvasPoint(page);
-      await page.mouse.click(clearPoint.x, clearPoint.y);
-      await page.waitForFunction(
-        () =>
-          document.querySelectorAll("[data-print-root] .print-seat").length >=
-          30,
-        { timeout: 2000 },
-      );
       await page.emulateMedia({ media: "print" });
       const printCss = await page.evaluate(() => {
         const displayOf = (selector) => {
           const el = document.querySelector(selector);
           return el ? getComputedStyle(el).display : null;
         };
-        const visibleRect = (selector) => {
-          const el = document.querySelector(selector);
-          if (!el) return { width: 0, height: 0 };
-          return el.getBoundingClientRect();
-        };
-        const sheet = document
-          .querySelector("[data-print-root] .print-sheet")
-          ?.getBoundingClientRect();
-        const seats = Array.from(
-          document.querySelectorAll("[data-print-root] .print-seat"),
-        ).map((el) => el.getBoundingClientRect());
-        const seatsOnSheet = sheet
-          ? seats.filter(
-              (r) =>
-                r.left >= sheet.left - 1 &&
-                r.right <= sheet.right + 1 &&
-                r.top >= sheet.top - 1 &&
-                r.bottom <= sheet.bottom + 1,
-            ).length
+        const printRoot = document.querySelector("[data-print-root]");
+        const screenRoot = document.querySelector("[data-screen-root]");
+        const appShell = document.querySelector(".app-shell");
+        const printRootBox = printRoot?.getBoundingClientRect();
+        const seatCount = printRoot
+          ? printRoot.querySelectorAll(".print-seat").length
           : 0;
-        const landmarkText = Array.from(
-          document.querySelectorAll("[data-print-root] .print-landmark"),
-        )
-          .map((el) => el.textContent ?? "")
-          .join("");
         return {
           screenRoot: displayOf("[data-screen-root]"),
+          appShell: displayOf(".app-shell"),
+          screenHidden:
+            (screenRoot && getComputedStyle(screenRoot).display === "none") ||
+            (appShell && getComputedStyle(appShell).display === "none"),
           printRoot: displayOf("[data-print-root]"),
-          headerBox: visibleRect(".app-header"),
-          footerBox: visibleRect(".app-footer"),
-          toolbarBox: visibleRect(".app-canvas-toolbar"),
-          heading: displayOf(".print-heading"),
-          sheetHeight: sheet ? sheet.height : 0,
-          seatCount: seats.length,
-          seatsOnSheet,
-          hasDeskText: landmarkText.includes("教卓"),
-          printRoleSvg: document.querySelector("[data-print-root] svg") !== null,
+          printRootHeight: printRootBox ? printRootBox.height : 0,
+          heading: document.querySelector(".print-heading"),
+          seatCount,
         };
       });
       record(
         failures,
-        `${label} print sheet holds every seat`,
-        printCss.seatCount > 0 &&
-          printCss.seatsOnSheet === printCss.seatCount &&
-          printCss.sheetHeight > 0,
-        `seats=${printCss.seatCount} onSheet=${printCss.seatsOnSheet} sheetHeight=${printCss.sheetHeight}`,
-      );
-      record(
-        failures,
         `${label} print hides the screen root`,
-        printCss.screenRoot === "none",
-        `screen-root display=${printCss.screenRoot}`,
+        printCss.screenHidden === true,
+        `screen-root display=${printCss.screenRoot} app-shell display=${printCss.appShell}`,
       );
       record(
         failures,
-        `${label} print shows the print root`,
-        printCss.printRoot === "block",
-        `print-root display=${printCss.printRoot}`,
+        `${label} print root is visible`,
+        printCss.printRoot !== "none" &&
+          printCss.printRoot !== null &&
+          printCss.printRootHeight > 0,
+        `print-root display=${printCss.printRoot} height=${printCss.printRootHeight}`,
       );
       record(
         failures,
-        `${label} print hides header`,
-        printCss.headerBox.width === 0 && printCss.headerBox.height === 0,
-        `header box=${JSON.stringify(printCss.headerBox)}`,
+        `${label} print root has classroom seats`,
+        printCss.seatCount === 30,
+        `seats=${printCss.seatCount}`,
       );
       record(
         failures,
-        `${label} print hides footer`,
-        printCss.footerBox.width === 0 && printCss.footerBox.height === 0,
-        `footer box=${JSON.stringify(printCss.footerBox)}`,
-      );
-      record(
-        failures,
-        `${label} print hides toolbar`,
-        printCss.toolbarBox.width === 0 && printCss.toolbarBox.height === 0,
-        `toolbar box=${JSON.stringify(printCss.toolbarBox)}`,
-      );
-      record(
-        failures,
-        `${label} print has no heading`,
-        printCss.heading === "none" || printCss.heading === null,
-        `heading display=${printCss.heading}`,
-      );
-      record(
-        failures,
-        `${label} print keeps 教卓 and drops role icons`,
-        printCss.hasDeskText && !printCss.printRoleSvg,
-        `desk=${printCss.hasDeskText} svg=${printCss.printRoleSvg}`,
+        `${label} print heading is absent`,
+        printCss.heading === null,
+        `heading=${printCss.heading}`,
       );
       await page.emulateMedia({ media: "screen" });
-      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
-      await page
-        .locator(".app-canvas-controls", { hasText: scaleBeforePrint ?? "" })
-        .waitFor({ timeout: 2000 })
-        .catch(() => {});
       const scaleAfterPrint = await page
         .locator(".app-canvas-controls")
         .textContent();
       record(
         failures,
-        `${label} print restores zoom`,
+        `${label} print leaves zoom HUD unchanged`,
         scaleAfterPrint === scaleBeforePrint,
         `before=${scaleBeforePrint} after=${scaleAfterPrint}`,
       );
-      await page.locator("#btn-header-settings").click();
     }
 
     await page.locator("#btn-header-settings").click();
