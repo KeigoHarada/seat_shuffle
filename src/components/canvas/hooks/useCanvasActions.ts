@@ -17,8 +17,6 @@ export const useCanvasActions = (
   selectedIds: string[],
   setSelectedIds: (ids: string[]) => void,
   clearSelection: () => void,
-  contextMenu: { x: number; y: number; worldX: number; worldY: number } | null,
-  setContextMenu: (menu: null) => void,
   viewportRef: RefObject<HTMLDivElement | null>,
   pan: { x: number; y: number },
   scale: number,
@@ -30,7 +28,6 @@ export const useCanvasActions = (
   } = useCanvasSelectionActions({
     selectedIds,
     clearSelection,
-    setContextMenu,
   });
 
   const { handleCopy, handlePaste, handleDuplicate } = useCanvasClipboard({
@@ -56,7 +53,6 @@ export const useCanvasActions = (
     pan,
     scale,
     setSelectedIds,
-    contextMenu,
   });
 
   return {

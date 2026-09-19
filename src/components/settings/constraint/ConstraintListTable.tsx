@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { useStore } from "../../../stores/appStore";
 import { Trash2, Users, Target } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
-import { Constraint } from "../../../types/constraint";
-import { GENDER_OPTIONS } from "../../../constants/gender";
 import Checkbox from "../../ui/Checkbox";
 import { evaluateConstraint } from "../../../services/constraintEvaluation";
+import ConstraintDescription from "./ConstraintDescription";
 
 const ConstraintListTable: React.FC = () => {
   const constraints = useStore((state) => state.constraints);
@@ -18,132 +17,11 @@ const ConstraintListTable: React.FC = () => {
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  const getStudentName = (id: string) =>
-    students.find((s) => s.id === id)?.name || "不明な生徒";
-  const getRoleName = (id: string) =>
-    roles.find((r) => r.id === id)?.name || "不明な役割";
-  const getGenderLabel = (id: string) =>
-    GENDER_OPTIONS.find((g) => g.value === id)?.label || "不明な性別";
-  const getGroupName = (id: string) =>
-    groups.find((g) => g.id === id)?.name || "不明なグループ";
-
-  const renderContent = (c: Constraint) => {
-    if (c.type === "student-student") {
-      const isClose = c.matchType === "close";
-      return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-            minWidth: 0,
-          }}
-        >
-          <div
-            style={{
-              fontWeight: 700,
-              fontSize: "13px",
-              color: "var(--c-text-main)",
-            }}
-          >
-            {getStudentName(c.studentId1)} と {getStudentName(c.studentId2)}
-          </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: "var(--c-text-sub)",
-            }}
-          >
-            {isClose ? "同じ班にする" : "別の班にする"}
-          </div>
-        </div>
-      );
-    }
-
-    if (c.type === "student-group") {
-      const isInclude = c.matchType === "include";
-      const groupNames = c.groupIds
-        .map((id: string) => getGroupName(id))
-        .join(" または ");
-      return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-            minWidth: 0,
-          }}
-        >
-          <div
-            style={{
-              fontWeight: 700,
-              fontSize: "13px",
-              color: "var(--c-text-main)",
-            }}
-          >
-            {getStudentName(c.studentId)}
-          </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: "var(--c-text-sub)",
-            }}
-          >
-            {groupNames} に {isInclude ? "入れる" : "入れない"}
-          </div>
-        </div>
-      );
-    }
-
-    if (c.type === "group-match") {
-      const targetName =
-        c.targetType === "role"
-          ? getRoleName(c.targetId)
-          : getGenderLabel(c.targetId);
-
-      const groupNames = c.groupIds
-        .map((id: string) => getGroupName(id))
-        .join(", ");
-
-      return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-            minWidth: 0,
-          }}
-        >
-          <div
-            style={{
-              fontWeight: 700,
-              fontSize: "13px",
-              color: "var(--c-text-main)",
-            }}
-          >
-            {c.targetType === "role" ? "役割:" : "性別:"} {targetName}
-          </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: "var(--c-text-sub)",
-            }}
-          >
-            {groupNames} にそれぞれ {c.minCount} 人以上
-          </div>
-        </div>
-      );
-    }
-
-    return null;
-  };
-
   const getIcon = (type: string) => {
     switch (type) {
       case "student-student":
         return <Users size={16} color="var(--c-text-sub)" />;
       case "student-group":
-        return <Target size={16} color="var(--c-text-sub)" />;
       case "group-match":
         return <Target size={16} color="var(--c-text-sub)" />;
       default:
@@ -220,7 +98,12 @@ const ConstraintListTable: React.FC = () => {
                 {getIcon(c.type)}
               </div>
 
-              {renderContent(c)}
+              <ConstraintDescription
+                constraint={c}
+                students={students}
+                roles={roles}
+                groups={groups}
+              />
 
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <Checkbox

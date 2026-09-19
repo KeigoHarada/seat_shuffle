@@ -338,6 +338,15 @@ export const useStore = create<StateAndActions>()(
     }),
     {
       name: "seat-shuffle-storage",
+      partialize: (state) => {
+        const {
+          isShuffling: _isShuffling,
+          highlightedStudentId: _highlightedStudentId,
+          editingStudentId: _editingStudentId,
+          ...persisted
+        } = state;
+        return persisted;
+      },
       merge: (persistedState, currentState) => {
         const persisted =
           persistedState && typeof persistedState === "object"
@@ -345,6 +354,9 @@ export const useStore = create<StateAndActions>()(
             : {};
         const rest = { ...persisted };
         delete rest.pastSeats;
+        delete rest.isShuffling;
+        delete rest.highlightedStudentId;
+        delete rest.editingStudentId;
         return {
           ...currentState,
           ...(rest as Partial<typeof currentState>),

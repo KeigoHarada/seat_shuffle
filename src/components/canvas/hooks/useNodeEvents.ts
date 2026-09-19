@@ -14,6 +14,9 @@ import {
   shouldSelectOnNodePointerDown,
 } from "../../../services/canvasGesture";
 
+import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
+import { useStore } from "../../../stores/appStore";
+
 interface UseNodeEventsProps {
   seats: Seat[];
   selectedIds: string[];
@@ -25,16 +28,6 @@ interface UseNodeEventsProps {
   isViewMode: boolean;
   getPointerCount: () => number;
   cancelDrag: () => void;
-  setContextMenu: (
-    menu: { x: number; y: number; worldX: number; worldY: number } | null,
-  ) => void;
-  setPopoverPos: (pos: { x: number; y: number }) => void;
-  setAssignPopoverSeatId: (id: string | null) => void;
-  setIsSettingsOpen: (open: boolean) => void;
-  setActiveSettingsTab: (
-    tab: "students" | "roles" | "groups" | "constraints" | "global",
-  ) => void;
-  setHighlightedStudentId: (id: string | null) => void;
   updatePointerDownPos: (x: number, y: number) => void;
 }
 
@@ -49,12 +42,6 @@ export const useNodeEvents = ({
   isViewMode,
   getPointerCount,
   cancelDrag,
-  setContextMenu,
-  setPopoverPos,
-  setAssignPopoverSeatId,
-  setIsSettingsOpen,
-  setActiveSettingsTab,
-  setHighlightedStudentId,
   updatePointerDownPos,
 }: UseNodeEventsProps) => {
   const longPressTimerRef = useRef<number | null>(null);
@@ -70,15 +57,12 @@ export const useNodeEvents = ({
   const openAssign = useCallback(
     (id: string, clientX: number, clientY: number) => {
       const rect = viewportRef.current?.getBoundingClientRect();
-      if (rect) {
-        setPopoverPos({
-          x: clientX - rect.left,
-          y: clientY - rect.top,
-        });
-      }
-      setAssignPopoverSeatId(id);
+      const pos = rect
+        ? { x: clientX - rect.left, y: clientY - rect.top }
+        : { x: clientX, y: clientY };
+      useCanvasOverlayStore.getState().openSeatAssignPopover(id, pos);
     },
-    [viewportRef, setPopoverPos, setAssignPopoverSeatId],
+    [viewportRef],
   );
 
   const handleNodePointerDown = useCallback(
@@ -112,9 +96,11 @@ export const useNodeEvents = ({
         cancelDrag();
         const rect = viewportRef.current?.getBoundingClientRect();
         if (!rect) return;
-        setContextMenu(
-          contextMenuFromClient(clientX, clientY, rect, pan, scale),
-        );
+        useCanvasOverlayStore
+          .getState()
+          .openContextMenu(
+            contextMenuFromClient(clientX, clientY, rect, pan, scale),
+          );
       }, LONG_PRESS_MS);
     },
     [
@@ -127,7 +113,6 @@ export const useNodeEvents = ({
       clearLongPress,
       cancelDrag,
       viewportRef,
-      setContextMenu,
       pan,
       scale,
     ],
@@ -168,18 +153,13 @@ export const useNodeEvents = ({
       if (seat && !seat.studentId) {
         openAssign(id, e.clientX, e.clientY);
       } else if (seat && seat.studentId) {
-        setIsSettingsOpen(true);
-        setActiveSettingsTab("students");
-        setHighlightedStudentId(seat.studentId);
+        const store = useStore.getState();
+        store.setIsSettingsOpen(true);
+        store.setActiveSettingsTab("students");
+        store.setHighlightedStudentId(seat.studentId);
       }
     },
-    [
-      seats,
-      openAssign,
-      setIsSettingsOpen,
-      setActiveSettingsTab,
-      setHighlightedStudentId,
-    ],
+    [seats, openAssign],
   );
 
   return {

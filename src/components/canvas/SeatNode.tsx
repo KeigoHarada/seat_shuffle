@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Lock } from "lucide-react";
 import { useStore } from "../../stores/appStore";
 import { AVAILABLE_ICONS, type IconName } from "../../constants/icons";
-import { Seat } from "../../types/seat";
+import type { Seat } from "../../types/seat";
+import type { Role } from "../../types/student";
+import type { Group } from "../../types/group";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../../constants/canvas";
 
 interface Props {
@@ -17,6 +19,73 @@ interface Props {
   onPointerCancel?: (e: React.PointerEvent) => void;
   onDoubleClick?: (e: React.MouseEvent) => void;
 }
+
+const StudentRolesBadge: React.FC<{ roles: Role[] }> = ({ roles }) => {
+  if (roles.length === 0) return null;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 4,
+        right: 4,
+        display: "flex",
+        gap: 2,
+        color: "var(--c-text-sub)",
+        alignItems: "center",
+      }}
+    >
+      {roles.slice(0, 3).map((role) => {
+        const IconComp =
+          AVAILABLE_ICONS[role.iconName as IconName] || AVAILABLE_ICONS.Star;
+        return (
+          <div key={role.id} title={role.name} style={{ display: "flex" }}>
+            <IconComp size={14} />
+          </div>
+        );
+      })}
+      {roles.length > 3 && (
+        <span style={{ fontSize: 10, lineHeight: 1 }}>...</span>
+      )}
+    </div>
+  );
+};
+
+const SeatGroupsBadge: React.FC<{ groups: Group[] }> = ({ groups }) => {
+  if (groups.length === 0) return null;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 4,
+        right: 4,
+        display: "flex",
+        gap: 2,
+        alignItems: "center",
+      }}
+    >
+      {groups.slice(0, 3).map((group) => (
+        <div
+          key={group.id}
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            backgroundColor: group.color,
+            border: "1px solid rgba(0,0,0,0.1)",
+          }}
+          title={group.name}
+        />
+      ))}
+      {groups.length > 3 && (
+        <span
+          style={{ fontSize: 10, color: "var(--c-text-sub)", lineHeight: 1 }}
+        >
+          ...
+        </span>
+      )}
+    </div>
+  );
+};
 
 const SeatNode: React.FC<Props> = ({
   seat,
@@ -37,12 +106,17 @@ const SeatNode: React.FC<Props> = ({
   const isViewMode = useStore((state) => state.isViewMode);
 
   const student = students.find((s) => s.id === seat.studentId);
-  const seatGroups = groups.filter((g) => seat.groupIds.includes(g.id));
+  const seatGroups = useMemo(
+    () => groups.filter((g) => seat.groupIds.includes(g.id)),
+    [groups, seat.groupIds],
+  );
   const mainGroup = seatGroups.length > 0 ? seatGroups[0] : null;
 
-  const studentRoles = student
-    ? allRoles.filter((r) => student.roleIds?.includes(r.id))
-    : [];
+  const studentRoles = useMemo(
+    () =>
+      student ? allRoles.filter((r) => student.roleIds?.includes(r.id)) : [],
+    [student, allRoles],
+  );
 
   const prevStudentId = useRef(seat.studentId);
   const [isSwapped, setIsSwapped] = useState(false);
@@ -56,14 +130,13 @@ const SeatNode: React.FC<Props> = ({
     }
   }, [seat.studentId]);
 
-  const getBackgroundColor = () => {
-    if (isViewMode || !mainGroup) return "var(--c-surface)";
-    const c = mainGroup.color;
-    return `color-mix(in srgb, ${c} 30%, white)`;
-  };
-
   const isEditing =
     seat.studentId !== null && editingStudentId === seat.studentId;
+
+  const backgroundColor = useMemo(() => {
+    if (isViewMode || !mainGroup) return "var(--c-surface)";
+    return `color-mix(in srgb, ${mainGroup.color} 30%, white)`;
+  }, [isViewMode, mainGroup]);
 
   const style: React.CSSProperties = {
     position: "absolute",
@@ -71,7 +144,7 @@ const SeatNode: React.FC<Props> = ({
     top: seat.y * GRID_SIZE + 4,
     width: SEAT_COLS * GRID_SIZE - 8,
     height: SEAT_ROWS * GRID_SIZE - 8,
-    backgroundColor: getBackgroundColor(),
+    backgroundColor,
     border: isSelected
       ? "2px solid var(--c-primary)"
       : "1px solid var(--c-border)",
@@ -175,79 +248,13 @@ const SeatNode: React.FC<Props> = ({
           >
             {student.name}
           </div>
-          {studentRoles.length > 0 && !isViewMode && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: 4,
-                right: 4,
-                display: "flex",
-                gap: 2,
-                color: "var(--c-text-sub)",
-                alignItems: "center",
-              }}
-            >
-              {studentRoles.slice(0, 3).map((role) => {
-                const IconComp =
-                  AVAILABLE_ICONS[role.iconName as IconName] ||
-                  AVAILABLE_ICONS.Star;
-                return (
-                  <div
-                    key={role.id}
-                    title={role.name}
-                    style={{ display: "flex" }}
-                  >
-                    <IconComp size={14} />
-                  </div>
-                );
-              })}
-              {studentRoles.length > 3 && (
-                <span style={{ fontSize: 10, lineHeight: 1 }}>...</span>
-              )}
-            </div>
-          )}
+          {!isViewMode && <StudentRolesBadge roles={studentRoles} />}
         </>
       ) : (
         <div style={{ fontSize: 14, color: "var(--c-text-sub)" }}>空席</div>
       )}
 
-      {seatGroups.length > 0 && !isViewMode && (
-        <div
-          style={{
-            position: "absolute",
-            top: 4,
-            right: 4,
-            display: "flex",
-            gap: 2,
-            alignItems: "center",
-          }}
-        >
-          {seatGroups.slice(0, 3).map((group) => (
-            <div
-              key={group.id}
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                backgroundColor: group.color,
-                border: "1px solid rgba(0,0,0,0.1)",
-              }}
-              title={group.name}
-            />
-          ))}
-          {seatGroups.length > 3 && (
-            <span
-              style={{
-                fontSize: 10,
-                color: "var(--c-text-sub)",
-                lineHeight: 1,
-              }}
-            >
-              ...
-            </span>
-          )}
-        </div>
-      )}
+      {!isViewMode && <SeatGroupsBadge groups={seatGroups} />}
 
       {seat.isLocked && !isViewMode && (
         <div

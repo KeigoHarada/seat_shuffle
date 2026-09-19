@@ -18,6 +18,8 @@ import {
   trySetPointerCapture,
 } from "../../../services/canvasGesture";
 
+import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
+
 interface UseCanvasPointerEventsProps {
   canvasTool: "select" | "hand";
   isSpaceMode: boolean;
@@ -37,9 +39,6 @@ interface UseCanvasPointerEventsProps {
   handlePointerUp: (e: PointerEvent) => void;
   cancelDrag: () => void;
   cancelNodeLongPress: () => void;
-  setContextMenu: (
-    menu: { x: number; y: number; worldX: number; worldY: number } | null,
-  ) => void;
 }
 
 export const useCanvasPointerEvents = ({
@@ -61,7 +60,6 @@ export const useCanvasPointerEvents = ({
   handlePointerUp,
   cancelDrag,
   cancelNodeLongPress,
-  setContextMenu,
 }: UseCanvasPointerEventsProps) => {
   const pointerDownPosRef = useRef({ x: 0, y: 0 });
   const isMarqueeRef = useRef(false);
@@ -86,9 +84,11 @@ export const useCanvasPointerEvents = ({
       if (isViewMode) return;
       const rect = viewportRef.current?.getBoundingClientRect();
       if (!rect) return;
-      setContextMenu(contextMenuFromClient(clientX, clientY, rect, pan, scale));
+      useCanvasOverlayStore
+        .getState()
+        .openContextMenu(contextMenuFromClient(clientX, clientY, rect, pan, scale));
     },
-    [isViewMode, pan, scale, viewportRef, setContextMenu],
+    [isViewMode, pan, scale, viewportRef],
   );
 
   const handleContextMenu = useCallback(
@@ -166,7 +166,7 @@ export const useCanvasPointerEvents = ({
   const onCanvasPointerDown = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
-      setContextMenu(null);
+      useCanvasOverlayStore.getState().closeAllOverlays();
       clearLongPress();
 
       if (isCanvasChromeTarget(e.target)) return;
@@ -220,7 +220,6 @@ export const useCanvasPointerEvents = ({
       handlePointerDown,
       isSpaceMode,
       isViewMode,
-      setContextMenu,
       startTouchLongPress,
     ],
   );

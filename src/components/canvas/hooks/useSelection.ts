@@ -48,31 +48,15 @@ export const useSelection = (seats: Seat[], objects: CanvasObject[]) => {
   const setSelectedIds = useCanvasSelectionStore(
     (state) => state.setSelectedIds,
   );
+  const toggleSelection = useCanvasSelectionStore(
+    (state) => state.toggleSelection,
+  );
+  const selectOnly = useCanvasSelectionStore((state) => state.selectOnly);
+  const clearSelection = useCanvasSelectionStore(
+    (state) => state.clearSelection,
+  );
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const selectionBoxRef = useRef<SelectionBox | null>(null);
-
-  const toggleSelection = useCallback(
-    (id: string) => {
-      const previous = useCanvasSelectionStore.getState().selectedIds;
-      setSelectedIds(
-        previous.includes(id)
-          ? previous.filter((entry) => entry !== id)
-          : [...previous, id],
-      );
-    },
-    [setSelectedIds],
-  );
-
-  const selectOnly = useCallback(
-    (id: string) => {
-      setSelectedIds([id]);
-    },
-    [setSelectedIds],
-  );
-
-  const clearSelection = useCallback(() => {
-    setSelectedIds([]);
-  }, [setSelectedIds]);
 
   const startSelectionBox = useCallback((x: number, y: number) => {
     const next = { startX: x, startY: y, currentX: x, currentY: y };

@@ -6,12 +6,13 @@ import { generateTemplate } from "../../../services/templates";
 import type { TemplateId } from "../../../types/template";
 import { useStore } from "../../../stores/appStore";
 
+import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
+
 interface UseCanvasItemCreationProps {
   viewportRef: RefObject<HTMLDivElement | null>;
   pan: { x: number; y: number };
   scale: number;
   setSelectedIds: (ids: string[]) => void;
-  contextMenu?: { x: number; y: number; worldX: number; worldY: number } | null;
 }
 
 export const useCanvasItemCreation = ({
@@ -19,8 +20,8 @@ export const useCanvasItemCreation = ({
   pan,
   scale,
   setSelectedIds,
-  contextMenu,
 }: UseCanvasItemCreationProps) => {
+  const contextMenu = useCanvasOverlayStore((state) => state.contextMenu);
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
   const addSeat = useStore((state) => state.addSeat);

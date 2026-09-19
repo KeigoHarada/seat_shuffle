@@ -1,7 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { CanvasObject } from "../../types/canvas";
 import { GRID_SIZE } from "../../constants/canvas";
 import { useStore } from "../../stores/appStore";
+import { useObjectResize } from "./hooks/useObjectResize";
 
 interface Props {
   obj: CanvasObject;
@@ -29,15 +30,16 @@ const CanvasObjectNode: React.FC<Props> = ({
   const isCircle = obj.type === "circle";
   const [isEditing, setIsEditing] = useState(false);
   const [textValue, setTextValue] = useState(obj.text || "");
-  const [isResizing, setIsResizing] = useState(false);
 
-  const resizeRef = useRef<{
-    startX: number;
-    startY: number;
-    startWidth: number;
-    startHeight: number;
-    recorded: boolean;
-  } | null>(null);
+  const {
+    handleResizePointerDown,
+    handleResizePointerMove,
+    handleResizePointerUp,
+  } = useObjectResize({
+    obj,
+    scale,
+    updateObject,
+  });
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,55 +57,6 @@ const CanvasObjectNode: React.FC<Props> = ({
   const handleTextKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.currentTarget.blur();
-    }
-  };
-
-  const handleResizePointerDown = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    setIsResizing(true);
-
-    resizeRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startWidth: obj.width,
-      startHeight: obj.height,
-      recorded: false,
-    };
-  };
-
-  const handleResizePointerMove = (e: React.PointerEvent) => {
-    if (!isResizing || !resizeRef.current) return;
-
-    const dx = (e.clientX - resizeRef.current.startX) / scale;
-    const dy = (e.clientY - resizeRef.current.startY) / scale;
-
-    const diffCols = Math.round(dx / GRID_SIZE);
-    const diffRows = Math.round(dy / GRID_SIZE);
-
-    let newWidth = Math.max(2, resizeRef.current.startWidth + diffCols);
-    let newHeight = Math.max(2, resizeRef.current.startHeight + diffRows);
-
-    if (isCircle) {
-      const maxDiff = Math.max(diffCols, diffRows);
-      newWidth = Math.max(2, resizeRef.current.startWidth + maxDiff);
-      newHeight = newWidth;
-    }
-
-    if (newWidth !== obj.width || newHeight !== obj.height) {
-      if (!resizeRef.current.recorded) {
-        useStore.getState().pushUndo();
-        resizeRef.current.recorded = true;
-      }
-      updateObject(obj.id, { width: newWidth, height: newHeight });
-    }
-  };
-
-  const handleResizePointerUp = (e: React.PointerEvent) => {
-    if (isResizing) {
-      setIsResizing(false);
-      resizeRef.current = null;
-      e.currentTarget.releasePointerCapture(e.pointerId);
     }
   };
 

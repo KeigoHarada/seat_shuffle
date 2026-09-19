@@ -1,10 +1,53 @@
 import React, { useRef, useLayoutEffect, useState } from "react";
 import { Lock, Unlock } from "lucide-react";
 import { clampMenuPosition } from "../../services/canvasGeometry";
+import { useCanvasOverlayStore } from "./stores/canvasOverlayStore";
+
+interface MenuItemProps {
+  onClick: () => void;
+  color?: string;
+  children: React.ReactNode;
+  rightIcon?: React.ReactNode;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({
+  onClick,
+  color = "var(--c-text-main)",
+  children,
+  rightIcon,
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    style={{
+      padding: "8px 16px",
+      textAlign: "left",
+      background: "none",
+      border: "none",
+      color,
+      fontSize: 14,
+      cursor: "pointer",
+      transition: "background-color 0.1s",
+      width: "100%",
+      display: "flex",
+      justifyContent: rightIcon ? "space-between" : "flex-start",
+      alignItems: "center",
+    }}
+    onMouseEnter={(e) =>
+      (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
+    }
+    onMouseLeave={(e) =>
+      (e.currentTarget.style.backgroundColor = "transparent")
+    }
+  >
+    <span>{children}</span>
+    {rightIcon && (
+      <span style={{ display: "flex", alignItems: "center" }}>{rightIcon}</span>
+    )}
+  </button>
+);
 
 interface CanvasContextMenuProps {
-  contextMenu: { x: number; y: number; worldX: number; worldY: number } | null;
-  onClose: () => void;
   onAddSeat: () => void;
   hasSelection: boolean;
   onDeleteSelected: () => void;
@@ -20,8 +63,6 @@ interface CanvasContextMenuProps {
 }
 
 const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
-  contextMenu,
-  onClose,
   onAddSeat,
   hasSelection,
   onDeleteSelected,
@@ -35,6 +76,10 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   onToggleLockSelected,
   onAssignStudentSelected,
 }) => {
+  const contextMenu = useCanvasOverlayStore((state) => state.contextMenu);
+  const closeContextMenu = useCanvasOverlayStore(
+    (state) => state.closeContextMenu,
+  );
   const menuRef = useRef<HTMLDivElement>(null);
   const [adjustedPos, setAdjustedPos] = useState<{
     left: number;
@@ -73,6 +118,11 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 
   const pos = adjustedPos ?? { left: contextMenu.x, top: contextMenu.y };
 
+  const handleAction = (action?: () => void) => {
+    if (action) action();
+    closeContextMenu();
+  };
+
   return (
     <div
       ref={menuRef}
@@ -94,213 +144,55 @@ const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
       }}
       onPointerDown={(e) => e.stopPropagation()}
     >
-      <button
-        onClick={() => {
-          onAddSeat();
-          onClose();
-        }}
-        style={{
-          padding: "8px 16px",
-          textAlign: "left",
-          background: "none",
-          border: "none",
-          color: "var(--c-text-main)",
-          fontSize: 14,
-          cursor: "pointer",
-          transition: "background-color 0.1s",
-          width: "100%",
-        }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = "transparent")
-        }
-      >
+      <MenuItem onClick={() => handleAction(onAddSeat)}>
         座席を新規作成
-      </button>
+      </MenuItem>
 
       {hasSelection && (
         <>
           {hasSelectedSeats && onAssignGroupSelected && (
-            <button
-              onClick={() => {
-                onAssignGroupSelected();
-                onClose();
-              }}
-              style={{
-                padding: "8px 16px",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                color: "var(--c-text-main)",
-                fontSize: 14,
-                cursor: "pointer",
-                transition: "background-color 0.1s",
-                width: "100%",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--c-surface-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
-            >
+            <MenuItem onClick={() => handleAction(onAssignGroupSelected)}>
               グループを選択
-            </button>
+            </MenuItem>
           )}
 
           {hasOccupiedSeats && onUnassignSelected && (
-            <button
-              onClick={() => {
-                onUnassignSelected();
-                onClose();
-              }}
-              style={{
-                padding: "8px 16px",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                color: "var(--c-text-main)",
-                fontSize: 14,
-                cursor: "pointer",
-                transition: "background-color 0.1s",
-                width: "100%",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--c-surface-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
-            >
+            <MenuItem onClick={() => handleAction(onUnassignSelected)}>
               生徒の割り当て解除
-            </button>
+            </MenuItem>
           )}
 
           {hasSingleEmptySeat && onAssignStudentSelected && (
-            <button
-              onClick={() => {
-                onAssignStudentSelected();
-                onClose();
-              }}
-              style={{
-                padding: "8px 16px",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                color: "var(--c-text-main)",
-                fontSize: 14,
-                cursor: "pointer",
-                transition: "background-color 0.1s",
-                width: "100%",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--c-surface-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
-            >
+            <MenuItem onClick={() => handleAction(onAssignStudentSelected)}>
               生徒を割り当て
-            </button>
+            </MenuItem>
           )}
 
           {hasOccupiedSeats && onToggleLockSelected && (
-            <button
-              onClick={() => {
-                onToggleLockSelected(!isAllSelectedLocked);
-                onClose();
-              }}
-              style={{
-                padding: "8px 16px",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                color: "var(--c-text-main)",
-                fontSize: 14,
-                cursor: "pointer",
-                transition: "background-color 0.1s",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--c-surface-hover)")
+            <MenuItem
+              onClick={() =>
+                handleAction(() => onToggleLockSelected(!isAllSelectedLocked))
               }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
+              rightIcon={
+                isAllSelectedLocked ? <Unlock size={14} /> : <Lock size={14} />
               }
             >
-              <span>
-                {isAllSelectedLocked ? "ロックを解除" : "座席をロック"}
-              </span>
-              <span style={{ display: "flex", alignItems: "center" }}>
-                {isAllSelectedLocked ? (
-                  <Unlock size={14} />
-                ) : (
-                  <Lock size={14} />
-                )}
-              </span>
-            </button>
+              {isAllSelectedLocked ? "ロックを解除" : "座席をロック"}
+            </MenuItem>
           )}
 
-          <button
-            onClick={() => {
-              if (onDuplicateSelected) onDuplicateSelected();
-              onClose();
-            }}
-            style={{
-              padding: "8px 16px",
-              textAlign: "left",
-              background: "none",
-              border: "none",
-              color: "var(--c-text-main)",
-              fontSize: 14,
-              cursor: "pointer",
-              transition: "background-color 0.1s",
-              width: "100%",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "transparent")
-            }
-          >
-            複製
-          </button>
+          {onDuplicateSelected && (
+            <MenuItem onClick={() => handleAction(onDuplicateSelected)}>
+              複製
+            </MenuItem>
+          )}
 
-          <button
-            onClick={() => {
-              onDeleteSelected();
-              onClose();
-            }}
-            style={{
-              padding: "8px 16px",
-              textAlign: "left",
-              background: "none",
-              border: "none",
-              color: "var(--c-danger)",
-              fontSize: 14,
-              cursor: "pointer",
-              transition: "background-color 0.1s",
-              width: "100%",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "var(--c-surface-hover)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "transparent")
-            }
+          <MenuItem
+            color="var(--c-danger)"
+            onClick={() => handleAction(onDeleteSelected)}
           >
             削除
-          </button>
+          </MenuItem>
         </>
       )}
     </div>

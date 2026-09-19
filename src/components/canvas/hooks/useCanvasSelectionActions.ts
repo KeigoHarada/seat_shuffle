@@ -1,16 +1,15 @@
 import { useCallback } from "react";
 import { useStore } from "../../../stores/appStore";
+import { useCanvasOverlayStore } from "../stores/canvasOverlayStore";
 
 interface UseCanvasSelectionActionsProps {
   selectedIds: string[];
   clearSelection: () => void;
-  setContextMenu?: (menu: null) => void;
 }
 
 export const useCanvasSelectionActions = ({
   selectedIds,
   clearSelection,
-  setContextMenu,
 }: UseCanvasSelectionActionsProps) => {
   const seats = useStore((state) => state.seats);
   const removeSeat = useStore((state) => state.removeSeat);
@@ -26,8 +25,8 @@ export const useCanvasSelectionActions = ({
       removeObject(id);
     });
     clearSelection();
-    setContextMenu?.(null);
-  }, [selectedIds, removeSeat, removeObject, clearSelection, setContextMenu, pushUndo]);
+    useCanvasOverlayStore.getState().closeContextMenu();
+  }, [selectedIds, removeSeat, removeObject, clearSelection, pushUndo]);
 
   const handleUnassignSelected = useCallback(() => {
     const occupiedIds = selectedIds.filter((id) => {
@@ -40,8 +39,8 @@ export const useCanvasSelectionActions = ({
       updateSeat(id, { studentId: null, isLocked: false });
     });
     clearSelection();
-    setContextMenu?.(null);
-  }, [selectedIds, seats, updateSeat, clearSelection, setContextMenu, pushUndo]);
+    useCanvasOverlayStore.getState().closeContextMenu();
+  }, [selectedIds, seats, updateSeat, clearSelection, pushUndo]);
 
   const handleToggleLockSelected = useCallback(
     (locked: boolean) => {
@@ -54,9 +53,9 @@ export const useCanvasSelectionActions = ({
       occupiedIds.forEach((id) => {
         updateSeat(id, { isLocked: locked });
       });
-      setContextMenu?.(null);
+      useCanvasOverlayStore.getState().closeContextMenu();
     },
-    [selectedIds, seats, updateSeat, setContextMenu, pushUndo],
+    [selectedIds, seats, updateSeat, pushUndo],
   );
 
   return {

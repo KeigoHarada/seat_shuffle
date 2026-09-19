@@ -1,40 +1,55 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useRef } from "react";
 import { useStore } from "../../stores/appStore";
 import { GRID_SIZE } from "../../constants/canvas";
 import { usePanZoom } from "./hooks/usePanZoom";
 import { useCanvasDrag } from "./hooks/useCanvasDrag";
 import { useSelection } from "./hooks/useSelection";
 import CanvasControls from "./CanvasControls";
-
 import CanvasToolbar from "./CanvasToolbar";
 import CanvasNodes from "./CanvasNodes";
 import { useCanvasActions } from "./hooks/useCanvasActions";
 import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
 import GroupAssignPopover from "./GroupAssignPopover";
-import { showToast } from "../../stores/toast";
-import { autoAssignStudents } from "../../services/autoAssign";
 import { useCanvasPointerEvents } from "./hooks/useCanvasPointerEvents";
 import { useNodeEvents } from "./hooks/useNodeEvents";
+import { useAutoAssignAction } from "./hooks/useAutoAssignAction";
+import { useCanvasOverlayStore } from "./stores/canvasOverlayStore";
 
 const Canvas: React.FC = () => {
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
   const addSeat = useStore((state) => state.addSeat);
   const updateSeat = useStore((state) => state.updateSeat);
-  const setSeats = useStore((state) => state.setSeats);
   const removeSeat = useStore((state) => state.removeSeat);
   const addObject = useStore((state) => state.addObject);
   const updateObject = useStore((state) => state.updateObject);
   const removeObject = useStore((state) => state.removeObject);
   const canvasTool = useStore((state) => state.canvasTool);
-  const setIsSettingsOpen = useStore((state) => state.setIsSettingsOpen);
-  const setActiveSettingsTab = useStore((state) => state.setActiveSettingsTab);
-  const setHighlightedStudentId = useStore(
-    (state) => state.setHighlightedStudentId,
-  );
-  const students = useStore((state) => state.students);
   const isViewMode = useStore((state) => state.isViewMode);
+
+  const assignPopoverSeatId = useCanvasOverlayStore(
+    (state) => state.assignPopoverSeatId,
+  );
+  const popoverPos = useCanvasOverlayStore((state) => state.popoverPos);
+  const showGroupPopover = useCanvasOverlayStore(
+    (state) => state.showGroupPopover,
+  );
+  const groupPopoverPos = useCanvasOverlayStore(
+    (state) => state.groupPopoverPos,
+  );
+  const closeSeatAssignPopover = useCanvasOverlayStore(
+    (state) => state.closeSeatAssignPopover,
+  );
+  const closeGroupAssignPopover = useCanvasOverlayStore(
+    (state) => state.closeGroupAssignPopover,
+  );
+  const openSeatAssignPopover = useCanvasOverlayStore(
+    (state) => state.openSeatAssignPopover,
+  );
+  const openGroupAssignPopover = useCanvasOverlayStore(
+    (state) => state.openGroupAssignPopover,
+  );
 
   const {
     pan,
@@ -81,23 +96,6 @@ const Canvas: React.FC = () => {
     selectedIds,
   );
 
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    worldX: number;
-    worldY: number;
-  } | null>(null);
-
-  const [assignPopoverSeatId, setAssignPopoverSeatId] = useState<string | null>(
-    null,
-  );
-  const [popoverPos, setPopoverPos] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-
-  const [showGroupPopover, setShowGroupPopover] = useState(false);
-  const [groupPopoverPos, setGroupPopoverPos] = useState({ x: 0, y: 0 });
   const cancelNodeLongPressRef = useRef(() => {});
 
   const viewportStyle: React.CSSProperties = {
@@ -151,7 +149,6 @@ const Canvas: React.FC = () => {
     handlePointerUp,
     cancelDrag,
     cancelNodeLongPress: () => cancelNodeLongPressRef.current(),
-    setContextMenu,
   });
 
   const {
@@ -171,12 +168,6 @@ const Canvas: React.FC = () => {
     isViewMode,
     getPointerCount,
     cancelDrag,
-    setContextMenu,
-    setPopoverPos,
-    setAssignPopoverSeatId,
-    setIsSettingsOpen,
-    setActiveSettingsTab,
-    setHighlightedStudentId,
     updatePointerDownPos,
   });
   cancelNodeLongPressRef.current = cancelNodeLongPress;
@@ -202,49 +193,12 @@ const Canvas: React.FC = () => {
     selectedIds,
     setSelectedIds,
     clearSelection,
-    contextMenu,
-    setContextMenu,
     viewportRef,
     pan,
     scale,
   );
 
-  const handleAutoAssign = useCallback(() => {
-    const algorithm = useStore.getState().appSettings.autoAssignAlgorithm;
-    const { assignments, error } = autoAssignStudents(
-      seats,
-      students,
-      algorithm,
-    );
-
-    if (error) {
-      switch (error) {
-        case "no-empty-seats":
-          showToast.error("空席がありません。座席を追加してください。");
-          return;
-        case "no-waiting-students":
-          showToast.info("割り当て待ちの生徒がいません。");
-          return;
-        default: {
-          const _exhaustive: never = error;
-          return _exhaustive;
-        }
-      }
-    }
-
-    const assigned = new Map(
-      assignments.map(({ seatId, studentId }) => [seatId, studentId]),
-    );
-    useStore.getState().pushUndo();
-    setSeats(
-      seats.map((seat) => {
-        const studentId = assigned.get(seat.id);
-        return studentId === undefined ? seat : { ...seat, studentId };
-      }),
-    );
-
-    showToast.success(`${assignments.length}人の生徒を自動割り当てしました！`);
-  }, [seats, students, setSeats]);
+  const { handleAutoAssign } = useAutoAssignAction();
 
   const selectedSeats = selectedIds
     .map((id) => seats.find((s) => s.id === id))
@@ -285,17 +239,15 @@ const Canvas: React.FC = () => {
       <CanvasControls scale={scale} onResetView={resetView} />
 
       <CanvasContextMenu
-        contextMenu={contextMenu}
-        onClose={() => setContextMenu(null)}
         onAddSeat={handleAddSeatFromMenu}
         hasSelection={selectedIds.length > 0}
         onDeleteSelected={handleDeleteSelected}
         onDuplicateSelected={handleDuplicate}
         onUnassignSelected={handleUnassignSelected}
         onAssignGroupSelected={() => {
-          if (contextMenu) {
-            setGroupPopoverPos({ x: contextMenu.x, y: contextMenu.y });
-            setShowGroupPopover(true);
+          const menu = useCanvasOverlayStore.getState().contextMenu;
+          if (menu) {
+            openGroupAssignPopover({ x: menu.x, y: menu.y });
           }
         }}
         isAllSelectedLocked={isAllSelectedLocked}
@@ -303,9 +255,9 @@ const Canvas: React.FC = () => {
         hasOccupiedSeats={hasOccupiedSeats}
         hasSingleEmptySeat={hasSingleEmptySeat}
         onAssignStudentSelected={() => {
-          if (contextMenu && selectedIds.length === 1) {
-            setPopoverPos({ x: contextMenu.x, y: contextMenu.y });
-            setAssignPopoverSeatId(selectedIds[0]);
+          const menu = useCanvasOverlayStore.getState().contextMenu;
+          if (menu && selectedIds.length === 1) {
+            openSeatAssignPopover(selectedIds[0], { x: menu.x, y: menu.y });
           }
         }}
         onToggleLockSelected={handleToggleLockSelected}
@@ -352,7 +304,7 @@ const Canvas: React.FC = () => {
 
       <SeatAssignPopover
         isOpen={assignPopoverSeatId !== null}
-        onClose={() => setAssignPopoverSeatId(null)}
+        onClose={closeSeatAssignPopover}
         targetSeatId={assignPopoverSeatId}
         x={popoverPos.x}
         y={popoverPos.y}
@@ -360,7 +312,7 @@ const Canvas: React.FC = () => {
 
       <GroupAssignPopover
         isOpen={showGroupPopover}
-        onClose={() => setShowGroupPopover(false)}
+        onClose={closeGroupAssignPopover}
         targetSeatIds={selectedIds}
         x={groupPopoverPos.x}
         y={groupPopoverPos.y}
