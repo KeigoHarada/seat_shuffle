@@ -2,74 +2,74 @@ import { CanvasObject, Seat, Student } from "../types";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 import { getCanvasBoundingBox, type CanvasBoundingBox } from "./canvas";
 
-export const A4_SHORT_MM = 210;
-export const A4_LONG_MM = 297;
-export const PRINT_MARGIN_MM = 10;
-
-const SEAT_INSET_PX = 4;
-
 export type PrintMode = "wall" | "desk";
-export type PrintOrientation = "landscape" | "portrait";
+export type PrintOrientation = "portrait" | "landscape";
 
 export type PrintSource = {
-  seats: Seat[];
-  objects: CanvasObject[];
-  students: Student[];
+  students: ReadonlyArray<
+    Pick<Student, "id" | "name" | "furigana" | "attendanceNumber">
+  >;
+  seats: ReadonlyArray<Pick<Seat, "id" | "studentId" | "x" | "y">>;
+  objects: ReadonlyArray<
+    Pick<CanvasObject, "id" | "type" | "x" | "y" | "width" | "height" | "text">
+  >;
 };
 
-export type PrintSeatLabel =
+export type PrintFrame = {
+  xMm: number;
+  yMm: number;
+  widthMm: number;
+  heightMm: number;
+};
+
+export type PrintPlan =
+  | { kind: "empty"; reason: "no-marks" }
   | {
-      kind: "occupied";
-      attendanceNumber: number;
-      furigana: string;
-      name: string;
-      rotation: 0 | 180;
-    }
-  | {
-      kind: "empty";
-      rotation: 0 | 180;
+      kind: "ready";
+      mode: PrintMode;
+      page: {
+        paper: "A4";
+        orientation: PrintOrientation;
+        marginMm: 10;
+        contentWidthMm: number;
+        contentHeightMm: number;
+      };
+      seats: ReadonlyArray<{
+        id: string;
+        frame: PrintFrame;
+        label: {
+          rotation: 0 | 180;
+          attendanceNumber: number | null;
+          furigana: string | null;
+          name: string | null;
+          emptyText: "空席" | null;
+        };
+      }>;
+      landmarks: ReadonlyArray<{
+        id: string;
+        shape: "rectangle" | "circle";
+        frame: PrintFrame;
+        text: string | null;
+      }>;
     };
 
-export type PrintBox = {
-  leftPct: number;
-  topPct: number;
-  widthPct: number;
-  heightPct: number;
+const A4_SHORT_MM = 210;
+const A4_LONG_MM = 297;
+const MARGIN_MM = 10;
+const LANDSCAPE_CONTENT = {
+  orientation: "landscape" as const,
+  contentWidthMm: A4_LONG_MM - MARGIN_MM * 2,
+  contentHeightMm: A4_SHORT_MM - MARGIN_MM * 2,
+};
+const PORTRAIT_CONTENT = {
+  orientation: "portrait" as const,
+  contentWidthMm: A4_SHORT_MM - MARGIN_MM * 2,
+  contentHeightMm: A4_LONG_MM - MARGIN_MM * 2,
 };
 
-export type PrintSeat = PrintBox & {
-  id: string;
-  label: PrintSeatLabel;
-};
-
-export type PrintLandmark = PrintBox & {
-  id: string;
-  shape: "rectangle" | "circle";
-  text: string | null;
-};
-
-export type PrintReadyPlan = {
-  kind: "ready";
-  mode: PrintMode;
-  orientation: PrintOrientation;
-  pageWidthMm: number;
-  pageHeightMm: number;
-  seats: PrintSeat[];
-  landmarks: PrintLandmark[];
-};
-
-export type PrintEmptyPlan = {
-  kind: "empty";
-};
-
-export type PrintPlan = PrintReadyPlan | PrintEmptyPlan;
-
-type WorldBox = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
+function emptyPlan(): Extract<PrintPlan, { kind: "empty" }> {
+  return { kind: "empty", reason: "no-marks" };
+}
 
 function rotationForMode(mode: PrintMode): 0 | 180 {
   switch (mode) {
@@ -84,7 +84,22 @@ function rotationForMode(mode: PrintMode): 0 | 180 {
   }
 }
 
-function filterTargets(source: PrintSource, selectedIds?: string[]) {
+function landmarkShape(
+  type: PrintSource["objects"][number]["type"],
+): "rectangle" | "circle" {
+  switch (type) {
+    case "rectangle":
+      return "rectangle";
+    case "circle":
+      return "circle";
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
+  }
+}
+
+function filterMarks(source: PrintSource, selectedIds?: readonly string[]) {
   if (!selectedIds || selectedIds.length === 0) {
     return { seats: source.seats, objects: source.objects };
   }
@@ -95,114 +110,96 @@ function filterTargets(source: PrintSource, selectedIds?: string[]) {
   };
 }
 
-function seatLabel(
-  seat: Seat,
-  students: Student[],
-  mode: PrintMode,
-): PrintSeatLabel {
-  const rotation = rotationForMode(mode);
-  const student = students.find((entry) => entry.id === seat.studentId);
-  if (!student) {
-    return { kind: "empty", rotation };
-  }
-  return {
-    kind: "occupied",
-    attendanceNumber: student.attendanceNumber,
-    furigana: student.furigana ?? "",
-    name: student.name,
-    rotation,
-  };
+function toLayoutSeats(seats: PrintSource["seats"]): Seat[] {
+  return seats.map((seat) => ({
+    id: seat.id,
+    studentId: seat.studentId,
+    x: seat.x,
+    y: seat.y,
+    groupIds: [],
+    isLocked: false,
+  }));
 }
 
-function fitScale(
-  bboxWidth: number,
-  bboxHeight: number,
-  pageWidthMm: number,
-  pageHeightMm: number,
+function toLayoutObjects(objects: PrintSource["objects"]): CanvasObject[] {
+  return objects.map((object) => ({
+    id: object.id,
+    type: object.type,
+    x: object.x,
+    y: object.y,
+    width: object.width,
+    height: object.height,
+    text: object.text,
+  }));
+}
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function scaleFor(
+  contentWidthMm: number,
+  contentHeightMm: number,
+  bbox: CanvasBoundingBox,
 ): number {
-  const availableWidth = pageWidthMm - PRINT_MARGIN_MM * 2;
-  const availableHeight = pageHeightMm - PRINT_MARGIN_MM * 2;
-  return Math.min(availableWidth / bboxWidth, availableHeight / bboxHeight);
+  return Math.min(contentWidthMm / bbox.width, contentHeightMm / bbox.height);
 }
 
-function choosePage(
-  bboxWidth: number,
-  bboxHeight: number,
-): {
-  orientation: PrintOrientation;
-  pageWidthMm: number;
-  pageHeightMm: number;
-  scale: number;
-} {
-  const portraitScale = fitScale(
-    bboxWidth,
-    bboxHeight,
-    A4_SHORT_MM,
-    A4_LONG_MM,
-  );
-  const landscapeScale = fitScale(
-    bboxWidth,
-    bboxHeight,
-    A4_LONG_MM,
-    A4_SHORT_MM,
-  );
-  if (portraitScale > landscapeScale) {
-    return {
-      orientation: "portrait",
-      pageWidthMm: A4_SHORT_MM,
-      pageHeightMm: A4_LONG_MM,
-      scale: portraitScale,
-    };
-  }
-  return {
-    orientation: "landscape",
-    pageWidthMm: A4_LONG_MM,
-    pageHeightMm: A4_SHORT_MM,
-    scale: landscapeScale,
-  };
-}
-
-function toPct(
-  box: WorldBox,
+function placeFrame(
+  worldX: number,
+  worldY: number,
+  worldW: number,
+  worldH: number,
   bbox: CanvasBoundingBox,
   scale: number,
-  pageWidthMm: number,
-  pageHeightMm: number,
-): PrintBox {
-  const availableWidth = pageWidthMm - PRINT_MARGIN_MM * 2;
-  const availableHeight = pageHeightMm - PRINT_MARGIN_MM * 2;
-  const contentWidth = bbox.width * scale;
-  const contentHeight = bbox.height * scale;
-  const originX = PRINT_MARGIN_MM + (availableWidth - contentWidth) / 2;
-  const originY = PRINT_MARGIN_MM + (availableHeight - contentHeight) / 2;
-  const leftMm = originX + (box.x - bbox.minX) * scale;
-  const topMm = originY + (box.y - bbox.minY) * scale;
+  contentWidthMm: number,
+  contentHeightMm: number,
+): PrintFrame {
+  const offsetX = (contentWidthMm - bbox.width * scale) / 2;
+  const offsetY = (contentHeightMm - bbox.height * scale) / 2;
   return {
-    leftPct: (leftMm / pageWidthMm) * 100,
-    topPct: (topMm / pageHeightMm) * 100,
-    widthPct: ((box.w * scale) / pageWidthMm) * 100,
-    heightPct: ((box.h * scale) / pageHeightMm) * 100,
+    xMm: round2((worldX - bbox.minX) * scale + offsetX),
+    yMm: round2((worldY - bbox.minY) * scale + offsetY),
+    widthMm: round2(worldW * scale),
+    heightMm: round2(worldH * scale),
   };
 }
 
-function overflows(
-  boxes: PrintBox[],
-  pageWidthMm: number,
-  pageHeightMm: number,
+function frameOutside(
+  frame: PrintFrame,
+  contentWidthMm: number,
+  contentHeightMm: number,
 ): boolean {
-  const slopMm = 0.02;
-  return boxes.some((box) => {
-    const left = (box.leftPct / 100) * pageWidthMm;
-    const top = (box.topPct / 100) * pageHeightMm;
-    const right = left + (box.widthPct / 100) * pageWidthMm;
-    const bottom = top + (box.heightPct / 100) * pageHeightMm;
-    return (
-      left < PRINT_MARGIN_MM - slopMm ||
-      top < PRINT_MARGIN_MM - slopMm ||
-      right > pageWidthMm - PRINT_MARGIN_MM + slopMm ||
-      bottom > pageHeightMm - PRINT_MARGIN_MM + slopMm
-    );
-  });
+  return (
+    frame.xMm < 0 ||
+    frame.yMm < 0 ||
+    frame.xMm + frame.widthMm > contentWidthMm ||
+    frame.yMm + frame.heightMm > contentHeightMm
+  );
+}
+
+function occupiedLabel(
+  student: Pick<Student, "name" | "furigana" | "attendanceNumber">,
+  rotation: 0 | 180,
+) {
+  const furigana = student.furigana?.trim() ? student.furigana : null;
+  return {
+    rotation,
+    attendanceNumber: student.attendanceNumber,
+    furigana,
+    name: student.name,
+    emptyText: null,
+  };
+}
+
+function emptyLabel(rotation: 0 | 180) {
+  return {
+    rotation,
+    attendanceNumber: null,
+    furigana: null,
+    name: null,
+    emptyText: "空席" as const,
+  };
 }
 
 export function printOrientationLabel(orientation: PrintOrientation): string {
@@ -221,74 +218,123 @@ export function printOrientationLabel(orientation: PrintOrientation): string {
 export function createPrintPlan(
   source: PrintSource,
   mode: PrintMode,
-  selectedIds?: string[],
+  selectedIds?: readonly string[],
 ): PrintPlan {
-  const { seats, objects } = filterTargets(source, selectedIds);
+  const { seats, objects } = filterMarks(source, selectedIds);
   if (seats.length === 0 && objects.length === 0) {
-    return { kind: "empty" };
+    return emptyPlan();
   }
 
-  const bbox = getCanvasBoundingBox(seats, objects);
+  const bbox = getCanvasBoundingBox(
+    toLayoutSeats(seats),
+    toLayoutObjects(objects),
+  );
   if (!bbox || bbox.width <= 0 || bbox.height <= 0) {
-    return { kind: "empty" };
+    return emptyPlan();
   }
 
-  const page = choosePage(bbox.width, bbox.height);
-  const worldSeats: WorldBox[] = seats.map((seat) => ({
-    x: seat.x * GRID_SIZE + SEAT_INSET_PX,
-    y: seat.y * GRID_SIZE + SEAT_INSET_PX,
-    w: SEAT_COLS * GRID_SIZE - SEAT_INSET_PX * 2,
-    h: SEAT_ROWS * GRID_SIZE - SEAT_INSET_PX * 2,
-  }));
-  const worldObjects: WorldBox[] = objects.map((object) => ({
-    x: object.x * GRID_SIZE,
-    y: object.y * GRID_SIZE,
-    w: object.width * GRID_SIZE,
-    h: object.height * GRID_SIZE,
-  }));
+  const landscapeScale = scaleFor(
+    LANDSCAPE_CONTENT.contentWidthMm,
+    LANDSCAPE_CONTENT.contentHeightMm,
+    bbox,
+  );
+  const portraitScale = scaleFor(
+    PORTRAIT_CONTENT.contentWidthMm,
+    PORTRAIT_CONTENT.contentHeightMm,
+    bbox,
+  );
+  const page =
+    portraitScale > landscapeScale ? PORTRAIT_CONTENT : LANDSCAPE_CONTENT;
+  const contentWidthMm = page.contentWidthMm;
+  const contentHeightMm = page.contentHeightMm;
+  let scale = portraitScale > landscapeScale ? portraitScale : landscapeScale;
 
-  const layout = (scale: number) => {
-    const seatBoxes = worldSeats.map((box) =>
-      toPct(box, bbox, scale, page.pageWidthMm, page.pageHeightMm),
-    );
-    const objectBoxes = worldObjects.map((box) =>
-      toPct(box, bbox, scale, page.pageWidthMm, page.pageHeightMm),
-    );
-    return { seatBoxes, objectBoxes };
-  };
+  const layoutFrames = (nextScale: number) => ({
+    seatFrames: seats.map((seat) =>
+      placeFrame(
+        seat.x * GRID_SIZE,
+        seat.y * GRID_SIZE,
+        SEAT_COLS * GRID_SIZE,
+        SEAT_ROWS * GRID_SIZE,
+        bbox,
+        nextScale,
+        contentWidthMm,
+        contentHeightMm,
+      ),
+    ),
+    objectFrames: objects.map((object) =>
+      placeFrame(
+        object.x * GRID_SIZE,
+        object.y * GRID_SIZE,
+        object.width * GRID_SIZE,
+        object.height * GRID_SIZE,
+        bbox,
+        nextScale,
+        contentWidthMm,
+        contentHeightMm,
+      ),
+    ),
+  });
 
-  let scale = page.scale;
-  let { seatBoxes, objectBoxes } = layout(scale);
-  for (let attempt = 0; attempt < 8; attempt++) {
-    if (
-      !overflows(
-        [...seatBoxes, ...objectBoxes],
-        page.pageWidthMm,
-        page.pageHeightMm,
-      )
-    ) {
-      break;
+  let { seatFrames, objectFrames } = layoutFrames(scale);
+  const allFrames = [...seatFrames, ...objectFrames];
+  if (
+    allFrames.some((frame) =>
+      frameOutside(frame, contentWidthMm, contentHeightMm),
+    )
+  ) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const frame of allFrames) {
+      minX = Math.min(minX, frame.xMm);
+      minY = Math.min(minY, frame.yMm);
+      maxX = Math.max(maxX, frame.xMm + frame.widthMm);
+      maxY = Math.max(maxY, frame.yMm + frame.heightMm);
     }
-    scale *= 0.999;
-    ({ seatBoxes, objectBoxes } = layout(scale));
+    const usedWidth = Math.max(maxX - minX, Number.EPSILON);
+    const usedHeight = Math.max(maxY - minY, Number.EPSILON);
+    const shrink = Math.min(
+      contentWidthMm / usedWidth,
+      contentHeightMm / usedHeight,
+    );
+    scale *= shrink < 1 ? shrink : 0.999;
+    ({ seatFrames, objectFrames } = layoutFrames(scale));
   }
+
+  const studentsById = new Map(
+    source.students.map((student) => [student.id, student]),
+  );
+  const rotation = rotationForMode(mode);
 
   return {
     kind: "ready",
     mode,
-    orientation: page.orientation,
-    pageWidthMm: page.pageWidthMm,
-    pageHeightMm: page.pageHeightMm,
-    seats: seats.map((seat, index) => ({
-      id: seat.id,
-      ...seatBoxes[index],
-      label: seatLabel(seat, source.students, mode),
-    })),
+    page: {
+      paper: "A4",
+      orientation: page.orientation,
+      marginMm: 10,
+      contentWidthMm,
+      contentHeightMm,
+    },
+    seats: seats.map((seat, index) => {
+      const student = seat.studentId
+        ? studentsById.get(seat.studentId)
+        : undefined;
+      return {
+        id: seat.id,
+        frame: seatFrames[index],
+        label: student
+          ? occupiedLabel(student, rotation)
+          : emptyLabel(rotation),
+      };
+    }),
     landmarks: objects.map((object, index) => ({
       id: object.id,
-      shape: object.type,
+      shape: landmarkShape(object.type),
+      frame: objectFrames[index],
       text: object.text ?? null,
-      ...objectBoxes[index],
     })),
   };
 }
