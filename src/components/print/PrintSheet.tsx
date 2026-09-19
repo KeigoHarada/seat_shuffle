@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { useStore } from "../../stores";
+import { useStore } from "../../stores/appStore";
 import { useCanvasSelectionStore } from "../../stores/canvasSelection";
 import { usePrintSessionStore } from "../../stores/printSession";
 import {

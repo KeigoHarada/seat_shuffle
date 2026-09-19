@@ -10,8 +10,8 @@ import {
   Target,
 } from "lucide-react";
 import { useOnboardingStore } from "../../stores/onboarding";
-import { TOUR_STEPS } from "../../constants/tourSteps";
-import { useStore } from "../../stores";
+import { TOUR_STEPS } from "./data/tourSteps";
+import { useStore } from "../../stores/appStore";
 
 interface Rect {
   top: number;

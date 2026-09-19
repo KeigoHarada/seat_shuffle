@@ -1,5 +1,5 @@
 import React from "react";
-import { useStore } from "../../stores";
+import { useStore } from "../../stores/appStore";
 
 const ShuffleAnimation: React.FC<{ forceShow?: boolean }> = ({ forceShow }) => {
   const isShuffling = useStore((state) => state.isShuffling);

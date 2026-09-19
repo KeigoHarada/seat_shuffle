@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useStore } from "../../../stores";
+import { useStore } from "../../../stores/appStore";
 import { Plus } from "lucide-react";
-import { Group } from "../../../types";
+import { Group } from "../../../types/group";
 import ColorPicker from "../../ui/ColorPicker";
-import { PREDEFINED_COLORS } from "../../../constants";
+import { PREDEFINED_COLORS } from "../../../constants/colors";
 import Input from "../../ui/Input";
 
 const GroupAddForm: React.FC = () => {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useStore } from "../../../stores";
+import { useStore } from "../../../stores/appStore";
 import { Trash2 } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import IconPicker, { IconName } from "../../ui/IconPicker";

@@ -1,4 +1,6 @@
-import { CanvasObject, Seat, Student } from "../types";
+import type { CanvasObject } from "../types/canvas";
+import type { Seat } from "../types/seat";
+import type { Student } from "../types/student";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 import { getCanvasBoundingBox, type CanvasBoundingBox } from "./canvas";
 

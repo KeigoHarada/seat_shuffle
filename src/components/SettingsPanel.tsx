@@ -11,7 +11,7 @@ import RoleTab from "./settings/role/RoleTab";
 import GroupTab from "./settings/group/GroupTab";
 import ConstraintTab from "./settings/constraint/ConstraintTab";
 import GlobalTab from "./settings/global/GlobalTab";
-import { useStore } from "../stores";
+import { useStore } from "../stores/appStore";
 
 export type SettingsTab =
   "students" | "roles" | "groups" | "constraints" | "global";

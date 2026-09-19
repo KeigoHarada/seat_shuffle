@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
-import { useStore } from "../../stores";
+import { useStore } from "../../stores/appStore";
 import { GRID_SIZE } from "../../constants/canvas";
 import { usePanZoom } from "../../hooks/usePanZoom";
 import { useCanvasDrag } from "../../hooks/useCanvasDrag";
@@ -13,7 +13,7 @@ import CanvasContextMenu from "./CanvasContextMenu";
 import SeatAssignPopover from "./SeatAssignPopover";
 import GroupAssignPopover from "./GroupAssignPopover";
 import { showToast } from "../../stores/toast";
-import { autoAssignStudents } from "../../utils/algorithm";
+import { autoAssignStudents } from "../../services/algorithm";
 import { useCanvasPointerEvents } from "../../hooks/useCanvasPointerEvents";
 import { useNodeEvents } from "../../hooks/useNodeEvents";
 

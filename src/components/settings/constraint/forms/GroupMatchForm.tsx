@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useStore } from "../../../../stores";
+import { useStore } from "../../../../stores/appStore";
 import { Plus } from "lucide-react";
-import { GroupMatchConstraint } from "../../../../types";
-import { GENDER_OPTIONS } from "../../../../constants";
+import { GroupMatchConstraint } from "../../../../types/constraint";
+import { GENDER_OPTIONS } from "../../../../constants/gender";
 import Select from "../../../ui/Select";
 import MultiSelect from "../../../ui/MultiSelect";
 import Input from "../../../ui/Input";

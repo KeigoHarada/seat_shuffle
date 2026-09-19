@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef } from "react";
-import { Seat, CanvasObject } from "../types";
+import type { Seat } from "../types/seat";
+import type { CanvasObject } from "../types/canvas";
 import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
 
 import { DragNode, checkCollision, screenToWorld } from "../utils/canvas";
@@ -9,7 +10,7 @@ import {
   trySetPointerCapture,
 } from "../utils/panZoomGesture";
 import { showToast } from "../stores/toast";
-import { useStore } from "../stores";
+import { useStore } from "../stores/appStore";
 
 export const useCanvasDrag = (
   seats: Seat[],

@@ -1,7 +1,8 @@
 import React from "react";
 import CanvasObjectNode from "./CanvasObjectNode";
 import SeatNode from "../SeatNode";
-import { Seat, CanvasObject } from "../../types";
+import { Seat } from "../../types/seat";
+import { CanvasObject } from "../../types/canvas";
 import {
   getSeatDragDisplayProps,
   getObjectDragDisplayProps,

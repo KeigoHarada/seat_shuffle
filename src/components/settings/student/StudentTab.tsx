@@ -7,7 +7,7 @@ import {
   ROSTER_IMPORT_CONFIRM,
   useProjectIo,
 } from "../../../hooks/useProjectIo";
-import type { RosterParseOk } from "../../../utils/roster";
+import type { RosterParseOk } from "../../../services/roster";
 import StudentAddForm from "./StudentAddForm";
 import StudentListTable from "./StudentListTable";
 

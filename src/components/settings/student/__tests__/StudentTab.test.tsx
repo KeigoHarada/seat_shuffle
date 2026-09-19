@@ -2,7 +2,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import StudentTab from "../StudentTab";
-import { useStore } from "../../../../stores";
+import { useStore } from "../../../../stores/appStore";
 import { useToastStore } from "../../../../stores/toast";
 
 const ROSTER_CONFIRM =

@@ -1,7 +1,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useStore } from "../../../stores";
+import { useStore } from "../../../stores/appStore";
 import { useCanvasSelectionStore } from "../../../stores/canvasSelection";
 import { usePrintSessionStore } from "../../../stores/printSession";
 import { useToastStore } from "../../../stores/toast";

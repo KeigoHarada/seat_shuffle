@@ -2,7 +2,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import GlobalTab from "../global/GlobalTab";
-import { useStore } from "../../../stores";
+import { useStore } from "../../../stores/appStore";
 
 describe("GlobalTab Support Section", () => {
   let container: HTMLDivElement;

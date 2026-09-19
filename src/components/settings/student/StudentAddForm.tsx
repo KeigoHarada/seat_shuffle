@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useStore } from "../../../stores";
+import { useStore } from "../../../stores/appStore";
 import { Plus } from "lucide-react";
-import { Student } from "../../../types";
-import { GENDERS, GENDER_OPTIONS, GenderType } from "../../../constants";
+import type { Student, GenderType } from "../../../types/student";
+import { GENDERS, GENDER_OPTIONS } from "../../../constants/gender";
 import MultiSelect from "../../ui/MultiSelect";
 import Select from "../../ui/Select";
 import Input from "../../ui/Input";

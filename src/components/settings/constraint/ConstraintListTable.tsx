@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { useStore } from "../../../stores";
+import { useStore } from "../../../stores/appStore";
 import { Trash2, Users, Target } from "lucide-react";
 import ConfirmDialog from "../../ui/ConfirmDialog";
-import { Constraint } from "../../../types";
-import { GENDER_OPTIONS } from "../../../constants";
+import { Constraint } from "../../../types/constraint";
+import { GENDER_OPTIONS } from "../../../constants/gender";
 import Checkbox from "../../ui/Checkbox";
-import { evaluateConstraint } from "../../../utils/algorithm";
+import { evaluateConstraint } from "../../../services/algorithm";
 
 const ConstraintListTable: React.FC = () => {
   const constraints = useStore((state) => state.constraints);

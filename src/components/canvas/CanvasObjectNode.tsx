@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
-import { CanvasObject } from "../../types";
+import { CanvasObject } from "../../types/canvas";
 import { GRID_SIZE } from "../../constants/canvas";
-import { useStore } from "../../stores";
+import { useStore } from "../../stores/appStore";
 
 interface Props {
   obj: CanvasObject;

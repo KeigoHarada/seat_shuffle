@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useOnboardingStore } from "../../stores/onboarding";
-import { GUIDE_CATEGORIES } from "../../constants/guideItems";
+import { GUIDE_CATEGORIES } from "./data/guideItems";
 
 export const GuideHubSidebar: React.FC = () => {
   const selectedTab = useOnboardingStore((state) => state.selectedGuideTab);

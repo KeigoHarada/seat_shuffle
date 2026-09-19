@@ -1,4 +1,5 @@
-import { Seat, CanvasObject } from "../types";
+import type { Seat } from "../types/seat";
+import type { CanvasObject } from "../types/canvas";
 import { SEAT_COLS, SEAT_ROWS, GRID_SIZE } from "../constants/canvas";
 
 export interface DragState {

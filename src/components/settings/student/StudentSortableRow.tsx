@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
-import { Student } from "../../../types";
-import { useStore } from "../../../stores";
+import type { Student, GenderType } from "../../../types/student";
+import { useStore } from "../../../stores/appStore";
 import Select from "../../ui/Select";
 import MultiSelect from "../../ui/MultiSelect";
-import { GENDER_OPTIONS, GenderType } from "../../../constants";
+import { GENDER_OPTIONS } from "../../../constants/gender";
 import Input from "../../ui/Input";
 import { AVAILABLE_ICONS, IconName } from "../../ui/IconPicker";
 

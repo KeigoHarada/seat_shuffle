@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import Popover from "../ui/Popover";
-import { useStore } from "../../stores";
+import { useStore } from "../../stores/appStore";
 
 interface SeatAssignPopoverProps {
   isOpen: boolean;

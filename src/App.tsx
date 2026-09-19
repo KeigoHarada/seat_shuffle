@@ -3,13 +3,13 @@ import ShuffleAnimation from "./components/layout/ShuffleAnimation";
 import OnboardingController from "./components/onboarding/OnboardingController";
 import { PrintProvider } from "./components/print/PrintProvider";
 import { ToastContainer } from "./components/ui/Toast";
-import DesktopApp from "./views/desktop/DesktopApp";
+import MainView from "./views/MainView";
 
 const App: React.FC = () => {
   return (
     <PrintProvider>
       <div data-screen-root>
-        <DesktopApp />
+        <MainView />
         <ShuffleAnimation />
         <ToastContainer />
         <OnboardingController />

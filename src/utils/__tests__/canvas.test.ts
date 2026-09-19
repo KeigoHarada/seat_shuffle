@@ -7,7 +7,7 @@ import {
   contextMenuFromClient,
   clampMenuPosition,
 } from "../canvas";
-import { generateTemplate } from "../templates";
+import { generateTemplate } from "../../services/templates";
 
 describe("canvas utils", () => {
   describe("getCanvasBoundingBox", () => {

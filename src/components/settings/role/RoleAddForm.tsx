@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useStore } from "../../../stores";
+import { useStore } from "../../../stores/appStore";
 import { Plus } from "lucide-react";
-import { Role } from "../../../types";
+import { Role } from "../../../types/student";
 import IconPicker, { IconName } from "../../ui/IconPicker";
 import Input from "../../ui/Input";
 

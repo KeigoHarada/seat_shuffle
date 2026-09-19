@@ -5,7 +5,7 @@ import {
   type MouseEvent,
   type RefObject,
 } from "react";
-import { Seat } from "../types";
+import type { Seat } from "../types/seat";
 import { contextMenuFromClient } from "../utils/canvas";
 import {
   isTouchPointerType,

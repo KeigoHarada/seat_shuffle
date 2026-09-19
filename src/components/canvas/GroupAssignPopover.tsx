@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import Popover from "../ui/Popover";
 import Checkbox from "../ui/Checkbox";
-import { useStore } from "../../stores";
+import { useStore } from "../../stores/appStore";
 
 interface GroupAssignPopoverProps {
   isOpen: boolean;

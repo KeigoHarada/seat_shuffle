@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useStore } from "../../../../stores";
+import { useStore } from "../../../../stores/appStore";
 import { Plus } from "lucide-react";
-import { StudentStudentConstraint } from "../../../../types";
+import { StudentStudentConstraint } from "../../../../types/constraint";
 import Select from "../../../ui/Select";
 
 const StudentStudentForm: React.FC = () => {
