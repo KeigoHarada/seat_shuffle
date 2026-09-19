@@ -2,7 +2,11 @@ import React, { useEffect, useMemo } from "react";
 import { useStore } from "../../stores";
 import { useCanvasSelectionStore } from "../../stores/canvasSelection";
 import { usePrintSessionStore } from "../../stores/printSession";
-import { createPrintPlan, type PrintPlan } from "../../utils/printLayout";
+import {
+  createPrintPlan,
+  printPageRule,
+  type PrintPlan,
+} from "../../utils/printLayout";
 
 type ReadyPlan = Extract<PrintPlan, { kind: "ready" }>;
 type ReadySeat = ReadyPlan["seats"][number];
@@ -136,7 +140,7 @@ const PrintSheet: React.FC<{ selectedIds?: readonly string[] }> = ({
       el.id = PAGE_STYLE_ID;
       document.head.appendChild(el);
     }
-    el.textContent = `@page { size: A4 ${plan.page.orientation}; margin: 10mm; }`;
+    el.textContent = printPageRule(plan.page.orientation);
     return () => {
       document.getElementById(PAGE_STYLE_ID)?.remove();
     };

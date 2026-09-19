@@ -32,5 +32,6 @@ Preconditions:
 
 - `#btn-footer-print` no longer calls `window.print()` directly. The dialog is required for the footer path. `Ctrl+P` uses the last confirmed mode (or 掲示用) and the live selection.
 - Print does not flip `isViewMode` or rewrite pan/zoom. A zoom change after print is a regression.
+- `@page` margin is `0`. Chrome's default URL/date footer needs margin room; prove with print-to-PDF (`preferCSSPageSize`, default headers on) that `http` / `127.0.0.1` and a date string are absent. Visual 10mm inset is print-root padding.
 - View mode blocks marquee selection. Selection print is an edit-mode gesture.
 - Do not persist print mode or selection. Reloading the tab resets the last mode to 掲示用.

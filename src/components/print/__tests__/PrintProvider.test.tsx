@@ -141,6 +141,9 @@ describe("PrintProvider", () => {
       document.querySelector<HTMLElement>("[data-print-seat-id='seat-a']")
         ?.style.left,
     ).toMatch(/%$/);
+    expect(document.getElementById("rakugae-print-page")?.textContent).toBe(
+      "@page { size: A4 landscape; margin: 0; }",
+    );
   });
 
   it("rotates seat and landmark text in desk mode", async () => {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createPrintPlan,
+  printPageRule,
   type PrintPlan,
   type PrintSource,
 } from "../printLayout";
@@ -98,6 +99,12 @@ describe("createPrintPlan", () => {
     expect(plan.landmarks[0]?.rotation).toBe(0);
     expect(plan.seats.every((seat) => seat.label.rotation === 0)).toBe(true);
     expectFramesInside(plan);
+    expect(printPageRule(plan.page.orientation)).toBe(
+      "@page { size: A4 landscape; margin: 0; }",
+    );
+    expect(printPageRule("portrait")).toBe(
+      "@page { size: A4 portrait; margin: 0; }",
+    );
   });
 
   it("rotates seat and landmark labels in desk mode and keeps frames", () => {

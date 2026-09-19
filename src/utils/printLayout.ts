@@ -217,6 +217,18 @@ export function printOrientationLabel(orientation: PrintOrientation): string {
   }
 }
 
+export function printPageRule(orientation: PrintOrientation): string {
+  switch (orientation) {
+    case "landscape":
+    case "portrait":
+      return `@page { size: A4 ${orientation}; margin: 0; }`;
+    default: {
+      const _exhaustive: never = orientation;
+      return _exhaustive;
+    }
+  }
+}
+
 export function createPrintPlan(
   source: PrintSource,
   mode: PrintMode,
