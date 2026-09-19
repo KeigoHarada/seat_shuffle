@@ -3,10 +3,11 @@ import type { Group } from "./group";
 import type { Seat } from "./seat";
 import type { CanvasObject } from "./canvas";
 import type { Constraint } from "./constraint";
+import type { ShuffleAnimationType } from "./animation";
 
 export interface AppSettings {
   algorithm: "random" | "optimize";
-  shuffleAnimation: "none" | "confetti" | "slide" | "flash";
+  shuffleAnimation: ShuffleAnimationType;
   autoAssignAlgorithm:
     "right-top-down" | "left-top-down" | "left-top-right" | "random";
 }
