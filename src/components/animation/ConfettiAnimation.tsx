@@ -8,7 +8,7 @@ const CONFETTI_COLORS = [
   "#6a4c93",
 ];
 
-export const ConfettiAnimation: React.FC = () => {
+const ConfettiAnimation: React.FC = () => {
   return (
     <div
       style={{

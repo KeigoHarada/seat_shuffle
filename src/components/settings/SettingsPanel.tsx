@@ -79,7 +79,7 @@ const TabContainer: React.FC<{ title: string; children: React.ReactNode }> = ({
   </div>
 );
 
-export const SettingsContent: React.FC<{ activeTab: Tab }> = ({
+const SettingsContent: React.FC<{ activeTab: Tab }> = ({
   activeTab,
 }) => {
   let body: React.ReactNode;

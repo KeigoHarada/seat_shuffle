@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AVAILABLE_ICONS, type IconName } from "../../constants/icons";
 
-export { AVAILABLE_ICONS };
-export type { IconName };
-
 interface IconPickerProps {
   value: IconName;
   onChange: (value: IconName) => void;

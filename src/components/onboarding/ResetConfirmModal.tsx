@@ -2,7 +2,7 @@ import React from "react";
 import { AlertCircle, X } from "lucide-react";
 import { useOnboardingStore } from "../../stores/onboarding";
 
-export const ResetConfirmModal: React.FC = () => {
+const ResetConfirmModal: React.FC = () => {
   const isOpen = useOnboardingStore((state) => state.isResetConfirmOpen);
   const closeResetConfirm = useOnboardingStore(
     (state) => state.closeResetConfirm,

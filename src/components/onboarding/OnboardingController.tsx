@@ -6,7 +6,7 @@ import TourOverlay from "./TourOverlay";
 import ResetConfirmModal from "./ResetConfirmModal";
 import TourCompletionModal from "./TourCompletionModal";
 
-export const OnboardingController: React.FC = () => {
+const OnboardingController: React.FC = () => {
   const hasCompletedOnboarding = useOnboardingStore(
     (state) => state.hasCompletedOnboarding,
   );

@@ -1,6 +1,6 @@
 import React from "react";
 
-export const SlideAnimation: React.FC = () => {
+const SlideAnimation: React.FC = () => {
   return (
     <div
       style={{

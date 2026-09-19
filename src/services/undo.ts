@@ -38,7 +38,7 @@ export function undoSnapshotsEqual(a: UndoSnapshot, b: UndoSnapshot): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-export function limitUndoStack(stack: UndoSnapshot[]): UndoSnapshot[] {
+function limitUndoStack(stack: UndoSnapshot[]): UndoSnapshot[] {
   if (stack.length <= MAX_UNDO_STACK) return stack;
   return stack.slice(-MAX_UNDO_STACK);
 }

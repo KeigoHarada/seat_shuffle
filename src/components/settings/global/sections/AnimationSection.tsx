@@ -4,7 +4,7 @@ import { useStore } from "../../../../stores/appStore";
 import Select from "../../../ui/Select";
 import ShuffleAnimation from "../../../animation/ShuffleAnimation";
 
-export const AnimationSection: React.FC = () => {
+const AnimationSection: React.FC = () => {
   const appSettings = useStore((state) => state.appSettings);
   const updateAppSettings = useStore((state) => state.updateAppSettings);
   const isShuffling = useStore((state) => state.isShuffling);

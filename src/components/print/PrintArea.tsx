@@ -5,7 +5,7 @@ import { createPrintPlan } from "../../services/printLayout";
 import PrintDialog from "./PrintDialog";
 import PrintSheet from "./PrintSheet";
 
-export const PrintArea: React.FC = () => {
+const PrintArea: React.FC = () => {
   const students = useStore((state) => state.students);
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);

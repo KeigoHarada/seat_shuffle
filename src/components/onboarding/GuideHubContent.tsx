@@ -4,7 +4,7 @@ import { useOnboardingStore } from "../../stores/onboarding";
 import GuideDemoAnimation from "./GuideDemoAnimation";
 import { GUIDE_ITEMS, TOUR_ITEM } from "../../data/guideData";
 
-export const GuideHubContent: React.FC = () => {
+const GuideHubContent: React.FC = () => {
   const selectedTab = useOnboardingStore((state) => state.selectedGuideTab);
   const handleStartTourRequest = useOnboardingStore(
     (state) => state.handleStartTourRequest,

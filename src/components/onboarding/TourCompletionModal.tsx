@@ -2,7 +2,7 @@ import React from "react";
 import { Sparkles, HelpCircle, Check, PartyPopper, X } from "lucide-react";
 import { useOnboardingStore } from "../../stores/onboarding";
 
-export const TourCompletionModal: React.FC = () => {
+const TourCompletionModal: React.FC = () => {
   const isOpen = useOnboardingStore((state) => state.isCompletionModalOpen);
   const closeCompletionModal = useOnboardingStore(
     (state) => state.closeCompletionModal,

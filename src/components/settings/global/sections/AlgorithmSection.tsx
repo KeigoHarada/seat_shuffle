@@ -2,7 +2,7 @@ import React from "react";
 import { useStore } from "../../../../stores/appStore";
 import Select from "../../../ui/Select";
 
-export const AlgorithmSection: React.FC = () => {
+const AlgorithmSection: React.FC = () => {
   const algorithm = useStore((state) => state.appSettings.algorithm || "random");
   const updateAppSettings = useStore((state) => state.updateAppSettings);
 

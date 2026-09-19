@@ -1,7 +1,7 @@
 import React from "react";
 import { Heart, ExternalLink } from "lucide-react";
 
-export const SupportSection: React.FC = () => {
+const SupportSection: React.FC = () => {
   return (
     <div
       style={{

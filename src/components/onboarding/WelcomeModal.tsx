@@ -3,7 +3,7 @@ import { X, Shield, Zap, Lock, Sparkles } from "lucide-react";
 import { BrandSymbol } from "../ui/Logo";
 import { useOnboardingStore } from "../../stores/onboarding";
 
-export const WelcomeModal: React.FC = () => {
+const WelcomeModal: React.FC = () => {
   const isOpen = useOnboardingStore((state) => state.isWelcomeModalOpen);
   const closeWelcomeModal = useOnboardingStore(
     (state) => state.closeWelcomeModal,

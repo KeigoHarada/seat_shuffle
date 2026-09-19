@@ -30,7 +30,7 @@ export const evaluateStudentGroupConstraint = (
   return c.matchType === "include" ? inGroup : !inGroup;
 };
 
-export const evaluateGroupMatchConstraint = (
+const evaluateGroupMatchConstraint = (
   c: GroupMatchConstraint,
   seats: Seat[],
   students: Student[],

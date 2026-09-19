@@ -2,7 +2,7 @@ import React from "react";
 import { useStore } from "../../../../stores/appStore";
 import Select from "../../../ui/Select";
 
-export const AutoAssignSection: React.FC = () => {
+const AutoAssignSection: React.FC = () => {
   const autoAssignAlgorithm = useStore(
     (state) => state.appSettings.autoAssignAlgorithm || "right-top-down",
   );

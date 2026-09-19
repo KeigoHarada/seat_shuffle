@@ -1,6 +1,6 @@
 import React from "react";
 
-export const FlashAnimation: React.FC = () => {
+const FlashAnimation: React.FC = () => {
   return (
     <div
       style={{

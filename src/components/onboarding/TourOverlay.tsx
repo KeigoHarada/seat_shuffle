@@ -3,7 +3,7 @@ import { useTourOverlay } from "./hooks/useTourOverlay";
 import { TourBackdrop } from "./TourBackdrop";
 import { TourTooltipCard } from "./TourTooltipCard";
 
-export const TourOverlay: React.FC = () => {
+const TourOverlay: React.FC = () => {
   const {
     isTourActive,
     currentStep,

@@ -366,5 +366,3 @@ export const useStore = create<StateAndActions>()(
     },
   ),
 );
-
-export const useAppStore = useStore;

@@ -4,7 +4,7 @@ interface GuideDemoAnimationProps {
   type?: string;
 }
 
-export const GuideDemoAnimation: React.FC<GuideDemoAnimationProps> = () => {
+const GuideDemoAnimation: React.FC<GuideDemoAnimationProps> = () => {
   return (
     <div
       style={{

@@ -391,7 +391,7 @@ export const LogoSvg: React.FC<{
   );
 };
 
-export const Logo: React.FC<LogoProps> = ({
+const Logo: React.FC<LogoProps> = ({
   size = "md",
   showTagline = false,
   variant = "full",

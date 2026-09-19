@@ -4,7 +4,7 @@ import { useStore } from "../../../../stores/appStore";
 import ConfirmDialog from "../../../ui/ConfirmDialog";
 import { showToast } from "../../../../stores/toast";
 
-export const DataManagementSection: React.FC = () => {
+const DataManagementSection: React.FC = () => {
   const clearState = useStore((state) => state.clearState);
   const loadDefaultTemplate = useStore((state) => state.loadDefaultTemplate);
   const [confirmAction, setConfirmAction] = useState<

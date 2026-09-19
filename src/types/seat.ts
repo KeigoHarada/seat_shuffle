@@ -1,5 +1,3 @@
-export type SeatId = string;
-
 export interface Seat {
   id: string;
   studentId: string | null;

@@ -8,7 +8,7 @@ import { assignGroupsByBlocks } from "../services/group";
 import type { UndoSnapshot } from "../types/history";
 import { PREDEFINED_COLORS } from "../constants/groupPalette";
 
-export const DEFAULT_ROLES: Role[] = [
+const DEFAULT_ROLES: Role[] = [
   {
     id: "role-leader",
     name: "班長",
@@ -23,7 +23,7 @@ export const DEFAULT_ROLES: Role[] = [
   },
 ];
 
-export const DEFAULT_GROUPS: Group[] = [
+const DEFAULT_GROUPS: Group[] = [
   {
     id: "group-1",
     name: "1班",
@@ -68,7 +68,7 @@ export const DEFAULT_GROUPS: Group[] = [
   },
 ];
 
-export const RAW_STUDENTS = [
+const RAW_STUDENTS = [
   {
     name: "く太郎",
     furigana: "クタロウ",

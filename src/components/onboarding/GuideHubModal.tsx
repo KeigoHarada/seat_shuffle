@@ -4,7 +4,7 @@ import { useOnboardingStore } from "../../stores/onboarding";
 import GuideHubSidebar from "./GuideHubSidebar";
 import GuideHubContent from "./GuideHubContent";
 
-export const GuideHubModal: React.FC = () => {
+const GuideHubModal: React.FC = () => {
   const isOpen = useOnboardingStore((state) => state.isGuideHubOpen);
   const closeGuideHub = useOnboardingStore((state) => state.closeGuideHub);
 

@@ -11,7 +11,7 @@ interface ConstraintDescriptionProps {
   groups: Group[];
 }
 
-export const ConstraintDescription: React.FC<ConstraintDescriptionProps> = ({
+const ConstraintDescription: React.FC<ConstraintDescriptionProps> = ({
   constraint,
   students,
   roles,

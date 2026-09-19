@@ -1,7 +1,7 @@
 export const MIN_SCALE = 0.25;
 export const MAX_SCALE = 2.0;
 export const LONG_PRESS_MS = 520;
-export const TAP_MOVE_PX = 10;
+const TAP_MOVE_PX = 10;
 
 import type { Point, CanvasDownGesture } from "../types/canvas";
 
