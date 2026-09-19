@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Play, RotateCcw, Trash2, ExternalLink, Heart } from "lucide-react";
 import { useStore } from "../../../stores/appStore";
 import Select from "../../ui/Select";
-import ShuffleAnimation from "../../layout/ShuffleAnimation";
+import ShuffleAnimation from "../../canvas/ShuffleAnimation";
 import ConfirmDialog from "../../ui/ConfirmDialog";
 import { showToast } from "../../../stores/toast";
 

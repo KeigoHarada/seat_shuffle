@@ -2,7 +2,7 @@ import React from "react";
 import { Sparkles, Keyboard, ListChecks, Lightbulb } from "lucide-react";
 import { useOnboardingStore } from "../../stores/onboarding";
 import GuideDemoAnimation from "./GuideDemoAnimation";
-import { GUIDE_ITEMS, TOUR_ITEM } from "./data/guideItems";
+import { GUIDE_ITEMS, TOUR_ITEM } from "../../data/guideData";
 
 export const GuideHubContent: React.FC = () => {
   const selectedTab = useOnboardingStore((state) => state.selectedGuideTab);

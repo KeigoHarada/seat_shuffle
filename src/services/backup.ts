@@ -207,3 +207,32 @@ export function applyProjectBackup(
     appSettings: snapshot.appSettings,
   };
 }
+
+export function downloadBackupFile(
+  state: AppState,
+  filename = "rakugae-backup.json",
+): void {
+  const contents = serializeProjectBackup(state);
+  const blob = new Blob([contents], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function readBackupFile(file: File): Promise<BackupParseResult> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      resolve(parseProjectBackup(text));
+    };
+    reader.onerror = () => {
+      resolve({ ok: false, reason: "corrupt" });
+    };
+    reader.readAsText(file);
+  });
+}
+

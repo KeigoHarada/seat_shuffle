@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Canvas from "../components/canvas/Canvas";
-import SettingsPanel from "../components/SettingsPanel";
+import SettingsPanel from "../components/settings/SettingsPanel";
 import { useCompactLayout } from "../hooks/useCompactLayout";
 import { useStore } from "../stores/appStore";
 import Header from "./Header";

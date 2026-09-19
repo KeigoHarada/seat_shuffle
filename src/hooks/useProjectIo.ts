@@ -1,11 +1,14 @@
 import type { ChangeEvent } from "react";
 import { useStore } from "../stores/appStore";
 import {
-  parseRosterCsv,
+  readRosterFile,
   type RosterParseErr,
   type RosterParseOk,
 } from "../services/roster";
-import { parseProjectBackup, serializeProjectBackup } from "../services/backup";
+import {
+  downloadBackupFile,
+  readBackupFile,
+} from "../services/backup";
 import { showToast } from "../stores/toast";
 
 export const ROSTER_IMPORT_CONFIRM =
@@ -37,16 +40,6 @@ function rosterErrorMessage(reason: RosterParseErr["reason"]): string {
   }
 }
 
-function downloadText(filename: string, contents: string, type: string) {
-  const blob = new Blob([contents], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 export function useProjectIo() {
   const importRoster = (parsed: RosterParseOk) => {
     useStore.getState().importRoster(parsed);
@@ -59,63 +52,40 @@ export function useProjectIo() {
     );
   };
 
-  const handleRosterFile = (
+  const handleRosterFile = async (
     e: ChangeEvent<HTMLInputElement>,
     onParsed: (parsed: RosterParseOk) => void,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = String(event.target?.result ?? "");
-        const parsed = parseRosterCsv(text);
-        if (!parsed.ok) {
-          showToast.error(rosterErrorMessage(parsed.reason));
-          return;
-        }
+      const parsed = await readRosterFile(file);
+      if (!parsed.ok) {
+        showToast.error(rosterErrorMessage(parsed.reason));
+      } else {
         onParsed(parsed);
-      };
-      reader.onerror = () => {
-        showToast.error("ファイルの読み込みに失敗しました。");
-      };
-      reader.readAsText(file);
+      }
     }
     clearFileInputForReselect(e.target);
   };
 
   const handleSaveBackup = () => {
     const state = useStore.getState();
-    const body = serializeProjectBackup(state);
     const day = new Date().toISOString().slice(0, 10);
-    downloadText(
-      `rakugae_backup_${day}.json`,
-      body,
-      "application/octet-stream",
-    );
+    downloadBackupFile(state, `rakugae_backup_${day}.json`);
   };
 
-  const handleLoadBackup = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleLoadBackup = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = String(event.target?.result ?? "");
-      const parsed = parseProjectBackup(text);
-      if (!parsed.ok) {
-        showToast.error(
-          "バックアップを読み込めませんでした。現在の状態は変えていません。",
-        );
-        return;
-      }
-      useStore.getState().replaceProject(parsed.snapshot);
-      showToast.success("バックアップを読み込みました。");
-    };
-    reader.onerror = () => {
+    const parsed = await readBackupFile(file);
+    if (!parsed.ok) {
       showToast.error(
         "バックアップを読み込めませんでした。現在の状態は変えていません。",
       );
-    };
-    reader.readAsText(file);
+    } else {
+      useStore.getState().replaceProject(parsed.snapshot);
+      showToast.success("バックアップを読み込みました。");
+    }
     clearFileInputForReselect(e.target);
   };
 

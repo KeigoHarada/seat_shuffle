@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Lock } from "lucide-react";
-import { useStore } from "../stores/appStore";
-import { AVAILABLE_ICONS, IconName } from "./ui/IconPicker";
-import { Seat } from "../types/seat";
-import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../constants/canvas";
+import { useStore } from "../../stores/appStore";
+import { AVAILABLE_ICONS, IconName } from "../ui/IconPicker";
+import { Seat } from "../../types/seat";
+import { GRID_SIZE, SEAT_COLS, SEAT_ROWS } from "../../constants/canvas";
 
 interface Props {
   seat: Seat;

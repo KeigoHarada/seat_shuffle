@@ -1,6 +1,6 @@
 import { LayoutGrid, Users, Shield, Shuffle } from "lucide-react";
 
-import type { GuideItem, GuideCategory } from "../../../types/onboarding";
+import type { GuideItem, GuideCategory } from "../types/onboarding";
 export type { GuideItem, GuideCategory };
 
 export const TOUR_ITEM: GuideItem = {

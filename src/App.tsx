@@ -1,5 +1,5 @@
 import React from "react";
-import ShuffleAnimation from "./components/layout/ShuffleAnimation";
+import ShuffleAnimation from "./components/canvas/ShuffleAnimation";
 import OnboardingController from "./components/onboarding/OnboardingController";
 import { PrintProvider } from "./components/print/PrintProvider";
 import { ToastContainer } from "./components/ui/Toast";

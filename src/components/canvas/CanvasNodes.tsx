@@ -1,6 +1,6 @@
 import React from "react";
 import CanvasObjectNode from "./CanvasObjectNode";
-import SeatNode from "../SeatNode";
+import SeatNode from "./SeatNode";
 import { Seat } from "../../types/seat";
 import { CanvasObject } from "../../types/canvas";
 import {

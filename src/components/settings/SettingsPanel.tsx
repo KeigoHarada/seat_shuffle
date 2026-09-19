@@ -6,12 +6,12 @@ import {
   Settings2,
   ShieldCheck,
 } from "lucide-react";
-import StudentTab from "./settings/student/StudentTab";
-import RoleTab from "./settings/role/RoleTab";
-import GroupTab from "./settings/group/GroupTab";
-import ConstraintTab from "./settings/constraint/ConstraintTab";
-import GlobalTab from "./settings/global/GlobalTab";
-import { useStore } from "../stores/appStore";
+import StudentTab from "./student/StudentTab";
+import RoleTab from "./role/RoleTab";
+import GroupTab from "./group/GroupTab";
+import ConstraintTab from "./constraint/ConstraintTab";
+import GlobalTab from "./global/GlobalTab";
+import { useStore } from "../../stores/appStore";
 
 export type SettingsTab =
   "students" | "roles" | "groups" | "constraints" | "global";

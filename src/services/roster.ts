@@ -161,3 +161,17 @@ export function applyRosterImport(
     constraints: [],
   };
 }
+
+export function readRosterFile(file: File): Promise<RosterParseResult> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      resolve(parseRosterCsv(text));
+    };
+    reader.onerror = () => {
+      resolve({ ok: false, reason: "zero-valid-rows" });
+    };
+    reader.readAsText(file, "UTF-8");
+  });
+}

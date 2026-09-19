@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useStore } from "./appStore";
-import { TOUR_STEPS } from "../components/onboarding/data/tourSteps";
+import { TOUR_STEPS } from "../services/onboardingTour";
 
 export interface OnboardingState {
   hasCompletedOnboarding: boolean;
