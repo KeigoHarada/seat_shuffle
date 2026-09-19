@@ -1,74 +1,81 @@
-import React from "react";
-import {
-  type PrintLandmark,
-  type PrintPlan,
-  type PrintSeat,
-  type PrintSeatLabel,
-} from "../../utils/printLayout";
+import React, { useEffect, useMemo } from "react";
+import { useStore } from "../../stores";
+import { useCanvasSelectionStore } from "../../stores/canvasSelection";
+import { usePrintSessionStore } from "../../stores/printSession";
+import { createPrintPlan, type PrintPlan } from "../../utils/printLayout";
 
-function boxStyle(box: {
-  leftPct: number;
-  topPct: number;
-  widthPct: number;
-  heightPct: number;
-}): React.CSSProperties {
+type ReadyPlan = Extract<PrintPlan, { kind: "ready" }>;
+type ReadySeat = ReadyPlan["seats"][number];
+type ReadyLandmark = ReadyPlan["landmarks"][number];
+
+const PAGE_STYLE_ID = "rakugae-print-page";
+
+function frameStyle(frame: ReadySeat["frame"]): React.CSSProperties {
   return {
     position: "absolute",
-    left: `${box.leftPct}%`,
-    top: `${box.topPct}%`,
-    width: `${box.widthPct}%`,
-    height: `${box.heightPct}%`,
+    left: `${frame.xMm}mm`,
+    top: `${frame.yMm}mm`,
+    width: `${frame.widthMm}mm`,
+    height: `${frame.heightMm}mm`,
   };
 }
 
-function SeatLabel({ label }: { label: PrintSeatLabel }) {
-  switch (label.kind) {
-    case "occupied":
-      return (
-        <div
-          className="print-seat-label"
-          style={{ transform: `rotate(${label.rotation}deg)` }}
-        >
-          <div className="print-seat-attendance">{label.attendanceNumber}</div>
-          <div className="print-seat-furigana">{label.furigana || " "}</div>
-          <div className="print-seat-name">{label.name}</div>
-        </div>
-      );
-    case "empty":
-      return (
-        <div
-          className="print-seat-label"
-          style={{ transform: `rotate(${label.rotation}deg)` }}
-        >
-          <div className="print-seat-empty">空席</div>
-        </div>
-      );
+function labelTransform(rotation: 0 | 180): string | undefined {
+  switch (rotation) {
+    case 0:
+      return undefined;
+    case 180:
+      return "rotate(180deg)";
     default: {
-      const _exhaustive: never = label;
+      const _exhaustive: never = rotation;
       return _exhaustive;
     }
   }
 }
 
-function PrintSeatNode({ seat }: { seat: PrintSeat }) {
+function SeatLabel({ label }: { label: ReadySeat["label"] }) {
+  const transform = labelTransform(label.rotation);
+  switch (label.emptyText) {
+    case "空席":
+      return (
+        <div className="print-seat-label" style={{ transform }}>
+          <div className="print-seat-empty">{label.emptyText}</div>
+        </div>
+      );
+    case null:
+      return (
+        <div className="print-seat-label" style={{ transform }}>
+          <div className="print-seat-attendance">{label.attendanceNumber}</div>
+          <div className="print-seat-furigana">{label.furigana ?? " "}</div>
+          <div className="print-seat-name">{label.name}</div>
+        </div>
+      );
+    default: {
+      const _exhaustive: never = label.emptyText;
+      return _exhaustive;
+    }
+  }
+}
+
+function PrintSeatNode({ seat }: { seat: ReadySeat }) {
   return (
     <div
       className="print-seat"
       data-print-seat-id={seat.id}
-      style={boxStyle(seat)}
+      style={frameStyle(seat.frame)}
     >
       <SeatLabel label={seat.label} />
     </div>
   );
 }
 
-function PrintLandmarkNode({ landmark }: { landmark: PrintLandmark }) {
+function PrintLandmarkNode({ landmark }: { landmark: ReadyLandmark }) {
   return (
     <div
       className="print-landmark"
       data-print-landmark-id={landmark.id}
       data-shape={landmark.shape}
-      style={boxStyle(landmark)}
+      style={frameStyle(landmark.frame)}
     >
       {landmark.text ? (
         <span className="print-landmark-text">{landmark.text}</span>
@@ -77,37 +84,62 @@ function PrintLandmarkNode({ landmark }: { landmark: PrintLandmark }) {
   );
 }
 
-const PrintSheet: React.FC<{ plan: PrintPlan }> = ({ plan }) => {
-  const orientation = plan.kind === "ready" ? plan.orientation : "landscape";
-  const widthMm = plan.kind === "ready" ? plan.pageWidthMm : 297;
-  const heightMm = plan.kind === "ready" ? plan.pageHeightMm : 210;
+const PrintSheet: React.FC = () => {
+  const students = useStore((state) => state.students);
+  const seats = useStore((state) => state.seats);
+  const objects = useStore((state) => state.objects);
+  const mode = usePrintSessionStore((state) => state.mode);
+  const selectedIds = useCanvasSelectionStore((state) => state.selectedIds);
 
-  return (
-    <div data-print-root data-orientation={orientation}>
-      <style>
-        {`@media print { @page { size: A4 ${orientation}; margin: 10mm; } }`}
-      </style>
-      <div
-        className="print-sheet"
-        data-orientation={orientation}
-        style={{
-          width: `${widthMm}mm`,
-          aspectRatio: `${widthMm} / ${heightMm}`,
-        }}
-      >
-        {plan.kind === "ready"
-          ? plan.landmarks.map((landmark) => (
-              <PrintLandmarkNode key={landmark.id} landmark={landmark} />
-            ))
-          : null}
-        {plan.kind === "ready"
-          ? plan.seats.map((seat) => (
-              <PrintSeatNode key={seat.id} seat={seat} />
-            ))
-          : null}
-      </div>
-    </div>
+  const plan = useMemo(
+    () => createPrintPlan({ students, seats, objects }, mode, selectedIds),
+    [students, seats, objects, mode, selectedIds],
   );
+
+  useEffect(() => {
+    if (plan.kind !== "ready") {
+      document.getElementById(PAGE_STYLE_ID)?.remove();
+      return;
+    }
+    let el = document.getElementById(PAGE_STYLE_ID);
+    if (!(el instanceof HTMLStyleElement)) {
+      el?.remove();
+      el = document.createElement("style");
+      el.id = PAGE_STYLE_ID;
+      document.head.appendChild(el);
+    }
+    el.textContent = `@page { size: A4 ${plan.page.orientation}; margin: 10mm; }`;
+    return () => {
+      document.getElementById(PAGE_STYLE_ID)?.remove();
+    };
+  }, [plan]);
+
+  switch (plan.kind) {
+    case "empty":
+      return null;
+    case "ready":
+      return (
+        <div
+          data-print-root
+          data-orientation={plan.page.orientation}
+          style={{
+            width: `${plan.page.contentWidthMm}mm`,
+            height: `${plan.page.contentHeightMm}mm`,
+          }}
+        >
+          {plan.landmarks.map((landmark) => (
+            <PrintLandmarkNode key={landmark.id} landmark={landmark} />
+          ))}
+          {plan.seats.map((seat) => (
+            <PrintSeatNode key={seat.id} seat={seat} />
+          ))}
+        </div>
+      );
+    default: {
+      const _exhaustive: never = plan;
+      return _exhaustive;
+    }
+  }
 };
 
 export default PrintSheet;

@@ -8,10 +8,12 @@ import DesktopApp from "./views/desktop/DesktopApp";
 const App: React.FC = () => {
   return (
     <PrintProvider>
-      <DesktopApp />
-      <ShuffleAnimation />
-      <ToastContainer />
-      <OnboardingController />
+      <div data-screen-root>
+        <DesktopApp />
+        <ShuffleAnimation />
+        <ToastContainer />
+        <OnboardingController />
+      </div>
     </PrintProvider>
   );
 };

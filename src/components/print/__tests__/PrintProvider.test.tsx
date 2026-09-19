@@ -28,10 +28,7 @@ describe("PrintProvider", () => {
     printMock = vi.fn();
     vi.stubGlobal("print", printMock);
     usePrintSessionStore.setState({
-      dialogOpen: false,
-      draftMode: "wall",
-      confirmedMode: null,
-      frozenIds: null,
+      mode: "wall",
     });
     useCanvasSelectionStore.setState({ selectedIds: [] });
     useToastStore.setState({ toasts: [] });
@@ -139,6 +136,6 @@ describe("PrintProvider", () => {
 
     expect(printMock).toHaveBeenCalledTimes(1);
     expect(document.querySelector("#print-dialog")).toBeNull();
-    expect(usePrintSessionStore.getState().confirmedMode).toBe("wall");
+    expect(usePrintSessionStore.getState().mode).toBe("wall");
   });
 });

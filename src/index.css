@@ -1020,30 +1020,23 @@ input[type="number"] {
   font-size: 14px;
 }
 
-.print-sheet {
-  position: relative;
-  background: #fff;
-  overflow: hidden;
-  max-width: 100%;
-  height: auto;
-  color: #334155;
-  print-color-adjust: exact;
-  -webkit-print-color-adjust: exact;
-}
-
 .print-seat,
 .print-landmark {
   box-sizing: border-box;
   container-type: size;
+  background: #fff;
+  border: 1px solid var(--c-border);
+  font-family: var(--font-family);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
 }
 
 .print-seat {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
 .print-seat-label {
@@ -1063,7 +1056,7 @@ input[type="number"] {
   left: 8%;
   font-size: 16cqh;
   font-weight: 700;
-  color: #64748b;
+  color: var(--c-text-sub);
   line-height: 1;
 }
 
@@ -1072,34 +1065,31 @@ input[type="number"] {
 .print-seat-empty {
   max-width: 90%;
   text-align: center;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow: hidden;
 }
 
 .print-seat-furigana {
   font-size: 14cqh;
-  color: #64748b;
+  color: var(--c-text-sub);
   line-height: 1.1;
 }
 
 .print-seat-name {
   font-size: 22cqh;
   font-weight: 500;
-  color: #334155;
+  color: var(--c-text-main);
   line-height: 1.15;
 }
 
 .print-seat-empty {
   font-size: 20cqh;
-  color: #64748b;
+  color: var(--c-text-sub);
 }
 
 .print-landmark {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px solid #cbd5e1;
 }
 
 .print-landmark[data-shape="circle"] {
@@ -1107,13 +1097,13 @@ input[type="number"] {
 }
 
 .print-landmark[data-shape="rectangle"] {
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .print-landmark-text {
   font-size: 36cqh;
   font-weight: 700;
-  color: #334155;
+  color: var(--c-text-main);
   text-align: center;
 }
 
@@ -1123,12 +1113,10 @@ input[type="number"] {
   }
 
   [data-print-root] {
-    display: block !important;
-  }
-
-  html,
-  body {
-    margin: 0 !important;
-    background: #fff !important;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    max-width: 100%;
   }
 }

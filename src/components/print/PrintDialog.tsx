@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import {
   printOrientationLabel,
   type PrintMode,
@@ -20,7 +21,9 @@ const PrintDialog: React.FC<PrintDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  return (
+  const host = document.querySelector("[data-screen-root]") ?? document.body;
+
+  return createPortal(
     <div className="modal-overlay" onClick={onCancel}>
       <div
         id="print-dialog"
@@ -40,7 +43,7 @@ const PrintDialog: React.FC<PrintDialogProps> = ({
           className="text-title3"
           style={{ margin: 0, color: "var(--c-text-main)" }}
         >
-          印刷
+          印刷設定
         </h3>
         <fieldset
           style={{
@@ -88,6 +91,7 @@ const PrintDialog: React.FC<PrintDialogProps> = ({
             display: "flex",
             justifyContent: "flex-end",
             gap: "var(--spacing-sm)",
+            marginTop: "var(--spacing-xs)",
           }}
         >
           <button
@@ -108,7 +112,8 @@ const PrintDialog: React.FC<PrintDialogProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    host,
   );
 };
 

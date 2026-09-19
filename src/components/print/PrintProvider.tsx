@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useContext, useMemo } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { flushSync } from "react-dom";
 import { useStore } from "../../stores";
 import { useCanvasSelectionStore } from "../../stores/canvasSelection";
@@ -18,70 +24,64 @@ export function usePrint() {
   return context;
 }
 
+function printSourceFromStore() {
+  const { students, seats, objects } = useStore.getState();
+  return { students, seats, objects };
+}
+
 export const PrintProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const students = useStore((state) => state.students);
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
-  const students = useStore((state) => state.students);
-  const liveSelectedIds = useCanvasSelectionStore((state) => state.selectedIds);
-  const dialogOpen = usePrintSessionStore((state) => state.dialogOpen);
-  const draftMode = usePrintSessionStore((state) => state.draftMode);
-  const confirmedMode = usePrintSessionStore((state) => state.confirmedMode);
-  const frozenIds = usePrintSessionStore((state) => state.frozenIds);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [draftMode, setDraftMode] = useState<PrintMode>("wall");
+  const [dialogSelectedIds, setDialogSelectedIds] = useState<readonly string[]>(
+    [],
+  );
 
   const source = useMemo(
-    () => ({ seats, objects, students }),
-    [seats, objects, students],
+    () => ({ students, seats, objects }),
+    [students, seats, objects],
   );
 
   const requestPrint = useCallback(() => {
-    const preview = createPrintPlan(source, draftMode, liveSelectedIds);
+    const selectedIds = useCanvasSelectionStore.getState().selectedIds;
+    const mode = usePrintSessionStore.getState().mode;
+    const preview = createPrintPlan(printSourceFromStore(), mode, selectedIds);
     if (preview.kind === "empty") {
       showToast.info("印刷できる座席や図形がありません");
       return;
     }
-    usePrintSessionStore.getState().openDialog(liveSelectedIds);
-  }, [draftMode, liveSelectedIds, source]);
+    setDraftMode(mode);
+    setDialogSelectedIds(selectedIds);
+    setDialogOpen(true);
+  }, []);
 
-  const printMode: PrintMode = dialogOpen
-    ? draftMode
-    : (confirmedMode ?? "wall");
-  const printIds = dialogOpen ? (frozenIds ?? []) : liveSelectedIds;
-  const plan = createPrintPlan(source, printMode, printIds);
-  const dialogPlan = createPrintPlan(source, draftMode, frozenIds ?? []);
+  const dialogPlan = createPrintPlan(source, draftMode, dialogSelectedIds);
 
   const confirmPrint = () => {
-    const nextPlan = createPrintPlan(source, draftMode, frozenIds ?? []);
-    if (nextPlan.kind === "empty") {
-      showToast.info("印刷できる座席や図形がありません");
-      usePrintSessionStore.getState().closeDialog();
-      return;
-    }
     flushSync(() => {
-      usePrintSessionStore.getState().confirmMode();
+      usePrintSessionStore.getState().setMode(draftMode);
+      setDialogOpen(false);
     });
     window.print();
-    usePrintSessionStore.getState().closeDialog();
   };
 
   return (
     <PrintContext.Provider value={{ requestPrint }}>
-      <div data-screen-root>
-        {children}
-        {dialogOpen && dialogPlan.kind === "ready" ? (
-          <PrintDialog
-            draftMode={draftMode}
-            orientation={dialogPlan.orientation}
-            onChangeMode={(mode) =>
-              usePrintSessionStore.getState().setDraftMode(mode)
-            }
-            onConfirm={confirmPrint}
-            onCancel={() => usePrintSessionStore.getState().closeDialog()}
-          />
-        ) : null}
-      </div>
-      <PrintSheet plan={plan} />
+      {children}
+      <PrintSheet />
+      {dialogOpen && dialogPlan.kind === "ready" ? (
+        <PrintDialog
+          draftMode={draftMode}
+          orientation={dialogPlan.page.orientation}
+          onChangeMode={setDraftMode}
+          onConfirm={confirmPrint}
+          onCancel={() => setDialogOpen(false)}
+        />
+      ) : null}
     </PrintContext.Provider>
   );
 };
