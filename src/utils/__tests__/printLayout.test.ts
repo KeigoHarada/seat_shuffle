@@ -75,10 +75,6 @@ function expectFramesInside(plan: Extract<PrintPlan, { kind: "ready" }>): void {
 }
 
 describe("createPrintPlan", () => {
-  it("is a callable export", () => {
-    expect(typeof createPrintPlan).toBe("function");
-  });
-
   it("fits a 30-seat classroom and 教卓 on A4 landscape with upright labels", () => {
     const plan = createPrintPlan(classroomSource(), "wall");
     expectReady(plan);
@@ -190,21 +186,18 @@ describe("createPrintPlan", () => {
     expect(plan.seats[0]).toMatchObject({
       id: "occupied",
       label: {
+        kind: "occupied",
         rotation: 0,
         attendanceNumber: 1,
         furigana: "アタロウ",
         name: "あ太郎",
-        emptyText: null,
       },
     });
     expect(plan.seats[1]).toMatchObject({
       id: "vacant",
       label: {
+        kind: "empty",
         rotation: 0,
-        attendanceNumber: null,
-        furigana: null,
-        name: null,
-        emptyText: "空席",
       },
     });
   });

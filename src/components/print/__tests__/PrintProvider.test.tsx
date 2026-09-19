@@ -138,4 +138,54 @@ describe("PrintProvider", () => {
     expect(document.querySelector("#print-dialog")).toBeNull();
     expect(usePrintSessionStore.getState().mode).toBe("wall");
   });
+
+  it("prints the selection frozen when the dialog opened", async () => {
+    useStore.setState({
+      seats: [
+        {
+          id: "seat-a",
+          studentId: null,
+          groupIds: [],
+          x: 0,
+          y: 0,
+          isLocked: false,
+        },
+        {
+          id: "seat-b",
+          studentId: null,
+          groupIds: [],
+          x: 12,
+          y: 0,
+          isLocked: false,
+        },
+      ],
+      objects: [],
+      students: [],
+    });
+    useCanvasSelectionStore.setState({ selectedIds: ["seat-a"] });
+
+    await act(async () => {
+      root?.render(
+        <PrintProvider>
+          <PrintTrigger />
+        </PrintProvider>,
+      );
+    });
+
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>("#btn-footer-print")?.click();
+    });
+    expect(
+      document.querySelector("[data-print-seat-id='seat-a']"),
+    ).not.toBeNull();
+    expect(document.querySelector("[data-print-seat-id='seat-b']")).toBeNull();
+
+    await act(async () => {
+      useCanvasSelectionStore.setState({ selectedIds: [] });
+    });
+    expect(
+      document.querySelector("[data-print-seat-id='seat-a']"),
+    ).not.toBeNull();
+    expect(document.querySelector("[data-print-seat-id='seat-b']")).toBeNull();
+  });
 });

@@ -37,13 +37,18 @@ export type PrintPlan =
       seats: ReadonlyArray<{
         id: string;
         frame: PrintFrame;
-        label: {
-          rotation: 0 | 180;
-          attendanceNumber: number | null;
-          furigana: string | null;
-          name: string | null;
-          emptyText: "空席" | null;
-        };
+        label:
+          | {
+              kind: "occupied";
+              rotation: 0 | 180;
+              attendanceNumber: number;
+              furigana: string | null;
+              name: string;
+            }
+          | {
+              kind: "empty";
+              rotation: 0 | 180;
+            };
       }>;
       landmarks: ReadonlyArray<{
         id: string;
@@ -182,23 +187,19 @@ function occupiedLabel(
   student: Pick<Student, "name" | "furigana" | "attendanceNumber">,
   rotation: 0 | 180,
 ) {
-  const furigana = student.furigana?.trim() ? student.furigana : null;
   return {
+    kind: "occupied" as const,
     rotation,
     attendanceNumber: student.attendanceNumber,
-    furigana,
+    furigana: student.furigana?.trim() ? student.furigana : null,
     name: student.name,
-    emptyText: null,
   };
 }
 
 function emptyLabel(rotation: 0 | 180) {
   return {
+    kind: "empty" as const,
     rotation,
-    attendanceNumber: null,
-    furigana: null,
-    name: null,
-    emptyText: "空席" as const,
   };
 }
 

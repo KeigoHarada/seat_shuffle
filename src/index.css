@@ -1065,7 +1065,8 @@ input[type="number"] {
 .print-seat-empty {
   max-width: 90%;
   text-align: center;
-  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .print-seat-furigana {
@@ -1118,5 +1119,6 @@ input[type="number"] {
     overflow: hidden;
     background: #fff;
     max-width: 100%;
+    height: auto;
   }
 }

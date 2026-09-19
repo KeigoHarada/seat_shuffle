@@ -1030,6 +1030,11 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         const seatCount = printRoot
           ? printRoot.querySelectorAll(".print-seat").length
           : 0;
+        const landmarkText = printRoot
+          ? Array.from(printRoot.querySelectorAll(".print-landmark"))
+              .map((el) => el.textContent ?? "")
+              .join("")
+          : "";
         return {
           screenRoot: displayOf("[data-screen-root]"),
           appShell: displayOf(".app-shell"),
@@ -1047,6 +1052,10 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
             .getElementById("canvas-main-area")
             ?.getAttribute("data-selected-count"),
           printChildCount: printRoot ? printRoot.childElementCount : 0,
+          hasDeskText: landmarkText.includes("教卓"),
+          printRoleSvg: printRoot
+            ? printRoot.querySelector("svg") !== null
+            : false,
         };
       });
       record(
@@ -1075,6 +1084,12 @@ async function assertSharedChrome(page, url, viewport, failures, expectCompact) 
         `${label} print heading is absent`,
         printCss.heading === null,
         `heading=${printCss.heading}`,
+      );
+      record(
+        failures,
+        `${label} print keeps 教卓 and drops role icons`,
+        printCss.hasDeskText && !printCss.printRoleSvg,
+        `desk=${printCss.hasDeskText} svg=${printCss.printRoleSvg}`,
       );
       await page.emulateMedia({ media: "screen" });
       const scaleAfterPrint = await page

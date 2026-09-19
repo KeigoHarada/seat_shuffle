@@ -64,15 +64,15 @@ export const PrintProvider: React.FC<{ children: React.ReactNode }> = ({
   const confirmPrint = () => {
     flushSync(() => {
       usePrintSessionStore.getState().setMode(draftMode);
-      setDialogOpen(false);
     });
     window.print();
+    setDialogOpen(false);
   };
 
   return (
     <PrintContext.Provider value={{ requestPrint }}>
       {children}
-      <PrintSheet />
+      <PrintSheet selectedIds={dialogOpen ? dialogSelectedIds : undefined} />
       {dialogOpen && dialogPlan.kind === "ready" ? (
         <PrintDialog
           draftMode={draftMode}

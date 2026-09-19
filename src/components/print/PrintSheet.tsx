@@ -35,14 +35,14 @@ function labelTransform(rotation: 0 | 180): string | undefined {
 
 function SeatLabel({ label }: { label: ReadySeat["label"] }) {
   const transform = labelTransform(label.rotation);
-  switch (label.emptyText) {
-    case "空席":
+  switch (label.kind) {
+    case "empty":
       return (
         <div className="print-seat-label" style={{ transform }}>
-          <div className="print-seat-empty">{label.emptyText}</div>
+          <div className="print-seat-empty">空席</div>
         </div>
       );
-    case null:
+    case "occupied":
       return (
         <div className="print-seat-label" style={{ transform }}>
           <div className="print-seat-attendance">{label.attendanceNumber}</div>
@@ -51,7 +51,7 @@ function SeatLabel({ label }: { label: ReadySeat["label"] }) {
         </div>
       );
     default: {
-      const _exhaustive: never = label.emptyText;
+      const _exhaustive: never = label;
       return _exhaustive;
     }
   }
@@ -84,16 +84,19 @@ function PrintLandmarkNode({ landmark }: { landmark: ReadyLandmark }) {
   );
 }
 
-const PrintSheet: React.FC = () => {
+const PrintSheet: React.FC<{ selectedIds?: readonly string[] }> = ({
+  selectedIds,
+}) => {
   const students = useStore((state) => state.students);
   const seats = useStore((state) => state.seats);
   const objects = useStore((state) => state.objects);
   const mode = usePrintSessionStore((state) => state.mode);
-  const selectedIds = useCanvasSelectionStore((state) => state.selectedIds);
+  const liveSelectedIds = useCanvasSelectionStore((state) => state.selectedIds);
+  const targetIds = selectedIds ?? liveSelectedIds;
 
   const plan = useMemo(
-    () => createPrintPlan({ students, seats, objects }, mode, selectedIds),
-    [students, seats, objects, mode, selectedIds],
+    () => createPrintPlan({ students, seats, objects }, mode, targetIds),
+    [students, seats, objects, mode, targetIds],
   );
 
   useEffect(() => {
@@ -124,7 +127,7 @@ const PrintSheet: React.FC = () => {
           data-orientation={plan.page.orientation}
           style={{
             width: `${plan.page.contentWidthMm}mm`,
-            height: `${plan.page.contentHeightMm}mm`,
+            aspectRatio: `${plan.page.contentWidthMm} / ${plan.page.contentHeightMm}`,
           }}
         >
           {plan.landmarks.map((landmark) => (
